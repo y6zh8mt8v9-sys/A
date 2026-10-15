@@ -822,6 +822,7 @@ button,a,.nb,.cp,.rkb{touch-action:manipulation;}
           <div style="display:flex;gap:8px;">
             <button class="bgh" onclick="showTitle(true)" style="flex:1"> Load Save</button>
             <button class="bgh" onclick="openTeamBuilder()" style="flex:1;border-color:var(--b2);color:var(--b2)"> Teams</button>
+            <button class="bgh" onclick="openWorldSetup()" style="flex:1;border-color:var(--gd);color:var(--gd)">League Setup</button>
             <button class="bgh" onclick="openSettings()" style="flex:1"> Settings</button>
           </div>
         </div>
@@ -1113,10 +1114,10 @@ const DIV_NAMES={
   '5A':['Premier Metro Conference','Great Lakes Division','Pacific Ridge League','Southern Plains Circuit','Capitol Region Division','Northern Valley Conference','Lakefront Premier League','Titan Coast Division'],
 };
 const POS=['QB','RB','WR','TE','OL','DL','LB','CB','S','K'];
-// NCAA jersey number rules (Rule 1-4-1). OL 50-79 is a hard rule; all others are recommended ranges.
-// Number 0 legal in NCAA since 2020. Each entry is an array of [min,max] ranges.
+// college jersey number rules (Rule 1-4-1). OL 50-79 is a hard rule; all others are recommended ranges.
+// Number 0 legal in college since 2020. Each entry is an array of [min,max] ranges.
 const POS_NUM={QB:[[0,19]],RB:[[0,49]],WR:[[0,49],[80,89]],TE:[[0,49],[80,89]],OL:[[50,79]],DL:[[50,79],[90,99]],LB:[[0,59],[90,99]],CB:[[0,49]],S:[[0,49]],K:[[0,19]]};
-// Max varsity roster size (matches NCAA scholarship limit for atmosphere)
+// Max varsity roster size (matches college scholarship limit for atmosphere)
 const MAX_VARSITY=85;
 // Side of ball for jersey number sharing — same number allowed if one is offense, one is defense
 const POS_OFFENSE=new Set(['QB','RB','WR','TE','OL','K']);
@@ -2978,7 +2979,7 @@ function teamQ(sch,sId,successScore,facilScore){
   return clamp(q,0,1);
 }
 // ═══════════ v2.06 HIGH SCHOOL BODIES ═══════════
-// Average senior on an average varsity roster (MaxPreps-style rosters: linemen ~6'1"-6'2" and 235-255 lb, skill players 5'9"-6'0"),
+// Average senior on an average varsity roster (typical prep rosters: linemen ~6'1"-6'2" and 235-255 lb, skill players 5'9"-6'0"),
 // younger classes are smaller. Strong programs (prestige, big classification, a deep roster, winning, a good recruiting coordinator)
 // carry bigger kids; the weight room and practice field decide how much they put on each year. Every roster has outliers both ways.
 const HS_BODY={QB:[72.5,185],RB:[69.5,180],WR:[71.5,170],TE:[74,215],OL:[73.5,255],DL:[73,235],LB:[71.5,200],CB:[70,165],S:[71,178],K:[70.5,168]};
@@ -3232,7 +3233,7 @@ function distributeStars(){
 function initGame(coach,divs,dIdx,sIdx,chosenRivals){
   const ms=divs[dIdx].teams[sIdx];ms.isP=true;ms.staff=genStaff(true);ms.tier='bad';
   const baseYr=2026;
-  G={coach,cls:ms.cls,myId:ms.id,divisions:divs,players:[],yr:1,baseYear:baseYr,week:0,phase:'offseason',osPhase:0,wins:0,losses:0,prestige:1,budget:50000,offR:0,defR:0,tFocus:'balanced',offS:ms.offS,defS:ms.defS,sched:[],log:[],hist:[],wl:[],hof:[],wlArchive:[],hofArchive:[],fac:ms.fac,staff:ms.staff,trainLevel:ms.trainLevel||1,schoolRecs:{game:{},season:{},career:{}},trophies:[],playoff:null,benched:{},_page:'dash',allLeagues:{},
+  G={proV:1,coach,cls:ms.cls,myId:ms.id,divisions:divs,players:[],yr:1,baseYear:baseYr,week:0,phase:'offseason',osPhase:0,wins:0,losses:0,prestige:1,budget:50000,offR:0,defR:0,tFocus:'balanced',offS:ms.offS,defS:ms.defS,sched:[],log:[],hist:[],wl:[],hof:[],wlArchive:[],hofArchive:[],fac:ms.fac,staff:ms.staff,trainLevel:ms.trainLevel||1,schoolRecs:{game:{},season:{},career:{}},trophies:[],playoff:null,benched:{},_page:'dash',allLeagues:{},
     // Store player-chosen rivalries as a set of opponent team IDs
     chosenRivals:chosenRivals||[],
     seasonRivalId:null, // reset each season — player picks their rival at schedule builder
@@ -4803,18 +4804,31 @@ function _recPools(){
 function starThr(yr){const R=_recPools();return R.T[yr]||R.T[12]||[ -1e9,80,84,87,89,91];}
 function natThr(yr){const R=_recPools();return R.N[yr]||R.N[12]||[-1e9,Infinity,Infinity,Infinity,Infinity,Infinity];}
 
-const COLLEGES=(()=>{const L=[];const acad={'Franklin Lutheran':3.4,"Ravenscroft College":3.5,"Sonora Methodist":3.4,'Killeen Wesleyan':3.4,"Rolfe College":3.4,"Overton College":3.4,"Dalhart Lutheran":3.3,"Cisco Methodist":3.3,"Decorah Lutheran":3.3,'Loring College':3.3,"Stephenville State":3.2,"Canadian":3.1,"Northern Llano Grande":3.2,"Cotulla State":3.5,"Lampasas State":3.5,"Southern Acadia State":3.6,"Wharton":3.4,"Northern Magnolia":3.4,"Chesterton College":3.3,"South Granite":3.4,"Foxwood State":3.4,"Borger State":3.4,'Llano Grande State':3.2,"Mason State":3.2,'Ganado':3.0,'Junction':3.0,"Ozona State":3.0,"Tyler State":3.0,'Clarion':3.0};
+const COL_BY={},COLLEGES=[];
+// v2.14: rebuilt when League Setup changes the college lists
+function buildColleges(){const L=COLLEGES;L.length=0;const acad={'Franklin Lutheran':3.4,"Ravenscroft College":3.5,"Sonora Methodist":3.4,'Killeen Wesleyan':3.4,"Rolfe College":3.4,"Overton College":3.4,"Dalhart Lutheran":3.3,"Cisco Methodist":3.3,"Decorah Lutheran":3.3,'Loring College':3.3,"Stephenville State":3.2,"Canadian":3.1,"Northern Llano Grande":3.2,"Cotulla State":3.5,"Lampasas State":3.5,"Southern Acadia State":3.6,"Wharton":3.4,"Northern Magnolia":3.4,"Chesterton College":3.3,"South Granite":3.4,"Foxwood State":3.4,"Borger State":3.4,'Llano Grande State':3.2,"Mason State":3.2,'Ganado':3.0,'Junction':3.0,"Ozona State":3.0,"Tyler State":3.0,'Clarion':3.0};
   // program strength spreads evenly from the top of each level to its floor, however long the list is
   const add=(arr,lvl,hi,lo,ac)=>arr.forEach((n,i)=>L.push({school:n,lvl,pr:Math.round(hi-(hi-lo)*i/Math.max(1,arr.length-1)),acad:ac?(acad[n]||0):0}));
   add(D1FBS,'FBS',99,56,1);add(D1FCS,'FCS',55,30,1);add(D2,'D2',38,18);add(D3,'D3',24,5,1);add(NAIA,'NAIA',29,12);add(JUCO,'JUCO',20,3);
-  for(const c of L)c.pr=Math.max(1,c.pr);return L;})();
-const COL_BY=Object.fromEntries(COLLEGES.map(c=>[c.school+'|'+c.lvl,c]));
+  for(const c of L)c.pr=Math.max(1,c.pr);for(const k in COL_BY)delete COL_BY[k];for(const c of L)COL_BY[c.school+'|'+c.lvl]=c;return L;}
+buildColleges();
 // v1.94: every college signs a class of 30-85 players, split across positional needs. Offers stop once a
 // position board is crowded (3x the open spots), commits stop once the spots are filled.
 const POS_NEED_W={QB:3,RB:4,WR:8,TE:3,OL:11,DL:9,LB:7,CB:6,S:5,K:1};
 function _colRand(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
   return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
 const COL_RENAME={"Alabama":"Llano Grande","Ohio State":"Coralina","Georgia":"Magnolia","Texas":"Crestfield","LSU":"Cumberland","Oregon":"Acadia","Michigan":"Cascadia","Notre Dame":"Llano Grande State","Clemson":"Coralina State","USC":"Magnolia State","Oklahoma":"Llano Grande A&M","Penn State":"Wakota","Florida":"Summit","Tennessee":"Tierra Alta","Texas A&M":"Crestfield State","Miami":"Cumberland State","Auburn":"Cascadia State","Florida State":"Magnolia A&M","Ole Miss":"Acadia State","Indiana":"Coralina Tech","Washington":"Cumberland Tech","South Carolina":"Llano Grande Tech","Missouri":"Wakota State","Nebraska":"Summit State","Wisconsin":"Tierra Alta State","Iowa":"Crestfield Tech","Utah":"Cascadia Tech","Kentucky":"Wakota Tech","Arkansas":"Summit Mines","Mississippi State":"Acadia Tech","UCLA":"Shelton University","Michigan State":"Ormsby University","Louisville":"Northam University","North Carolina":"Langford University","Colorado":"Beckett University","Arizona State":"Harrington University","Baylor":"Wickham University","TCU":"Winslow University","Texas Tech":"Ainsworth University","Kansas State":"Brookhaven University","Oklahoma State":"Eastern Llano Grande","BYU":"Southern Crestfield","Iowa State":"Central Tierra Alta","SMU":"Western Crestfield","NC State":"South Acadia","Virginia Tech":"North Summit","Minnesota":"Eastern Magnolia","Illinois":"Western Llano Grande","Maryland":"East Coralina","Purdue":"Southern Cascadia","Rutgers":"Western Cumberland","Northwestern":"Northern Llano Grande","West Virginia":"Ranger Christian","Pitt":"Benton State","Syracuse":"Spearman Christian","Duke":"Mason State","Georgia Tech":"Rockford","Virginia":"Shelbyville","Wake Forest":"Ganado","Boston College":"Junction","Stanford":"Borger State","California":"Haskell","Arizona":"Granite","Houston":"Salado State","Cincinnati":"Hereford State","UCF":"Beeville Christian","Kansas":"Milford State","Vanderbilt":"Canadian","Boise State":"Sonora State","Tulane":"Canyon State","Memphis":"Llano State","James Madison":"Kaimana","Liberty":"Jasper State","UNLV":"Hico State","Army":"Ozona State","Navy":"Tyler State","Air Force":"Clarion","San Diego State":"Elgin","Fresno State":"Ravenwood","Oregon State":"Waco","Washington State":"Aurora","Utah State":"San Miguel Christian","Colorado State":"Graham State","Toledo":"Odessa","Appalachian State":"Kerrville State","Coastal Carolina":"Pampa State","Louisiana":"Elmdale Christian","Marshall":"San Benito State","South Florida":"Fairfield State","UTSA":"Granite State","North Texas":"Wilmington","Texas State":"Breckenridge","Western Kentucky":"Katy State","Georgia Southern":"Dover State","Troy":"Uvalde State","Old Dominion":"Electra State","Arkansas State":"Snyder","South Alabama":"Alvin State","Southern Miss":"Kaimana State","Georgia State":"San Gabriel","Louisiana-Monroe":"Ulysses State","East Carolina":"Garner State","Temple":"Comanche State","Tulsa":"Childress State","Rice":"Stephenville State","UAB":"Santa Rosa","Charlotte":"Belton State","FAU":"Lamesa State","Wyoming":"Bryan","Hawaii":"Cleveland State","Nevada":"Gatesville State","New Mexico":"Santa Inés State","San Jose State":"Hallettsville State","Miami (OH)":"Madison","Ohio":"Brenham Christian","Northern Illinois":"Cuero State","Bowling Green":"Coleman State","Buffalo":"Rocksprings","Western Michigan":"Stinnett State","Central Michigan":"Wellington","Eastern Michigan":"Ballinger Christian","Ball State":"Hudson","Kent State":"Refugio","Akron":"Eastland","UMass":"Santa Lucía State","UConn":"Killeen State","Jacksonville State":"Santo Tomás State","Sam Houston":"Dumas","Louisiana Tech":"Linwood","Middle Tennessee":"Edna State","New Mexico State":"Gonzales Christian","UTEP":"Vernon","FIU":"Denton State","Kennesaw State":"Munday","Delaware":"Thomasville State","Missouri State":"Quanah Christian","Sacramento State":"Sweetwater Christian","North Dakota State":"Silsbee State","Montana State":"West Summit","South Dakota State":"Sandberg State","Montana":"Seguin","Villanova":"Dalhart State","UC Davis":"Hutto","Idaho":"Brady State","Southern Illinois":"Crestwood State","North Dakota":"Sinton State","South Dakota":"Shamrock","Illinois State":"Northern Summit","Northern Iowa":"Luling State","Youngstown State":"Westby State","Tarleton State":"Daingerfield","Abilene Christian":"San Jacinto State","Incarnate Word":"Perryton","Furman":"Santa Clara","Mercer":"Santa Teresa","Chattanooga":"Lufkin","Rhode Island":"East Tierra Alta State","New Hampshire":"Ashville","Richmond":"Silverton State","Lehigh":"Lindell College","Lafayette":"Mexia State","Holy Cross":"Saint Gresham","Harvard":"Southern Acadia State","Yale":"Lampasas State","Princeton":"Cotulla State","Penn":"Northern Magnolia","Dartmouth":"Wharton","Brown":"Foxwood State","Columbia":"South Granite","Cornell":"Chesterton College","William & Mary":"North Granite State","Elon":"San Rafael State","Towson":"Hondo State","Albany":"Vance College","Maine":"Smyrna State","Stony Brook":"Eastern Tierra Alta State","Monmouth":"Seymour State","Campbell":"Lockhart State","North Carolina A&T":"Central Coralina","Crestfield State":"Southern Granite","Hampton":"Crossroads State","Bryant":"Central Kaimana State","Weber State":"Kountze","Eastern Washington":"Abilene","Northern Arizona":"Seaford State","Idaho State":"Nora State","Portland State":"Northbrook","Northern Colorado":"Irondale","Cal Poly":"Saint Thornton","Southern Utah":"Madsen College","Utah Tech":"Lexington","Central Arkansas":"East Aurora","Austin Peay":"Dunlap State","Eastern Kentucky":"Radford College","North Alabama":"Orchard Hill","West Georgia":"Clarkston State","Lamar":"West Cascadia State","McNeese":"Saint Keswick","Nicholls":"Western Coralina","Northwestern State":"Oakwood","Southeastern Louisiana":"West Coralina","Stephen F. Austin":"Burlington State","Houston Christian":"Central Cascadia","East Texas A&M":"Harmon State","UTRGV":"Wadsworth College","Samford":"Eastern Wakota","Western Carolina":"South Llano Grande","ETSU":"Saint Loring","Wofford":"Laramie","The Citadel":"Western Tierra Alta","VMI":"Northern Cascadia State","Fordham":"Northern Granite","Colgate":"West Cumberland","Bucknell":"Dunmore College","Georgetown":"Ridgefield College","Murray State":"West Kaimana","Indiana State":"San Elizario State","Tennessee State":"Centerville State","Tennessee Tech":"Santa Cruz State","UT Martin":"North Magnolia State","Southeast Missouri State":"Shelton College","Eastern Illinois":"Pella State","Western Illinois":"Maplewood State","Lindenwood":"Winchester State","Gardner-Webb":"Southern Summit State","Charleston Southern":"Weston State","Jackson State":"Dunmore","Florida A&M":"Jensen State","Alabama State":"Zetland","Southern":"Schaller State","Prairie View A&M":"Central Cumberland","Grambling State":"Vinton","Alcorn State":"Harlan State","Alabama A&M":"South Wakota","Bethune-Cookman":"Laurelton State","Texas Southern":"Lohrville State","Arkansas-Pine Bluff":"Camden State","Mississippi Valley State":"Parkside","North Carolina Central":"Hartwell","South Carolina State":"Chester State","Howard":"North Cascadia","Morgan State":"Newburgh State","Delaware State":"Saint Harrington","Norfolk State":"East Granite","Duquesne":"East Cascadia","Central Connecticut":"Uniondale State","Saint Francis (PA)":"Cranston College","Robert Morris":"Emberly College","LIU":"Yoakum State","Wagner":"Forrest Hills State","Stonehill":"East Acadia","Mercyhurst":"Pinebrook State","New Haven":"Central Llano Grande","Merrimack":"East Magnolia State","Sacred Heart":"Fairview","St. Thomas (MN)":"Walton State","San Diego":"Yorktown State","Dayton":"Eastern Aurora","Drake":"Eastport State","Butler":"Hilldale State","Davidson":"North Wakota","Marist":"East Wakota","Morehead State":"Gilmer","Presbyterian":"Saint Lyndon","Stetson":"Viborg","Valparaiso":"San Lorenzo","Grand Valley State":"Osage State","Ferris State":"San Isidro","Harding":"Remsen State","Valdosta State":"Elmore State","Pittsburg State":"Vicksburg State","Northwest Missouri State":"Lakewood State","Colorado School of Mines":"Glendale State","Minnesota State":"Odebolt State","Slippery Rock":"Manson State","Kutztown":"Corwin College","West Florida":"Bayfield University","Central Missouri":"Middletown University","Lenoir-Rhyne":"Exeter","Ouachita Baptist":"Northdale University","Delta State":"Waverly State","Angelo State":"Easton College","Indiana (PA)":"Clearfield","Shepherd":"Northam College","Bemidji State":"Kirkland University","Augustana (SD)":"Central Wakota","Wingate":"Holstein State","Minnesota Duluth":"Newark State","Missouri Western":"Lenox State","Fort Hays State":"Newport","Washburn":"Quimby","Emporia State":"Marion State","Nebraska-Kearney":"Salem State","Central Oklahoma":"Midvale State","Missouri Southern":"Grandview State","Northeastern State":"Eastern Kaimana","Saginaw Valley State":"Moorefield State","Davenport":"Ida State","Michigan Tech":"Clinton State","Northern Michigan":"Brookhaven State","Wayne State (MI)":"Grantham College","Ashland":"Fenton State","Findlay":"Redding College","Hillsdale":"Millfield State","Tiffin":"Sutton State","Walsh":"Pembroke College","Ohio Dominican":"Brandt State","Thomas More":"Belmont","Kentucky Wesleyan":"Allendale State","Indianapolis":"Oakland","McKendree":"Hartley State","Missouri S&T":"San Felipe State","Quincy":"Arcadia","Truman State":"North Crestfield","William Jewell":"Cedarburg University","Wakota State":"Thorson University","Southwest Baptist":"Kingston State","Upper Iowa":"Gilmore","Winona State":"Oakley College","Concordia-St. Paul":"Colfax State","Mary":"Bellmont College","Sioux Falls":"Southern Coralina","MSU Moorhead":"Upton University","Southwest Minnesota State":"Jonesville State","Tierra Alta A&M":"Western Wakota","Northern State":"South Summit","Minot State":"Jewell State","Wayne State (NE)":"Verdigre State","CSU Pueblo":"Taylorsville State","Colorado Mesa":"San Marcos","Western Colorado":"San Ignacio University","Black Hills State":"West Acadia","Chadron State":"Norwood University","Adams State":"Halvorsen","Fort Lewis":"Kanawha State","New Mexico Highlands":"Kentwood State","Northern Wakota":"Quincyville State","South Dakota Mines":"Inglewood State","West Texas A&M":"Rolfe State","Texas A&M-Kingsville":"Ormsby College","Midwestern State":"San Pablo University","Eastern New Mexico":"San Cayetano State","Western New Mexico":"San Andrés State","UT Permian Basin":"Thor","Sul Ross State":"Vogel State","Central Washington":"Lindgren","West Crestfield":"Everly University","Western Oregon":"Oakfield State","Henderson State":"Riverside State","Arkansas Tech":"Oxford State","Southern Arkansas":"Nygaard State","Arkansas-Monticello":"Sunbury State","East Central":"Kimball University","Southeastern Oklahoma State":"Pilger","Southwestern Oklahoma State":"Harrington State","Northwestern Oklahoma State":"South Crestfield","Río Grande State":"Woden","Oklahoma Baptist":"Bancroft University","Southern Nazarene":"Mortenson","North Greenville":"Primghar State","West Alabama":"Ulrich State","Mississippi College":"Elkader State","Shorter":"Ivywood State","Carson-Newman":"Lund State","Catawba":"Decorah University","Mars Hill":"Emmet State","Newberry":"Tilden State","Tusculum":"Chesterton","UVA Wise":"Kensington College","Emory & Henry":"Bristol","Charleston (WV)":"Lockwood State","Concord":"Bramwell State","Fairmont State":"Ormsby","Frostburg State":"Norwood College","Glenville State":"Mercer Hill University","West Liberty":"Sutcliffe State","West Virginia State":"Lyndon State","West Virginia Wesleyan":"Mercer Hill State","Wheeling":"Southern Wakota","Bloomsburg":"Sheldon","PennWest California":"Larchmont State","East Stroudsburg":"Mayfield State","Gannon":"Redding State","Lock Haven":"West Magnolia","Millersville":"Dalton University","Seton Hill":"Northern Kaimana","Shippensburg":"Whitmore State","West Chester":"Delmar","American International":"Yardley State","Assumption":"North Llano Grande","Bentley":"Gresham University","Pace":"Osgood University","Saint Anselm":"Easton State","Southern Connecticut State":"Alderman State","Bowie State":"Calloway College","Elizabeth City State":"Larkspur State","Fayetteville State":"Fulton College","Johnson C. Smith":"Everett State","Lincoln (PA)":"Lindell University","Livingstone":"South Magnolia","Shaw":"Ridgefield University","Virginia State":"Oakley","Virginia Union":"Ravenscroft State","Winston-Salem State":"Shelton State","Albany State":"Larchmont","Allen":"Northam State","Benedict":"Ashbury University","Central State":"Hadley","Clark Atlanta":"Dorchester","Edward Waters":"Upton State","Fort Valley State":"Queensbury College","Kentucky State":"Ormsby State","Lane":"Wickham","Miles":"Ivydale State","Morehouse":"Oakley State","Savannah State":"Ashford University","Tuskegee":"Iverson","Lincoln (MO)":"Whitcomb College","Chowan":"Lyndon University","Mary Hardin-Baylor":"Merriweather","Mount Union":"Middletown College","Wisconsin-Whitewater":"Edna Wesleyan","North Central College":"Saint Wickham","Johns Hopkins":"Franklin Lutheran","Cortland":"Gresham College","Wartburg":"Saint Easton","Linfield":"Fielding","Wisconsin-La Crosse":"Whitcomb","Bethel MN":"Pinehurst College","Saint John's (MN)":"Cleveland Lutheran","Trinity (TX)":"Childress College","Hardin-Simmons":"Kirkland College","Delaware Valley":"Beeville Methodist","Wheaton IL":"Wexford College","Rowan":"Belton Methodist","Wisconsin-Oshkosh":"Jessop College","Wisconsin-Platteville":"Saint Ainsworth","Wisconsin-River Falls":"Edgewood College","Wisconsin-Stevens Point":"Gilchrist College","Wisconsin-Stout":"Abernathy College","Wisconsin-Eau Claire":"Chester College","John Carroll":"Saint Carrington","Baldwin Wallace":"Seymour Wesleyan","Capital":"Saint Merriweather","Heidelberg":"Saint Larkspur","Marietta":"Harrington College","Muskingum":"Nolan College","Ohio Northern":"Prentiss College","Otterbein":"Langford College","Wilmington (OH)":"Sheffield","Wabash":"Lyndon College","DePauw":"Garner Lutheran","Denison":"Dempsey","Wittenberg":"Quincy Lutheran","Kenyon":"Saint Pembroke","Oberlin":"Foxcroft College","Ohio Wesleyan":"Llano Lutheran","Hiram":"Caldwell College","Wooster":"Harrington","Allegheny":"Ranger Methodist","Augustana (IL)":"Hartwell College","Carthage":"Sinton College","Elmhurst":"Mexia Methodist","Illinois Wesleyan":"Borger College","Millikin":"Garrison College","North Park":"Saint Tillman","Washington U. (MO)":"Loring College","Carroll (WI)":"Talbot","Concordia-Moorhead":"Spearman Lutheran","Gustavus Adolphus":"Thornton College","Hamline":"Walton Wesleyan","St. Olaf":"Abernathy","Carleton":"Ballinger Lutheran","Augsburg":"Kilgore Methodist","Central (IA)":"Langford","Coe":"Yorkshire College","Dubuque":"Lockhart Lutheran","Loras":"Uvalde College","Luther":"Allendale Lutheran","Simpson":"Gatesville College","Buena Vista":"Alvin College","Nebraska Wesleyan":"Kimbrough College","Monmouth (IL)":"Liberty Lutheran","Ripon":"Saint Edgewood","Lawrence":"Bramwell College","Beloit":"Quanah College","Knox":"Saint Blakemore","Illinois College":"Merriweather College","Lake Forest":"Ozona Methodist","Cornell College":"Lamesa College","Grinnell":"Rockwell College","Crestfield Lutheran":"Osgood College","Macalester":"Saint Newbury","Chicago":"Sonora Methodist","Albion":"Underhill College","Alma":"Hensley College","Adrian":"Saint Ashbury","Hope":"Saint Mercer Hill","Kalamazoo":"Somerset College","Olivet":"Larkspur College","Trine":"Blakemore","Anderson (IN)":"Fielding College","Bluffton":"Prescott College","Ashwood College":"Kendrick","Defiance":"Vandermeer College","Franklin":"Ingram","Hanover":"Graham Methodist","Manchester":"Lampasas Wesleyan","Mount St. Joseph":"Canyon College","Rose-Hulman":"Saint Varnell","Bethany (WV)":"Saint Yardley","Carnegie Mellon":"Killeen Wesleyan","Case Western Reserve":"Marlowe College","Geneva":"Hawthorne College","Grove City":"Sweetwater College","Kendall College":"Kerrville Methodist","Saint Vincent":"Jasper College","Thiel":"Ashford College","Waynesburg":"Saint Dalton","Westminster PA":"Ivydale College","Washington & Jefferson":"Everett College","Albright":"Fairbanks College","King's (PA)":"Nash College","Lebanon Valley":"Saint Tanglewood","Lycoming":"Salado College","Misericordia":"Stinnett Lutheran","Stevenson":"Kingsbury College","Widener":"Brenham College","Wakota Lutheran":"Silsbee College","Wilkes":"Mayfield","Dickinson":"Hereford Lutheran","Franklin & Marshall":"Mason Wesleyan","Gettysburg":"Shelton","McDaniel":"Osage College","Moravian":"Truett College","Muhlenberg":"Tyler Wesleyan","Ursinus":"Brady Wesleyan","Hobart":"Lund College","Rochester":"Primghar Wesleyan","RPI":"Hico Methodist","Prairie Methodist":"Hadley College","St. Lawrence":"Varnell College","Union (NY)":"Tanglewood College","WPI":"Hondo Lutheran","Alfred":"Pelham College","Alfred State":"Santa Cruz Lutheran","Brockport":"Cotulla College","Buffalo State":"Chamberlain College","Ithaca":"Pella College","Morrisville State":"Electra Wesleyan","Utica":"Grandview Wesleyan","Kean":"Westcott College","Santa Elena College":"Upton College","Montclair State":"Laurelton College","Salisbury":"Weston","TCNJ":"Stephenville College","William Paterson":"Saint Pritchard","Christopher Newport":"Benton Methodist","Coast Guard":"Coleman Methodist","Merchant Marine":"Saint Hillsdale","MIT":"Ravenscroft College","Norwich":"San Rafael College","Springfield":"Nolan","Amherst":"Rolfe College","Bates":"Beckett College","Bowdoin":"Dalhart Lutheran","Colby":"Brookhaven Lutheran","Hamilton":"Cuero College","Middlebury":"Cisco Methodist","Trinity (CT)":"Crestwood Lutheran","Tufts":"Decorah Lutheran","Wesleyan":"Hawthorne","Williams":"Overton College","Bridgewater State":"Rutherford College","Fitchburg State":"Pampa College","Framingham State":"Lenox Methodist","Plymouth State":"Saint Ainsley","UMass Dartmouth":"Milford College","Westfield State":"Yoakum Lutheran","Worcester State":"Dunlap College","Massachusetts Maritime":"Colfax College","Endicott":"Maplewood Methodist","Western New England":"Schaller Methodist","Nichols":"Dorchester College","Curry":"Comanche College","Salve Regina":"Luling Methodist","Husson":"San Cayetano College","Maine Maritime":"Saint Somerset","Gallaudet":"Albany Methodist","Bridgewater (VA)":"Taylorsville College","Ferrum":"San Elizario Methodist","Guilford":"Overton","Hampden-Sydney":"Talbot College","Randolph-Macon":"Georgetown Lutheran","Shenandoah":"Katy Lutheran","Washington & Lee":"San Felipe Lutheran","Averett":"Everly College","Belhaven":"Carrington College","Brevard":"Saint Nash","Greensboro":"Winchester College","Huntingdon":"Whitmore College","LaGrange":"Temple Methodist","Maryville (TN)":"Tilden Lutheran","Methodist":"Glendale Methodist","North Carolina Wesleyan":"Kirkland","Berry":"San Benito Methodist","Centre":"Taylor Lutheran","Hendrix":"Thorson Lutheran","Millsaps":"Saint Chamberlain","Rhodes":"Gonzales Lutheran","Sewanee":"Quincyville Lutheran","Howard Payne":"Saint Wadsworth","East Texas Baptist":"Newbury","McMurry":"Truman Methodist","Southwestern (TX)":"Bramwell","Texas Lutheran":"Thomasville College","Austin College":"Dalton College","Whitworth":"Saint Gilchrist","Pacific Lutheran":"San Pablo College","Puget Sound":"Fairbanks","Willamette":"Elmdale Wesleyan","Lewis & Clark":"Tillman College","George Fox":"Rollins College","Pacific (OR)":"Tolliver College","Chapman":"Newark Methodist","Redlands":"Sutcliffe College","Cal Lutheran":"Holstein Wesleyan","La Verne":"Akron Lutheran","Pomona-Pitzer":"Brandt Wesleyan","Claremont-Mudd-Scripps":"Hallettsville Wesleyan","Greenville":"Dalton","Northwestern (MN)":"Ashford","Martin Luther":"Keswick","Crown":"Riverside College","Minnesota Morris":"Salem College","Eureka":"Santo Tomás College","Wisconsin Lutheran":"Osgood","Concordia Chicago":"Jensen Lutheran","Concordia Wisconsin":"San Andrés Wesleyan","Benedictine (IL)":"Inglewood Wesleyan","Aurora":"Oakfield College","Morningside":"Dover Christian","Grand View":"Harmon Wesleyan","Northwestern IA":"Santa Lucía Wesleyan","Keiser":"Sunbury Wesleyan","Lindsey Wilson":"Oxford Christian","Marian IN":"Santa Inés Baptist","Benedictine KS":"Forrest Hills Christian","Kansas Wesleyan":"San Ignacio Wesleyan","Reinhardt":"Kingston Christian","Georgetown KY":"Seaford Christian","Bethel TN":"Pinebrook Baptist","Southern Oregon":"Eastport Wesleyan","College of Idaho":"Northdale Baptist","Carroll MT":"Nygaard Christian","Montana Tech":"Odebolt Christian","Dordt":"Hartley Wesleyan","Saint Francis IN":"Vogel Christian","Campbellsville":"Verdigre Wesleyan","Missouri Valley":"Sutton Wesleyan","Indiana Wesleyan":"Marion Wesleyan","Baker":"Westby Baptist","Central Methodist":"Norwood Wesleyan","Evangel":"Greenville Christian","Graceland":"Santa Elena Baptist","MidAmerica Nazarene":"Ivywood Baptist","Peru State":"Mayfield College","William Penn":"Yorktown Christian","Crestfield Christian":"Cedarburg Wesleyan","Culver-Stockton":"Kendrick College","Bethany (KS)":"San Miguel Baptist","Bethel (KS)":"San Jacinto Baptist","Avila":"Kentwood Christian","Wakota Wesleyan":"Silverton Baptist","Friends":"Clarkston Nazarene","McPherson":"Jonesville Christian","Ottawa (KS)":"Jewell Baptist","Southwestern (KS)":"Kimball Baptist","Sterling":"Fenton Christian","San Isidro University":"Upton Baptist","Tabor":"Quinlan College","Eastern Oregon":"Westfield Wesleyan","Montana Western":"Moorefield Wesleyan","Montana State-Northern":"Yardley College","Mesa Verde Baptist":"Kanawha Christian","Rocky Mountain":"Millfield Wesleyan","Concordia (NE)":"Bancroft Wesleyan","Doane":"Fairfield Nazarene","Hastings":"Foxwood Baptist","Cedar Bluff College":"Glenwood College","Midland":"Denton Baptist","Briar Cliff":"Lohrville Baptist","Dakota Wesleyan":"Uniondale Wesleyan","Mount Marty":"Centerville Wesleyan","Taylor":"Remsen Christian","Lawrence Tech":"Kendall Wesleyan","Siena Heights":"Emmet Wesleyan","Olivet Nazarene":"Crossroads Christian","Saint Xavier":"Hilldale Christian","Madonna":"Clinton Christian","Cumberland":"Elmore Wesleyan","Cumberlands":"Bayfield Christian","Kentucky Christian":"Midvale Wesleyan","Pikeville":"Elkader Baptist","Union (KY)":"Ida Wesleyan","Langston":"Manson Baptist","Texas Wesleyan":"Mercer Hill College","Wayland Baptist":"Newburgh Wesleyan","Ottawa (AZ)":"Nora Baptist","Arizona Christian":"Vicksburg Wesleyan","Texas College":"Fairhaven Wesleyan","SAGU":"Camden Wesleyan","Louisiana Christian":"Waverly Christian","Lyon":"Sandberg Wesleyan","Oklahoma Panhandle State":"Smyrna Nazarene","Ave Maria":"Lakewood Christian","Warner":"Burlington Wesleyan","Webber International":"Ulrich Christian","Southeastern (FL)":"Ingram Wesleyan","Point":"Harlan Baptist","Faulkner":"Pruitt Christian","Valley City State":"Fielding Christian","Mayville State":"Ulysses Christian","Jamestown":"Tanglewood Christian","Dickinson State":"Rollins Christian","Dakota State":"Pembroke Wesleyan","Waldorf":"Fairhaven College","Saint Mary (KS)":"Newbury Wesleyan","Iowa Western CC":"Crestwood CC","Hutchinson CC":"Fayette County CC","Butler CC":"Jim Hogg County CC","Garden City CC":"Lampasas CC","Dodge City CC":"Bandera County CC","Coffeyville CC":"Granite Valley CC","Independence CC":"Lavaca County CC","Fort Scott CC":"Nueces County CC","Highland CC":"Hidalgo County CC","East Mississippi CC":"Sonora Community College","Jones College":"Coke County CC","NW Mississippi CC":"Mexia Junior College","Hinds CC":"Presidio County CC","Itawamba CC":"Burnet County CC","Mississippi Gulf Coast CC":"Schleicher County CC","Copiah-Lincoln CC":"Llano County CC","Pearl River CC":"Starr County CC","Coahoma CC":"Gillespie County CC","Holmes CC":"Uvalde County CC","Southwest Mississippi CC":"Forrest Hills CC","East Central CC":"Sutton County CC","Northeast Mississippi CC":"Hondo CC","Mississippi Delta CC":"Kaimana Valley CC","Navarro College":"Ozona Junior College","Kilgore College":"Pella CC","Blinn College":"Stephenville CC","Trinity Valley CC":"Brazos County CC","Tyler JC":"Alvin CC","Cisco College":"Sterling County CC","Arizona Western":"Victoria County CC","Snow College":"Lampasas County CC","NEO A&M":"Quanah CC","Ellsworth CC":"San Andrés CC","Georgia Military College":"Val Verde County CC","Crestfield CC":"Coleman CC","Lackawanna College":"Belton CC","ASA Miami":"Holstein CC","Nassau CC":"Kinney County CC","Hudson Valley CC":"Kimble County CC","Ashwood County CC":"Salado Junior College","Monroe College":"Crestfield Valley CC","Erie CC":"Comal County CC","NDSCS":"Young County CC","Rochester CC&TC":"Medina County CC","Itasca CC":"Glendale CC","Wakota Valley CC":"Childress CC","Vermilion CC":"Aurora Valley CC","Central Lakes College":"San Patricio County CC","Minnesota West":"Luling CC","Minnesota State CTC":"Irion County CC","Tierra Alta CC":"Spearman CC","Riverland CC":"Callahan County CC","City College of San Francisco":"Bexar Norte County CC","Saddleback College":"Frio County CC","Riverside City College":"Real County CC","Río Grande Valley CC":"Comanche CC","Mt. San Antonio College":"Blanco County CC","Fullerton College":"Mason CC","Palomar College":"Maverick County CC","Bakersfield College":"Pecos County CC","Long Beach City College":"Mills County CC","El Camino College":"Edna CC","Fresno City College":"Jasper CC","Sierra College":"Goliad County CC","American River College":"Lakewood CC","Laney College":"Colfax CC","Mesa del Sol CC":"San Jacinto CC","College of San Mateo":"Runnels County CC","Butte College":"Katy Junior College","Chabot College":"Kerrville CC","Diablo Valley College":"Ida Junior College","Modesto JC":"Dalhart CC","Feather River College":"Brady CC","Shasta College":"Hallettsville CC","Santa Rosa JC":"Reeves County CC","Hartnell College":"Stinnett CC","West Hills Coalinga":"Harmon CC","Reedley College":"Travis Norte County CC","Ventura College":"Seymour CC","Pasadena City College":"Caddo County CC","LA Harbor College":"Gonzales County CC","LA Pierce College":"Cleveland CC","LA Valley College":"Atascosa County CC","Antelope Valley College":"Dimmit County CC","Citrus College":"Canyon CC","Chaffey College":"Hereford CC","Victor Valley College":"Wakota Valley CC","San Bernardino Valley College":"Brenham CC","Mt. San Jacinto College":"Marion CC","Southwestern College":"Killeen CC","Grossmont College":"Webb County CC","San Diego Mesa College":"Crossroads Junior College","Santa Barbara City College":"Hico CC","Allan Hancock College":"Magnolia Valley CC","Santa Monica College":"Ranger CC","Compton College":"Sunbury CC","Cerritos College":"Pampa Community College","East LA College":"Santa Cruz CC","Glendale CC (CA)":"Ballinger CC","Orange Coast College":"Zavala County CC","College of the Canyons":"Cedarburg CC","San Joaquin Delta College":"Uvalde CC","Merced College":"Tom Green County CC","Contra Costa College":"Gatesville Junior College","Gavilan College":"Edwards County CC","Mendocino College":"Inglewood Junior College","College of the Siskiyous":"Wilson County CC","Yuba College":"McMullen County CC","Lassen College":"Karnes County CC"};
+// v2.14: pro leagues, teams and awards are fictional now; older saves carry the old names in their alumni stories
+const PRO_MIGRATE={"Arizona Cardinals": "Crestfield Comets", "Atlanta Falcons": "Bayport Admirals", "Baltimore Ravens": "Iron City Forge", "Buffalo Bills": "Lakeshore Storm", "Carolina Panthers": "Summit Avalanche", "Chicago Bears": "Granite Quarrymen", "Cincinnati Bengals": "Cascadia Timberwolves", "Cleveland Browns": "Aurora Huskies", "Dallas Cowboys": "Kaimana Surf", "Denver Broncos": "Coralina Barracudas", "Detroit Lions": "Magnolia Monarchs", "Green Bay Packers": "Acadia Bayou Kings", "Houston Texans": "Cumberland Miners", "Indianapolis Colts": "Llano Grande Stampede", "Jacksonville Jaguars": "Tierra Alta Scorpions", "Kansas City Chiefs": "Wakota Twisters", "Las Vegas Raiders": "Capital City Senators", "Los Angeles Chargers": "Riverton Rapids", "Los Angeles Rams": "Silver Lake Sentinels", "Miami Dolphins": "Mesa Rattlers", "Minnesota Vikings": "Harbor City Anchors", "New England Patriots": "Pine Valley Lumberjacks", "New Orleans Saints": "Red Rock Outlaws", "New York Giants": "Gulf Coast Tarpons", "New York Jets": "Prairie Stallions", "Philadelphia Eagles": "Midland Mustangs", "Pittsburgh Steelers": "Steel Valley Ironmen", "San Francisco 49ers": "Desert Sidewinders", "Seattle Seahawks": "Highland Pioneers", "Tampa Bay Buccaneers": "Bluewater Navigators", "Tennessee Titans": "Twin Rivers Kingfishers", "Washington Commanders": "Northgate Knights", "Arlington Renegades": "Bayport Blaze", "DC Defenders": "Riverton Rivermen", "Houston Roughnecks": "Capital City Guardians", "Memphis Showboats": "Pine Valley Grizzlies", "Michigan Panthers": "Harbor City Hammers", "San Antonio Brahmas": "Silver Lake Saber-tooths", "Birmingham Stallions": "Red Rock Wranglers", "St. Louis Battlehawks": "Northgate Nighthawks", "BC Lions": "Westshore Orcas", "Calgary Stampeders": "Foothill Stallions", "Edmonton Elks": "Plains Harvesters", "Saskatchewan Roughriders": "Lakehead Voyageurs", "Winnipeg Blue Bombers": "Bay of Pines Loons", "Hamilton Tiger-Cats": "Riverside Steelmen", "Toronto Argonauts": "Lakeport Lancers", "Ottawa Redblacks": "Capital Rideau Rangers", "Montreal Alouettes": "Old Port Royals"},PRO_TXT=[["NFL", "NGL"], ["UFL", "SFL"], ["CFL", "MGL"], ["Super Bowl", "Gridiron Bowl"], ["Pro Bowl", "Pro All-Star"], ["All-Pro", "All-League"], ["Grey Cup", "Maple Cup"], ["Heisman Trophy", "Golden Helmet Trophy"], ["Pro Football Hall of Fame", "Gridiron Hall of Fame"], ["Canton", "the Gridiron Hall of Fame"], ["Biletnikoff Award", "Golden Hands Award"], ["Doak Walker Award", "Feature Back Award"], ["Butkus Award", "Linebacker of the Year Award"], ["Thorpe Award", "Defensive Back of the Year Award"], ["Outland Trophy", "Trench Trophy"], ["Lombardi Award", "Lineman of the Year Award"], ["Nagurski Trophy", "Defender of the Year Trophy"], ["Maxwell Award", "Player of the Year Award"], ["Bednarik Award", "Iron Wall Award"], ["Manning Award", "Field General Award"], ["O'Brien Award", "Gunslinger Award"], ["Mackey Award", "Tight End of the Year Award"], ["Groza Award", "Kicker of the Year Award"], ["Rimington", "Center of the Year"], ["Senior Bowl", "Senior Classic"], ["Shrine Bowl", "Coast-to-Coast Bowl"]];
+function proMigrate(){
+  if(G.proV>=1)return;const fix=t=>{if(typeof t!=='string')return t;for(const k in PRO_MIGRATE)if(t.includes(k))t=t.split(k).join(PRO_MIGRATE[k]);for(const[a,b]of PRO_TXT)if(t.includes(a))t=t.split(a).join(b);return t;};
+  const st=[G.ai&&G.ai.alumni].filter(Boolean);
+  while(st.length){const o=st.pop();if(!o||typeof o!=='object')continue;
+    if(Array.isArray(o)){for(let i=0;i<o.length;i++){if(typeof o[i]==='string')o[i]=fix(o[i]);else if(o[i]&&typeof o[i]==='object')st.push(o[i]);}continue;}
+    for(const k in o){const v=o[k];if(typeof v==='string')o[k]=fix(v);else if(v&&typeof v==='object')st.push(v);}}
+  for(const p of[...(G.players||[]),...(G.hofArchive||[]),...(G.wlArchive||[])]){p.story=null;p._cf=undefined;}
+  G.draftTeamRegistry={};G.proV=1;
+}
 // v2.07: older saves still name real colleges; every school reference moves to its fictional counterpart once
 function colMigrate(){
   if(G.colV>=2)return;const R=COL_RENAME,CONF={SEC:'Southern Athletic','Big Ten':'Great Lakes','Big 12':'Plains Twelve',ACC:'Atlantic Coast League'};
@@ -5699,7 +5713,7 @@ function finalizeOffseason(){
   const seniorsLost=grad.length;
   const _totalGames=G.wins+G.losses;
   const winBonus=_totalGames>0?clamp(Math.round((G.wins/_totalGames-0.5)*10),-5,5):0;
-  const frCnt=Math.max(3,seniorsLost+winBonus);
+  const frCnt=Math.max(3,Math.round((seniorsLost+winBonus)*worldFrMult()));
   const newFr=[];
   for(let i=0;i<frCnt;i++){
     const p=genPlayer(G.myId,9,G.cls,needs);
@@ -7973,14 +7987,14 @@ function _pgRecrMine(){
 // dev trait, rating, college level, position, and random life events.
 
 const _STORY_JOBS = {
-  elite:   ['NFL starter','All-Pro selection','Pro Bowl honoree','Super Bowl champion','NFL MVP candidate','perennial starter','franchise cornerstone','two-time Pro Bowler','starter who earned a second contract','key contributor on a Super Bowl roster'],
-  good:    ['NFL roster player','NFL practice squad veteran','CFL starter','UFL starter','arena football veteran','special teams ace','backup who saw significant playing time','depth piece who stuck around for five seasons','CFL all-star','UFL team captain','core special teamer who played over 100 games'],
-  avg:     ['CFL depth player','UFL backup','indoor football player','semi-pro player','Arena League contributor','regional league standout','USFL roster member','fan-favorite in the IFL','tryout player who made the most of his shot'],
+  elite:   ['NGL starter','All-League selection','Pro All-Star honoree','Gridiron Bowl champion','NGL MVP candidate','perennial starter','franchise cornerstone','two-time Pro All-Starer','starter who earned a second contract','key contributor on a Gridiron Bowl roster'],
+  good:    ['NGL roster player','NGL practice squad veteran','MGL starter','SFL starter','indoor football veteran','special teams ace','backup who saw significant playing time','depth piece who stuck around for five seasons','MGL all-star','SFL team captain','core special teamer who played over 100 games'],
+  avg:     ['MGL depth player','SFL backup','indoor football player','semi-pro player','Arena League contributor','regional league standout','USFL roster member','fan-favorite in the IFL','tryout player who made the most of his shot'],
   low:     ['recreational league player','flag football coach','youth football coach','high school assistant coach','college scout']
 };
 const _STORY_JOBS_INTL = [
   'ELF (European League of Football) starter','ELF All-Star','German Football League import star',
-  'Canadian Football League veteran','CFL Grey Cup champion',
+  'Canadian Football League veteran','MGL Maple Cup champion',
   'Japan X League import player','X League All-Star',
   'Liga de Fútbol Americano Profesional (Mexico) star',
   'Vanier Cup champion (Canada)','Australian Football League convert',
@@ -8032,15 +8046,7 @@ const _STORY_TRAGIC = [
   'walked away from the game after a third concussion in two years',
   'had a promising start cut short by a fractured tibia in training camp'
 ];
-const _STORY_DRAFT_TEAMS = [
-  'Dallas Cowboys','New England Patriots','Kansas City Chiefs','San Francisco 49ers','Green Bay Packers',
-  'Baltimore Ravens','Buffalo Bills','Philadelphia Eagles','Miami Dolphins','Cincinnati Bengals',
-  'Los Angeles Rams','Las Vegas Raiders','Seattle Seahawks','Minnesota Vikings','Chicago Bears',
-  'New York Giants','Pittsburgh Steelers','Tampa Bay Buccaneers','Denver Broncos','Atlanta Falcons',
-  'Detroit Lions','Jacksonville Jaguars','Tennessee Titans','Arizona Cardinals','New Orleans Saints',
-  'Los Angeles Chargers','Washington Commanders','Carolina Panthers','Houston Texans','Indianapolis Colts',
-  'New York Jets','Cleveland Browns'
-];
+const _STORY_DRAFT_TEAMS = ['Crestfield Comets','Bayport Admirals','Iron City Forge','Lakeshore Storm','Summit Avalanche','Granite Quarrymen','Cascadia Timberwolves','Aurora Huskies','Kaimana Surf','Coralina Barracudas','Magnolia Monarchs','Acadia Bayou Kings','Cumberland Miners','Llano Grande Stampede','Tierra Alta Scorpions','Wakota Twisters','Capital City Senators','Riverton Rapids','Silver Lake Sentinels','Mesa Rattlers','Harbor City Anchors','Pine Valley Lumberjacks','Red Rock Outlaws','Gulf Coast Tarpons','Prairie Stallions','Midland Mustangs','Steel Valley Ironmen','Desert Sidewinders','Highland Pioneers','Bluewater Navigators','Twin Rivers Kingfishers','Northgate Knights'];
 const _STORY_BROADCAST_LINES = [
   'occasionally appears as a color commentator on local sports radio',
   'has a popular football podcast with over 50,000 subscribers',
@@ -8254,12 +8260,12 @@ function generatePlayerStory(p){
     const draftTeam=_claimDraftTeam(gradYr,Math.floor(rng(10)*_STORY_DRAFT_TEAMS.length),rng);
     icon='';
     headline=`${p.fn} ${p.ln} drafted Round ${draftRound}, Pick ${draftPick} (No. ${overallPick} overall) by the ${draftTeam}`;
-    outcome=`NFL Draft — Round ${draftRound}`;
+    outcome=`NGL Draft — Round ${draftRound}`;
     const draftSlotDesc=_draftSlotDesc(draftRound,draftPick,overallPick);
     const colStats=cf?`After posting ${cf.statsBlock} at ${school}`:`After a standout college career at ${school}`;
 
     const posFlavorElite=_pickPosElite(rng(21));
-    // Multiple body narrative variants for elite NFL picks
+    // Multiple body narrative variants for elite NGL picks
     if(narrativeVariant===0){
       body=`${colStats}, ${p.fn} was selected by the ${draftTeam} with ${draftSlotDesc}. `+
         `In the pros, he ${posFlavorElite}${draftRound===1?', living up to every expectation that came with his draft position':draftRound===2?', surpassing what most scouts expected from a second-round pick':' — a steal for the ${draftTeam} in the third round'}. `+
@@ -8280,7 +8286,7 @@ function generatePlayerStory(p){
           `Outside the game, he ${familyEvent} and settled in ${cityRef}. `)+
         (broadcastLine?'He also '+broadcastLine+'.':'');
     } else {
-      const fbsNote=fbsTier==='elite'?` Playing at ${school} had honed him into an NFL-ready prospect.`:fbsTier==='good'?` His time at ${school} gave him the tools to compete at the next level.`:'';
+      const fbsNote=fbsTier==='elite'?` Playing at ${school} had honed him into an NGL-ready prospect.`:fbsTier==='good'?` His time at ${school} gave him the tools to compete at the next level.`:'';
       body=`${colStats}.${fbsNote} The ${draftTeam} made it official, trading up to take him with ${draftSlotDesc}. `+
         `He went on to ${posFlavorElite}${draftRound===1?', cementing himself as a franchise piece':' and carving out a long career'}. `+
         (hasTragedy?_STORY_TRAGIC[Math.floor(rng(12)*_STORY_TRAGIC.length)]+' tested his resolve, but he pushed through. ':
@@ -8296,7 +8302,7 @@ function generatePlayerStory(p){
     const tragic=_STORY_TRAGIC[Math.floor(rng(12)*_STORY_TRAGIC.length)];
     icon='';
     headline=`${p.fn} ${p.ln} drafted Round 3 by the ${draftTeam} — career cut short`;
-    outcome='NFL Draft Pick';
+    outcome='NGL Draft Pick';
     if(narrativeVariant<2){
       body=`The talent was never in question — the ${draftTeam} saw enough to take ${p.fn} in the third round. But ${tragic}, and the career everyone expected never fully materialized. `+
         `He ${familyEvent} and rebuilt his life ${cityRef}. `+
@@ -8331,7 +8337,7 @@ function generatePlayerStory(p){
     icon='';
     // More varied headlines based on college level and path
     if(lvl==='FBS'){
-      headline=`${p.fn} ${p.ln} fights his way onto an NFL roster as a ${proJob}`;
+      headline=`${p.fn} ${p.ln} fights his way onto an NGL roster as a ${proJob}`;
     } else if(lvl==='FCS'){
       headline=`${p.fn} ${p.ln} earns a pro contract — ${proJob}`;
     } else {
@@ -8444,7 +8450,7 @@ function _collegeCareerDesc(dev,lvl,r,school){
   const fbsTier=lvl==='FBS'?_fbsPrestigeTier(school||''):'mid';
   if(lvl==='FBS'){
     if(dev==='Elite Dev'){
-      if(fbsTier==='elite')return['dominant','record-breaking','Heisman-caliber'][Math.floor(r*3)];
+      if(fbsTier==='elite')return['dominant','record-breaking','trophy-caliber'][Math.floor(r*3)];
       return['standout','dominant','breakout'][Math.floor(r*3)];
     }
     if(dev==='Star Dev'){
@@ -8596,29 +8602,29 @@ function _genCollegeCareerFacts(p){
   // ── Awards — position-specific, prestige-aware, realistically sparse ──
   // Only Elite Dev players at good schools regularly win awards; most players win nothing
   const _posAwards={
-    QB:{elite:['Heisman Trophy finalist','Manning Award winner','Manning Award finalist','Davey O\'Brien Award winner','Davey O\'Brien semifinalist','first-team All-American'],
+    QB:{elite:['Golden Helmet Trophy finalist','Field General Award winner','Field General Award finalist','Gunslinger Award winner','Gunslinger Award semifinalist','first-team All-American'],
         mid:['Conference Offensive Player of the Year','first-team All-Conference QB','second-team All-Conference QB','bowl game MVP']},
-    RB:{elite:['Heisman Trophy finalist','Doak Walker Award winner','Doak Walker Award finalist','first-team All-American RB','second-team All-American RB'],
+    RB:{elite:['Golden Helmet Trophy finalist','Feature Back Award winner','Feature Back Award finalist','first-team All-American RB','second-team All-American RB'],
         mid:['Conference Offensive Player of the Year','first-team All-Conference RB','second-team All-Conference RB','bowl game MVP']},
-    WR:{elite:['Biletnikoff Award winner','Biletnikoff Award finalist','first-team All-American WR','second-team All-American WR','Senior Bowl MVP'],
+    WR:{elite:['Golden Hands Award winner','Golden Hands Award finalist','first-team All-American WR','second-team All-American WR','Senior Classic MVP'],
         mid:['first-team All-Conference WR','second-team All-Conference WR','Conference Offensive Player of the Year','bowl game MVP']},
-    TE:{elite:['John Mackey Award winner','John Mackey Award finalist','first-team All-American TE','second-team All-American TE'],
+    TE:{elite:['Tight End of the Year Award winner','Tight End of the Year Award finalist','first-team All-American TE','second-team All-American TE'],
         mid:['first-team All-Conference TE','second-team All-Conference TE','Conference Offensive Player of the Year']},
-    OL:{elite:['Outland Trophy winner','Outland Trophy finalist','Rimington Award winner','first-team All-American OL','Lombardi Award finalist'],
+    OL:{elite:['Trench Trophy winner','Trench Trophy finalist','Center of the Year Award winner','first-team All-American OL','Lineman of the Year Award finalist'],
         mid:['first-team All-Conference OL','second-team All-Conference OL','Conference Offensive Lineman of the Year']},
-    DL:{elite:['Outland Trophy finalist','Lombardi Award winner','Lombardi Award finalist','first-team All-American DL','Nagurski Trophy finalist'],
+    DL:{elite:['Trench Trophy finalist','Lineman of the Year Award winner','Lineman of the Year Award finalist','first-team All-American DL','Defender of the Year Trophy finalist'],
         mid:['first-team All-Conference DL','second-team All-Conference DL','Conference Defensive Lineman of the Year']},
-    LB:{elite:['Butkus Award winner','Butkus Award finalist','Nagurski Trophy finalist','first-team All-American LB','Bednarik Award finalist'],
+    LB:{elite:['Linebacker of the Year Award winner','Linebacker of the Year Award finalist','Defender of the Year Trophy finalist','first-team All-American LB','Iron Wall Award finalist'],
         mid:['first-team All-Conference LB','second-team All-Conference LB','Conference Defensive Player of the Year']},
-    CB:{elite:['Thorpe Award winner','Thorpe Award finalist','Bednarik Award finalist','first-team All-American CB','Nagurski Trophy finalist'],
+    CB:{elite:['Defensive Back of the Year Award winner','Defensive Back of the Year Award finalist','Iron Wall Award finalist','first-team All-American CB','Defender of the Year Trophy finalist'],
         mid:['first-team All-Conference CB','second-team All-Conference CB','Conference Defensive Player of the Year']},
-    S: {elite:['Thorpe Award finalist','Bednarik Award finalist','first-team All-American S','second-team All-American S','Nagurski Trophy semifinalist'],
+    S: {elite:['Defensive Back of the Year Award finalist','Iron Wall Award finalist','first-team All-American S','second-team All-American S','Defender of the Year Trophy semifinalist'],
         mid:['first-team All-Conference S','second-team All-Conference S','Conference Defensive Player of the Year']},
-    K: {elite:['Lou Groza Award winner','Lou Groza Award finalist','first-team All-American K'],
+    K: {elite:['Kicker of the Year Award winner','Kicker of the Year Award finalist','first-team All-American K'],
         mid:['first-team All-Conference K','Conference Special Teams Player of the Year']}
   };
   // Universal fallbacks
-  const _AWARDS_GENERIC_MID=['team captain','bowl game MVP','Conference Freshman of the Year','Senior Bowl invitee','Academic All-Conference'];
+  const _AWARDS_GENERIC_MID=['team captain','bowl game MVP','Conference Freshman of the Year','Senior Classic invitee','Academic All-Conference'];
   const _AWARDS_FCS_POS=['FCS All-American','FCS All-American honorable mention','All-Conference first-team','conference Defensive/Offensive Player of the Year','FCS playoff standout'];
   const _AWARDS_D_POS=['conference champion','team captain','Academic All-Conference','conference MVP','team MVP'];
 
@@ -8691,19 +8697,24 @@ function _genCollegeCareerFacts(p){
 }
 
 // ═══════════ GRIDIRON AI v2 — on-device career engine (no network, no API key) ═══════════
-// Base rates: ~1.5% of draft-eligible NCAA players are drafted (nearly all FBS); 7 rounds / ~257 picks;
-// average NFL career ~3.3 years (drafted ~5-6, first-rounders ~9); RB careers shortest, QB/K longest.
+// Base rates: ~1.5% of draft-eligible college players are drafted (nearly all FBS); 7 rounds / ~257 picks;
+// average NGL career ~3.3 years (drafted ~5-6, first-rounders ~9); RB careers shortest, QB/K longest.
 const AI_VER=2;
-const AI_NFL=['Arizona Cardinals','Atlanta Falcons','Baltimore Ravens','Buffalo Bills','Carolina Panthers','Chicago Bears','Cincinnati Bengals','Cleveland Browns','Dallas Cowboys','Denver Broncos','Detroit Lions','Green Bay Packers','Houston Texans','Indianapolis Colts','Jacksonville Jaguars','Kansas City Chiefs','Las Vegas Raiders','Los Angeles Chargers','Los Angeles Rams','Miami Dolphins','Minnesota Vikings','New England Patriots','New Orleans Saints','New York Giants','New York Jets','Philadelphia Eagles','Pittsburgh Steelers','San Francisco 49ers','Seattle Seahawks','Tampa Bay Buccaneers','Tennessee Titans','Washington Commanders'];
-const AI_UFL=['Arlington Renegades','DC Defenders','Houston Roughnecks','Memphis Showboats','Michigan Panthers','San Antonio Brahmas','Birmingham Stallions','St. Louis Battlehawks'];
-const AI_CFL=['BC Lions','Calgary Stampeders','Edmonton Elks','Saskatchewan Roughriders','Winnipeg Blue Bombers','Hamilton Tiger-Cats','Toronto Argonauts','Ottawa Redblacks','Montreal Alouettes'];
+const AI_NGL=['Crestfield Comets','Bayport Admirals','Iron City Forge','Lakeshore Storm','Summit Avalanche','Granite Quarrymen','Cascadia Timberwolves','Aurora Huskies','Kaimana Surf','Coralina Barracudas','Magnolia Monarchs','Acadia Bayou Kings','Cumberland Miners','Llano Grande Stampede','Tierra Alta Scorpions','Wakota Twisters','Capital City Senators','Riverton Rapids','Silver Lake Sentinels','Mesa Rattlers','Harbor City Anchors','Pine Valley Lumberjacks','Red Rock Outlaws','Gulf Coast Tarpons','Prairie Stallions','Midland Mustangs','Steel Valley Ironmen','Desert Sidewinders','Highland Pioneers','Bluewater Navigators','Twin Rivers Kingfishers','Northgate Knights'];
+const AI_SFL=['Bayport Blaze','Riverton Rivermen','Capital City Guardians','Pine Valley Grizzlies','Harbor City Hammers','Silver Lake Saber-tooths','Red Rock Wranglers','Northgate Nighthawks'];
+const AI_MGL=['Westshore Orcas','Foothill Stallions','Plains Harvesters','Lakehead Voyageurs','Bay of Pines Loons','Riverside Steelmen','Lakeport Lancers','Capital Rideau Rangers','Old Port Royals'];
 const AI_CONF={'Southern Athletic':['Llano Grande','Summit Mines','Cascadia State','Summit','Magnolia','Wakota Tech','Cumberland','Acadia State','Acadia Tech','Wakota State','Llano Grande A&M','Llano Grande Tech','Tierra Alta','Crestfield','Crestfield State','Canadian'],'Great Lakes':['Western Llano Grande','Coralina Tech','Crestfield Tech','East Coralina','Cascadia','Ormsby University','Eastern Magnolia','Summit State','Northern Llano Grande','Coralina','Acadia','Wakota','Southern Cascadia','Western Cumberland','Shelton University','Magnolia State','Cumberland Tech','Tierra Alta State'],'Plains Twelve':['Granite','Harrington University','Wickham University','Southern Crestfield','Hereford State','Beckett University','Salado State','Central Tierra Alta','Milford State','Brookhaven University','Eastern Llano Grande','Winslow University','Ainsworth University','Beeville Christian','Cascadia Tech','Ranger Christian'],'Atlantic Coast League':['Junction','Haskell','Coralina State','Mason State','Magnolia A&M','Rockford','Northam University','Cumberland State','South Acadia','Langford University','Benton State','Western Crestfield','Borger State','Spearman Christian','Shelbyville','North Summit','Ganado'],Independent:['Llano Grande State']};
 // v2.12: with 27 FBS programs, the top 14 form two power conferences of 7 (like the real Power Four share); the other 13 are the rest of FBS
 {const old={};for(const c in AI_CONF)AI_CONF[c].forEach(n=>{old[n]=c;});const top=D1FBS.slice(0,14),N={'Southern Athletic':[],'Great Lakes':[]};
   for(const n of top){const c=old[n];const tgt=(c==='Southern Athletic'||c==='Great Lakes')&&N[c].length<7?c:(N['Southern Athletic'].length<=N['Great Lakes'].length?'Southern Athletic':'Great Lakes');N[tgt].push(n);}
   for(const c in AI_CONF)delete AI_CONF[c];Object.assign(AI_CONF,N);}
 const AI_P4={};for(const c in AI_CONF)AI_CONF[c].forEach(s=>{AI_P4[s]=c;});
-const AI_BOWLS_TOP=['Rose Bowl','Sugar Bowl','Orange Bowl','Cotton Bowl','Fiesta Bowl','Peach Bowl'];
+const AI_CONF_BASE=JSON.parse(JSON.stringify(AI_CONF));
+// v2.14: League Setup can rename or replace the FBS list; the top 14 split into the two power conferences again
+function aiConfRebuild(){const old={};for(const c in AI_CONF_BASE)AI_CONF_BASE[c].forEach(n=>{old[n]=c;});const N={'Southern Athletic':[],'Great Lakes':[]};
+  for(const n of D1FBS.slice(0,14)){const c=old[n];const tgt=c&&N[c]&&N[c].length<7?c:(N['Southern Athletic'].length<=N['Great Lakes'].length?'Southern Athletic':'Great Lakes');N[tgt].push(n);}
+  for(const c in AI_CONF)delete AI_CONF[c];Object.assign(AI_CONF,N);for(const k in AI_P4)delete AI_P4[k];for(const c in AI_CONF)AI_CONF[c].forEach(s=>{AI_P4[s]=c;});}
+const AI_BOWLS_TOP=['Garden Bowl','Bayou Bowl','Tropic Bowl','Frontier Bowl','Desert Bowl','Orchard Bowl'];
 const AI_BOWLS=['Citrus Bowl','ReliaQuest Bowl','Alamo Bowl','Holiday Bowl','Gator Bowl','Music City Bowl','Liberty Bowl','Las Vegas Bowl','Sun Bowl','Pinstripe Bowl','Texas Bowl',"Duke's Mayo Bowl",'Armed Forces Bowl','Birmingham Bowl','Independence Bowl','Hawaii Bowl','Boca Raton Bowl','New Mexico Bowl','First Responder Bowl','Camellia Bowl'];
 const AI_GROW={'Elite Dev':2.1,'Star':1.7,'Star Dev':1.7,'Impact':1.25,'Normal':.75};
 const AI_RET={RB:29.5,WR:31.5,CB:31,DL:32.5,LB:31.5,S:32,TE:32.5,OL:34,QB:37,K:39};
@@ -8717,7 +8728,7 @@ const AI_PV={QB:4,DL:2.5,OL:1.5,CB:1.5,WR:1,S:0,LB:-.5,TE:-.5,RB:-1.5,K:-9};
 const AI_LVADJ={P4:0,G5:-3,FCS:-5.5,D2:-9,D3:-13,JUCO:-11};
 const AI_THR={P4:78,G5:72,FCS:69,D2:63,D3:56,JUCO:61};
 const AI_GP={P4:12,G5:12,FCS:11,D2:11,D3:10,JUCO:10};
-const AI_POSAWD={QB:["Davey O'Brien Award",'Maxwell Award','Johnny Unitas Golden Arm Award'],RB:['Doak Walker Award'],WR:['Fred Biletnikoff Award'],TE:['John Mackey Award'],OL:['Outland Trophy','Rimington Trophy','Joe Moore Award'],DL:['Bednarik Award','Bronko Nagurski Trophy','Ted Hendricks Award','Lombardi Award'],LB:['Butkus Award','Bednarik Award','Bronko Nagurski Trophy'],CB:['Jim Thorpe Award'],S:['Jim Thorpe Award'],K:['Lou Groza Award']};
+const AI_POSAWD={QB:["Gunslinger Award",'Player of the Year Award','Golden Arm Award'],RB:['Feature Back Award'],WR:['Golden Hands Award'],TE:['Tight End of the Year Award'],OL:['Trench Trophy','Center of the Year Award','Offensive Line of the Year Award'],DL:['Iron Wall Award','Defender of the Year Trophy','Pass Rusher of the Year Award','Lineman of the Year Award'],LB:['Linebacker of the Year Award','Iron Wall Award','Defender of the Year Trophy'],CB:['Defensive Back of the Year Award'],S:['Defensive Back of the Year Award'],K:['Kicker of the Year Award']};
 const AI_MAJORS=['Business Administration','Communications','Kinesiology','Criminal Justice','Sociology','Marketing','Exercise Science','General Studies','Sport Management','Psychology','Education','Finance','Engineering','Journalism','Economics','Biology'];
 const AI_TRK=[
  {s:'becomes a high school head coach',y:['wins his first playoff game as head coach','is named district coach of the year','sends his first player to a college program','takes over a bigger program','is named state coach of the year','is inducted into his school athletic hall of fame']},
@@ -8839,15 +8850,15 @@ function aiSign(a,p,Y,r,base){
 function aiCollAwards(a,r,perf,role,gpF,yrIdx,tier,tm){
   const out=[];if(role!=='Starter'&&role!=='Rotation')return out;if(gpF<.5)return out;const off=AI_OFF.includes(a.pos),pos=a.pos,conf=aiConfName(a),cn=conf==='conference'?'All-Conference':`All-${conf}`;
   if(yrIdx===1&&perf>=.55&&(tier==='P4'||tier==='G5'||tier==='FCS'))out.push('Freshman All-American');
-  if(tier==='JUCO'){if(perf>=.7)out.push('NJCAA All-American');return out;}
+  if(tier==='JUCO'){if(perf>=.7)out.push('junior college All-American');return out;}
   if(perf>=.84)out.push(cn+' First Team');else if(perf>=.72)out.push(cn+' Second Team');else if(perf>=.64&&r()<.5)out.push(cn+' Honorable Mention');
   if(perf>=.93&&r()<.45)out.push(conf==='conference'?(off?'Conference Offensive Player of the Year':'Conference Defensive Player of the Year'):`${conf} ${off?'Offensive':'Defensive'} Player of the Year`);
   if(tier==='P4'||tier==='G5'){
     const aaB=tier==='P4'?0:.05;
     if(perf>=.9+aaB&&r()<.45){out.push('First-Team All-American');a.aa1++;}else if(perf>=.83+aaB&&r()<.4)out.push('Second-Team All-American');
-    const aw=aiPk(r,AI_POSAWD[pos]||['Bednarik Award']);
+    const aw=aiPk(r,AI_POSAWD[pos]||['Iron Wall Award']);
     if(perf>=.95&&r()<.3)out.push('Winner of the '+aw);else if(perf>=.9&&r()<.45)out.push(aw+' finalist');else if(perf>=.82&&r()<.35)out.push(aw+' semifinalist');
-    if((pos==='QB'||pos==='RB'||pos==='WR')&&perf>=.94&&tm.w>=10){const x=r();if(x<(pos==='QB'?.25:.1)){out.push('Heisman Trophy winner');a.hei=true;}else if(x<.55)out.push('Heisman Trophy finalist');}
+    if((pos==='QB'||pos==='RB'||pos==='WR')&&perf>=.94&&tm.w>=10){const x=r();if(x<(pos==='QB'?.25:.1)){out.push('Golden Helmet Trophy winner');a.hei=true;}else if(x<.55)out.push('Golden Helmet Trophy finalist');}
   }else if(tier==='FCS'){if(perf>=.86)out.push('FCS All-American');if(perf>=.94&&r()<.3)out.push(off?'Walter Payton Award winner':'Buck Buchanan Award winner');else if(perf>=.88&&r()<.4)out.push(off?'Walter Payton Award finalist':'Buck Buchanan Award finalist');}
   else if(tier==='D2'){if(perf>=.86)out.push('D2 All-American');if(perf>=.9&&off&&r()<.4)out.push('Harlon Hill Trophy finalist');}
   else if(tier==='D3'){if(perf>=.86)out.push('D3 All-American');if(perf>=.9&&r()<.35)out.push('Gagliardi Trophy finalist');}
@@ -8857,7 +8868,7 @@ function aiCollAwards(a,r,perf,role,gpF,yrIdx,tier,tm){
 function aiPost(a,tm,tier,r,p){
   const tx=[];
   if(tier==='P4'||tier==='G5'){
-    if(tm.w>=11||(tier==='G5'&&tm.w>=11&&r()<.5)){const rd=r();tx.push(`${a.school} goes ${tm.w}-${tm.l} and earns a College Football Playoff berth`+(rd<.12?` and wins the national championship!`:rd<.3?`, reaching the national title game.`:rd<.55?`, falling in the semifinals.`:`.`));if(rd<.12)tm.title=true;}
+    if(tm.w>=11||(tier==='G5'&&tm.w>=11&&r()<.5)){const rd=r();tx.push(`${a.school} goes ${tm.w}-${tm.l} and earns a National Playoff berth`+(rd<.12?` and wins the national championship!`:rd<.3?`, reaching the national title game.`:rd<.55?`, falling in the semifinals.`:`.`));if(rd<.12)tm.title=true;}
     else if(tm.w>=9&&tier==='P4')tx.push(`${a.school} finishes ${tm.w}-${tm.l} and plays in the ${aiPk(r,AI_BOWLS_TOP)} (${r()<.55?'win':'loss'}).`);
     else if(tm.w>=6)tx.push(`${a.school} goes ${tm.w}-${tm.l} and plays in the ${aiPk(r,AI_BOWLS)} (${r()<.5?'win':'loss'}).`);
     else tx.push(`${a.school} finishes ${tm.w}-${tm.l} and misses a bowl.`);
@@ -8882,7 +8893,7 @@ function aiCollege(a,p,Y,r,base){
   const perf=stt?aiCl(q*(role==='Starter'?1:.8)*Math.min(1.1,stt.form)+aiN(r)*.05,0,1):0;a.lastPerf=perf;a.lastRole=role;
   const cls=['freshman','sophomore','junior','senior','fifth-year senior','sixth-year senior'][Math.min(5,a.cy-1)];
   let hl;
-  if(role==='Redshirt'){hl=`${p.fn} redshirts at ${a.school}`;tx.push(`${p.fn} appears in ${gp} game${gp!==1?'s':''} and keeps his redshirt (the NCAA allows up to four), spending the year in the weight room.`);tg.push('Redshirt');}
+  if(role==='Redshirt'){hl=`${p.fn} redshirts at ${a.school}`;tx.push(`${p.fn} appears in ${gp} game${gp!==1?'s':''} and keeps his redshirt (the rules allow up to four), spending the year in the weight room.`);tg.push('Redshirt');}
   else{hl=role==='Starter'?`${p.fn} ${p.ln} starts as a ${cls} at ${a.school}`:role==='Rotation'?`${p.fn} ${p.ln} earns rotation snaps as a ${cls} at ${a.school}`:`${p.fn} ${p.ln} spends his ${cls} year as a reserve at ${a.school}`;
     tx.push(`${p.pos} · ${gp} game${gp!==1?'s':''}${role==='Starter'?' · starter':''} · ${tier==='P4'?'Power conference':tier==='G5'?'Group of Five':tier}`);}
   if(stt){aiAdd(a.ct,stt.k);}
@@ -8899,12 +8910,12 @@ function aiCollege(a,p,Y,r,base){
   if(!a.deg&&a.cy>=4&&r()<.75){a.deg=true;tx.push(`Earns his degree in ${a.major}.`);}
   if(r()<.12){a.cc=true;}
   const e=aiEntry(a,y,age,'col',hl,tx,{stl:stt?stt.t:null,aw,tg,team:a.school});
-  if(aw.some(n=>/Heisman|national championship|First-Team All-American|Winner/.test(n))||tm.title)e.nw=true;
+  if(aw.some(n=>/Golden Helmet|national championship|First-Team All-American|Winner/.test(n))||tm.title)e.nw=true;
   return aiOffseason(a,p,e,r,Y,base,perf,role);
 }
 // ── draft grade, declare, transfer ──
 function aiGrade(a,r){
-  const tier=a.tier||aiTier(a),awN=a.awl.filter(x=>/All-American|Player of the Year|Award|Heisman|Trophy/.test(x.n)).length;
+  const tier=a.tier||aiTier(a),awN=a.awl.filter(x=>/All-American|Player of the Year|Award|Golden Helmet|Trophy/.test(x.n)).length;
   const prod=aiCl(a.lastPerf,0,1)*6,maj=a.inj.filter(x=>x.sev==='major').length;
   return a.ovr+a.talent+(AI_PV[a.pos]||0)+(AI_LVADJ[tier]||0)+Math.min(9,awN*2)+prod-maj*2.5+(a.pl<=3?1.5:0);
 }
@@ -8944,12 +8955,12 @@ function aiCombine(a,r){
 function aiRookieDeal(pk){const pts=[[1,45],[10,30],[32,14.5],[33,10.5],[64,7.2],[100,5.8],[135,4.9],[170,4.5],[210,4.2],[257,4.1]];if(pk<=0)return 3;for(let i=0;i<pts.length-1;i++){if(pk<=pts[i+1][0]){const t=(pk-pts[i][0])/(pts[i+1][0]-pts[i][0]);return pts[i][1]+(pts[i+1][1]-pts[i][1])*t;}}return 4.1;}
 function aiDraft(a,p,e,r,Y,base,g,exhausted){
   const dy=e.y+1,tier=a.tier;a.colEnd=e.y;a.dg=g;e.tg.push('Draft');e.nw=true;
-  if(!exhausted)e.tx.push(`Declares early for the ${dy} NFL Draft with eligibility remaining.`);
+  if(!exhausted)e.tx.push(`Declares early for the ${dy} NGL Draft with eligibility remaining.`);
   if(!a.deg&&exhausted){a.deg=true;e.tx.push(`Finishes his degree in ${a.major}.`);}
   const proj=aiProj(g),inv=proj<=300;
-  if(inv&&exhausted&&proj<=180&&r()<.7)e.tx.push(`Plays in the ${proj<=110?'Senior Bowl':aiPk(r,['East-West Shrine Bowl','Hula Bowl','NFLPA Collegiate Bowl'])}.`);
+  if(inv&&exhausted&&proj<=180&&r()<.7)e.tx.push(`Plays in the ${proj<=110?'Senior Classic':aiPk(r,['Coast-to-Coast Bowl','Island All-Star Bowl','Players Collegiate Bowl'])}.`);
   const cmb=aiCombine(a,r);
-  if(proj<=290&&(tier==='P4'||tier==='G5'||proj<=200))e.tx.push(`NFL Combine: ${cmb.forty} 40-yard dash, ${cmb.bench} bench reps, ${cmb.vert}-inch vertical.`);
+  if(proj<=290&&(tier==='P4'||tier==='G5'||proj<=200))e.tx.push(`NGL Combine: ${cmb.forty} 40-yard dash, ${cmb.bench} bench reps, ${cmb.vert}-inch vertical.`);
   else e.tx.push(`Pro day: ${cmb.forty} 40-yard dash, ${cmb.vert}-inch vertical.`);
   // combine moves stock
   const bAdj=({QB:4.8,RB:4.52,WR:4.48,TE:4.7,OL:5.25,DL:4.85,LB:4.65,CB:4.45,S:4.52,K:4.95}[a.pos]||4.7)-parseFloat(cmb.forty);
@@ -8958,17 +8969,17 @@ function aiDraft(a,p,e,r,Y,base,g,exhausted){
   if(r()<pD*pK){
     let pk=Math.round(aiProj(g2)*Math.exp(aiCl(aiN(r),-2,2)*.45));if(pk>257)pk=200+aiRi(r,0,57);pk=aiCl(pk,1,257);
     const rd=pk<=32?1:pk<=64?2:pk<=100?3:pk<=135?4:pk<=176?5:pk<=220?6:7;
-    a.stage='pro';a.dy=dy;a.team=aiPk(r,AI_NFL);a.pick=pk;a.rd=rd;a.und=false;a.lg='NFL';a.cYrs=4;const tot=aiRookieDeal(pk);a.aav=tot/4;a.optn=rd===1;
+    a.stage='pro';a.dy=dy;a.team=aiPk(r,AI_NGL);a.pick=pk;a.rd=rd;a.und=false;a.lg='NGL';a.cYrs=4;const tot=aiRookieDeal(pk);a.aav=tot/4;a.optn=rd===1;
     a.ovr=aiCl(a.ovr-12+aiN(r)*3,35,99);
     e.hl=`${p.fn} ${p.ln} is picked #${pk} overall (round ${rd}) by the ${a.team}`;
-    e.tx.push(`${dy} NFL Draft: selected in round ${rd}, pick ${pk}, by the ${a.team}. Rookie deal: 4 years, about ${aiMoney(tot)}${rd===1?' with a fifth-year team option':''}.`);
+    e.tx.push(`${dy} NGL Draft: selected in round ${rd}, pick ${pk}, by the ${a.team}. Rookie deal: 4 years, about ${aiMoney(tot)}${rd===1?' with a fifth-year team option':''}.`);
     if(pk<=5)e.tx.push('One of the top picks in the class.');else if(proj<pk-40)e.tx.push('Slides further than projected on draft weekend.');else if(proj>pk+40)e.tx.push('A big riser who goes much earlier than projected.');
   }else if(r()<aiCl((g2-70)/22,0,.7)){
-    a.stage='pro';a.dy=dy;a.und=true;a.rd=0;a.pick=0;a.lg='NFL';a.team=aiPk(r,AI_NFL);a.cYrs=3;a.aav=.9;a.ovr=aiCl(a.ovr-12+aiN(r)*3,35,99);
+    a.stage='pro';a.dy=dy;a.und=true;a.rd=0;a.pick=0;a.lg='NGL';a.team=aiPk(r,AI_NGL);a.cYrs=3;a.aav=.9;a.ovr=aiCl(a.ovr-12+aiN(r)*3,35,99);
     e.hl=`${p.fn} ${p.ln} goes undrafted, signs with the ${a.team}`;e.tx.push(`Goes undrafted in ${dy} but signs a priority free-agent deal with the ${a.team} (signing bonus about $${aiRi(r,5,25)*1000}).`);
   }else if(r()<aiCl((g2-60)/30,0,.55)){
-    const lg=r()<.6?'UFL':'CFL';a.stage='pro';a.dy=dy;a.lg=lg;a.team=aiPk(r,lg==='UFL'?AI_UFL:AI_CFL);a.und=true;a.cYrs=2;a.aav=.08;a.pick=0;a.rd=0;a.ovr=aiCl(a.ovr-12+aiN(r)*3,35,99);
-    e.hl=`${p.fn} ${p.ln} signs with the ${a.team} (${lg})`;e.tx.push(`Not selected in the ${dy} draft; ${p.fn} signs with the ${a.team} of the ${lg} to keep chasing the NFL.`);
+    const lg=r()<.6?'SFL':'MGL';a.stage='pro';a.dy=dy;a.lg=lg;a.team=aiPk(r,lg==='SFL'?AI_SFL:AI_MGL);a.und=true;a.cYrs=2;a.aav=.08;a.pick=0;a.rd=0;a.ovr=aiCl(a.ovr-12+aiN(r)*3,35,99);
+    e.hl=`${p.fn} ${p.ln} signs with the ${a.team} (${lg})`;e.tx.push(`Not selected in the ${dy} draft; ${p.fn} signs with the ${a.team} of the ${lg} to keep chasing the NGL.`);
   }else{
     a.stage='post';a.lg=null;a.retY=e.y;a.trk=Math.floor(r()*AI_TRK.length);e.hl=`${p.fn} ${p.ln} finishes his playing career`;
     e.tx.push(`${p.fn} works out at his pro day but does not get a pro contract. He ${AI_TRK[a.trk].s}.`);e.tg.push('Career end');
@@ -8981,18 +8992,18 @@ function aiProAwards(a,r,perf,role,gpF,tmS,injBack){
   const out=[];if(role!=='Starter'&&role!=='Rotation')return out;if(gpF<.55)return out;const off=AI_OFF.includes(a.pos),side=off?'Offensive':'Defensive';
   if(a.py===1){if(role==='Starter'&&perf>=.72&&r()<.45)out.push(`AP ${side} Rookie of the Year`);else if(perf>=.55&&r()<.7)out.push('PFWA All-Rookie Team');}
   if(perf>=.96&&r()<.2)out.push(`AP ${side} Player of the Year`);
-  if((a.pos==='QB'&&perf>=.96&&tmS.w>=11&&r()<.3)||(a.pos==='RB'&&perf>=.98&&r()<.06))out.push('AP NFL MVP');
-  if(perf>=.9&&r()<.35)out.push('First-Team All-Pro');else if(perf>=.83&&r()<.3)out.push('Second-Team All-Pro');
-  if(perf>=.78&&r()<.42)out.push('Pro Bowl');
+  if((a.pos==='QB'&&perf>=.96&&tmS.w>=11&&r()<.3)||(a.pos==='RB'&&perf>=.98&&r()<.06))out.push('AP NGL MVP');
+  if(perf>=.9&&r()<.35)out.push('First-Team All-League');else if(perf>=.83&&r()<.3)out.push('Second-Team All-League');
+  if(perf>=.78&&r()<.42)out.push('Pro All-Star');
   if(injBack&&perf>=.72&&r()<.35)out.push('AP Comeback Player of the Year');
   if(a.py>=4&&perf>=.6&&r()<.025)out.push('Walter Payton Man of the Year');
   return out;
 }
-function aiSbTeams(Y){const c=aiH('sb',Y)%32;let l=aiH('sbL',Y)%32;if(l===c)l=(l+7)%32;return{champ:AI_NFL[c],loser:AI_NFL[l]};}
+function aiSbTeams(Y){const c=aiH('sb',Y)%32;let l=aiH('sbL',Y)%32;if(l===c)l=(l+7)%32;return{champ:AI_NGL[c],loser:AI_NGL[l]};}
 function aiHof(a){return a.pb*2+a.ap1*3+(a.ap2||0)*1+a.mvp*6+a.sb*1.5+a.awl.filter(x=>/Player of the Year/.test(x.n)&&!/Comeback|Rookie/.test(x.n)).length*3+(a.py>=12?3:0);}
 function aiPro(a,p,Y,r,base){
-  const y=base+Y-1,age=18+(Y-a.gy)-1;a.py++;const lg=a.lg,nfl=lg==='NFL';aiGrow(a,r,true,age);
-  const tx=[],tg=[];let hl;const thr=nfl?80:73,gpN=nfl?17:(lg==='CFL'?18:10);
+  const y=base+Y-1,age=18+(Y-a.gy)-1;a.py++;const lg=a.lg,nfl=lg==='NGL';aiGrow(a,r,true,age);
+  const tx=[],tg=[];let hl;const thr=nfl?80:73,gpN=nfl?17:(lg==='MGL'?18:10);
   const bonus=a.pick&&a.pick<=32?5:a.pick&&a.pick<=100?2:a.und?-4:0;
   const rv=a.ovr+a.talent+bonus*(a.py<=3?1:.3)+aiN(r)*4.5;
   let role=rv>=thr?'Starter':rv>=thr-7?'Rotation':rv>=thr-15?'Backup':'Practice squad';
@@ -9009,19 +9020,19 @@ function aiPro(a,p,Y,r,base){
   let aw=[];
   if(nfl&&role!=='Practice squad'){
     aw=aiProAwards(a,r,perf,role,gpF,tmS,a.injPrev);
-    if(tmS.champ&&(role==='Starter'||role==='Rotation')&&gpF>=.4){aw.push('Super Bowl champion');a.sb++;if(role==='Starter'&&perf>=.7&&r()<.12)aw.push('Super Bowl MVP');}
-    else if(tmS.lost&&role!=='Backup')tx.push(`The ${a.team} reach the Super Bowl but lose.`);
+    if(tmS.champ&&(role==='Starter'||role==='Rotation')&&gpF>=.4){aw.push('Gridiron Bowl champion');a.sb++;if(role==='Starter'&&perf>=.7&&r()<.12)aw.push('Gridiron Bowl MVP');}
+    else if(tmS.lost&&role!=='Backup')tx.push(`The ${a.team} reach the Gridiron Bowl but lose.`);
     else if(tmS.po&&role!=='Backup')tx.push(r()<.5?`The ${a.team} make the playoffs and lose in the wild-card round.`:`The ${a.team} reach the divisional round of the playoffs.`);
   }else if(!nfl&&role==='Starter'&&perf>.8&&r()<.4){aw.push(`All-${lg} Team`);}
   aw.forEach(n=>a.awl.push({y,n}));
-  if(aw.some(n=>/Pro Bowl/.test(n)))a.pb++;if(aw.includes('First-Team All-Pro'))a.ap1++;if(aw.includes('Second-Team All-Pro'))a.ap2=(a.ap2||0)+1;if(aw.includes('AP NFL MVP'))a.mvp++;
+  if(aw.some(n=>/Pro All-Star/.test(n)))a.pb++;if(aw.includes('First-Team All-League'))a.ap1++;if(aw.includes('Second-Team All-League'))a.ap2=(a.ap2||0)+1;if(aw.includes('AP NGL MVP'))a.mvp++;
   if(aw.length)tg.push('Award');
   if(inj){a.inj.push({y,name:inj.name,sev:inj.sev});tg.push('Injury');
     if(inj.sev==='major'){tx.push(`Injury: a ${inj.name} in week ${inj.wk} lands him on injured reserve for the rest of the season.`);a.ovr=aiCl(a.ovr-1.5-r()*2.5,30,99);a.injPrev=true;}
     else{a.injPrev=false;tx.push(inj.sev==='mod'?`Injury: a ${inj.name} sidelines him for ${inj.lost} games.`:`Misses ${inj.lost} game${inj.lost>1?'s':''} with a ${inj.name}.`);}}
   else a.injPrev=false;
   const e=aiEntry(a,y,age,'pro',hl,tx,{stl:stt?stt.t:null,aw,tg,team:a.team});
-  if(aw.some(n=>/Rookie of the Year|Player of the Year|MVP|Super Bowl|First-Team All-Pro/.test(n))||(inj&&inj.sev==='major'&&role==='Starter'))e.nw=true;
+  if(aw.some(n=>/Rookie of the Year|Player of the Year|MVP|Gridiron Bowl|First-Team All-League/.test(n))||(inj&&inj.sev==='major'&&role==='Starter'))e.nw=true;
   if(stt&&a.pos==='QB'&&stt.k.yd>=4000)tx.push('Throws for over 4,000 yards.');
   if(stt&&a.pos==='RB'&&stt.k.yd>=1000)tx.push('Rushes for over 1,000 yards.');
   if(stt&&(a.pos==='WR'||a.pos==='TE')&&stt.k.yd>=1000)tx.push('Tops 1,000 receiving yards.');
@@ -9036,43 +9047,43 @@ function aiPro(a,p,Y,r,base){
   a.cYrs--;
   const fall=(role==='Practice squad'&&a.py>=2)||(role==='Backup'&&a.ovr<thr-14&&r()<.45);
   if(fall&&a.py>=2&&r()<.7){
-    if(nfl&&r()<.45&&a.ovr>=58){a.lg=r()<.6?'UFL':'CFL';a.team=aiPk(r,a.lg==='UFL'?AI_UFL:AI_CFL);e.tx.push(`Released by the NFL club; signs with the ${a.team} of the ${a.lg}.`);e.tg.push('Transfer');}
+    if(nfl&&r()<.45&&a.ovr>=58){a.lg=r()<.6?'SFL':'MGL';a.team=aiPk(r,a.lg==='SFL'?AI_SFL:AI_MGL);e.tx.push(`Released by the NGL club; signs with the ${a.team} of the ${a.lg}.`);e.tg.push('Transfer');}
     else return aiRetire(a,p,e,r,y,age,'is released and cannot find another roster spot');
-  }else if(!nfl&&role==='Starter'&&perf>.78&&r()<.45){const t=aiPk(r,AI_NFL);a.lg='NFL';a.team=t;a.cYrs=2;a.aav=1.1;e.tx.push(`His ${lg} play earns an NFL contract with the ${t}.`);e.tg.push('Transfer');e.nw=true;}
+  }else if(!nfl&&role==='Starter'&&perf>.78&&r()<.45){const t=aiPk(r,AI_NGL);a.lg='NGL';a.team=t;a.cYrs=2;a.aav=1.1;e.tx.push(`His ${lg} play earns an NGL contract with the ${t}.`);e.tg.push('Transfer');e.nw=true;}
   else if(nfl&&a.optn&&a.py===3&&role==='Starter'&&perf>.6){a.cYrs+=1;a.optn=false;e.tx.push(`The ${a.team} pick up his fifth-year option.`);}
   else if(nfl&&a.cYrs===1&&role==='Starter'&&perf>=.7&&r()<.6){const aav=aiLp(AI_AAV[a.pos]||[2,20],aiCl(perf*1.05-.05,.15,1)),yrs=aiRi(r,3,5),gtd=Math.round(aav*yrs*(.4+r()*.25));a.cYrs+=yrs;a.aav=aav;e.tx.push(`Signs a ${yrs}-year extension with the ${a.team}: about ${aiMoney(aav*yrs)} (${aiMoney(aav)} per year, ${aiMoney(gtd)} guaranteed).`);e.nw=e.nw||aav>=(AI_AAV[a.pos]||[0,20])[1]*.8;}
   else if(a.cYrs<=0){
     const star=role==='Starter'&&perf>=.55;
     if(nfl&&star&&perf>=.85&&r()<.25){a.cYrs=1;a.aav=aiLp(AI_AAV[a.pos]||[2,20],.85);e.tx.push(`The ${a.team} use the franchise tag on him (about ${aiMoney(a.aav)} for one year).`);}
     else if(star&&r()<.8){const aav=aiLp(AI_AAV[a.pos]||[2,20],aiCl(perf*1.05-.05,.1,1)),yrs=aiRi(r,2,5),gtd=Math.round(aav*yrs*(.35+r()*.25));a.cYrs=yrs;a.aav=aav;
-      if(r()<.4){a.team=aiPk(r,AI_NFL.filter(t=>t!==a.team));if(!nfl){a.lg='NFL';}e.tx.push(`Hits free agency and signs with the ${a.team}: ${yrs} years, about ${aiMoney(aav*yrs)} (${aiMoney(gtd)} guaranteed).`);e.tg.push('Transfer');e.nw=e.nw||perf>=.8;}
+      if(r()<.4){a.team=aiPk(r,AI_NGL.filter(t=>t!==a.team));if(!nfl){a.lg='NGL';}e.tx.push(`Hits free agency and signs with the ${a.team}: ${yrs} years, about ${aiMoney(aav*yrs)} (${aiMoney(gtd)} guaranteed).`);e.tg.push('Transfer');e.nw=e.nw||perf>=.8;}
       else e.tx.push(`Re-signs with the ${a.team}: ${yrs} years, about ${aiMoney(aav*yrs)} (${aiMoney(gtd)} guaranteed).`);}
-    else if(r()<.65){a.cYrs=aiRi(r,1,2);a.aav=1.2+r()*2;if(r()<.5){const t=aiPk(r,AI_NFL.filter(t=>t!==a.team));a.team=t;e.tx.push(`Signs a ${a.cYrs}-year veteran deal with the ${t}.`);e.tg.push('Transfer');}else e.tx.push('Re-signs on a short-term deal.');}
+    else if(r()<.65){a.cYrs=aiRi(r,1,2);a.aav=1.2+r()*2;if(r()<.5){const t=aiPk(r,AI_NGL.filter(t=>t!==a.team));a.team=t;e.tx.push(`Signs a ${a.cYrs}-year veteran deal with the ${t}.`);e.tg.push('Transfer');}else e.tx.push('Re-signs on a short-term deal.');}
     else return aiRetire(a,p,e,r,y,age,'is not re-signed and decides to step away');
-  }else if(nfl&&role==='Starter'&&a.py>=3&&r()<.05){const t=aiPk(r,AI_NFL.filter(t=>t!==a.team));e.tx.push(`Traded from the ${a.team} to the ${t}${r()<.5?' for a draft pick':' in a player swap'}.`);a.team=t;e.tg.push('Transfer');e.nw=true;}
+  }else if(nfl&&role==='Starter'&&a.py>=3&&r()<.05){const t=aiPk(r,AI_NGL.filter(t=>t!==a.team));e.tx.push(`Traded from the ${a.team} to the ${t}${r()<.5?' for a draft pick':' in a player swap'}.`);a.team=t;e.tg.push('Transfer');e.nw=true;}
   else if(nfl&&role==='Starter'&&a.py>=5&&r()<.08)e.tx.push('Voted a team captain.');
   return e;
 }
 function aiRetire(a,p,e,r,y,age,why){
   a.stage='post';a.retY=y;const s=aiTot(a.pos,a.pt);
   e.hl=`${p.fn} ${p.ln} ${why.startsWith('announces')?'retires':'ends his career'}`;e.tg.push('Retirement');e.nw=a.pb>0||a.py>=6;
-  e.tx.push(`${p.fn} ${why} after ${a.py} season${a.py!==1?'s':''} in ${a.lg==='NFL'?'the NFL':'pro football'} (age ${age}).`);if(s)e.tx.push(`Career line: ${s}.`);
-  const hi=[];if(a.pb)hi.push(`${a.pb} Pro Bowl${a.pb>1?'s':''}`);if(a.ap1)hi.push(`${a.ap1}x First-Team All-Pro`);if(a.sb)hi.push(`${a.sb} Super Bowl title${a.sb>1?'s':''}`);if(a.mvp)hi.push(`${a.mvp>1?a.mvp+'x ':''}NFL MVP`);
+  e.tx.push(`${p.fn} ${why} after ${a.py} season${a.py!==1?'s':''} in ${a.lg==='NGL'?'the NGL':'pro football'} (age ${age}).`);if(s)e.tx.push(`Career line: ${s}.`);
+  const hi=[];if(a.pb)hi.push(`${a.pb} Pro All-Star${a.pb>1?'s':''}`);if(a.ap1)hi.push(`${a.ap1}x First-Team All-League`);if(a.sb)hi.push(`${a.sb} Gridiron Bowl title${a.sb>1?'s':''}`);if(a.mvp)hi.push(`${a.mvp>1?a.mvp+'x ':''}NGL MVP`);
   if(hi.length)e.tx.push('Honors: '+hi.join(', ')+'.');
   a.trk=Math.floor(r()*AI_TRK.length);e.tx.push(`${p.fn} ${AI_TRK[a.trk].s}.`);return e;
 }
 function aiPostY(a,p,Y,r,base){
   const y=base+Y-1,age=18+(Y-a.gy)-1;a.post++;let hl,tx=[],nw=false;const tg=[];const hs=aiHof(a),trk=AI_TRK[a.trk==null?0:a.trk];
   const yrsRet=a.retY!=null?y-a.retY:a.post;
-  if(a.py&&a.lg==='NFL'&&!a.canton&&yrsRet>=5&&yrsRet<=25&&hs>=26){
+  if(a.py&&a.lg==='NGL'&&!a.canton&&yrsRet>=5&&yrsRet<=25&&hs>=26){
     const first=yrsRet===5,pr=hs>=46?(first?.8:.9):hs>=36?(first?.2:.3):hs>=30?.1:.03;
-    if(r()<pr){a.canton=y+1;hl=`${p.fn} ${p.ln} elected to the Pro Football Hall of Fame`;tx=[first?`A first-ballot Hall of Famer: ${p.fn} is voted into Canton in his first year of eligibility (Class of ${y+1}).`:`After ${yrsRet-4} years on the ballot, ${p.fn} is voted into the Pro Football Hall of Fame (Class of ${y+1}).`];tg.push('Hall of Fame');nw=true;}
-    else{hl=`${p.fn} ${p.ln} named a Hall of Fame ${hs>=34?'finalist':'semifinalist'}`;tx=[`${p.fn} is a ${hs>=34?'finalist':'semifinalist'} for the Pro Football Hall of Fame but falls short this year.`];}
+    if(r()<pr){a.canton=y+1;hl=`${p.fn} ${p.ln} elected to the Gridiron Hall of Fame`;tx=[first?`A first-ballot Hall of Famer: ${p.fn} is voted into the Gridiron Hall of Fame in his first year of eligibility (Class of ${y+1}).`:`After ${yrsRet-4} years on the ballot, ${p.fn} is voted into the Gridiron Hall of Fame (Class of ${y+1}).`];tg.push('Hall of Fame');nw=true;}
+    else{hl=`${p.fn} ${p.ln} named a Hall of Fame ${hs>=34?'finalist':'semifinalist'}`;tx=[`${p.fn} is a ${hs>=34?'finalist':'semifinalist'} for the Gridiron Hall of Fame but falls short this year.`];}
   }else if(a.aa1>=1&&!a.cfh&&a.colEnd&&y-a.colEnd>=10&&a.stage==='post'&&r()<aiCl(.004+a.aa1*.009+(a.hei?.05:0),0,.08)){
     a.cfh=y;hl=`${p.fn} ${p.ln} enters the College Football Hall of Fame`;tx=[`The former ${a.school} star is inducted into the College Football Hall of Fame in Atlanta.`];tg.push('Hall of Fame');nw=true;
   }else{hl=`${p.fn} ${p.ln}: life after football`;const l=trk.y[a.post-1];tx=[l?`${p.fn} ${l}.`:`${p.fn} stays active in the game as a respected alumnus.`];if(r()<.2)tx.push('Visits his old high school to talk with the current team.');}
   const doneAt=Math.min(8,trk.y.length+1);
-  if(a.post>=doneAt&&!(a.py&&a.lg==='NFL'&&hs>=26&&!a.canton&&yrsRet<25)&&!(a.aa1&&!a.cfh&&a.colEnd&&y-a.colEnd<12)){a.done=true;tx.push(`${p.fn} remains a legend of the program.`);}
+  if(a.post>=doneAt&&!(a.py&&a.lg==='NGL'&&hs>=26&&!a.canton&&yrsRet<25)&&!(a.aa1&&!a.cfh&&a.colEnd&&y-a.colEnd<12)){a.done=true;tx.push(`${p.fn} remains a legend of the program.`);}
   if(a.post>=30)a.done=true;
   return aiEntry(a,y,age,'post',hl,tx,{tg,nw});
 }
@@ -9099,7 +9110,7 @@ function aiProject(p,N){
   for(let i=0;i<N;i++){
     const q=Object.assign({},p,{gradYr:1,committed:{lvl,school:school||'Projection'}}),a=aiNew(q);a.talent=aiN(aiRng(aiH('pt',p.id,i)))*2.2;
     for(let Y=1;Y<=8&&a.stage==='college';Y++){try{aiStep(a,q,Y,2026,'proj'+i);}catch(e){break;}}
-    if(a.lg==='NFL'){nfl++;if(a.pick){nd++;if(a.rd===1)n1++;}}
+    if(a.lg==='NGL'){nfl++;if(a.pick){nd++;if(a.rd===1)n1++;}}
   }
   return{lvl,pDraft:nd/N,pR1:n1/N,pNfl:nfl/N};
 }
@@ -9178,8 +9189,8 @@ function aiCareerCard(p,compact){
     <div style="font-size:13px;font-weight:700;margin:6px 0 8px">${aiStageLbl(a)} &middot; ${aiStatus(a)}</div>
     ${sumRow('College totals',ct)}${sumRow('Pro totals',pt)}
     ${sumRow('Transfers',a.tr?String(a.tr):'')}${sumRow('Major injuries',maj?String(maj):'')}
-    ${sumRow('Pro Bowls / All-Pro / Super Bowls',a.lg==='NFL'||a.py?`${a.pb} / ${a.ap1} / ${a.sb}`:'')}
-    ${a.canton?`<div style="margin:6px 0">${aiChip('Pro Football Hall of Fame, Class of '+a.canton,'var(--gd)')}</div>`:''}
+    ${sumRow('Pro All-Stars / All-League / Gridiron Bowls',a.lg==='NGL'||a.py?`${a.pb} / ${a.ap1} / ${a.sb}`:'')}
+    ${a.canton?`<div style="margin:6px 0">${aiChip('Gridiron Hall of Fame, Class of '+a.canton,'var(--gd)')}</div>`:''}
     ${awH?`<div style="margin:6px 0 4px">${awH}</div>`:''}
     <div style="margin-top:8px">${tl}</div></div>`;
 }
@@ -9194,7 +9205,7 @@ function aiHofFeed(){
   rows.sort((p,q)=>q.e.y-p.e.y||(q.e.nw?1:0)-(p.e.nw?1:0));
   const top=rows.slice(0,6).map(r=>`<div style="padding:7px 0;border-top:1px solid var(--bd);cursor:pointer" onclick="showPlayer(${r.x.id})"><span style="font-weight:800;color:var(--gd);font-size:11px">${r.e.y}</span> <span style="font-size:12px">${r.e.hl}</span></div>`).join('');
   return`<div style="border:1px solid var(--bd);background:var(--s2);padding:12px 14px;margin-bottom:14px">
-    <div style="font-weight:900;font-size:13px;margin-bottom:6px">Alumni news <span style="font-weight:400;font-size:11px;color:var(--mu)">${col} in college, ${pro} in pro football, ${ret} finished${can?', '+can+' in Canton':''}</span></div>${top}</div>`;
+    <div style="font-weight:900;font-size:13px;margin-bottom:6px">Alumni news <span style="font-weight:400;font-size:11px;color:var(--mu)">${col} in college, ${pro} in pro football, ${ret} finished${can?', '+can+' in the Gridiron Hall of Fame':''}</span></div>${top}</div>`;
 }
 // ───────── Advisor ─────────
 const AI_OFFP=['QB','RB','WR','TE','OL','K'];
@@ -9318,7 +9329,7 @@ function rkCompute(){
   if(_RK&&_RK.key===key&&_RK.G===G)return _RK;
   if(_RK&&_RK.G===G&&_RK.key!==key)G.rkPrev={c:_RK.cMap,a:_RK.aMap,n:_RK.nMap,yr:_RK.yr};
   if(G.rkPrev&&G.rkPrev.yr!==G.yr)G.rkPrev=null;
-  // Resume-style model (like MaxPreps/AP): results and schedule strength drive it, talent matters most early,
+  // Resume-style model (like the prep polls): results and schedule strength drive it, talent matters most early,
   // and classification only nudges cross-class comparisons instead of deciding them.
   const rows=all.map(s=>{const g=(s.wins||0)+(s.losses||0);return{s,id:s.id,st:stOf(s),ov:teamOvr(s.id),g,w:s.wins||0,l:s.losses||0,wpa:((s.wins||0)+2)/(g+4),pr:s.prestige||1};});
   const byC={};rows.forEach(r=>{(byC[r.s.cls]=byC[r.s.cls]||[]).push(r);});
@@ -9396,7 +9407,7 @@ function pgRank(){
   return`<div data-norank><div class="pnl"><div class="ph">Rankings <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${title} · ${G.phase==='offseason'?'preseason':'week '+(G.week||0)}</span></div><div class="pb">
     <div>${btn('NAT','National')}${ST_ORDER.map(k=>btn(k==='CF'?'ALL':'ST:'+k,'All-'+stName(k))).join('')}</div>
     ${clsBtns?`<div>${clsBtns}</div>`:''}
-    <div style="font-size:12px;color:var(--mu);margin:4px 0 4px">Next to team names, <span class="rkb rk-n" style="cursor:default">#2</span> in blue is the national rank and <span class="rkb rk-a" style="cursor:default">#3</span> in gold the rank in the team's own state. The national rank is shown first; tap a badge to switch.</div><div style="font-size:12px;color:var(--mu);margin:0 0 10px">Like MaxPreps and the AP poll, rankings are driven by results: record, strength of schedule and unbeaten or one-loss seasons, with team talent weighing most in the preseason and early weeks. The national poll measures every team on one scale, so the stronger Crestfield classes carry more weight than the neighbor states. The top two teams in the final national poll play for the National Championship.</div>
+    <div style="font-size:12px;color:var(--mu);margin:4px 0 4px">Next to team names, <span class="rkb rk-n" style="cursor:default">#2</span> in blue is the national rank and <span class="rkb rk-a" style="cursor:default">#3</span> in gold the rank in the team's own state. The national rank is shown first; tap a badge to switch.</div><div style="font-size:12px;color:var(--mu);margin:0 0 10px">Like the national prep rankings and media polls, rankings are driven by results: record, strength of schedule and unbeaten or one-loss seasons, with team talent weighing most in the preseason and early weeks. The national poll measures every team on one scale, so the stronger Crestfield classes carry more weight than the neighbor states. The top two teams in the final national poll play for the National Championship.</div>
     ${natBox}
     <div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>Rk</th><th></th><th>Team</th><th>Record</th><th>Rating</th><th>Prestige</th><th>Pts</th></tr></thead><tbody>${top}</tbody></table></div>
     ${others?`<div style="font-size:11px;color:var(--mu);margin-top:10px"><b>Also considered:</b> ${others}</div>`:''}</div></div></div>`;
@@ -9717,6 +9728,7 @@ function gdTeam(s,kind,kitOv,opt){
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
   for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);
+  if(u.shoulder&&u.shoulder!=='none')for(const q of roster){q.eq=q.eq||{};q.eq.shoulder={mode:u.shoulder,c:u.shoulderC||u.trim};}
   const pack={helmet:kit.helmet,helmetStripe:kit.hstripe,helmetLogo:kit.hstripe,facemask:kit.mask,jersey:kit.jersey,jerseyTrim:kit.trim,pants:kit.pants,pantsStripe:kit.pstripe,belt:'#1d1d22',socks:kit.sock,sockStripe:kit.trim,cleats:kit.cleat,cleatAccent:kit.trim,gloves:kit.glove,number:kit.num,numberTrim:_gdLum(kit.jersey)>.6?null:'#f4f4f4',armSleeve:'skin'};
   const logo=sLogoStandalone(s,100),inner=logo.slice(logo.indexOf('>')+1,logo.lastIndexOf('</svg>')),c1=s.c1||'#1d3557';
   let pb=null,dpb=null,coachSkin='#c68a5e';try{pb=pbForTeam(s,'off');dpb=pbForTeam(s,'def');}catch(e){}
@@ -9869,7 +9881,7 @@ function uniDefault(s,kind){
     return{helmet:c3,hstripe:c1,mask:_gdLum(c1)>.5?c1:'#9aa3ad',jersey:j,trim:t,num:Math.abs(_gdLum(j)-_gdLum(c1))>.3?c1:(_gdLum(j)>.5?'#111111':'#ffffff'),pants:c3,pstripe:c1,sock:j,cleat:'#151a22'};}
   const k=gdKit(s,kind!=='away');return{helmet:k.helmet,hstripe:k.hstripe,mask:k.mask,jersey:k.jersey,trim:k.trim,num:k.num,pants:k.pants,pstripe:k.pstripe,sock:k.sock,cleat:k.cleat};
 }
-function uniOf(s,kind){const u=(s&&s.uni&&s.uni[kind])||null;return Object.assign(uniDefault(s,kind),u||{});}
+function uniOf(s,kind){const u=(s&&s.uni&&s.uni[kind])||null;const o=Object.assign(uniDefault(s,kind),u||{});if(!o.shoulder)o.shoulder='none';if(!o.shoulderC)o.shoulderC=o.trim;return o;}
 function uniSvg(k,num,w){
   w=w||120;const n=String(num==null?'7':num);
   return`<svg width="${w}" height="${Math.round(w*1.45)}" viewBox="0 0 100 145" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -9880,6 +9892,7 @@ function uniSvg(k,num,w){
   <path d="M33,80 L35,104 M67,80 L65,104" stroke="${k.pstripe}" stroke-width="3"/>
   <path d="M28,40 Q50,32 72,40 L86,58 L76,66 L70,58 L69,80 L31,80 L30,58 L24,66 L14,58Z" fill="${k.jersey}"/>
   <path d="M14,58 L24,66 M86,58 L76,66" stroke="${k.trim}" stroke-width="4"/>
+  ${k.shoulder&&k.shoulder!=='none'?({single:[0.42],double:[0.32,0.52],triple:[0.28,0.42,0.56]}[k.shoulder]||[]).map(a=>`<path d="M${(14+14*a).toFixed(1)},${(58-18*a).toFixed(1)} L${(24+12*a).toFixed(1)},${(66-16*a).toFixed(1)} M${(86-14*a).toFixed(1)},${(58-18*a).toFixed(1)} L${(76-12*a).toFixed(1)},${(66-16*a).toFixed(1)}" stroke="${k.shoulderC||k.trim}" stroke-width="2.6"/>`).join(''):''}
   <path d="M42,36 Q50,44 58,36" fill="none" stroke="${k.trim}" stroke-width="3"/>
   <text x="50" y="72" text-anchor="middle" font-size="24" font-weight="900" font-family="Arial,sans-serif" fill="${k.num}" stroke="${k.trim}" stroke-width="1" paint-order="stroke">${n}</text>
   <path d="M30,22 C30,6 70,6 70,22 L70,30 Q50,38 30,30Z" fill="${k.helmet}"/>
@@ -9911,6 +9924,9 @@ function uniEditorHtml(){
         <label style="font-size:12px;color:var(--mu)">Tertiary <input type="color" value="${teamC3(ms)}" onchange="uniSetC3(this.value)" style="width:46px;height:30px;padding:0;border-radius:8px;vertical-align:middle"></label></div>
       <div class="tabs" style="margin-bottom:12px">${tabs}</div>
       ${rows}
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">Shoulder stripes</label>
+        <select onchange="uniSet('${kind}','shoulder',this.value);pbRerender()" style="padding:5px 8px;border-radius:8px">${[['none','None'],['single','Single stripe'],['double','Double stripe'],['triple','Triple stripe']].map(([v,l])=>`<option value="${v}"${(u.shoulder||'none')===v?' selected':''}>${l}</option>`).join('')}</select>
+        <input type="color" value="${u.shoulderC||u.trim}" oninput="uniSet('${kind}','shoulderC',this.value)" style="width:46px;height:34px;padding:0;border-radius:8px;cursor:pointer" title="Stripe color"></div>
       <button class="bgh bsm" onclick="uniReset('${kind}')">Reset this uniform to team colors</button>
       <div style="font-size:11px;color:var(--mu);margin-top:8px">Pick any color with the color picker or tap a swatch. You choose which uniform to wear before every game you play.</div>
     </div></div>`;
@@ -10453,8 +10469,9 @@ function clsEq(c){return XCLS[c]?XCLS[c].eq:(CLS_SZ[c]?c:'3A');}
 function clsNum(c){return c==='INTL'?3:+clsEq(c)[0];}
 function clsSt(c){return XCLS[c]?XCLS[c].st:c==='INTL'?'INTL':c==='OOS'?'OOS':'CF';}
 function stOf(s){return s?clsSt(s.cls||G.cls):'CF';}
-function stName(st){return st==='CF'?'Crestfield':XST[st]?XST[st].name:st==='INTL'?'International':'Out of State';}
-function clsName(c){return XCLS[c]?`${XST[XCLS[c].st].name} ${XCLS[c].lbl}`:c==='INTL'?'International':c==='OOS'?'Out of State':`Crestfield ${c}`;}
+let CF_NAME='Crestfield';
+function stName(st){return st==='CF'?CF_NAME:XST[st]?XST[st].name:st==='INTL'?'International':'Out of State';}
+function clsName(c){return XCLS[c]?`${XST[XCLS[c].st].name} ${XCLS[c].lbl}`:c==='INTL'?'International':c==='OOS'?'Out of State':`${CF_NAME} ${c}`;}
 function clsOfSt(st){return st==='CF'?CLS_ORDER.slice():XST[st]?XST[st].cls.slice():[];}
 function myClsOrder(){return clsOfSt(clsSt(G.cls));}
 function makeDivsAny(c){return XCLS[c]?makeStateDivisions(c):makeDivisions(c);}
@@ -11184,7 +11201,7 @@ function fpAdvHtml(){const g=FP.store.god;
     <label style="display:flex;align-items:center;gap:10px;font-weight:800;margin-bottom:10px"><input type="checkbox" ${g.on?'checked':''} onchange="FP.store.god.on=this.checked;fpSave();fpRender()"> God mode</label>
     <div style="font-size:12px;color:var(--mu);margin-bottom:12px">Only for Free Practice, never in your career. Applies to your team in every mode.</div>
     <div style="${g.on?'':'opacity:.45;pointer-events:none'}">
-      <div style="margin-bottom:12px"><b style="font-size:13px">Pick the catch</b><div style="font-size:12px;color:var(--mu)">Before each offensive play, the call screen shows a <b>God mode catch</b> menu. Choose hands, over the shoulder, moss, one-handed OBJ, toe tap, sliding, diving and more: your receiver makes that catch every time he gets to the ball. "Normal" keeps regular catching.</div></div>
+      <div style="margin-bottom:12px"><b style="font-size:13px">Pick the catch</b><div style="font-size:12px;color:var(--mu)">Before each offensive play, the call screen shows a <b>God mode catch</b> menu. Choose hands, over the shoulder, over the top, one-handed fingertip, toe tap, sliding, diving and more: your receiver makes that catch every time he gets to the ball. "Normal" keeps regular catching.</div></div>
       <label style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><input type="checkbox" ${g.picks?'checked':''} onchange="FP.store.god.picks=this.checked;fpSave()"> <span><b style="font-size:13px">Guaranteed interceptions</b><br><span style="font-size:12px;color:var(--mu)">When the other team throws, your nearest defender breaks on the ball and picks it off.</span></span></label>
       <label style="font-size:13px;font-weight:800">Skill move cooldowns <select onchange="FP.store.god.cd=+this.value;fpSave()">${cds.map(([v,l])=>`<option value="${v}"${g.cd===v?' selected':''}>${l}</option>`).join('')}</select></label>
       <div style="font-size:12px;color:var(--mu)">Shorter waits between jukes, spins, stiff arms, trucks and hurdles for your ball carrier.</div>
@@ -12592,11 +12609,11 @@ function commitNow(pid){const p=getP(pid);if(!p)return;const sel=document.getEle
 const EQ_COLORS=[['c1','Team primary'],['c2','Team secondary'],['#ffffff','White'],['#16181d','Black'],['#8d939b','Gray'],['#c8102e','Red'],['#1d4fb8','Blue'],['#3fd0ff','Light blue'],['#f2b632','Gold'],['#ff7a1a','Orange'],['#39e639','Neon green'],['#ff5fa8','Pink'],['#6b2fb8','Purple']];
 const EQ_SLEEVE=[['none','None'],['one','One arm'],['both','Both arms']];
 const EQ_BAND=[['none','None'],['wrist1','One wrist'],['wrist2','Both wrists'],['bicep','Biceps']];
-const EQ_UNDER=[['none','None'],['long','Long sleeve'],['quarter','Quarter sleeve'],['jamo','Jamo (baggy, untucked)']];
+const EQ_UNDER=[['none','None'],['long','Long sleeve'],['quarter','Quarter sleeve'],['jamo','Baggy (untucked)']];
 function eqDefault(p){
   const id=p.id!=null?p.id:(p.fs||0),h=n=>((id*2654435761+n*40503)>>>0)%1000/1000,pos=p.pos||'WR',skill=['QB','RB','WR','TE','CB','S'].includes(pos),line=pos==='OL'||pos==='DL';
   const pick=(a,r)=>a[Math.floor(r*a.length)%a.length];
-  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false};
+  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:''};
   if(h(21)<(['WR','CB','S','RB','LB'].includes(pos)?0.22:pos==='QB'?0.12:0.08))e.visor=pick(['smoke','smoke','black','clear','gold','blue'],h(22));
   if(h(23)<(skill?0.14:0.05)){e.legS=h(24)<0.55?'one':'both';e.legSC=pick(['#16181d','#ffffff','c1'],h(25));}
   if(['WR','RB','CB','S','LB'].includes(pos)&&h(26)<0.14)e.crop=true;
@@ -12616,9 +12633,10 @@ const EQ_VISOR={clear:'#a9bccd',smoke:'#3a414c',black:'#14171c',gold:'#d9a520',b
 function eqCol(c,s){return c==='c1'?(s&&s.c1)||'#1d3557':c==='c2'?(s&&s.c2)||'#ffffff':c;}
 function eqResolve(e,s){if(!e)return null;const C=c=>eqCol(c,s);
   return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,
+    helm:{shell:e.hShell||'gloss',stripe:e.hStripe||'team',mask:e.hMask?C(e.hMask):''},
     pants:e.pants||'knee',socks:e.socks||'high',visor:e.visor?EQ_VISOR[e.visor]||null:null,legS:{mode:e.legS||'none',c:C(e.legSC||'#16181d')},crop:!!e.crop,sleeve:{mode:e.sleeve||'none',c:C(e.sleeveC||'#16181d')},band:{mode:e.band||'none',c:C(e.bandC||'#ffffff')},under:{mode:e.under||'none',c:C(e.underC||'#8d939b')}};}
-function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push('mouthpiece');if(e.sleeve!=='none')o.push(e.sleeve==='one'?'arm sleeve':'arm sleeves');
-  if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Jamo'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
+function eqDesc(e){const o=[];if(e.hShell&&e.hShell!=='gloss')o.push(e.hShell+' helmet');if(e.hStripe==='none')o.push('no helmet stripe');if(e.hMask)o.push('custom facemask');if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push('mouthpiece');if(e.sleeve!=='none')o.push(e.sleeve==='one'?'arm sleeve':'arm sleeves');
+  if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Baggy'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
 // colour picker: presets plus any custom colour
 function eqColHtml(id,val,none){const pre=EQ_COLORS.some(c=>c[0]===val)||(none&&!val);const hex=/^#/.test(val||'')?val:'#ffffff';
   return`<span style="display:inline-flex;gap:4px;align-items:center"><select class="ei" id="${id}" onchange="eqPrev()" style="width:auto;min-width:0;padding:4px 6px">${none?`<option value=""${!val?' selected':''}>${none}</option>`:''}${EQ_COLORS.map(([v,l])=>`<option value="${v}"${v===val?' selected':''}>${l}</option>`).join('')}<option value="custom"${pre?'':' selected'}>Custom…</option></select><input type="color" id="${id}-x" value="${hex}" oninput="document.getElementById('${id}').value='custom';eqPrev()" style="width:34px;height:30px;padding:0;border:0;background:none"></span>`;}
@@ -12640,17 +12658,20 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         ${row('Leg sleeves',eqSel('eq-ls',[['none','None'],['one','One leg'],['both','Both legs']],e.legS||'none')+eqColHtml('eq-lsc',e.legSC||'#16181d'))}
         ${row('Visor',eqSel('eq-vi',[['','None'],['clear','Clear'],['smoke','Smoke'],['black','Black'],['gold','Gold mirror'],['blue','Blue mirror'],['red','Red mirror'],['purple','Purple mirror']],e.visor||''))}
         ${row('Jersey',eqSel('eq-cr',[['0','Regular'],['1','Cropped (undershirt / back plate shows)']],e.crop?'1':'0'))}
+        ${row('Helmet finish',eqSel('eq-hs',[['gloss','Gloss'],['matte','Matte'],['chrome','Chrome']],e.hShell||'gloss'))}
+        ${row('Helmet stripe',eqSel('eq-ht',[['team','Team stripe'],['none','No stripe']],e.hStripe||'team'))}
+        ${row('Facemask',eqColHtml('eq-hm',e.hMask||'','Uniform default'))}
         ${p.pos==='QB'?'<div style="font-size:11px;color:var(--mu);margin:-2px 0 6px 100px">Quarterbacks throw bare-handed (no gloves in Game Day).</div>':''}
         <button class="bgh bxs" onclick="eqRandom(${p.id})">Randomize</button> <button class="bgh bxs" onclick="eqClear()">Plain</button></div>
       <div style="flex:0 0 auto;text-align:center"><canvas id="eq-cv" width="330" height="210" style="width:330px;max-width:100%;height:auto;border-radius:10px;background:linear-gradient(#2f7d33,#25692a);image-rendering:pixelated"></canvas>
         <div style="font-size:11px;color:var(--mu)">Shows on the field in Game Day</div></div></div></div>`;}
 function eqRead(){const g=id=>document.getElementById(id);if(!g('eq-tw'))return null;
   return{towel:g('eq-tw').value==='1',towelC:eqColRead('eq-twc')||'#ffffff',glove:eqColRead('eq-gl'),cleat:eqColRead('eq-cl'),mouth:eqColRead('eq-mo'),
-    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false};}
+    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||''};}
 function eqSetForm(e){const g=id=>document.getElementById(id),sc=(id,v)=>{const s=g(id);if(!s)return;if([...s.options].some(o=>o.value===v))s.value=v;else{s.value='custom';g(id+'-x').value=v;}};
-  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';eqPrev();}
+  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');eqPrev();}
 function eqRandom(pid){const p=getP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
-function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false});}
+function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:''});}
 // the same pixel sprites as Game Day, loaded once from the embedded game for the preview
 let _eqLibP=null;
 function eqLib(){
@@ -12960,7 +12981,9 @@ function applySaveText(txt){
         }
         // v2.06: the old star ratings become the scouts' grade; national star ratings are set from the current classes
         try{bodyMigrate();}catch(e){console.error('bodies',e);}
+        try{worldApply(G.world||{});}catch(e){console.error('league setup',e);}
         try{colMigrate();}catch(e){console.error('colleges',e);}
+        try{proMigrate();}catch(e){console.error('pro names',e);}
         try{colMigrate3();}catch(e){console.error('colleges v3',e);}
         if(G.players.some(p=>p.sg===undefined)){G._thr=null;for(const p of G.players)if(p.sg===undefined){p.sg=p.stars||0;p.stars=p.grad?(p.stars||0):natTarget(p);}}
         for(const p of (G.hofArchive||[]))_migrateArchivedPlayer(p);
@@ -14325,8 +14348,107 @@ function onDiv(){
 document.getElementById('s-div').addEventListener('change',onDiv);
 function onSch(){}
 
+// ═══════════ v2.14 LEAGUE SETUP: rename states and counties, edit colleges, pro teams, divisions, star counts and class sizes ═══════════
+// The edits live on this device (and are copied into every career you start, so a save always keeps its own world).
+const WORLD_KEY='gpgm_world';let _worldOrig=null,WORLD={};
+function worldOrig(){
+  if(_worldOrig)return _worldOrig;
+  const st={CF:'Crestfield'};for(const k in XST)st[k]=XST[k].name;const cn={};for(const c of MAPC)cn[c.id]=c.name;
+  const sz={};for(const c of CLS_ORDER)sz[c]={t:CLS_SZ[c].t,d:CLS_SZ[c].d};for(const c in XCLS)sz[c]={t:XCLS[c].t,d:XCLS[c].d};
+  const cp=o=>JSON.parse(JSON.stringify(o));
+  return _worldOrig={states:st,counties:cn,colleges:{FBS:D1FBS.slice(),FCS:D1FCS.slice(),D2:D2.slice(),D3:D3.slice(),NAIA:NAIA.slice(),JUCO:JUCO.slice()},
+    pro:{NGL:AI_NGL.slice(),SFL:AI_SFL.slice(),MGL:AI_MGL.slice()},divs:cp(DIV_NAMES),xdivs:cp(XDIV_NAMES),size:sz,stars:Object.assign({},NAT_STARS),colRng:cp(COL_CLS_RNG),hsQ:cp(COL_HS_Q)};
+}
+function worldLoad(){try{return JSON.parse(localStorage.getItem(WORLD_KEY)||'null')||{};}catch(e){return{};}}
+function worldStore(W){try{localStorage.setItem(WORLD_KEY,JSON.stringify(W||{}));}catch(e){notify('Could not save League Setup on this device','e');}}
+const _setArr=(a,b)=>{a.length=0;for(const x of b)a.push(x);};
+function worldApply(W){
+  W=W&&typeof W==='object'?W:{};const O=worldOrig();WORLD=W;
+  const S=W.states||{};CF_NAME=S.CF||O.states.CF;for(const k in XST)XST[k].name=S[k]||O.states[k];
+  for(const k in MAP_STATES)MAP_STATES[k].name=stName(k);
+  const C=W.counties||{};for(const c of MAPC)c.name=C[c.id]||O.counties[c.id];
+  const CL=W.colleges||{},L=(k,a)=>_setArr(a,CL[k]&&CL[k].length>=3?CL[k]:O.colleges[k]);
+  L('FBS',D1FBS);L('FCS',D1FCS);L('D2',D2);L('D3',D3);L('NAIA',NAIA);L('JUCO',JUCO);buildColleges();try{aiConfRebuild();}catch(e){}
+  const PR=W.pro||{};_setArr(AI_NGL,PR.NGL&&PR.NGL.length>=4?PR.NGL:O.pro.NGL);_setArr(_STORY_DRAFT_TEAMS,AI_NGL);
+  _setArr(AI_SFL,PR.SFL&&PR.SFL.length>=2?PR.SFL:O.pro.SFL);_setArr(AI_MGL,PR.MGL&&PR.MGL.length>=2?PR.MGL:O.pro.MGL);
+  for(const k in O.divs)_setArr(DIV_NAMES[k],(W.divs&&W.divs[k])||O.divs[k]);
+  for(const k in O.xdivs)_setArr(XDIV_NAMES[k],(W.xdivs&&W.xdivs[k])||O.xdivs[k]);
+  for(const c in O.size){const z=(W.size&&W.size[c])||O.size[c],T=CLS_SZ[c]||XCLS[c];if(T){T.t=clamp(Math.round(z.t)||O.size[c].t,8,160);T.d=clamp(Math.round(z.d)||O.size[c].d,1,16);T.d=Math.min(T.d,Math.floor(T.t/4));}}
+  Object.assign(NAT_STARS,O.stars,W.stars||{});
+  const cm=clamp(+W.colMult||1,0.5,2);for(const k in O.colRng)COL_CLS_RNG[k]=O.colRng[k].map(v=>Math.max(4,Math.round(v*cm)));for(const k in O.hsQ)COL_HS_Q[k]=O.hsQ[k].map(v=>Math.max(1,Math.round(v*cm)));
+  try{if(typeof G!=='undefined'&&G)G._thr=null;}catch(e){}
+}
+function worldFrMult(){return clamp(+(WORLD&&WORLD.frMult)||1,0.5,2);}
+const WS={tab:'states',st:'CF',lvl:'FBS',draft:null};
+function wsClean(t){return String(t||'').replace(/[<>&"'`\\]/g,'').replace(/\s+/g,' ').trim().slice(0,40);}
+function wsList(txt,max){const out=[],seen=new Set();for(const l of String(txt||'').split(/\n/)){const n=wsClean(l);if(n&&!seen.has(n.toLowerCase())){seen.add(n.toLowerCase());out.push(n);}if(out.length>=max)break;}return out;}
+function openWorldSetup(){WS.draft=JSON.parse(JSON.stringify(worldLoad()));wsRender();}
+function wsCur(){const O=worldOrig(),D=WS.draft;return{O,D};}
+function wsTab(t){wsGrab();WS.tab=t;wsRender();}
+// read the inputs of the tab on screen into the draft
+function wsGrab(){
+  const D=WS.draft,O=worldOrig(),v=id=>{const e=document.getElementById(id);return e?e.value:null;};
+  if(WS.tab==='states'){D.states=D.states||{};for(const k of ST_ORDER){const x=v('ws-st-'+k);if(x!=null){const n=wsClean(x);if(n&&n!==O.states[k])D.states[k]=n;else delete D.states[k];}}
+    D.counties=D.counties||{};for(const c of MAPC){if(c.st!==WS.st)continue;const x=v('ws-cn-'+c.id);if(x==null)continue;const n=wsClean(x);if(n&&n!==O.counties[c.id])D.counties[c.id]=n;else delete D.counties[c.id];}}
+  if(WS.tab==='divs'){D.size=D.size||{};D.divs=D.divs||{};D.xdivs=D.xdivs||{};
+    const cls=clsOfSt(WS.st);for(const c of cls){const t=+v('ws-t-'+c),d=+v('ws-d-'+c);if(t&&d)D.size[c]={t,d};}
+    const x=v('ws-dn');if(x!=null){const names=wsList(x,200);if(WS.st==='CF'){let i=0;for(const c of CLS_ORDER){const n=(D.size[c]||O.size[c]).d;D.divs[c]=names.slice(i,i+n);i+=n;}}else D.xdivs[WS.st]=names;}}
+  if(WS.tab==='colleges'){const x=v('ws-col');if(x!=null){D.colleges=D.colleges||{};D.colleges[WS.lvl]=wsList(x,400);}}
+  if(WS.tab==='pro'){D.pro=D.pro||{};for(const k of['NGL','SFL','MGL']){const x=v('ws-pro-'+k);if(x!=null)D.pro[k]=wsList(x,64);}}
+  if(WS.tab==='stars'){D.stars=D.stars||{};for(const s of[5,4,3,2]){const x=v('ws-s'+s);if(x!=null)D.stars[s]=clamp(Math.round(+x)||0,0,5000);}const f=v('ws-fr'),c=v('ws-cm');if(f!=null)D.frMult=+f;if(c!=null)D.colMult=+c;}
+}
+function wsRender(){
+  const{O,D}=wsCur(),tabs=[['states','States & counties'],['divs','Divisions & sizes'],['colleges','Colleges'],['pro','Pro teams'],['stars','Stars & classes']];
+  const stSel=(fn)=>`<select onchange="wsGrab();WS.st=this.value;wsRender()" style="padding:6px 8px;border-radius:8px">${ST_ORDER.map(k=>`<option value="${k}"${WS.st===k?' selected':''}>${(D.states&&D.states[k])||O.states[k]}</option>`).join('')}</select>`;
+  let body='';
+  if(WS.tab==='states'){
+    body=`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">Rename any state. Pick a state to rename its counties too.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin-bottom:12px">${ST_ORDER.map(k=>`<label style="font-size:11px;color:var(--mu)">${O.states[k]}<input id="ws-st-${k}" value="${(D.states&&D.states[k])||O.states[k]}" maxlength="40" style="width:100%"></label>`).join('')}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b style="font-size:13px">Counties in</b>${stSel()}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:34vh;overflow-y:auto">${MAPC.filter(c=>c.st===WS.st).map(c=>`<input id="ws-cn-${c.id}" value="${(D.counties&&D.counties[c.id])||O.counties[c.id]}" maxlength="40" title="${O.counties[c.id]}">`).join('')}</div>`;
+  }else if(WS.tab==='divs'){
+    const cls=clsOfSt(WS.st),sz=c=>(D.size&&D.size[c])||O.size[c];
+    const names=WS.st==='CF'?CLS_ORDER.flatMap(c=>{const a=(D.divs&&D.divs[c])||O.divs[c]||[];const n=sz(c).d;return Array.from({length:n},(_,i)=>a[i]||`${c} Division ${i+1}`);}):(()=>{const a=(D.xdivs&&D.xdivs[WS.st])||O.xdivs[WS.st]||[];const n=cls.reduce((s,c)=>s+sz(c).d,0);return Array.from({length:n},(_,i)=>a[i]||`District ${i+1}`);})();
+    body=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:13px">State</b>${stSel()}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:6px">Teams and divisions in each classification (more teams make a bigger league; at least 4 teams per division).</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:150px;font-size:12px;font-weight:800">${clsName(c)}</span><label style="font-size:12px">Teams <input id="ws-t-${c}" type="number" min="8" max="160" value="${sz(c).t}" style="width:76px"></label><label style="font-size:12px">Divisions <input id="ws-d-${c}" type="number" min="1" max="16" value="${sz(c).d}" style="width:64px"></label></div>`).join('')}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">Division names, one per line, in order (smallest classification first). Add lines for new divisions.</div>
+      <textarea id="ws-dn" rows="10" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${names.join('\n')}</textarea>`;
+  }else if(WS.tab==='colleges'){
+    const lv=[['FBS','FBS'],['FCS','FCS'],['D2','Division II'],['D3','Division III'],['NAIA','NAIA'],['JUCO','Junior college']];
+    const list=(D.colleges&&D.colleges[WS.lvl]&&D.colleges[WS.lvl].length?D.colleges[WS.lvl]:O.colleges[WS.lvl]);
+    body=`<div class="tabs" style="margin-bottom:8px">${lv.map(([k,l])=>`<button class="tab ${WS.lvl===k?'on':''}" onclick="wsGrab();WS.lvl='${k}';wsRender()">${l}</button>`).join('')}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">One college per line, strongest program first. Rename, add or remove lines (at least 3). ${list.length} colleges.</div>
+      <textarea id="ws-col" rows="14" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${list.join('\n')}</textarea>`;
+  }else if(WS.tab==='pro'){
+    const P=k=>(D.pro&&D.pro[k]&&D.pro[k].length?D.pro[k]:O.pro[k]);
+    body=`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">The pro teams your former players can be drafted by or sign with. One team per line, add as many as you like.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${[['NGL','National Gridiron League (draft)'],['SFL','Spring Football League'],['MGL','Maple Gridiron League']].map(([k,l])=>`<label style="font-size:12px;font-weight:800">${l}<textarea id="ws-pro-${k}" rows="12" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${P(k).join('\n')}</textarea></label>`).join('')}</div>`;
+  }else{
+    const st=Object.assign({},O.stars,D.stars||{});
+    body=`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">How many players nationally earn each star rating per graduating class (the full 13-state country). Smaller countries scale these down.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px">${[5,4,3,2].map(s=>`<label style="font-size:12px;font-weight:800">${'★'.repeat(s)} players<input id="ws-s${s}" type="number" min="0" max="5000" value="${st[s]}" style="width:100%"></label>`).join('')}</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <label style="font-size:12px;font-weight:800">Your freshman class size<select id="ws-fr" style="display:block;padding:6px 8px;border-radius:8px">${[[0.5,'Half'],[0.75,'Smaller'],[1,'Normal'],[1.25,'Bigger'],[1.5,'Much bigger'],[2,'Double']].map(([v,l])=>`<option value="${v}"${(+D.frMult||1)===v?' selected':''}>${l}</option>`).join('')}</select></label>
+        <label style="font-size:12px;font-weight:800">College recruiting class sizes<select id="ws-cm" style="display:block;padding:6px 8px;border-radius:8px">${[[0.5,'Half'],[0.75,'Smaller'],[1,'Normal'],[1.25,'Bigger'],[1.5,'Much bigger'],[2,'Double']].map(([v,l])=>`<option value="${v}"${(+D.colMult||1)===v?' selected':''}>${l}</option>`).join('')}</select></label></div>`;
+  }
+  openMo(`<div style="font-weight:900;font-size:22px;margin-bottom:2px">League Setup</div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Customize the world before you start a career. Changes apply to new careers (each save keeps the world it started with).</div>
+    <div class="tabs" style="margin-bottom:10px">${tabs.map(([k,l])=>`<button class="tab ${WS.tab===k?'on':''}" onclick="wsTab('${k}')">${l}</button>`).join('')}</div>
+    <div>${body}</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px">
+      <button class="bgh" onclick="if(confirm('Reset every League Setup change back to the default world?')){WS.draft={};wsSave();}">Reset all</button>
+      <button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="wsGrab();wsSave()">Save League Setup</button></div>`);
+}
+function wsSave(){
+  const D=WS.draft||{};worldStore(D);worldApply(D);
+  try{_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();}catch(e){console.error('league setup',e);}
+  clo();notify('League Setup saved. New careers use it.');
+}
+
 // Initialise the county map + offers on load
 function initCountyMap(){
+  try{worldApply(worldLoad());}catch(e){console.error('league setup',e);}
   // Reset state
   _sId=1;
   _selectedOfferTeam=null;
@@ -14423,6 +14545,7 @@ function startGame(){
   const team=_selectedOfferTeam;
   showLoading('Building Your Program…',team,18,()=>{
     initGame(coach,divs,foundDIdx,foundSIdx,chosenRivals);
+    try{G.world=JSON.parse(JSON.stringify(WORLD||{}));}catch(e){G.world={};}
     G.coach=window._coachDraft||null;G.saveId=null;window._coachDraft=null;setTimeout(()=>{try{saveGame(true);}catch(e){}},900);
     document.getElementById('setup').classList.add('hid');
     document.getElementById('app').classList.remove('hid');
@@ -14619,9 +14742,9 @@ const TUT_PAGES=[
     </ul>
     <p><strong>Alumni career tracker</strong></p>
     <ul>
-      <li>Enshrine a player in the <strong>Hall of Fame</strong>. After he graduates, the AI writes one update <strong>every season</strong>: signing and NIL deals, redshirts (including medical redshirts), full season stat lines, team records, bowl games and the College Football Playoff, conference and national awards, injuries with games missed, transfer-portal moves, all-star games, NFL Combine results, the NFL Draft (round and pick) or undrafted and UFL/CFL paths, pro seasons with playoff runs, Pro Bowls and All-Pro teams, contracts, extensions, franchise tags and trades, retirement, life afterwards, and even the College Football and Pro Football Halls of Fame.</li>
+      <li>Enshrine a player in the <strong>Hall of Fame</strong>. After he graduates, the AI writes one update <strong>every season</strong>: signing and NIL deals, redshirts (including medical redshirts), full season stat lines, team records, bowl games and the National Playoff, conference and national awards, injuries with games missed, transfer-portal moves, all-star games, NGL Combine results, the NGL Draft (round and pick) or undrafted and SFL/MGL paths, pro seasons with playoff runs, Pro All-Stars and All-League teams, contracts, extensions, franchise tags and trades, retirement, life afterwards, and even the College Football and Pro Football Halls of Fame.</li>
       <li>Open the player's profile (story tab) or the Hall of Fame page to read the full timeline. A badge on the Advisor button shows unread updates, and big moments also appear in the News tab.</li>
-      <li>Careers use real-world base rates: only about 1 to 2 percent of draft-eligible college players are drafted, almost all from big FBS programs, and the average NFL career is only a few years (running backs shortest, quarterbacks and kickers longest). Real colleges, NFL, UFL and CFL teams and college award names are used, but the players and their stats are fictional.</li>
+      <li>Careers use real-world base rates: only about 1 to 2 percent of draft-eligible college players are drafted, almost all from big FBS programs, and the average NGL career is only a few years (running backs shortest, quarterbacks and kickers longest). Real colleges, NGL, SFL and MGL teams and college award names are used, but the players and their stats are fictional.</li>
       <li>Players you do not enshrine keep the older one-time story. Alumni results are generated from each player's ratings and development, so great players usually, but not always, thrive.</li>
     </ul>
     <div class="tip">Tip: Enshrine seniors with Star or Elite development and high ratings. Ask the advisor about "Hall of Fame picks" to see their projected draft odds first.</div>
@@ -15207,11 +15330,11 @@ body.kbm .btn[data-k]::after{content:attr(data-k);display:inline-block;margin-le
       const at = (x, y) => (x < 0 || y < 0 || x >= fw || y >= fh) ? -3 : mat[y * fw + x];
       const ARM = MI.armSleeve, GL = MI.gloves, JE = MI.jersey, JT = MI.jerseyTrim, CL = MI.cleats, SK = MI.skin, FM = MI.facemask, HE = MI.helmet;
       const PANTS = [MI.pants, MI.pantsStripe, MI.belt], HELM = [HE, MI.helmetStripe, MI.helmetLogo];
-      const out = { glove: [], cleat: [], arm: [], neck: [], hem: [], baggy: [], towel: null, mouth: null, knee: [], sock: [], towelPx: null };
+      const out = { glove: [], cleat: [], arm: [], neck: [], hem: [], baggy: [], towel: null, mouth: null, knee: [], sock: [], towelPx: null, helm: [], mask: [], shoulder: [] };
       let hx = 0, hn = 0, fx = 0, fn = 0, fyMax = -1, hyMax = -1;
       for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const m = mat[y * fw + x];
         if (m === GL) out.glove.push([x, y, lv[y * fw + x]]); else if (m === CL) out.cleat.push([x, y, lv[y * fw + x]]);
-        if (HELM.includes(m)) { hx += x; hn++; hyMax = Math.max(hyMax, y); } if (m === FM) { fx += x; fn++; fyMax = Math.max(fyMax, y); } }
+        if (HELM.includes(m)) { hx += x; hn++; hyMax = Math.max(hyMax, y); out.helm.push([x, y, lv[y * fw + x], m]); } if (m === FM) { fx += x; fn++; fyMax = Math.max(fyMax, y); out.mask.push([x, y, lv[y * fw + x]]); } }
       const face = fn && hn ? Math.sign(Math.round(fx / fn - hx / hn)) : 0;
       const backRowAll = !!(BACK_ROWS[sheetName] && BACK_ROWS[sheetName].has(Math.floor(cell / cols)));
       // visor: the top two rows of face showing through the facemask (none from behind)
@@ -15239,6 +15362,13 @@ body.kbm .btn[data-k]::after{content:attr(data-k);display:inline-block;margin-le
       const order = comps.slice().sort((a, b) => (b.over - a.over) || (b.n - a.n)), rank = {}; order.forEach((c, i) => rank[c.id] = i);
       for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const k = y * fw + x; if (mat[k] !== ARM) continue; out.arm.push([x, y, lv[k], dJ[k], dG[k], rank[comp[k]] || 0]);
         if (dJ[k] <= 5) for (const [a, b] of N4) { const X = x + a, Y = y + b; if (at(X, Y) === -2 && !out.baggy.some(q => q[0] === X && q[1] === Y)) out.baggy.push([X, Y, 1, rank[comp[k]] || 0]); } }
+      // v2.14 shoulder stripes: jersey pixels just above each sleeve opening, by distance (through the jersey) from it
+      { const seen = new Int16Array(fw * fh).fill(99), q = [];
+        for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const k = y * fw + x; if (mat[k] !== ARM || dJ[k] !== 0) continue;
+          for (const [a, b] of N4) { const X = x + a, Y = y + b, m = at(X, Y); if (m !== JE && m !== JT) continue; const kk = Y * fw + X; if (seen[kk] > 0) { seen[kk] = 0; q.push(kk); } } }
+        for (let h = 0; h < q.length; h++) { const p = q[h], x = p % fw, y = (p - x) / fw; if (seen[p] >= 4) continue;
+          for (const [a, b] of N4) { const X = x + a, Y = y + b, m = at(X, Y); if (m !== JE && m !== JT) continue; const kk = Y * fw + X; if (seen[kk] <= seen[p] + 1) continue; seen[kk] = seen[p] + 1; q.push(kk); } }
+        for (const p of q) { const x = p % fw, y = (p - x) / fw; out.shoulder.push([x, y, lv[p], seen[p]]); } }
       // collar (neck skin touching the jersey) and the shirt tail just under the jersey
       for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const m = mat[y * fw + x];
         if (m === SK && y > hyMax - 3 && N4.some(([a, b]) => at(x + a, y + b) === JE || at(x + a, y + b) === JT)) out.neck.push([x, y, lv[y * fw + x]]);
@@ -15291,8 +15421,15 @@ body.kbm .btn[data-k]::after{content:attr(data-k);display:inline-block;margin-le
       const T = legTrackC[key], f = cell % cols; return T.res ? T.res[f] : (E.sleeveLeg || 0); }
     const eqCss = new Map();
     function eqRamp(hex) { if (!eqCss.has(hex)) eqCss.set(hex, ramp(hex).map(css)); return eqCss.get(hex); }
-    function drawEq(ctx, sheet, cell, ax, ay, sx, sy, eq, skin) {
+    function drawEq(ctx, sheet, cell, ax, ay, sx, sy, eq, skin, hp) {
       const E = eqCell(sheet, cell), R = (x, y, c) => { ctx.fillStyle = c; ctx.fillRect((x - ax) * sx, (y - ay) * sy, sx + 0.04, sy + 0.04); };
+      // v2.14 jersey style: stripes across the shoulders (team uniform setting)
+      if (eq.shoulder && eq.shoulder.mode && eq.shoulder.mode !== 'none' && E.shoulder) { const r = eqRamp(eq.shoulder.c || '#ffffff'), D = { single: [2], double: [1, 3], triple: [1, 2, 3] }[eq.shoulder.mode] || [2];
+        for (const [x, y, l, d] of E.shoulder) if (D.includes(d)) R(x, y, r[Math.max(1, l)]); }
+      // v2.14 helmet style (player setting): shell finish, stripe on or off, facemask colour
+      if (eq.helm && hp && E.helm) { const H = eq.helm, sh = l => H.shell === 'matte' ? hp[[0, 1, 1, 1][l]] : H.shell === 'chrome' ? [hp[0], hp[2], hp[3], '#ffffff'][l] : hp[l];
+        if ((H.shell && H.shell !== 'gloss') || H.stripe === 'none') for (const [x, y, l, m] of E.helm) { if (m === MI.helmetStripe && H.stripe === 'none') R(x, y, sh(l)); else if (m === MI.helmet && H.shell && H.shell !== 'gloss') R(x, y, sh(l)); }
+        if (H.mask) { const r = eqRamp(H.mask); for (const [x, y, l] of E.mask) R(x, y, r[l]); } }
       if (skin && eq.pants === 'short') for (const [x, y, l] of E.knee) R(x, y, skin[l]);
       if (skin && (eq.socks === 'low' || eq.socks === 'none')) for (const [x, y, l, bottom] of E.sock) if (eq.socks === 'none' || !bottom) R(x, y, skin[l]);
       // leg sleeves: from the knee to the ankle, on one leg or both
@@ -15331,7 +15468,7 @@ body.kbm .btn[data-k]::after{content:attr(data-k);display:inline-block;margin-le
         // per team/build/skin (a full sheet is ~8 MB of canvas memory; 30+ of them crashed phones mid-game)
         this.P = P; this.pages = []; this.cells = new Map(); this.free = 0;
         this.num = P.num.map(css); this.trim = P.trim ? P.trim.map(css) : null;
-        this.skin = P.pal[MI.skin].map(css);
+        this.skin = P.pal[MI.skin].map(css); this.helm = P.pal[MI.helmet].map(css);
         this.cols = data[sheetName].px.width / ATLAS.frameW;
       }
       cell(id) {
@@ -15377,7 +15514,7 @@ body.kbm .btn[data-k]::after{content:attr(data-k);display:inline-block;margin-le
             }
           }
         }
-        if (eq && this.sheet !== 'referee') drawEq(ctx, this.sheet, a.row * this.cols + frame, ax, ay, sx, sy, eq, this.skin);
+        if (eq && this.sheet !== 'referee') drawEq(ctx, this.sheet, a.row * this.cols + frame, ax, ay, sx, sy, eq, this.skin, this.helm);
         ctx.setTransform(m);
       }
     }
@@ -16345,7 +16482,7 @@ function downFx(e){const o={jz:0,sq:1};if(!e.down||!e.downAt)return o;const t=G.
 
 function gpGod(){return GP&&GP.god&&GP.god.on?GP.god:null;}
 function gpCD(c){const gd=gpGod();return gd&&c&&c.team===0?(gd.cd||0.25):1;}
-const GOD_CATCHES=[['auto','Normal'],['hands','Hands'],['shoulder','Over the shoulder'],['high','High point'],['moss','Moss'],['onehand','One-handed'],['obj','One-hand OBJ'],['low','Low'],['slide','Sliding'],['dive','Diving'],['onedive','One-hand dive'],['toetap','Toe tap'],['poss','In traffic'],['trafL','Traffic, left'],['trafR','Traffic, right'],['safe','Secure']];
+const GOD_CATCHES=[['auto','Normal'],['hands','Hands'],['shoulder','Over the shoulder'],['high','High point'],['moss','Over the top'],['onehand','One-handed'],['obj','One-hand fingertip'],['low','Low'],['slide','Sliding'],['dive','Diving'],['onedive','One-hand dive'],['toetap','Toe tap'],['poss','In traffic'],['trafL','Traffic, left'],['trafR','Traffic, right'],['safe','Secure']];
 function gpGodRow(ft){const gd=gpGod();if(!gd||isAI(0))return;
   const w=document.createElement('label');w.style.cssText='display:inline-flex;align-items:center;gap:6px;font:800 12px Nunito,system-ui,sans-serif;color:#0d2a43;margin-right:auto';
   w.innerHTML='God mode catch <select style="font:700 12px Nunito,system-ui,sans-serif;padding:6px 8px;border-radius:10px">'+GOD_CATCHES.map(([k,l])=>'<option value="'+k+'"'+((G.godCatch||'auto')===k?' selected':'')+'>'+l+'<\/option>').join('')+'<\/select>';
@@ -20452,8 +20589,8 @@ function sndStep(dt){
   SND.crowd.bp.frequency.setTargetAtTime(800+roar*1400,c.currentTime,0.3);
 }
 /* ===================== touchdown, sack & first-down celebrations ===================== */
-const TD_CELEBS=[['spike','Spike'],['dunk','Goal post dunk'],['griddy','The Griddy'],['dance','Dance'],['sky','Point to the sky'],['bump','Jump bump'],
-  ['airplane','Airplane'],['heisman','Heisman pose'],['raise','Raise the roof'],['kick','Kick it into the stands'],['jumper','Jump shot'],['nap','Take a nap'],['bow','Take a bow'],['team','Team pile-on']];
+const TD_CELEBS=[['spike','Spike'],['dunk','Goal post dunk'],['griddy','Grid shuffle'],['dance','Dance'],['sky','Point to the sky'],['bump','Jump bump'],
+  ['airplane','Airplane'],['heisman','Trophy pose'],['raise','Raise the roof'],['kick','Kick it into the stands'],['jumper','Jump shot'],['nap','Take a nap'],['bow','Take a bow'],['team','Team pile-on']];
 const SACK_CELEBS=['sackflex','sackarms','sackpoint','sackdance','sackwings'];
 const FD_CELEBS=['fdpoint','fdflex','fdhype','fdchop','fdspin'];
 function gpMateFor(e,used){let mate=null,bd=1e9;for(const o of G.ents)if(o!==e&&o.team===e.team&&o.pl&&!o.down&&!o.hurt&&!o.celeb&&o.role!=='OL'&&!(used&&used.has(o))){const d=dist(o,e);if(d<bd){bd=d;mate=o;}}return mate;}
