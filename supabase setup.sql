@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
--- Gridiron Prep GM · Online Play database (Supabase) · v2.13: profiles and saves on your account
+-- Gridiron Prep GM · Online Play database (Supabase) · v2.14: account deletion, blocks, reports, saves with friends
 -- Run once: Supabase dashboard → SQL Editor → New query → paste this whole file → Run.
 -- It is safe to run again later (it updates the rules without touching saved data).
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -171,3 +171,100 @@ create policy "Own save files: replace" on storage.objects
 drop policy if exists "Own save files: delete" on storage.objects;
 create policy "Own save files: delete" on storage.objects
   for delete to authenticated using (bucket_id = 'saves' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- 6) v2.14: DELETE YOUR ACCOUNT, BLOCK AND REPORT PLAYERS, SEND SAVES TO FRIENDS ──────────────────────
+-- (required by the App Store: players who can create an account must be able to delete it in the game)
+
+-- blocks: a blocked player can't send you friend requests or saves, and disappears from your searches
+create table if not exists public.blocks (
+  blocker     uuid not null references public.profiles (id) on delete cascade,
+  blocked     uuid not null references public.profiles (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (blocker, blocked),
+  check (blocker <> blocked)
+);
+alter table public.blocks enable row level security;
+drop policy if exists "Your own blocks" on public.blocks;
+create policy "Your own blocks" on public.blocks
+  for all to authenticated using ((select auth.uid()) = blocker) with check ((select auth.uid()) = blocker);
+revoke all on public.blocks from anon, authenticated;
+grant select, insert, delete on public.blocks to authenticated;
+
+create or replace function public.is_blocked(a uuid, b uuid) returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.blocks k where (k.blocker = a and k.blocked = b) or (k.blocker = b and k.blocked = a));
+$$;
+revoke all on function public.is_blocked(uuid, uuid) from public, anon;
+grant execute on function public.is_blocked(uuid, uuid) to authenticated;
+
+-- friend requests can't be sent between players where either one blocked the other
+drop policy if exists "Send friend requests" on public.friendships;
+create policy "Send friend requests" on public.friendships
+  for insert to authenticated with check ((select auth.uid()) = requester and status = 'pending' and not public.is_blocked(requester, addressee));
+
+-- reports: players can file them, only the project owner reads them (Supabase dashboard → Table Editor → reports)
+create table if not exists public.reports (
+  id          bigint generated always as identity primary key,
+  reporter    uuid not null references public.profiles (id) on delete cascade,
+  reported    uuid not null references public.profiles (id) on delete cascade,
+  reason      text not null check (char_length(reason) between 1 and 300),
+  created_at  timestamptz not null default now()
+);
+alter table public.reports enable row level security;
+drop policy if exists "File a report" on public.reports;
+create policy "File a report" on public.reports
+  for insert to authenticated with check ((select auth.uid()) = reporter);
+revoke all on public.reports from anon, authenticated;
+grant insert on public.reports to authenticated;
+
+-- saves sent to friends: a copy goes into the friend's inbox (bucket "shared", folder <recipient>/<sender>/)
+create table if not exists public.shared_saves (
+  id          bigint generated always as identity primary key,
+  sender      uuid not null references public.profiles (id) on delete cascade,
+  recipient   uuid not null references public.profiles (id) on delete cascade,
+  meta        jsonb not null default '{}'::jsonb check (pg_column_size(meta) <= 2000),
+  path        text not null,
+  enc         text not null default 'gzip' check (enc in ('gzip', 'raw')),
+  size        bigint not null default 0,
+  created_at  timestamptz not null default now()
+);
+alter table public.shared_saves enable row level security;
+drop policy if exists "Sent and received saves" on public.shared_saves;
+create policy "Sent and received saves" on public.shared_saves
+  for select to authenticated using ((select auth.uid()) in (sender, recipient));
+drop policy if exists "Send a save to a friend" on public.shared_saves;
+create policy "Send a save to a friend" on public.shared_saves
+  for insert to authenticated with check ((select auth.uid()) = sender and public.is_friend(sender, recipient) and not public.is_blocked(sender, recipient)
+    and path like recipient::text || '/' || sender::text || '/%');
+drop policy if exists "Remove sent or received saves" on public.shared_saves;
+create policy "Remove sent or received saves" on public.shared_saves
+  for delete to authenticated using ((select auth.uid()) in (sender, recipient));
+revoke all on public.shared_saves from anon, authenticated;
+grant select, insert, delete on public.shared_saves to authenticated;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('shared', 'shared', false, 52428800)
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit;
+
+drop policy if exists "Shared saves: send" on storage.objects;
+create policy "Shared saves: send" on storage.objects
+  for insert to authenticated with check (bucket_id = 'shared' and (storage.foldername(name))[2] = (select auth.uid())::text
+    and public.is_friend((select auth.uid()), ((storage.foldername(name))[1])::uuid) and not public.is_blocked((select auth.uid()), ((storage.foldername(name))[1])::uuid));
+drop policy if exists "Shared saves: read" on storage.objects;
+create policy "Shared saves: read" on storage.objects
+  for select to authenticated using (bucket_id = 'shared' and (select auth.uid())::text in ((storage.foldername(name))[1], (storage.foldername(name))[2]));
+drop policy if exists "Shared saves: delete" on storage.objects;
+create policy "Shared saves: delete" on storage.objects
+  for delete to authenticated using (bucket_id = 'shared' and (select auth.uid())::text in ((storage.foldername(name))[1], (storage.foldername(name))[2]));
+
+-- delete your own account: the game removes your files first, then this deletes the account and (by cascade)
+-- your profile, friendships, blocks, reports, cloud save list, shared saves and the games you hosted
+create or replace function public.delete_my_account() returns void
+language plpgsql security definer set search_path = '' as $$
+begin
+  if auth.uid() is null then raise exception 'Not signed in'; end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

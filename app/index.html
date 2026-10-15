@@ -11559,7 +11559,10 @@ async function olLoadSocial(force){
   const B=OLS.backend;if(!B||!OLS.user)return;
   if(OLS.friends&&OLS.matches&&!force)return;
   try{const fr=await B.friendships(),ids=[...new Set(fr.flatMap(f=>[f.requester,f.addressee]))].filter(x=>x!==OLS.user.id),pr=await B.profiles(ids),nm={};for(const p of pr)nm[p.id]=p;
-    OLS.friends=fr.map(f=>{const other=f.requester===OLS.user.id?f.addressee:f.requester,P=nm[other];return Object.assign({},f,{other,otherP:P||null,otherName:P?pfName(P):'(player)',mine:f.requester===OLS.user.id});});
+    try{OLS.blocked=B.blocks?await B.blocks(OLS.user.id):[];OLS.blockedP=OLS.blocked.length?await B.profiles(OLS.blocked):[];}catch(e){OLS.blocked=[];OLS.blockedP=[];}
+    const bl=new Set(OLS.blocked);
+    OLS.friends=fr.map(f=>{const other=f.requester===OLS.user.id?f.addressee:f.requester,P=nm[other];return Object.assign({},f,{other,otherP:P||null,otherName:P?pfName(P):'(player)',mine:f.requester===OLS.user.id});}).filter(f=>!bl.has(f.other));
+    try{OLS.shared=B.sharedList?await B.sharedList(OLS.user.id):[];}catch(e){OLS.shared=[];}
     OLS.matches=await B.matches();OLS.statsErr=null;
   }catch(e){OLS.statsErr=e.message;OLS.friends=OLS.friends||[];OLS.matches=OLS.matches||[];}
 }
@@ -11650,13 +11653,15 @@ function olFriendsHtml(){
   const h2h=o=>{const h=R.H[me+'|'+o];return h?`${h.w}-${h.l}${h.t?'-'+h.t:''}`:'0-0';};
   return`${OLS.statsErr?`<div class="ol-note ol-err">${olEsc(OLS.statsErr)}</div>`:''}
     <div class="pnl" style="margin-bottom:14px"><div class="ph">Add a friend</div><div class="pb"><div class="ol-row"><input id="ol-fq" placeholder="Username" maxlength="20" onkeydown="if(event.key==='Enter')olFind()"><button class="btn bsm" onclick="olFind()">Search</button></div><div id="ol-fres"></div></div></div>
-    ${inc.length?`<div class="pnl" style="margin-bottom:14px"><div class="ph">Friend requests</div><div class="pb">${inc.map(f=>`<div class="ol-fr">${pfTag(f.otherP||{username:f.otherName})}<span><button class="btn bgn bsm" onclick="olFriendAct('accept',${f.id})">Accept</button> <button class="bgh bsm" onclick="olFriendAct('remove',${f.id})">Decline</button></span></div>`).join('')}</div></div>`:''}
+    ${inc.length?`<div class="pnl" style="margin-bottom:14px"><div class="ph">Friend requests</div><div class="pb">${inc.map(f=>`<div class="ol-fr">${pfTag(f.otherP||{username:f.otherName})}<span><button class="btn bgn bsm" onclick="olFriendAct('accept',${f.id})">Accept</button> <button class="bgh bsm" onclick="olFriendAct('remove',${f.id})">Decline</button> <button class="bgh bsm" onclick="olBlock('${olEsc(f.other)}',${f.id})">Block</button></span></div>`).join('')}</div></div>`:''}
+    ${acc.length?`<div class="pnl" style="margin-bottom:14px"><div class="ph">Friends: share and safety</div><div class="pb">${acc.map(f=>`<div class="ol-fr">${pfTag(f.otherP||{username:f.otherName},22)}<span><button class="btn bsm" onclick="shareOpen('${olEsc(f.other)}')">Send a save</button> <button class="bgh bsm" onclick="olReport('${olEsc(f.other)}')">Report</button> <button class="bgh bsm" onclick="olBlock('${olEsc(f.other)}',${f.id})">Block</button></span></div>`).join('')}</div></div>`:''}
     <div class="pnl" style="margin-bottom:14px"><div class="ph">Friends <span class="ol-mu">${acc.length}</span></div><div class="pb">${acc.length?`<table class="ol-t"><thead><tr><th>Player</th><th>Your record vs them</th><th>Their record</th><th></th></tr></thead><tbody>${acc.map(f=>{const p=R.P[f.other];return`<tr><td>${pfTag(f.otherP||{username:f.otherName})}${f.otherP&&f.otherP.bio?`<div class="ol-mu pf-bio-s">${olEsc(f.otherP.bio)}</div>`:''}</td><td>${h2h(f.other)}</td><td>${p?`${p.w}-${p.l}${p.t?'-'+p.t:''}`:'0-0'}</td><td style="text-align:right"><button class="bgh bsm" onclick="if(confirm('Remove this friend?'))olFriendAct('remove',${f.id})">Remove</button></td></tr>`;}).join('')}</tbody></table>`:'<div class="ol-mu">No friends yet. Search for a username above.</div>'}</div></div>
     ${out.length?`<div class="pnl"><div class="ph">Sent requests</div><div class="pb">${out.map(f=>`<div class="ol-fr"><span>${olEsc(f.otherName)} <i class="ol-mu">pending</i></span><button class="bgh bsm" onclick="olFriendAct('remove',${f.id})">Cancel</button></div>`).join('')}</div></div>`:''}`;
 }
 async function olFind(){const q=(document.getElementById('ol-fq').value||'').trim(),box=document.getElementById('ol-fres');if(q.length<2){box.innerHTML='<div class="ol-mu">Type at least 2 letters.</div>';return;}
   try{const r=(await OLS.backend.search(q)).filter(p=>p.id!==OLS.user.id),known=new Set((OLS.friends||[]).map(f=>f.other));
-    box.innerHTML=r.length?r.map(p=>`<div class="ol-fr">${pfTag(p)}${known.has(p.id)?'<span class="ol-mu">already added</span>':`<button class="btn bsm" onclick="olFriendAdd('${olEsc(p.id)}',this)">Add friend</button>`}</div>`).join(''):'<div class="ol-mu">No player with that name.</div>';}
+    const bl=new Set(OLS.blocked||[]),r2=r.filter(p=>!bl.has(p.id));
+    box.innerHTML=r2.length?r2.map(p=>`<div class="ol-fr">${pfTag(p)}<span>${known.has(p.id)?'<span class="ol-mu">already added</span>':`<button class="btn bsm" onclick="olFriendAdd('${olEsc(p.id)}',this)">Add friend</button>`} <button class="bgh bsm" onclick="olReport('${olEsc(p.id)}')">Report</button></span></div>`).join(''):'<div class="ol-mu">No player with that name.</div>';}
   catch(e){box.innerHTML=`<div class="ol-mu">${olEsc(e.message)}</div>`;}}
 async function olFriendAdd(id,b){try{b.disabled=true;await OLS.backend.addFriend(OLS.user.id,id);notify('Friend request sent');await olLoadSocial(true);olRender();}catch(e){notify(e.message,'e');b.disabled=false;}}
 async function olFriendAct(a,id){try{if(a==='accept')await OLS.backend.acceptFriend(id);else await OLS.backend.removeFriend(id);await olLoadSocial(true);olRender();}catch(e){notify(e.message,'e');}}
@@ -11684,17 +11689,20 @@ function olStatsHtml(){
 }
 function olAcctHtml(){
   const c=olCfg(),srv=`<div class="ol-mu" style="margin-top:12px">${c.mode==='local'?'Test mode: accounts and records live in this browser only.':'Online server: '+olEsc(c.url.replace(/^https:\/\//,''))}${c.builtIn?'':` · <a href="#" onclick="OLS.cfgOpen=true;olRender();return false">change</a>`}</div>`;
-  if(OLS.user)return pfEditHtml()+cloudAcctHtml()+`<div class="pnl"><div class="ph">Account</div><div class="pb"><p class="ol-p">Signed in as ${pfTag(OLS.profile||{username:olName()},24)}${OLS.user.email?` (${olEsc(OLS.user.email)})`:''}.</p><button class="bgh" onclick="olSignOut()">Sign out</button>${srv}</div></div>`;
+  if(OLS.user)return pfEditHtml()+cloudAcctHtml()+sharedInHtml()+`<div class="pnl" style="margin-bottom:14px"><div class="ph">Account</div><div class="pb"><p class="ol-p">Signed in as ${pfTag(OLS.profile||{username:olName()},24)}${OLS.user.email?` (${olEsc(OLS.user.email)})`:''}.</p><div class="ol-row"><button class="bgh" onclick="olSignOut()">Sign out</button><button class="bgh" onclick="privacyOpen()">Privacy policy</button></div>${srv}</div></div>
+    ${blockedHtml()}
+    <div class="pnl" style="border-color:var(--rd)"><div class="ph" style="color:var(--rd)">Delete account</div><div class="pb"><p class="ol-p">Permanently deletes your account, profile, friends list, the saves on your account and the saves you sent or received. Saves on this device stay. This cannot be undone.</p><button class="btn" style="background:var(--rd);border-color:var(--rd)" onclick="olDeleteAccount()">Delete my account</button></div></div>`;
   const up=OLS.authMode==='up';
   return`<div class="pnl"><div class="ph">${up?'Create an account':'Sign in'}</div><div class="pb">
     <div class="ol-form">${up?`<label>Username<input id="ol-un" maxlength="20" autocomplete="username" placeholder="3-20 letters, numbers or _"></label>`:''}
       <label>Email<input id="ol-em" type="email" autocomplete="email"></label><label>Password<input id="ol-pw" type="password" autocomplete="${up?'new-password':'current-password'}" placeholder="${up?'at least 8 characters':''}" onkeydown="if(event.key==='Enter')olAuth()"></label></div>
     <div class="ol-row"><button class="btn bgn" ${OLS.busy?'disabled':''} onclick="olAuth()">${up?'Create account':'Sign in'}</button><button class="bgh" onclick="OLS.authMode='${up?'in':'up'}';olRender()">${up?'I already have an account':'Create an account'}</button></div>
-    <p class="ol-mu">Your username is what friends search for. Your email is only used to sign in.</p>${srv}</div></div>`;
+    <p class="ol-mu">Your username is what friends search for. Your email is only used to sign in. <a href="#" onclick="privacyOpen();return false">Privacy policy</a></p>${srv}</div></div>`;
 }
 async function olAuth(){
   const up=OLS.authMode==='up',v=id=>(document.getElementById(id)||{}).value||'',em=v('ol-em').trim(),pw=v('ol-pw'),un=v('ol-un').trim();
   if(up&&!/^[A-Za-z0-9_]{3,20}$/.test(un)){notify('Username: 3 to 20 letters, numbers or _','e');return;}
+  if(up&&pfBad(un)){notify('Please pick a different username.','e');return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){notify('Enter a valid email','e');return;}
   if(pw.length<(up?8:1)){notify(up?'Use at least 8 characters for the password':'Enter your password','e');return;}
   OLS.busy=true;olRender();
@@ -11724,7 +11732,8 @@ function pfAvatar(p,sz){sz=sz||32;if(!p)return'';const a=p.avatar&&typeof p.avat
   return`<span class="pf-av pf-ini" style="width:${sz}px;height:${sz}px;background:${c};font-size:${Math.round(sz*0.46)}px">${olEsc(nm.slice(0,1).toUpperCase())}</span>`;}
 function pfTag(p,sz){if(!p)return'';const dn=pfName(p);return`<span class="pf-tag">${pfAvatar(p,sz||26)}<span><b>${olEsc(dn)}</b>${p.display_name&&p.display_name.trim()&&p.display_name.trim()!==p.username?` <span class="ol-mu">@${olEsc(p.username)}</span>`:''}</span></span>`;}
 function pfClean(o){const out={};
-  if(o.display_name!=null)out.display_name=String(o.display_name).replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,24)||null;
+  if(o.display_name!=null){out.display_name=String(o.display_name).replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,24)||null;if(out.display_name&&pfBad(out.display_name))out.display_name=null;}
+  if(o.bio!=null&&pfBad(o.bio))o.bio='';
   if(o.bio!=null)out.bio=String(o.bio).replace(/[\u0000-\u0009\u000b-\u001f<>]/g,'').trim().slice(0,120)||null;
   if(o.home_state!=null)out.home_state=ST_ORDER.includes(o.home_state)?o.home_state:null;
   if(o.avatar!=null){const a=o.avatar,hex=/^#[0-9a-f]{6}$/i;out.avatar=a&&a.m?{m:String(a.m).slice(0,30),c1:hex.test(a.c1)?a.c1:'#1d428a',c2:hex.test(a.c2)?a.c2:'#ffffff'}:null;}
@@ -11752,6 +11761,25 @@ function cloudSupabaseExt(B,cfg,getSb,err){
     const{error}=await sb.from('cloud_saves').upsert({user_id:uid,id,meta,size:z.blob.size,enc:z.enc,updated_at:new Date().toISOString()},{onConflict:'user_id,id'});if(error&&miss(error))throw new Error(NEED);err(error);return z.blob.size;};
   B.cloudGet=async(uid,id,enc)=>{const{data,error}=await getSb().storage.from('saves').download(`${uid}/${id}.save`);if(error)throw new Error(error.message||'Could not download the save');return await cgUnzip(data,enc);};
   B.cloudDel=async(uid,id)=>{const sb=getSb();await sb.storage.from('saves').remove([`${uid}/${id}.save`]);const{error}=await sb.from('cloud_saves').delete().eq('user_id',uid).eq('id',id);err(error);};
+  // v2.14: delete your account, block and report players, send saves to friends
+  const NEED14='Your online database needs the v2.14 update: run the new supabase_setup.sql in the Supabase SQL Editor (it keeps all your data).',
+    miss14=e=>e&&/does not exist|42P01|42883|PGRST20[0-9]|schema cache|shared_saves|blocks|reports|delete_my_account|Bucket not found|bucket/i.test((e.message||'')+' '+(e.code||'')+' '+(e.error||''));
+  B.sharedList=async uid=>{const{data,error}=await getSb().from('shared_saves').select('id,sender,recipient,meta,path,enc,size,created_at').order('created_at',{ascending:false}).limit(100);if(error&&miss14(error))return[];err(error);return data||[];};
+  B.sharedGet=async row=>{const{data,error}=await getSb().storage.from('shared').download(row.path);if(error)throw new Error(error.message||'Could not download the save');return await cgUnzip(data,row.enc);};
+  B.sharedDel=async row=>{const sb=getSb();await sb.storage.from('shared').remove([row.path]);const{error}=await sb.from('shared_saves').delete().eq('id',row.id);err(error);};
+  B.shareSave=async(uid,to,meta,str)=>{const z=await cgZip(str),sb=getSb(),path=`${to}/${uid}/${Date.now().toString(36)}.save`;
+    const up=await sb.storage.from('shared').upload(path,z.blob,{upsert:false,contentType:'application/octet-stream',cacheControl:'0'});
+    if(up.error){if(miss14(up.error)||/row-level|security/i.test(up.error.message||''))throw new Error(/too large|exceeded|maximum/i.test(up.error.message||'')?'This save is too big to send.':NEED14);err(up.error);}
+    const{error}=await sb.from('shared_saves').insert({sender:uid,recipient:to,meta,path,enc:z.enc,size:z.blob.size});
+    if(error){try{await sb.storage.from('shared').remove([path]);}catch(e){}if(miss14(error))throw new Error(NEED14);err(error);}};
+  B.blocks=async uid=>{const{data,error}=await getSb().from('blocks').select('blocked').eq('blocker',uid);if(error&&miss14(error))return[];err(error);return(data||[]).map(r=>r.blocked);};
+  B.block=async(uid,other)=>{const{error}=await getSb().from('blocks').insert({blocker:uid,blocked:other});if(error&&miss14(error))throw new Error(NEED14);if(error&&!/duplicate/i.test(error.message||''))err(error);};
+  B.unblock=async(uid,other)=>{const{error}=await getSb().from('blocks').delete().eq('blocker',uid).eq('blocked',other);err(error);};
+  B.reportUser=async(uid,other,reason)=>{const{error}=await getSb().from('reports').insert({reporter:uid,reported:other,reason});if(error&&miss14(error))throw new Error(NEED14);err(error);};
+  B.deleteAccount=async uid=>{const sb=getSb();
+    try{const L=await B.cloudList(uid);if(L.length)await sb.storage.from('saves').remove(L.map(r=>`${uid}/${r.id}.save`));}catch(e){}
+    try{const S=await B.sharedList(uid);if(S.length)await sb.storage.from('shared').remove(S.map(r=>r.path));}catch(e){}
+    const{error}=await sb.rpc('delete_my_account');if(error&&miss14(error))throw new Error(NEED14);err(error);try{await sb.auth.signOut();}catch(e){}};
   return B;}
 // test mode: profiles live with the test accounts, "account" saves live in a separate store in this browser
 function cloudLocalExt(B){
@@ -11767,7 +11795,75 @@ function cloudLocalExt(B){
   B.cloudPut=async(uid,id,meta,str)=>{const z=await cgZip(str);await tx('readwrite',s=>s.put({k:uid+'|'+id,uid,id,meta,size:z.blob.size,enc:z.enc,blob:z.blob,updated_at:new Date().toISOString()}));return z.blob.size;};
   B.cloudGet=async(uid,id,enc)=>{const r=await tx('readonly',s=>s.get(uid+'|'+id));if(!r)throw new Error('Save not found');return await cgUnzip(r.blob,r.enc||enc);};
   B.cloudDel=async(uid,id)=>{await tx('readwrite',s=>s.delete(uid+'|'+id));};
+  // v2.14 test mode: shared saves sit in the same browser store, blocks and reports in the test accounts
+  B.sharedList=async uid=>((await tx('readonly',s=>s.getAll()))||[]).filter(r=>r.share&&(r.recipient===uid||r.sender===uid)).map(r=>({id:r.k,sender:r.sender,recipient:r.recipient,meta:r.meta,path:r.k,enc:r.enc,size:r.size,created_at:r.created_at})).sort((a,b)=>a.created_at<b.created_at?1:-1);
+  B.sharedGet=async row=>{const r=await tx('readonly',s=>s.get(row.path));if(!r)throw new Error('Save not found');return await cgUnzip(r.blob,r.enc);};
+  B.sharedDel=async row=>{await tx('readwrite',s=>s.delete(row.path));};
+  B.shareSave=async(uid,to,meta,str)=>{const z=await cgZip(str),k='share|'+to+'|'+uid+'|'+Date.now().toString(36);await tx('readwrite',s=>s.put({k,share:1,sender:uid,recipient:to,meta,size:z.blob.size,enc:z.enc,blob:z.blob,created_at:new Date().toISOString()}));};
+  B.blocks=async uid=>(ld().blocks||[]).filter(b=>b[0]===uid).map(b=>b[1]);
+  B.block=async(uid,o)=>{const d=ld();d.blocks=(d.blocks||[]).filter(b=>!(b[0]===uid&&b[1]===o));d.blocks.push([uid,o]);sv(d);};
+  B.unblock=async(uid,o)=>{const d=ld();d.blocks=(d.blocks||[]).filter(b=>!(b[0]===uid&&b[1]===o));sv(d);};
+  B.reportUser=async(uid,o,reason)=>{const d=ld();(d.reports=d.reports||[]).push({reporter:uid,reported:o,reason,at:Date.now()});sv(d);};
+  B.deleteAccount=async uid=>{const d=ld();d.users=d.users.filter(u=>u.id!==uid);d.fr=d.fr.filter(f=>f.requester!==uid&&f.addressee!==uid);d.blocks=(d.blocks||[]).filter(b=>b[0]!==uid&&b[1]!==uid);sv(d);
+    const all=(await tx('readonly',s=>s.getAll()))||[];for(const r of all)if(r.uid===uid||r.sender===uid||r.recipient===uid)await tx('readwrite',s=>s.delete(r.k));try{sessionStorage.removeItem('gpm_ol_local_sess');}catch(e){}};
   return B;}
+
+/* ---- v2.14 safety, privacy and saves with friends ---- */
+const PF_BAD=['fuck','shit','cunt','nigg','faggot','bitch','whore','slut','rapist','nazi','hitler','porn','pussy','asshole','retard'];
+function pfBad(s){const t=String(s||'').toLowerCase().replace(/0/g,'o').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[4@]/g,'a').replace(/[5$]/g,'s').replace(/7/g,'t').replace(/[^a-z]/g,'');return PF_BAD.some(w=>t.includes(w));}
+function privacyOpen(){openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:8px">Privacy policy</div><div style="font-size:13px;line-height:1.55;max-height:60vh;overflow-y:auto">
+  <p><b>Playing without an account.</b> Your careers, settings and replays stay on your device (browser storage). Nothing is sent anywhere.</p>
+  <p><b>Online Play account (optional).</b> If you create one, the game stores your username, email address (used only to sign in), the profile you fill in (display name, emblem, bio, home state), your friends list, the results of games you play online, saves you back up or send to friends, and reports or blocks you make. Your email is never shown to other players.</p>
+  <p><b>Who sees what.</b> Other players can see your username, profile and online record. Saves on your account are private; a save you send is visible only to the friend you sent it to.</p>
+  <p><b>No ads, no tracking, no selling.</b> The game has no advertising, no analytics and does not sell or share your data.</p>
+  <p><b>Deleting your data.</b> Use Online Play → Account → Delete my account at any time. It removes your account and everything stored with it. Saves on this device can be deleted from Load Game.</p>
+  <p><b>Children.</b> The game is meant for everyone; online accounts need an email address and should be created by players 13 or older, or with a parent's help.</p>
+  <p><b>Contact.</b> Questions or a request about your data: use the support contact on the game's store page.</p></div>
+  <div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo()">Close</button></div>`);}
+async function olDeleteAccount(){
+  const t=prompt('This permanently deletes your online account and everything stored with it. Type DELETE to confirm.');
+  if(t!=='DELETE'){if(t!=null)notify('Account not deleted (type DELETE in capitals to confirm).','w');return;}
+  try{OLS.busy=true;olRender();await OLS.backend.deleteAccount(OLS.user.id);await olSetUser(null);OLS.cloud=null;OLS.pfEdit=null;OLS.friends=null;OLS.matches=null;OLS.shared=null;notify('Your account was deleted.');}
+  catch(e){notify('Could not delete the account: '+e.message,'e');}
+  OLS.busy=false;olRender();try{ttRefreshCloud();}catch(e){}
+}
+async function olBlock(uid,fid){
+  if(!confirm('Block this player? They are removed from your friends and cannot send you requests or saves.'))return;
+  try{if(fid!=null)try{await OLS.backend.removeFriend(fid);}catch(e){}await OLS.backend.block(OLS.user.id,uid);notify('Player blocked');await olLoadSocial(true);olRender();}catch(e){notify(e.message,'e');}
+}
+async function olUnblock(uid){try{await OLS.backend.unblock(OLS.user.id,uid);notify('Player unblocked');await olLoadSocial(true);olRender();}catch(e){notify(e.message,'e');}}
+async function olReport(uid){
+  const r=prompt('Report this player. What is wrong? (for example an offensive name or profile)');if(r==null)return;const reason=String(r).replace(/[<>]/g,'').trim().slice(0,300);
+  if(!reason){notify('Add a short reason to send the report.','w');return;}
+  try{await OLS.backend.reportUser(OLS.user.id,uid,reason);notify('Thanks, the report was sent. You can also block this player.');}catch(e){notify(e.message,'e');}
+}
+function blockedHtml(){const L=OLS.blocked||[];if(!L.length)return'';
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Blocked players <span class="ol-mu">${L.length}</span></div><div class="pb">${L.map(id=>{const P=(OLS.blockedP||[]).find(x=>x.id===id);return`<div class="ol-fr">${P?pfTag(P,22):`<span class="ol-mu">${olEsc(String(id).slice(0,8))}…</span>`}<button class="bgh bsm" onclick="olUnblock('${olEsc(id)}')">Unblock</button></div>`;}).join('')}</div></div>`;}
+// send a career save to a friend: pick the save, it is compressed and goes into their inbox
+async function shareOpen(to){
+  let L=[];try{L=await svList();}catch(e){}
+  const f=(OLS.friends||[]).find(x=>x.other===to);
+  openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:4px">Send a save to ${olEsc(f?f.otherName:'your friend')}</div>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">They get their own copy of the career to play. Your save stays yours.</div>
+    ${L.length?L.map(m=>`<div class="ol-fr"><span>${olEsc(m.name)} ${olEsc(m.mascot)} · ${m.season} · ${olEsc(m.rec)}</span><button class="btn bsm" onclick="shareSend('${olEsc(to)}','${olEsc(m.id)}',this)">Send</button></div>`).join(''):'<div class="ol-mu">No saves on this device yet.</div>'}
+    <div style="text-align:right;margin-top:10px"><button class="bgh" onclick="clo()">Close</button></div>`);
+}
+async function shareSend(to,id,btn){
+  try{if(btn){btn.disabled=true;btn.textContent='Sending…';}const meta=(await svList()).find(m=>m.id===id),json=await svGetData(id);if(!meta||!json)throw new Error('Save not found');
+    await OLS.backend.shareSave(OLS.user.id,to,Object.assign({},meta,{from:olName()}),json);clo();notify('Save sent!');}
+  catch(e){notify('Could not send: '+e.message,'e');if(btn){btn.disabled=false;btn.textContent='Send';}}
+}
+function sharedInHtml(){const me=OLS.user&&OLS.user.id,L=(OLS.shared||[]).filter(r=>r.recipient===me);
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Saves from friends <span class="ol-mu">${L.length}</span></div><div class="pb">
+    ${L.length?L.map((r,i)=>{const m=r.meta||{};return`<div class="ol-fr"><span>${olEsc(m.name||'Career')} ${olEsc(m.mascot||'')} · ${olEsc(String(m.season||''))} · ${olEsc(m.rec||'')} <span class="ol-mu">from ${olEsc(m.from||'a friend')}</span></span><span><button class="btn bsm" onclick="sharedTake(${i},this)">Add to my saves</button> <button class="bgh bsm" onclick="sharedDrop(${i})">Delete</button></span></div>`;}).join(''):'<div class="ol-mu">When a friend sends you a career save, it shows up here. Send one from the Friends tab.</div>'}</div></div>`;}
+function _sharedIn(i){const me=OLS.user&&OLS.user.id;return(OLS.shared||[]).filter(r=>r.recipient===me)[i];}
+async function sharedTake(i,btn){const r=_sharedIn(i);if(!r)return;
+  try{if(btn){btn.disabled=true;btn.textContent='Adding…';}let json=await OLS.backend.sharedGet(r);const nid='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    try{const d=JSON.parse(json);if(d&&d.G){d.G.saveId=nid;json=JSON.stringify(d);}}catch(e){throw new Error('That save could not be read');}
+    const m=Object.assign({},r.meta||{},{id:nid,savedAt:Date.now(),size:json.length});await svSave(m,json);
+    try{await OLS.backend.sharedDel(r);}catch(e){}await olLoadSocial(true);olRender();try{ttRefresh();}catch(e){}notify('Added to your saves. Find it under Load Game.');}
+  catch(e){notify('Could not add the save: '+e.message,'e');if(btn){btn.disabled=false;btn.textContent='Add to my saves';}}}
+async function sharedDrop(i){const r=_sharedIn(i);if(!r||!confirm('Delete this save from your inbox?'))return;try{await OLS.backend.sharedDel(r);await olLoadSocial(true);olRender();}catch(e){notify(e.message,'e');}}
 
 /* ---- automatic backup: after a save on this device, the same save goes to your account ---- */
 function cloudAutoOn(){try{return localStorage.getItem('gpm_cloud_auto')!=='0';}catch(e){return true;}}
