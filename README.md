@@ -97,3 +97,10 @@ High school football GM with a playable Game Day engine.
 - Account deletion is available in the game (Online Play → Account → Delete my account), as Apple requires for apps with sign-up.
 - User-generated content (usernames, profiles) has blocking, reporting and a word filter.
   Reports land in the `reports` table in your Supabase dashboard.
+- Online Play sign-up requires agreeing to the in-game **Terms of use** (zero tolerance for objectionable content).
+  Apple expects reports to be acted on within 24 hours, as the terms promise.
+- **Before publishing:** set `SUPPORT_EMAIL` in `app/index.html` (search for `const SUPPORT_EMAIL`) so the support contact shows in Settings, Privacy and Terms.
+- In Supabase → Authentication → URL Configuration, set the **Site URL** to your hosted web version.
+  Sign-up confirmation emails from the iOS app link there, because the app's own address can't be opened from an email.
+- Inside the native app the offline service worker is switched off automatically (the files are bundled in the app).
+- All colleges, pro teams, leagues, awards and bowls are fictional.

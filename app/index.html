@@ -1060,6 +1060,8 @@ button,a,.nb,.cp,.rkb{touch-action:manipulation;}
 <div id="nf"></div>
 
 <script>
+// v2.14: true inside the native app wrapper (Capacitor or a WKWebView shell)
+var IS_NATIVE=!!(window.Capacitor&&(window.Capacitor.isNativePlatform?window.Capacitor.isNativePlatform():true))||location.protocol==='capacitor:'||location.protocol==='ionic:';
 'use strict';
 // ═══════════ THEME ═══════════
 function setTheme(mode){
@@ -1102,7 +1104,7 @@ function renderGdSettings(){const el=document.getElementById('set-gd');if(!el)re
     +row('Crowd noise',seg('crowd',[[true,'On'],[false,'Off']]))+row('Gameplay tips',seg('tips',[[false,'Hidden'],[true,'Shown']]))
     +row('Ball size',seg('ball',[[0.85,'S'],[1,'M'],[1.25,'L'],[1.5,'XL']]))+row('Your offense drives',seg('dir',[['right','Right'],['left','Left'],['real','Switch each quarter']]))
     +row('Vibration',seg('haptics',[[true,'On'],[false,'Off']]))
-    +`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="bgh bxs" onclick="closeSettings();showTutorial();setTimeout(()=>{const i=TUT_PAGES.findIndex(p=>p.tab==='PC controls');if(i>=0)goTutTab(i);},50)">Keyboard controls</button><button class="bgh bxs" onclick="privacyOpen()">Privacy policy</button></div>`;}
+    +`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="bgh bxs" onclick="closeSettings();showTutorial();setTimeout(()=>{const i=TUT_PAGES.findIndex(p=>p.tab==='PC controls');if(i>=0)goTutTab(i);},50)">Keyboard controls</button><button class="bgh bxs" onclick="privacyOpen()">Privacy policy</button><button class="bgh bxs" onclick="termsOpen()">Terms of use</button></div>${SUPPORT_EMAIL?`<div style="font-size:12px;margin-top:8px;opacity:.8">Support: ${supportHtml()}</div>`:''}`;}
 function openSettings(){
   try{renderGdSettings();}catch(e){}
   // Sync unlimited money button state
@@ -9647,7 +9649,8 @@ function coachCard(){
 }
 // v2.05 home-screen app: offline support and storage that the browser should not clear
 (function(){try{
-  if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'))
+  // v2.14: inside the iOS/Android app the files are bundled, so the offline cache is not needed
+  if(!IS_NATIVE&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'))
     window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
   if(navigator.storage&&navigator.storage.persist)navigator.storage.persisted().then(p=>{if(!p)navigator.storage.persist().catch(()=>{});}).catch(()=>{});
 }catch(e){}})();
@@ -10701,7 +10704,7 @@ Object.assign(XTOWN,{
 Object.assign(XMASC,{
   LG:['Longhorns','Roughnecks','Oilers','Armadillos','Mustangs','Rattlers','Javelinas','Wranglers','Rangers','Bobcats','Steers','Broncos','Panthers','Eagles','Bulldogs','Cowboys','Tigers','Lions','Hornets','Owls','Bearkats','Pirates','Buffaloes','Matadors','Coyotes','Wildcats','Cougars','Hawks','Lobos','Bluebonnets','Pumas','Thunder','Storm','Chargers','Stallions','Badgers','Mavericks','Outlaws','Desperados','Rams','Bears','Gators','Riverhawks','Big Reds','Bison','Golden Bears','Jackrabbits','Horned Frogs','Roadrunners','Buckaroos','Drillers','Ranchers','Tumbleweeds','Cactus','Prospectors','Scorpions','Coyotes'],
   CO:['Gators','Pelicans','Manatees','Flamingos','Hurricanes','Sharks','Dolphins','Marlins','Barracudas','Stingrays','Tarpons','Herons','Ospreys','Panthers','Seahawks','Mariners','Pirates','Buccaneers','Sailfish','Waves','Surf','Tides','Storm','Lightning','Rockets','Astronauts','Orange Devils','Citrus Kings','Raiders','Cougars','Bobcats','Wildcats','Knights','Spartans','Patriots','Eagles','Falcons','Bulldogs','Tigers','Lions','Rattlers','Cobras','Mustangs','Royals','Gladiators','Commodores','Sea Turtles','Crocs','Flamingos','Crabs','Lobsters','Seahorses','Palms','Orangemen','Pelicans','Hummingbirds','Parrots','Conchs','Sunrays','Barracudas'],
-  MG:['Crimson Tide','Gamecocks','Rebels','Wildcats','Bulldogs','Tigers','Bears','Eagles','Panthers','Yellowjackets','Hornets','Boll Weevils','Catfish','Gators','Rattlers','Generals','Colonels','Cavaliers','Patriots','Raiders','Warriors','Bulldogs','Blue Devils','Red Devils','Trojans','Spartans','Wolverines','Rams','Knights','Mustangs','Falcons','Owls','Hawks','Lions','Cougars','Jaguars','Cardinals','Magnolias','Pine Knots','Sawmillers','Red Elephants','Golden Tigers','Wolves','Bobcats','Dragons','Hornets','Possums','Boll Weevils','Peaches','Gamecocks','Catfish','Turkeys','Mules','Bluejays','Acorns','Roses'],
+  MG:['Crimson Wave','Gamecocks','Rebels','Wildcats','Bulldogs','Tigers','Bears','Eagles','Panthers','Yellowjackets','Hornets','Boll Weevils','Catfish','Gators','Rattlers','Generals','Colonels','Cavaliers','Patriots','Raiders','Warriors','Bulldogs','Blue Devils','Red Devils','Trojans','Spartans','Wolverines','Rams','Knights','Mustangs','Falcons','Owls','Hawks','Lions','Cougars','Jaguars','Cardinals','Magnolias','Pine Knots','Sawmillers','Red Elephants','Golden Tigers','Wolves','Bobcats','Dragons','Hornets','Possums','Boll Weevils','Peaches','Gamecocks','Catfish','Turkeys','Mules','Bluejays','Acorns','Roses'],
   AC:['Pelicans','Gators','Crawdads','Bayou Bengals','Cajuns','Ragin Gators','Garfish','Mudbugs','Egrets','Herons','Tigers','Panthers','Eagles','Wildcats','Bulldogs','Hornets','Trojans','Rebels','Pirates','Buccaneers','Lions','Cougars','Rams','Mustangs','Hawks','Falcons','Owls','Spartans','Knights','Saints','Bears','Wolves','Warriors','Bobcats','Cardinals','Riverhawks','Catfish','Crabs','Frogs','Bullfrogs','Ducks','Lizards','Herons','Fireflies'],
   CU:['Mountaineers','Highlanders','Moonshiners','Coal Miners','Hillcats','Black Bears','Bobcats','Volunteers','Rifles','Pioneers','Frontiersmen','Ridgerunners','Cardinals','Wildcats','Tigers','Bulldogs','Eagles','Panthers','Hornets','Rebels','Generals','Patriots','Rangers','Raiders','Trojans','Spartans','Lions','Bears','Falcons','Hawks','Owls','Cougars','Pirates','Mariners','Seahawks','Lighthouse Keepers','Buccaneers','Rams','Knights','Mustangs','Wolves','Colonels','Thunder','Hilltoppers','Possums','Raccoons','Squirrels','Hounds','Bells','Lighthouse Keepers','Sailors','Black Bears','Cardinals'],
   SU:['Grizzlies','Bighorns','Avalanche','Miners','Mountain Lions','Elk','Buffaloes','Peaks','Summit Kings','Yeti','Ravens','Golden Eagles','Eagles','Falcons','Hawks','Wolves','Coyotes','Bears','Wildcats','Bobcats','Panthers','Cougars','Pioneers','Trailblazers','Rangers','Outlaws','Stallions','Broncos','Mustangs','Knights','Spartans','Trojans','Titans','Thunder','Storm','Blizzard','Rockets','Comets','Prospectors','Stags','Pronghorns','Goats','Meteors','Snowflakes','Rams'],
@@ -11337,7 +11340,7 @@ function olSupabase(cfg){
       const{data,error}=await sb.auth.getSession();err(error);return data&&data.session?data.session.user:null;},
     onAuth(cb){sb.auth.onAuthStateChange((ev,session)=>cb(session?session.user:null));},
     async usernameFree(name){const{data,error}=await sb.from('profiles').select('id').ilike('username',name.replace(/[%_\\]/g,'\\$&')).limit(1);err(error);return!(data&&data.length);},
-    async signUp(username,email,password){const{data,error}=await sb.auth.signUp({email,password,options:{data:{username},emailRedirectTo:location.href.split('#')[0]}});err(error);return{user:data.user,session:!!data.session};},
+    async signUp(username,email,password){const{data,error}=await sb.auth.signUp({email,password,options:{data:{username},emailRedirectTo:IS_NATIVE?undefined:location.href.split('#')[0]}});err(error);return{user:data.user,session:!!data.session};},
     async signIn(email,password){const{data,error}=await sb.auth.signInWithPassword({email,password});err(error);return data.user;},
     async signOut(){await sb.auth.signOut();},
     async profile(uid){const{data,error}=await sb.from('profiles').select('id,username').eq('id',uid).maybeSingle();err(error);return data;},
@@ -11756,15 +11759,15 @@ function olStatsHtml(){
 }
 function olAcctHtml(){
   const c=olCfg(),srv=`<div class="ol-mu" style="margin-top:12px">${c.mode==='local'?'Test mode: accounts and records live in this browser only.':'Online server: '+olEsc(c.url.replace(/^https:\/\//,''))}${c.builtIn?'':` · <a href="#" onclick="OLS.cfgOpen=true;olRender();return false">change</a>`}</div>`;
-  if(OLS.user)return pfEditHtml()+cloudAcctHtml()+sharedInHtml()+`<div class="pnl" style="margin-bottom:14px"><div class="ph">Account</div><div class="pb"><p class="ol-p">Signed in as ${pfTag(OLS.profile||{username:olName()},24)}${OLS.user.email?` (${olEsc(OLS.user.email)})`:''}.</p><div class="ol-row"><button class="bgh" onclick="olSignOut()">Sign out</button><button class="bgh" onclick="privacyOpen()">Privacy policy</button></div>${srv}</div></div>
+  if(OLS.user)return pfEditHtml()+cloudAcctHtml()+sharedInHtml()+`<div class="pnl" style="margin-bottom:14px"><div class="ph">Account</div><div class="pb"><p class="ol-p">Signed in as ${pfTag(OLS.profile||{username:olName()},24)}${OLS.user.email?` (${olEsc(OLS.user.email)})`:''}.</p><div class="ol-row"><button class="bgh" onclick="olSignOut()">Sign out</button><button class="bgh" onclick="privacyOpen()">Privacy policy</button><button class="bgh" onclick="termsOpen()">Terms of use</button></div>${srv}</div></div>
     ${blockedHtml()}
     <div class="pnl" style="border-color:var(--rd)"><div class="ph" style="color:var(--rd)">Delete account</div><div class="pb"><p class="ol-p">Permanently deletes your account, profile, friends list, the saves on your account and the saves you sent or received. Saves on this device stay. This cannot be undone.</p><button class="btn" style="background:var(--rd);border-color:var(--rd)" onclick="olDeleteAccount()">Delete my account</button></div></div>`;
   const up=OLS.authMode==='up';
   return`<div class="pnl"><div class="ph">${up?'Create an account':'Sign in'}</div><div class="pb">
     <div class="ol-form">${up?`<label>Username<input id="ol-un" maxlength="20" autocomplete="username" placeholder="3-20 letters, numbers or _"></label>`:''}
-      <label>Email<input id="ol-em" type="email" autocomplete="email"></label><label>Password<input id="ol-pw" type="password" autocomplete="${up?'new-password':'current-password'}" placeholder="${up?'at least 8 characters':''}" onkeydown="if(event.key==='Enter')olAuth()"></label></div>
+      <label>Email<input id="ol-em" type="email" autocomplete="email"></label><label>Password<input id="ol-pw" type="password" autocomplete="${up?'new-password':'current-password'}" placeholder="${up?'at least 8 characters':''}" onkeydown="if(event.key==='Enter')olAuth()"></label>${up?`<label style="display:flex;align-items:flex-start;gap:8px;font-weight:600"><input id="ol-tos" type="checkbox" style="width:auto;margin-top:3px"><span>I agree to the <a href="#" onclick="termsOpen();return false">Terms of use</a>: no offensive or abusive content.</span></label>`:''}</div>
     <div class="ol-row"><button class="btn bgn" ${OLS.busy?'disabled':''} onclick="olAuth()">${up?'Create account':'Sign in'}</button><button class="bgh" onclick="OLS.authMode='${up?'in':'up'}';olRender()">${up?'I already have an account':'Create an account'}</button></div>
-    <p class="ol-mu">Your username is what friends search for. Your email is only used to sign in. <a href="#" onclick="privacyOpen();return false">Privacy policy</a></p>${srv}</div></div>`;
+    <p class="ol-mu">Your username is what friends search for. Your email is only used to sign in. <a href="#" onclick="privacyOpen();return false">Privacy policy</a> · <a href="#" onclick="termsOpen();return false">Terms of use</a></p>${srv}</div></div>`;
 }
 async function olAuth(){
   const up=OLS.authMode==='up',v=id=>(document.getElementById(id)||{}).value||'',em=v('ol-em').trim(),pw=v('ol-pw'),un=v('ol-un').trim();
@@ -11772,6 +11775,7 @@ async function olAuth(){
   if(up&&pfBad(un)){notify('Please pick a different username.','e');return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){notify('Enter a valid email','e');return;}
   if(pw.length<(up?8:1)){notify(up?'Use at least 8 characters for the password':'Enter your password','e');return;}
+  if(up&&!(document.getElementById('ol-tos')||{}).checked){notify('Please agree to the Terms of use to create an account','e');return;}
   OLS.busy=true;olRender();
   try{const B=await olBackend();
     if(up){if(!(await B.usernameFree(un)))throw new Error('That username is taken');const r=await B.signUp(un,em,pw);
@@ -11878,6 +11882,17 @@ function cloudLocalExt(B){
 /* ---- v2.14 safety, privacy and saves with friends ---- */
 const PF_BAD=['fuck','shit','cunt','nigg','faggot','bitch','whore','slut','rapist','nazi','hitler','porn','pussy','asshole','retard'];
 function pfBad(s){const t=String(s||'').toLowerCase().replace(/0/g,'o').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[4@]/g,'a').replace(/[5$]/g,'s').replace(/7/g,'t').replace(/[^a-z]/g,'');return PF_BAD.some(w=>t.includes(w));}
+// v2.14: set this to your support email before publishing (shown in Privacy, Terms and Settings)
+const SUPPORT_EMAIL='';
+function supportHtml(){return SUPPORT_EMAIL?`<a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>`:'the support contact on the game\'s store page';}
+function termsOpen(){openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:8px">Terms of use</div><div style="font-size:13px;line-height:1.55;max-height:60vh;overflow-y:auto">
+  <p>These terms apply to Online Play accounts. Playing offline needs no account.</p>
+  <p><b>No objectionable content or abusive players.</b> There is zero tolerance for offensive, hateful, sexual, threatening or harassing usernames, profiles, messages or shared saves, and for cheating that ruins other players' games.</p>
+  <p><b>Reporting and blocking.</b> You can block or report any player from their profile or your friends list. Reports are reviewed within 24 hours; content that breaks these terms is removed and the account responsible can be suspended or deleted.</p>
+  <p><b>Your account.</b> Keep your password private. You can delete your account at any time under Online Play → Account.</p>
+  <p><b>The game.</b> All teams, leagues, schools and players in the game are fictional. The game is provided as is.</p>
+  <p><b>Contact.</b> ${SUPPORT_EMAIL?supportHtml():'Use the support contact on the game\'s store page.'}</p></div>
+  <div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo()">Close</button></div>`);}
 function privacyOpen(){openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:8px">Privacy policy</div><div style="font-size:13px;line-height:1.55;max-height:60vh;overflow-y:auto">
   <p><b>Playing without an account.</b> Your careers, settings and replays stay on your device (browser storage). Nothing is sent anywhere.</p>
   <p><b>Online Play account (optional).</b> If you create one, the game stores your username, email address (used only to sign in), the profile you fill in (display name, emblem, bio, home state), your friends list, the results of games you play online, saves you back up or send to friends, and reports or blocks you make. Your email is never shown to other players.</p>
@@ -11885,7 +11900,7 @@ function privacyOpen(){openMo(`<div style="font-weight:900;font-size:20px;margin
   <p><b>No ads, no tracking, no selling.</b> The game has no advertising, no analytics and does not sell or share your data.</p>
   <p><b>Deleting your data.</b> Use Online Play → Account → Delete my account at any time. It removes your account and everything stored with it. Saves on this device can be deleted from Load Game.</p>
   <p><b>Children.</b> The game is meant for everyone; online accounts need an email address and should be created by players 13 or older, or with a parent's help.</p>
-  <p><b>Contact.</b> Questions or a request about your data: use the support contact on the game's store page.</p></div>
+  <p><b>Contact.</b> Questions or a request about your data: ${supportHtml()}.</p></div>
   <div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo()">Close</button></div>`);}
 async function olDeleteAccount(){
   const t=prompt('This permanently deletes your online account and everything stored with it. Type DELETE to confirm.');
