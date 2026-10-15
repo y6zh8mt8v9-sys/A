@@ -1,4 +1,4 @@
-# Gridiron Prep GM v2.14
+# Gridiron Prep GM v2.15
 
 High school football GM with a playable Game Day engine.
 
@@ -7,20 +7,65 @@ High school football GM with a playable Game Day engine.
 | File | What it is |
 | --- | --- |
 | `app/` | The web app source (open `app/index.html`, or host the folder). |
-| `Gridiron_web_app_v2_14.zip` | The same folder zipped, ready to upload to your host. |
-| `Gridiron_v2_14_code.txt` | `index.html` as plain text. |
-| `sw214.js` | The offline service worker (same as `app/sw.js`). |
-| `supabase setup.sql` | The Online Play database script, updated for v2.14. |
+| `Gridiron_web_app_v2_15.zip` | The same folder zipped, ready to upload to your host. |
+| `Gridiron_v2_15_code.txt` | `index.html` as plain text. |
+| `sw215.js` | The offline service worker (same as `app/sw.js`). |
+| `supabase setup.sql` | The Online Play database script, updated for v2.15. |
 | `Gridiron_web_app_v2_13.zip`, `Gridiron_v2_13_code.txt`, `sw213.js` | The previous version, unchanged. |
 
-## Deploying v2.14
+## Deploying v2.15
 
-1. Upload the contents of `Gridiron_web_app_v2_14.zip` to your host (same place as v2.13).
+1. Upload the contents of `Gridiron_web_app_v2_15.zip` to your host (same place as v2.13).
 2. **Online Play database:** open Supabase → SQL Editor → paste the whole `supabase setup.sql` → Run.
    It is safe to run again and keeps all data. It adds what the new online features need:
-   account deletion, blocking, reporting and sending saves to friends.
+   account deletion, blocking, reporting, sending saves to friends and community teams.
    Until you run it, those buttons show a message asking for the update; everything else keeps working.
-3. Players get the new version the next time they open the game (the service worker cache is now `gpgm-2.14`).
+3. Players get the new version the next time they open the game (the service worker cache is now `gpgm-2.15`).
+
+## What's new in 2.15
+
+### Game Day
+- **Move buttons and keys:** Juke and Dive buttons join Spin, Stiff arm, Truck and Hurdle, all labelled with their key.
+  Every key can be changed (Pause → Settings → Change keys).
+- **Controllers:** Xbox, PlayStation and most other gamepads work in the game and in the menus.
+- **Kick returns can be skipped** (Settings → Kick returns): the kickoff resolves at once.
+- **Difficulty sliders** for you and the CPU:
+  - speed, acceleration, strength, awareness
+  - throwing accuracy, ball speed, catching, interceptions
+  - man and zone coverage, fumbles, juking
+  - game speed
+  - presets: Easy, Normal, Hard, Legend
+- **Balance:**
+  - Jump balls and contested catches are decided by coverage and hands ratings, overall and height.
+  - Catching is a little harder.
+  - Good offensive lines hold up much better.
+  - Fast players are clearly faster than slow ones.
+  - Tall QBs throw over linebackers more easily, and tall receivers win high balls.
+- **TV-style scorebug** (the classic one is still in Settings).
+- **Cheerleaders** at every stadium, in the home team's colors.
+- **Slow phones:**
+  - Settings → Graphics: Fast lowers the resolution and turns off the title-screen highlights.
+  - Fans in the stands: Light or Off.
+- **Halftime** now explains who kicks off and why.
+
+### Career
+- **Edit Player:** height, weight, class and the face (skin tone, hairstyle, hair and eye color, facial hair).
+- **Edit many players at once** (Roster): add to, set or raise ratings for the whole team, offense, defense, a position or the JV.
+- **Ticket sales:**
+  - Home games earn gate and concession money, depending on stadium size, winning, prestige, rivals and playoffs.
+  - You set the ticket price on the Staff page.
+- **Trophy Case** (Program): titles, player awards and program records.
+- The staff "Head Coach" slot is now the **Assistant Head Coach**; you are the head coach.
+
+### Free Practice
+- Click any player on a Free Practice roster to edit him: name, number, position, ratings, size and face.
+- **Share codes** to send a team to a friend.
+- **Community teams** (Online Play account): publish your teams, browse and download other players' teams, report or block.
+
+### Fixes
+- A player who changes position keeps his height and weight.
+  His body no longer gets forced into the new position's size range.
+- The Sliders, Privacy policy and Terms windows no longer open behind the Settings window.
 
 ## What's new in 2.14
 

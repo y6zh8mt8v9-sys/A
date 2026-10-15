@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
--- Gridiron Prep GM · Online Play database (Supabase) · v2.14: account deletion, blocks, reports, saves with friends
+-- Gridiron Prep GM · Online Play database (Supabase) · v2.15: community teams (also: account deletion, blocks, reports, saves with friends)
 -- Run once: Supabase dashboard → SQL Editor → New query → paste this whole file → Run.
 -- It is safe to run again later (it updates the rules without touching saved data).
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -268,3 +268,38 @@ end;
 $$;
 revoke all on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- 7) v2.15: COMMUNITY TEAMS: Free Practice teams players publish for everyone to download ─────────────
+create table if not exists public.community_teams (
+  id uuid primary key default gen_random_uuid(),
+  owner uuid not null references auth.users(id) on delete cascade,
+  username text not null default '',
+  name text not null check (char_length(name) between 1 and 80),
+  ovr int not null default 60,
+  data jsonb not null check (pg_column_size(data) < 200000),
+  downloads int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists community_teams_created on public.community_teams (created_at desc);
+create index if not exists community_teams_owner on public.community_teams (owner);
+alter table public.community_teams enable row level security;
+drop policy if exists "Read community teams" on public.community_teams;
+create policy "Read community teams" on public.community_teams
+  for select to authenticated using (true);
+drop policy if exists "Publish your own teams" on public.community_teams;
+create policy "Publish your own teams" on public.community_teams
+  for insert to authenticated with check ((select auth.uid()) = owner
+    and (select count(*) from public.community_teams c where c.owner = (select auth.uid())) < 20);
+drop policy if exists "Remove your own teams" on public.community_teams;
+create policy "Remove your own teams" on public.community_teams
+  for delete to authenticated using ((select auth.uid()) = owner);
+revoke all on public.community_teams from anon, authenticated;
+grant select, insert, delete on public.community_teams to authenticated;
+
+-- counts a download without letting anyone edit other players' teams
+create or replace function public.community_download(tid uuid) returns void
+language sql security definer set search_path = '' as $$
+  update public.community_teams set downloads = downloads + 1 where id = tid;
+$$;
+revoke all on function public.community_download(uuid) from public, anon;
+grant execute on function public.community_download(uuid) to authenticated;
