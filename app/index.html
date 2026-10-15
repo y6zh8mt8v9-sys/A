@@ -472,6 +472,27 @@ body{height:100%;}
 #app{height:100vh;height:-webkit-fill-available;height:100dvh;}
 #main{min-height:0;}
 #ct{min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:max(18px,env(safe-area-inset-bottom));}
+/* v2.14: the setup screen was centered with flexbox, so a page taller than the screen lost its top (title, state picker)
+   and could not be scrolled back to it. Start at the top, and only center when there is room. */
+#setup{justify-content:flex-start!important}#setup>*{flex-shrink:0}#setup>:first-child{margin-top:auto}#setup>:last-child{margin-bottom:auto}
+/* v2.14 two-level navigation: five sections, each with its own short row of pages */
+#nav-prim{display:flex;gap:4px;padding:6px 10px 0;background:var(--s1);flex-shrink:0;}
+#nav-prim .np{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;border-radius:14px 14px 0 0;padding:6px 4px 7px;color:var(--mu);font:800 12px/1.1 Nunito,system-ui,sans-serif;letter-spacing:.02em;cursor:pointer;position:relative;min-height:46px}
+#nav-prim .np svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#nav-prim .np.on{color:#fff;background:linear-gradient(180deg,#7fd6ff 0%,#22a8f0 48%,#0f8ad6 52%,#36b4f5 100%);box-shadow:0 -2px 10px rgba(15,138,214,.35),inset 0 1px 0 rgba(255,255,255,.7)}
+#nav-prim .np i{position:absolute;top:5px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:var(--gd);box-shadow:0 0 0 2px var(--s1);display:none}
+#nav-prim .np.dot i{display:block}
+body[data-navg] #nav-bar .nav-group{display:none}
+body[data-navg="home"] #nav-bar .nav-group[data-g="home"],body[data-navg="team"] #nav-bar .nav-group[data-g="team"],body[data-navg="season"] #nav-bar .nav-group[data-g="season"],body[data-navg="league"] #nav-bar .nav-group[data-g="league"],body[data-navg="program"] #nav-bar .nav-group[data-g="program"],body[data-navg] #nav-bar .nav-group[data-g="util"]{display:flex}
+body[data-navg] #nav-bar .nav-group+.nav-group::before{display:none}
+body[data-navg] #nav-bar .nav-group[data-g="util"]{margin-left:auto}
+@media (max-width:768px){
+  #nav-prim{order:3;padding:4px 6px calc(4px + env(safe-area-inset-bottom));border-top:1px solid var(--bd);gap:2px}
+  #nav-prim .np{border-radius:12px;font-size:11px;min-height:50px}
+  #nav-bar{order:2;padding-bottom:0!important;justify-content:flex-start}
+  body[data-navg] #nav-bar .nav-group[data-g="util"],#nav-team-strip{display:none!important}
+  body[data-navg] #nav-bar .nb{margin:5px 3px!important;padding:8px 14px!important;min-height:38px;font-size:13px}
+}
 #mo,#pu,#confirm-menu,#tut-overlay,#settings-modal{overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:max(12px,env(safe-area-inset-top)) 10px max(12px,env(safe-area-inset-bottom));align-items:flex-start!important;}
 #mb,#pui,#tut-box,.offer-popup-box,#settings-modal>div{margin:auto!important;}
 #mb{overflow-y:auto!important;max-height:90vh;max-height:calc(100dvh - 24px)!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
@@ -851,6 +872,7 @@ button,a,.nb,.cp,.rkb{touch-action:manipulation;}
   </div>
   <div id="main">
     <!-- ── WINDOWED NAV BAR (replaces sidebar) ── -->
+    <div id="nav-prim" role="tablist" aria-label="Sections"></div>
     <div id="nav-bar">
       <!-- Team Strip -->
       <div id="nav-team-strip" onclick="nav('dash')" title="Dashboard">
@@ -939,6 +961,12 @@ button,a,.nb,.cp,.rkb{touch-action:manipulation;}
         </div>
         <button id="set-unlim-btn" onclick="toggleUnlimitedMoney()" style="min-width:70px;padding:6px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;transition:all .15s;border:2px solid var(--bd);background:var(--s3);color:var(--mu)">OFF</button>
       </div>
+    </div>
+
+    <!-- v2.14 Game Day settings (the same ones as the in-game pause menu) -->
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:14px 16px;margin-bottom:20px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:10px">Game Day</div>
+      <div id="set-gd"></div>
     </div>
 
     <button onclick="closeSettings()" class="btn" style="width:100%">Done</button>
@@ -1063,7 +1091,20 @@ function toggleTheme(){
 }
 
 // ── SETTINGS MODAL ──
+// v2.14 Game Day settings shared with the game (stored on this device)
+const GDS_MAIN_DEF={sound:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true};
+function gdsMain(){let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}return Object.assign({},GDS_MAIN_DEF,o);}
+function gdsMainSet(k,v){const o=gdsMain();o[k]=v;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}renderGdSettings();}
+function renderGdSettings(){const el=document.getElementById('set-gd');if(!el)return;const S=gdsMain();
+  const seg=(k,opts)=>`<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${opts.map(([v,l])=>`<button class="${S[k]===v?'btn':'bgh'} bxs" style="min-height:30px;padding:4px 10px" onclick='gdsMainSet(${JSON.stringify(k)},${JSON.stringify(v)})'>${l}</button>`).join('')}</div>`;
+  const row=(l,h)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700">${l}</span>${h}</div>`;
+  el.innerHTML=row('Sound effects',seg('sound',[[true,'On'],[false,'Off']]))+row('Volume',`<input type="range" min="0" max="1" step="0.05" value="${S.vol}" oninput="gdsMainSet('vol',+this.value)" style="width:140px">`)
+    +row('Crowd noise',seg('crowd',[[true,'On'],[false,'Off']]))+row('Gameplay tips',seg('tips',[[false,'Hidden'],[true,'Shown']]))
+    +row('Ball size',seg('ball',[[0.85,'S'],[1,'M'],[1.25,'L'],[1.5,'XL']]))+row('Your offense drives',seg('dir',[['right','Right'],['left','Left'],['real','Switch each quarter']]))
+    +row('Vibration',seg('haptics',[[true,'On'],[false,'Off']]))
+    +`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="bgh bxs" onclick="closeSettings();showTutorial();setTimeout(()=>{const i=TUT_PAGES.findIndex(p=>p.tab==='PC controls');if(i>=0)goTutTab(i);},50)">Keyboard controls</button><button class="bgh bxs" onclick="privacyOpen()">Privacy policy</button></div>`;}
 function openSettings(){
+  try{renderGdSettings();}catch(e){}
   // Sync unlimited money button state
   syncUnlimBtn();
   // Sync theme buttons to current state
@@ -1098,7 +1139,7 @@ function toggleUnlimitedMoney(){
 // Helper: returns true if unlimited money is active — use this before every budget check
 function hasFunds(cost){return !!(G&&G.unlimitedMoney)||((G&&G.budget)||0)>=cost;}
 // Apply saved theme on load
-(function(){try{const t=localStorage.getItem('gpgm_theme');if(t==='light')setTheme('light');}catch(e){}}());
+(function(){try{const t=localStorage.getItem('gpgm_theme');if(t!=='dark')setTheme('light');}catch(e){setTheme('light');}}());
 
 const CLS_SZ={'1A':{r:[28,38],t:75,d:8},'2A':{r:[35,48],t:75,d:8},'3A':{r:[42,58],t:75,d:8},'4A':{r:[55,70],t:75,d:8},'5A':{r:[65,85],t:75,d:8}};
 // Classification move-up costs and roster minimums for demotion
@@ -6935,6 +6976,26 @@ function nxp(){_popI++;if(_popI>=_popQ.length){document.getElementById('pu').cla
 
 // ═══════════ NAVIGATION ═══════════
 const NL={mine:'My Player',dash:'Dashboard',news:'News',roster:'Roster',depth:'Depth Chart',training:'Training',staff:'Staff & Playbook',cust:'Customize',sched:'Schedule',stand:'Standings',rank:'Rankings',playoff:'Playoffs',teams:'Teams',leads:'Leaders',recr:'Recruiting',watch:'Watchlist',hof:'Hall of Fame',advisor:'Assistant GM',hist:'History & Records',jv:'JV Team',recls:'Reclassification'};
+// v2.14 two-level navigation
+const NAV_GROUPS=[['home','Home','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',['dash','mine','news']],
+  ['team','Team','M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 20c0-3 3-5 6-5s6 2 6 5M14 15c3 0 8 1 8 5',['roster','depth','jv','training','staff','cust']],
+  ['season','Season','M4 5h16v15H4zM4 9h16M8 3v4M16 3v4M8 13h3M8 16h6',['sched','stand','rank','playoff']],
+  ['league','League','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4',['teams','leads','recr']],
+  ['program','Program','M12 3l2.6 5.6 6.1.7-4.6 4.1 1.3 6L12 16.4 6.6 19.4l1.3-6L3.3 9.3l6.1-.7z',['advisor','watch','hof','hist','recls']]];
+function navGroupOf(pg){for(const g of NAV_GROUPS)if(g[3].includes(pg))return g[0];return'home';}
+function navInit(){
+  const bar=document.getElementById('nav-bar'),pr=document.getElementById('nav-prim');if(!bar||!pr||pr.dataset.ok)return;pr.dataset.ok='1';
+  bar.querySelectorAll('.nav-group').forEach(gr=>{const b=gr.querySelector('.nb[id^="nb-"]');const pg=b?b.id.slice(3):null;gr.dataset.g=pg?navGroupOf(pg):'util';});
+  pr.innerHTML=NAV_GROUPS.map(([k,l,ic])=>`<button class="np" id="np-${k}" role="tab" onclick="navGo('${k}')"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg><span>${l}</span><i></i></button>`).join('');
+}
+function navGo(k){const g=NAV_GROUPS.find(x=>x[0]===k);if(!g)return;const last=(G.navLast||{})[k];nav(last&&g[3].includes(last)&&(last!=='mine'||G.myPlayerId!=null)?last:g[3][0]);}
+function navSync(page){
+  try{navInit();const g=navGroupOf(page);document.body.dataset.navg=g;(G.navLast||(G.navLast={}))[g]=page;
+    for(const[k]of NAV_GROUPS){const b=document.getElementById('np-'+k);if(b)b.classList.toggle('on',k===g);}
+    const vis=id=>{const e=document.getElementById(id);return!!(e&&e.style.display!=='none');};
+    const h=document.getElementById('np-home');if(h)h.classList.toggle('dot',vis('news-badge'));const pg=document.getElementById('np-program');if(pg)pg.classList.toggle('dot',vis('adv-badge'));
+    const on=document.querySelector('#nav-bar .nb.on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'});}catch(e){}
+}
 function nav(page,arg){
   const _prevPg=G._page;
   G._page=page;G._arg=arg;
@@ -6958,6 +7019,7 @@ function nav(page,arg){
   updateTb();
   updateSbCard();
   try{aiBadge();}catch(e){}
+  navSync(page);
   // Clear news badge when visiting news
   if(page==='news'){const b=document.getElementById('news-badge');if(b)b.style.display='none';}
 }
@@ -6989,6 +7051,9 @@ function pgDash(){
   const hasEmptySlots=G.sched.some(g=>g.custom&&g._empty);
   if(hasEmptySlots){
     actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="openScheduleBuilder()"> Build Your Schedule →</button>`;
+  } else if(G.phase==='offseason'&&no&&nextUnplayed&&nextUnplayed.type==='regular'){
+    // a new season that has not started yet: the next step is week 1, not the offseason
+    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">▶ Play Week ${nextUnplayed.wk}</button>`;
   } else if(G.phase==='offseason'){
     actionBtn=`<button class="btn bgn" style="padding:8px 18px;font-size:14px" onclick="doOffseason()">Begin Offseason →</button>`;
   } else if(G.phase==='regular'&&no){
@@ -12851,7 +12916,17 @@ function advWk(){
   }));
 }
 
+// v2.14: never sim a season by surprise. If games are left, ask first and say how many.
 function doOffseason(){
+  const leftReg=G.sched.filter(g=>g.type==='regular'&&!g.result&&!g._empty).length,leftPo=G.sched.some(g=>g.type==='playoff'&&!g.result)||(G.phase==='regular'&&!G.playoff);
+  if(leftReg>0||(G.phase!=='postseason'&&G.phase!=='offseason'&&leftPo)){
+    openMo(`<div style="text-align:center;padding:6px 4px"><div style="font-weight:900;font-size:21px;margin-bottom:8px">Sim the rest of the season?</div>
+      <div style="font-size:14px;color:var(--mu);margin-bottom:16px">${leftReg?`<b>${leftReg} regular season game${leftReg===1?'':'s'}</b>${leftPo?' and the playoffs':''} will be simulated`:'The playoffs will be simulated'} and the season ends. You can't undo this.</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="bgh" style="min-width:150px" onclick="clo()">Cancel</button><button class="btn" style="min-width:150px;background:var(--rd);border-color:var(--rd)" onclick="clo();_doOffseason()">Yes, sim the season</button></div></div>`);
+    return;}
+  _doOffseason();
+}
+function _doOffseason(){
   // Show loading screen before simulating remaining games and transitioning to offseason
   const myTeam=myS();
   showLoading('Wrapping Up the Season…',myTeam,14,()=>{
@@ -14727,8 +14802,20 @@ const TUT_PAGES=[
       <li><strong style="color:var(--ac)">Playoffs</strong> — Single-elimination bracket. Upsets happen. Win your region to reach the State Final.</li>
       <li><strong style="color:var(--gn)">Training</strong> — Train your returners, welcome incoming freshmen to JV, upgrade staff, and build your schedule for next year.</li>
     </ul>
-    <p>The <strong>top nav bar</strong> organizes everything into six groups: Home, Roster, Development, Season, League, and Program. The <strong>top info bar</strong> always shows your current ratings, prestige, budget, week, and phase.</p>
-    <div class="tip"> Tip: Hit <strong>Save</strong> in the top bar often — your game downloads as a .json file you can reload anytime from the main menu.</div>
+    <p>Everything lives in <strong>five sections</strong>: <b>Home</b>, <b>Team</b>, <b>Season</b>, <b>League</b> and <b>Program</b> (big tabs at the top, or at the bottom on a phone). Pick a section and its pages show up in the row right next to it. The <strong>top info bar</strong> always shows your ratings, prestige, budget, week and phase.</p>
+    <p><b>Not sure what to do next?</b> The big button on the Dashboard is always the next step: build your schedule, play this week's game, start the playoffs or begin the offseason.</p>
+    <div class="tip">Tip: the game saves on this device automatically. Hit <strong>Save</strong> any time to save right away (and back it up to your account if you have one).</div>
+  `},
+  {tab:'Getting around',icon:'',title:'Getting Around: the Five Sections',body:`
+    <ul>
+      <li><b>Home</b>: Dashboard (your next step and this week's game), My Player (with a player career) and News.</li>
+      <li><b>Team</b>: Roster, Depth Chart, JV Team, Training, Staff &amp; Playbook and Customize (uniforms, stadium).</li>
+      <li><b>Season</b>: Schedule, Standings, Rankings and Playoffs.</li>
+      <li><b>League</b>: Teams, Leaders and Recruiting.</li>
+      <li><b>Program</b>: Assistant GM, Watchlist, Hall of Fame, History and Reclassify.</li>
+    </ul>
+    <p>A dot on <b>Home</b> means unread news; a dot on <b>Program</b> means new alumni stories.</p>
+    <div class="tip">Tip: "Begin Offseason" always asks first if games are left. It never sims your season by surprise.</div>
   `},
   {tab:'Dashboard',icon:'',title:'Dashboard & News',body:`
     <p>The <strong>Dashboard</strong> is your command center. Start here every week.</p>
@@ -14891,6 +14978,50 @@ const TUT_PAGES=[
     </ul>
     <p><strong>Accounts, friends and records:</strong> create an account (username, email and password) on the <strong>Account</strong> tab, then add friends by username. Every game between two signed-in players is saved once the guest's device confirms the final score. <strong>Stats &amp; records</strong> shows your online record, points for and against, streaks, standings between you and your friends, your head-to-head record against each friend, single-game records (biggest win, most points, team yards, and passing, rushing, receiving and touchdown highs by one player) and your recent games.</p>
     <div class="tip">Tip: online play needs the site owner to connect a free Supabase project once (see ONLINE_SETUP.md). Without one, test mode lets you try it between two browser tabs on the same device.</div>
+  `},
+  {tab:'Game Day modes',icon:'',title:'Game Day: Modes, Settings and Sound',body:`
+    <p>Before every game pick how you want to play:</p>
+    <ul><li><b>Full game</b>: you play every snap.</li><li><b>Coach mode</b>: you call every play on offense and defense, your team runs them.</li>
+      <li><b>Offense only</b> / <b>Defense only</b>: the other side's drives are simulated.</li></ul>
+    <p>The <b>pause menu</b> (top left) can switch coach mode and the game mode at any time, <b>sim to the end of the quarter</b>, sim the rest of the game, and open <b>Settings</b>: sound effects and volume, crowd noise, gameplay tips (hidden by default), ball size, which way your offense drives (right, left, or switching each quarter like a real game) and vibration.</p>
+    <p>In close games late, on fourth down and in overtime you feel the pressure: a heartbeat, a red edge on the screen and a louder crowd. Clutch and big-game players stay calm; others get smaller catch windows and faster kick meters.</p>
+    <p>Celebrate: 14 touchdown celebrations to pick from, plus sack and first-down celebrations. Big hits can knock a helmet off (that player sits a play). The <b>stiff arm</b> now shoves defenders away and can put them on the ground.</p>
+    <p>On defense, <b>tap any of your players</b> during the play to take control of him.</p>
+  `},
+  {tab:'PC controls',icon:'',title:'Playing on a Computer',body:`
+    <p>Every action has a key (the guide also opens the first time you play on a computer, and lives under Pause → Settings and controls).</p>
+    <ul>
+      <li><b>Snap</b>: Enter or Space · <b>Timeout</b>: T · <b>Pause</b>: P or Esc</li>
+      <li><b>Pass</b>: 1–5 throw to that receiver (the numbers float over them), Space for a bullet, C to run with the QB, or pull back with the mouse like a slingshot</li>
+      <li><b>Ball carrier</b>: W/S or ↑/↓ juke, D or → dive, A or ← slow down, E spin, Q stiff arm, R truck, H hurdle</li>
+      <li><b>Defense</b>: WASD or arrows move, J tackle, Tab switch, click a player to control him, K or Space when the ball meter is up</li>
+      <li><b>Kicks and catches</b>: Space or click to stop the meters · F fair catch · 1–9 pick a celebration</li>
+    </ul>
+  `},
+  {tab:'Stats & careers',icon:'',title:'Stats, Game Logs and Careers',body:`
+    <p>Every player card has a <b>Game Log</b> (each game this season) and a <b>Career</b> tab (season by season, career totals, awards and college).</p>
+    <p>New stats: tackles for loss, yards after the catch, punt returns and safeties, in Game Day and in simulated games.</p>
+    <p><b>Play-call splits</b>: after each Game Day game the box score shows every call you ran, its average gain, touchdowns and first downs, and what each of your coverages gave up. Season totals are on Staff &amp; Playbook.</p>
+    <p><b>Game XP</b>: players earn XP for what they do in games (big games earn more, playoff games a bonus). Every 10 XP becomes a skill point.</p>
+    <p><b>Hot and cold streaks</b> need three straight games, count in the playoffs, show up in Game Day, and a player can heat up again later in the season.</p>
+  `},
+  {tab:'Player career',icon:'',title:'Player Career: Your Own Player',body:`
+    <p>On the setup screen tick <b>Create my own player</b>, pick his name, position and number. He joins your team as a freshman with star potential.</p>
+    <p>Follow him on <b>Home → My Player</b>: his ratings, this season's game log, offers and commitment, and his high school career. After he graduates his college and pro career plays out year by year.</p>
+  `},
+  {tab:'Meetings',icon:'',title:'JV Talks, Transfer Meetings and Practice',body:`
+    <p><b>JV talks</b>: tap <b>Talk</b> next to a JV player to convince him to move up. Every player cares most about one thing (playing time, college exposure, winning, coaching or his teammates); his traits hint at it. The right pitch works much better. Calling a player up without talking to him can hurt his morale if he would sit on the bench.</p>
+    <p><b>Transfer meetings</b>: open another school's player and tap <b>Set up a meeting</b>. Four meetings per season, $1,500 each. Prestige, your record, playing time and the right pitch decide it.</p>
+    <p><b>Practice</b>: the JV plays the scout team against your starters and earns practice XP too.</p>
+    <p><b>Playbooks</b>: every standard playbook has new plays (shallow cross, bench, double post, play action from the I and split backs, stretch, wham, power read, speed option and more) and four new defenses (Cover 3 Buzz, Cover 1 Spy, Cover 2 Invert, Sim Pressure).</p>
+  `},
+  {tab:'League Setup',icon:'',title:'League Setup and Customizing',body:`
+    <p>On the setup screen, <b>League Setup</b> lets you rename every state and county, edit or add colleges at every level, change the pro teams, rename and resize divisions, and set how many players get each star rating and how big recruiting classes are. New careers use your setup; each save keeps the world it started with.</p>
+    <p>In <b>Edit Player</b> choose a helmet finish (gloss, matte, chrome), take the stripe off or pick a facemask color. In the uniform designer add <b>shoulder stripes</b> (single, double or triple). Jersey number 0 works everywhere.</p>
+  `},
+  {tab:'Online & privacy',icon:'',title:'Online Play: Friends, Saves and Privacy',body:`
+    <p>From the <b>Friends</b> tab you can <b>send a career save</b> to a friend; theirs show up under Account → Saves from friends, ready to add to Load Game.</p>
+    <p>You can <b>block</b> or <b>report</b> any player. Account → <b>Delete my account</b> removes your account and everything stored with it; the privacy policy is on the same page.</p>
   `},
   {tab:'Tips',icon:'',title:'Key Tips & Strategies',body:`
     <p>Everything you need to build a dynasty, condensed:</p>
