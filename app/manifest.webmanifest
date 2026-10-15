@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Gridiron Prep GM",
+  "short_name": "Gridiron GM",
+  "description": "High school football GM: build a dynasty, play every snap on Game Day, and play your friends online.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#071628",
+  "theme_color": "#071628",
+  "categories": ["games", "sports"],
+  "lang": "en",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
