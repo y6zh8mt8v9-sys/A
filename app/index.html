@@ -722,7 +722,7 @@ button,a,.nb,.cp,.rkb{touch-action:manipulation;}
     <svg class="tt-ball" viewBox="0 0 120 70" aria-hidden="true"><defs><radialGradient id="ttbg" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#c47a45"/><stop offset=".6" stop-color="#8b4a22"/><stop offset="1" stop-color="#4f240c"/></radialGradient></defs><ellipse cx="60" cy="35" rx="54" ry="30" fill="url(#ttbg)"/><ellipse cx="48" cy="22" rx="28" ry="9" fill="#fff" opacity=".28"/><path d="M28,13 Q21,35 28,57 M92,13 Q99,35 92,57" stroke="#fff" stroke-width="4" fill="none"/><path d="M42,35 H78" stroke="#fff" stroke-width="3.5"/><path d="M46,29 V41 M53,29 V41 M60,29 V41 M67,29 V41 M74,29 V41" stroke="#fff" stroke-width="3"/></svg>
     <h1 class="tt-name"><span class="a">Gridiron</span> <span class="b">Prep GM</span></h1>
     <p class="tt-tag">Build a dynasty. Develop players. Win State.</p>
-    <div class="tt-ver">Version 2.13 · Game Day included</div>
+    <div class="tt-ver">Version 2.14 · Game Day included</div>
     <div class="tt-btns">
       <button id="tt-continue" class="tt-btn pri" style="display:none">Continue<small></small></button>
       <button class="tt-btn pri" onclick="ttNew()">Start New Game</button>
@@ -5726,6 +5726,8 @@ function applyPhaseTrain(phase){
 }
 
 function finalizeOffseason(){
+  // v2.14: record the season that just ended before seniors leave and everyone moves up a grade
+  try{const ab=schAbbr(myS()),yr=(G.baseYear||2026)+(G.yr-1);for(const p of G.players.filter(q=>q.sId===G.myId))archiveSeason(p,yr,ab);}catch(e){console.error('season archive',e);}
   G.osPhase=0;
   if(!G.wlArchive)G.wlArchive=[];
   if(!G.hofArchive)G.hofArchive=[];
