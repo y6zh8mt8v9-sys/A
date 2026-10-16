@@ -714,6 +714,11 @@ button,a,.nb,.cp,.rkb{touch-action:manipulation;}
 .ol-res-m{font-size:12px;color:var(--mu);margin-top:10px}
 
 .padf{outline:3px solid #f5c030!important;outline-offset:2px}
+/* v2.16 the top bars slide away while you scroll down and come back when you scroll up */
+#tb,#nav-bar,#nav-prim{transition:max-height .28s ease,opacity .22s ease,padding .28s ease,border-width .28s ease}
+#tb{max-height:200px}#nav-bar{max-height:140px}#nav-prim{max-height:140px}
+body.hdr-hide #tb,body.hdr-hide #nav-bar,body.hdr-hide #nav-prim{max-height:0!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important;border-width:0!important;opacity:0;overflow:hidden}
+@media (max-width:768px){body.hdr-hide #nav-prim{max-height:140px!important;opacity:1;padding-top:6px!important;padding-bottom:0!important}body.hdr-hide #nav-bar{max-height:0!important}}
 /* v2.16 Android: the frosted-glass blur is the most expensive thing on the page there */
 html.and *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
@@ -899,6 +904,8 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
       <div class="nav-group">
         <button class="nb" id="nb-roster" onclick="nav('roster')"><span class="nb-icon"></span>Roster</button>
         <button class="nb" id="nb-jv" onclick="nav('jv')"><span class="nb-icon"></span>JV Team</button>
+        <button class="nb" id="nb-recr" onclick="nav('recr')"><span class="nb-icon"></span>Recruiting</button>
+        <button class="nb" id="nb-scout" onclick="nav('scout')"><span class="nb-icon"></span>Scouting</button>
         <button class="nb" id="nb-depth" onclick="nav('depth')"><span class="nb-icon"></span>Depth Chart</button>
       </div>
       <!-- Development group -->
@@ -918,7 +925,6 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
       <div class="nav-group">
         <button class="nb" id="nb-teams" onclick="nav('teams')"><span class="nb-icon"></span>Teams</button>
         <button class="nb" id="nb-leads" onclick="nav('leads')"><span class="nb-icon"></span>Leaders</button>
-        <button class="nb" id="nb-recr" onclick="nav('recr')"><span class="nb-icon"></span>Recruiting</button>
       </div>
       <!-- Program / Archive group -->
       <div class="nav-group">
@@ -1138,6 +1144,10 @@ function padMainStep(){
 }
 addEventListener('gamepadconnected',()=>{if(!PADN.on)try{notify('Controller connected: d-pad to move, A to select, B to go back, LB/RB to switch sections');}catch(e){}padStart(padMainStep);});
 setTimeout(()=>{if(padGet())padStart(padMainStep);},800);
+(function(){const go=()=>{const ct=document.getElementById('ct');if(!ct||ct._hdr)return;ct._hdr=1;let last=0,acc=0;
+  ct.addEventListener('scroll',()=>{const y=ct.scrollTop,d=y-last;last=y;if(y<40){document.body.classList.remove('hdr-hide');acc=0;return;}
+    acc=(d>0)===(acc>0)?acc+d:d;if(acc>28)document.body.classList.add('hdr-hide');else if(acc<-28)document.body.classList.remove('hdr-hide');},{passive:true});};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
 // ── SETTINGS MODAL ──
 // v2.14 Game Day settings shared with the game (stored on this device)
 const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'row',clickTk:true};
@@ -2725,7 +2735,7 @@ function sLogo(s,sz=28){
   if(!s)return'';
   if(s.customLogo)return`<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><image href="${s.customLogo}" x="0" y="0" width="${sz}" height="${sz}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   if(s.intl&&s.intl!=='US'&&INTL_LOGO[s.id]){const L=intlLogoSvg(s,sz);if(L)return L;}
-  const ck=[s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
+  const ck=[s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0,s.logoKey||'',s.mash||''].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
   let _st='CF';try{_st=s.cls?clsSt(s.cls):'CF';}catch(e){}_LGcur=_ST_GLYPHS[_st]||null;
   try{return _sLogoBody(s,sz,ck);}finally{_LGcur=null;}
 }
@@ -2737,7 +2747,7 @@ function _sLogoBody(s,sz,ck){
   const ini=((s.name||s.mascot||'?').match(/[A-Za-z]/)||['?'])[0].toUpperCase();
   const P={var:(h>>>11)%2,F:c1,K:_lm(c1)>.45?_mx(c1,'#000000',.7):'#f4f6f8',L:_mx(c1,'#ffffff',.42),D:_mx(c1,'#000000',.4),A:Math.abs(_lm(c1)-_lm('#f0b72f'))<.22?c2:'#f0b72f',O:'#0b1118',ch:ini};
   const rm=['shade','shade','shade','flat','flat','mono'][(h>>>9)%6];if(rm==='mono'){P.L=c2;P.A=c2;P.D=_mx(c1,'#000000',.35);}
-  const mk=(s.mascot||'').toLowerCase(),key=_LK[mk],tc=_lm(c2)<.4?_mx(c2,'#ffffff',.6):c2;
+  const mk=(s.mascot||'').toLowerCase(),key=(s.logoKey&&_LGO[s.logoKey])?[s.logoKey,'']:_LK[mk],tc=_lm(c2)<.4?_mx(c2,'#ffffff',.6):c2;
   const FONT="font-family=\"'Alfa Slab One',Impact,'Arial Black',sans-serif\"";
   let body;
   const small=sz<=44,up=t=>String(t||'').toUpperCase();
@@ -2746,7 +2756,7 @@ function _sLogoBody(s,sz,ck){
   const word=up(s.mascot||''),scr=(s.mascot||'').charAt(0).toUpperCase()+(s.mascot||'').slice(1).toLowerCase();
   const TX=(x,y,fs,t,ex)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${fs}" font-weight="400" fill="${c1}" ${ex||''}>${t}</text>`;
   let k='',mas='';
-  if(key){k=key[0];let v=key[1];const alts=_ALT[mk];if(alts&&h3%3===0){k=alts[(h3>>>2)%alts.length];v='';}
+  if(key){k=key[0];let v=key[1];const alts=s.logoKey?null:_ALT[mk];if(alts&&h3%3===0){k=alts[(h3>>>2)%alts.length];v='';}
     let PP=P;if(v==='polar')PP=Object.assign({},P,{F:'#eef2f6',L:'#ffffff',D:'#aebbc8',K:'#1b2430'});else if(v==='zebra')PP=Object.assign({},P,{F:'#f2f2f2',L:'#ffffff',D:'#17191c',K:'#111111'});else if(v==='raven')PP=Object.assign({},P,{F:'#23262d',L:'#5a6170',D:'#0d0e11',K:'#f4f6f8'});
     mas=_LGO[k](PP,v);if(_FLIP.has(k)&&(h3>>>4)%2)mas=`<g transform="${_MR}">${mas}</g>`;
     if(rm==='shade'&&PP!==P&&PP.F!==c1)mas=mas.split(`fill="${PP.F}"`).join(`fill="url(#${_lgG(PP.F)})"`);}
@@ -2755,6 +2765,7 @@ function _sLogoBody(s,sz,ck){
   if(!key&&!['block','inter','outline','stack'].includes(sty))sty=(h>>>3)%2?'block':'inter';
   if(small&&['word','script','stack','tag'].includes(sty))sty=key?'head':'block';
   if(k==='paw'||k==='claw')sty=small?'head':(sty==='word'?'word':'head');
+  if(s.logoKey&&_LGO[s.logoKey])sty='head';
   const ol=(g)=>g.replace(/fill="[^"]*" stroke="[^"]*" stroke-width="[^"]*"/,`fill="${P.O}" stroke="${P.O}" stroke-width="20"`);
   const sw1=(words[0]||s.name||'').toUpperCase().slice(0,12);
   if(sty==='block')body=_gt(ini,50,92,96,94,c1);
@@ -2766,6 +2777,8 @@ function _sLogoBody(s,sz,ck){
   else if(sty==='script')body=`<text class="scr" x="50" y="62" text-anchor="middle" font-size="44" fill="${c1}" textLength="90" lengthAdjust="spacingAndGlyphs" transform="rotate(-7 50 55)">${scr}</text><path d="M10,78 C36,90 68,86 94,66" fill="none" stroke="${c1}" stroke-width="5.5" stroke-linecap="round"/>`;
   else if(sty==='letter')body=_gt(ini,50,94,104,96,tc)+`<g transform="translate(15 4) scale(.72)">${mas}</g>`;
   else body=`<g transform="translate(8 7) scale(.84)">${mas}</g>`;
+  // v2.16 mascot mashup: a second icon as a badge on the logo
+  if(s.mash&&_LGO[s.mash]){try{const P2=Object.assign({},P,{F:c2,L:_mx(c2,'#ffffff',.42),D:_mx(c2,'#000000',.4),K:_lm(c2)>.45?_mx(c2,'#000000',.7):'#f4f6f8'});body+=`<g transform="translate(56 56) scale(.46)">${_LGO[s.mash](P2,'')}</g>`;}catch(e){}}
   if(rm==='shade')body=body.split(`fill="${c1}"`).join(`fill="url(#${_lgG(c1)})"`);
   const big=sz>44,id=_lgf(c2,big);
   const bb=_lgm(body);let tf='';
@@ -5158,8 +5171,21 @@ function genOffers(p,scoutBoost,pops){
   if(crazy&&Math.random()<0.35){t+=10+Math.random()*16;why='numbers too big to ignore';}
   let c=colPick(t,p,crazy?40:20);if(!c&&(p.gpa||0)<2.0&&Math.random()<0.5)c=colPick(t,p,crazy?40:20,true);if(c&&c.pr<=Math.max(8,L)+(crazy?36:18))addOffer(p,c,pops,why);
 }
+// v2.16 commitments can flip: a committed senior may jump to a clearly better offer before signing day, or you can push him to
+function colRelease(p,o){try{const c=COL_BY[o.school+'|'+o.lvl];if(!c)return;const S=colCls(c,colClassYr(p));S.com[p.pos]=Math.max(0,(S.com[p.pos]||0)-1);}catch(e){}}
+function colFlipTarget(p){if(!p.committed||p.yr!==12||!(G.phase==='regular'||G.phase==='playoffs'))return null;const cur=colPr(p.committed);
+  const b=colOpenOffers(p).filter(o=>o.school!==p.committed.school&&colPr(o)>=cur+8).sort((a,b)=>colPr(b)-colPr(a))[0];return b||null;}
+function plFlip(p,o,pushed){const old=p.committed;colRelease(p,old);p.committed=o;colTakeCommit(p,o);
+  if(p.sId===G.myId){addLog(`<span style="color:var(--gd)">FLIP: ${p.fn} ${p.ln} flips from ${old.school} to ${o.school} (${o.lvl})${pushed?' after a talk with you':''}!</span>`);try{addNews('offer',`${p.fn} ${p.ln} flips to ${o.school}`,`Was committed to ${old.school}.`);}catch(e){}}}
+function colAutoFlip(p){const o=colFlipTarget(p);if(o&&Math.random()<0.025)plFlip(p,o,false);}
+window.pushFlip=function(pid){const p=getP(pid);if(!p||p.sId!==G.myId)return;const o=colFlipTarget(p);if(!o){notify('No better offer to flip to.','w');return;}
+  if(p.flipYr===G.yr){notify(`You already talked to ${p.fn} about flipping this season.`,'w');return;}p.flipYr=G.yr;
+  const ch=clamp(0.3+(G.prestige-1)*0.05+(colPr(o)-colPr(p.committed))*0.01+((p.morale||65)-60)*0.005,0.1,0.8);
+  if(Math.random()<ch){plFlip(p,o,true);notify(`${p.fn} flips to ${o.school}!`);}else{p.morale=clamp((p.morale||65)-4,0,100);notify(`${p.fn} is sticking with ${p.committed.school}.`,'w');}
+  clo();showPlayer(pid);};
 function checkCommit(p){
-  if(p.committed||!p.offers||!p.offers.length||p.yr<11)return;
+  if(p.committed){colAutoFlip(p);return;}
+  if(!p.offers||!p.offers.length||p.yr<11)return;
   const isSenior=p.yr===12,wk=G.week||0,urgency=isSenior?Math.min(0.22,0.07+wk*0.015):0.04;
   if(Math.random()>urgency)return;
   const open=colOpenOffers(p);if(!open.length)return;
@@ -7100,9 +7126,9 @@ function nxp(){_popI++;if(_popI>=_popQ.length){document.getElementById('pu').cla
 const NL={mine:'My Player',dash:'Dashboard',news:'News',roster:'Roster',depth:'Depth Chart',training:'Training',staff:'Staff & Playbook',cust:'Customize',sched:'Schedule',stand:'Standings',rank:'Rankings',playoff:'Playoffs',teams:'Teams',leads:'Leaders',recr:'Recruiting',watch:'Watchlist',hof:'Hall of Fame',advisor:'Assistant GM',hist:'History & Records',jv:'JV Team',recls:'Reclassification'};
 // v2.14 two-level navigation
 const NAV_GROUPS=[['home','Home','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',['dash','mine','news']],
-  ['team','Team','M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 20c0-3 3-5 6-5s6 2 6 5M14 15c3 0 8 1 8 5',['roster','depth','jv','training','staff','cust']],
+  ['team','Team','M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 20c0-3 3-5 6-5s6 2 6 5M14 15c3 0 8 1 8 5',['roster','depth','jv','recr','scout','training','staff','cust']],
   ['season','Season','M4 5h16v15H4zM4 9h16M8 3v4M16 3v4M8 13h3M8 16h6',['sched','stand','rank','playoff']],
-  ['league','League','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4',['teams','leads','recr']],
+  ['league','League','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4',['teams','leads']],
   ['program','Program','M12 3l2.6 5.6 6.1.7-4.6 4.1 1.3 6L12 16.4 6.6 19.4l1.3-6L3.3 9.3l6.1-.7z',['advisor','watch','hof','trophy','hist','recls']]];
 function navGroupOf(pg){for(const g of NAV_GROUPS)if(g[3].includes(pg))return g[0];return'home';}
 function navInit(){
@@ -7127,10 +7153,10 @@ function nav(page,arg){
   if(_prevPg!==page){const _c=document.getElementById('ct');if(_c)_c.scrollTop=0;}
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   // Highlight by ID mapping
-  const nbMap={mine:'nb-mine',dash:'nb-dash',news:'nb-news',roster:'nb-roster',depth:'nb-depth',training:'nb-training',staff:'nb-staff',cust:'nb-cust',sched:'nb-sched',stand:'nb-stand',rank:'nb-rank',playoff:'nb-playoff',teams:'nb-teams',leads:'nb-leads',recr:'nb-recr',watch:'nb-watch',hof:'nb-hof',trophy:'nb-trophy',advisor:'nb-advisor',hist:'nb-hist',jv:'nb-jv',recls:'nb-recls'};
+  const nbMap={mine:'nb-mine',dash:'nb-dash',news:'nb-news',roster:'nb-roster',depth:'nb-depth',training:'nb-training',staff:'nb-staff',cust:'nb-cust',sched:'nb-sched',stand:'nb-stand',rank:'nb-rank',playoff:'nb-playoff',teams:'nb-teams',leads:'nb-leads',recr:'nb-recr',watch:'nb-watch',hof:'nb-hof',trophy:'nb-trophy',scout:'nb-scout',advisor:'nb-advisor',hist:'nb-hist',jv:'nb-jv',recls:'nb-recls'};
   if(nbMap[page]){const el=document.getElementById(nbMap[page]);if(el)el.classList.add('on');}
   document.getElementById('ct').innerHTML='';
-  const renders={mine:pgMine,dash:pgDash,news:pgNews,roster:()=>pgRoster(G.myId),depth:pgDepth,training:pgTrain,staff:pgStaff,cust:pgCust,sched:pgSched,stand:pgStand,rank:pgRank,playoff:pgPlayoff,teams:pgTeams,leads:pgLeads,recr:pgRecr,watch:pgWatch,hof:pgHoF,trophy:pgTrophy,advisor:pgAdvisor,hist:pgHist,jv:pgJV,recls:pgRecls};
+  const renders={mine:pgMine,dash:pgDash,news:pgNews,roster:()=>pgRoster(G._arg!=null&&getS(G._arg)?G._arg:G.myId),depth:pgDepth,training:pgTrain,staff:pgStaff,cust:pgCust,sched:pgSched,stand:pgStand,rank:pgRank,playoff:pgPlayoff,teams:pgTeams,leads:pgLeads,recr:pgRecr,watch:pgWatch,hof:pgHoF,trophy:pgTrophy,scout:pgScout,advisor:pgAdvisor,hist:pgHist,jv:pgJV,recls:pgRecls};
   if(renders[page]){
     try{document.getElementById('ct').innerHTML=renders[page](arg);}
     catch(err){
@@ -7430,7 +7456,7 @@ function pgRoster(sid){
   const capPct=isMe?varsityRosterCount/MAX_VARSITY:null;
   const capColor=capPct===null?'':capPct>=1?'var(--rd)':capPct>=0.9?'var(--gd)':'var(--gn)';
   return`<div class="pnl"><div class="ph">${sLogo(sch,30)} &nbsp;${sch.name} ${sch.mascot} <span style="font-size:12px;font-weight:400;color:var(--mu)">${sPlayers(sid).length} players</span>${isMe?`<span style="margin-left:8px;background:${capPct>=1?'rgba(204,34,34,.18)':'rgba(34,184,112,.1)'};border:1px solid ${capColor};color:${capColor};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Varsity ${varsityRosterCount}/${MAX_VARSITY}${capPct>=1?'  AT CAP':''}</span>`:''}</div>
-    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p}</button>`).join('')}</div>${isMe?`<div style="margin-top:8px"><button class="bgh bsm" onclick="bulkOpen()">Edit many players at once…</button></div>`:''}</div>
+    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p}</button>`).join('')}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div></div>
     <div style="overflow-x:auto"><table><thead><tr>
       <th>#</th><th onclick="_setRS('name')">Name ${ar('name')}</th>
       <th onclick="_setRS('pos')">Pos ${ar('pos')}</th><th onclick="_setRS('yr')">Yr ${ar('yr')}</th>
@@ -7441,7 +7467,7 @@ function pgRoster(sid){
       <th onclick="_setRS('spd')">Spd ${ar('spd')}</th><th onclick="_setRS('str')">Str ${ar('str')}</th><th onclick="_setRS('awr')">Awr ${ar('awr')}</th>
       <th>Ht</th><th>Wt</th><th onclick="_setRS('gpa')">GPA ${ar('gpa')}</th>
       <th>Traits</th><th>Inj</th>
-      ${isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:''}
+      ${isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:'<th></th>'}
     </tr></thead>
     <tbody>${pl.map(p=>`<tr class="cl" onclick="showPlayer(${p.id})">
       <td style="color:var(--mu)">${p.num}</td><td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,28)}<span>${p.fn} ${p.ln}</span></div></td>
@@ -7463,6 +7489,7 @@ function pgRoster(sid){
           <button class="btn bxs" onclick="event.stopPropagation();confirmCutPlayer(${p.id})" title="Cut player" style="background:var(--rd);font-size:9px;padding:2px 5px"></button>
         </div>
       </td>`:''}
+      ${isMe?'':`<td><button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button></td>`}
     </tr>`).join('')}</tbody></table></div></div>`;
 }
 
@@ -7896,6 +7923,9 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
     <div class="fg"><label>Secondary Color</label><input type="color" id="ec2" value="${s.c2}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
     <div class="fg"><label>Off Scheme</label><select class="ei" id="eos">${OFF_SCH.map(sc=>`<option ${sc===s.offS?'selected':''}>${sc}</option>`).join('')}</select></div>
     <div class="fg"><label>Def Scheme</label><select class="ei" id="eds">${DEF_SCH.map(sc=>`<option ${sc===s.defS?'selected':''}>${sc}</option>`).join('')}</select></div>
+    <div class="fg"><label>Logo icon</label><select class="ei" id="elk" onchange="schLogoPrev(${sid})"><option value="">From the mascot name</option>${Object.keys(_LGO).sort().map(k=>`<option value="${k}" ${k===s.logoKey?'selected':''}>${k}</option>`).join('')}</select></div>
+    <div class="fg"><label>Mascot mashup (badge)</label><select class="ei" id="emash" onchange="schLogoPrev(${sid})"><option value="">None</option>${Object.keys(_LGO).sort().map(k=>`<option value="${k}" ${k===s.mash?'selected':''}>${k}</option>`).join('')}</select></div>
+    <div class="fg"><label>Logo preview</label><div id="elk-prev">${sLogo(s,64)}</div></div>
   </div>
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
     <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px">Custom Logo</div>
@@ -7912,7 +7942,8 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
     <button class="btn" onclick="saveSch(${sid})">Save</button>
     <button class="bgh" onclick="clo()">Cancel</button>
   </div>`);}
-window.saveSch=function(sid){const s=getS(sid);if(!s)return;s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=(document.getElementById('ea').value||s.abbr).toUpperCase().slice(0,2);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
+window.schLogoPrev=function(sid){const s=getS(sid),el=document.getElementById('elk-prev');if(!s||!el)return;const t=Object.assign({},s,{logoKey:document.getElementById('elk').value||null,mash:document.getElementById('emash').value||null,c1:document.getElementById('ec1').value,c2:document.getElementById('ec2').value,customLogo:null});el.innerHTML=sLogo(t,64);};
+window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=(document.getElementById('ea').value||s.abbr).toUpperCase().slice(0,2);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
 window.handleSchLogoUpload=function(inp,sid){
   const file=inp.files[0];if(!file)return;
   const reader=new FileReader();
@@ -12650,6 +12681,7 @@ function viewSchool(id){
         ${rb(teamOvr(id))}<span class="sbh">${s.offS}/${s.defS}</span>
         <span style="color:var(--mu);font-size:12px">${pl.length} players</span>
       </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="bgh bsm" onclick="clo();nav('roster',${id})">Full roster / edit players</button><button class="bgh bsm" onclick="clo();openEditSch(${id})">Edit team</button>${id!==G.myId&&!s.intl?`<button class="bgh bsm" onclick="coachTakeOver(${id})">Coach this team…</button>`:''}</div>
     </div>
   </div>
   <div class="tabs"><button class="tab on" onclick="swMTab(this,'sv-o')">Overview</button>
@@ -12888,24 +12920,29 @@ function showPlayer(id){
     <button class="bgh bsm" onclick="autoSP(${p.id})">Auto-upgrade all SP</button>
   </div>`:''}
   ${isMe?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-    <button class="bgh bsm" onclick="clo();editPlayer(${p.id})"> Edit Player &amp; Equipment</button>${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
+    <button class="bgh bsm" onclick="clo();editPlayer(${p.id})"> Edit Player &amp; Equipment</button>${colFlipTarget(p)?`<button class="bgh bsm" onclick="pushFlip(${p.id})">Push him to flip to ${colFlipTarget(p).school}</button>`:''}${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
   </div>`:''}
   ${!isMe&&!isGraduated&&G.players.includes(p)&&getS(p.sId)&&!getS(p.sId).fp?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-    <button class="btn bsm" onclick="meetOpen(${p.id})">Set up a meeting (transfer pitch)</button><span style="font-size:11px;color:var(--mu)">${meetLeft()} meeting${meetLeft()===1?'':'s'} left this season</span>
+    ${plScouted(p)?`<button class="btn bsm" onclick="meetOpen(${p.id})">Set up a meeting (transfer pitch)</button><span style="font-size:11px;color:var(--mu)">Cares most about ${PRIO_TXT[plPriority(p)]} · ${meetLeft()} meeting${meetLeft()===1?'':'s'} left · ${transferWindow()?'transfer window open':'transfers open in the offseason'}</span>`:`<button class="bgh bsm" onclick="clo();scoutPlayer(${p.id})">Scout him (${scoutLeft()} left)</button><span style="font-size:11px;color:var(--mu)">Scout a player to learn what he cares about; you can meet with him the season after.</span>`}
   </div>`:''}`);}
 // ═══════════ v2.14 PLAYER MEETINGS: talk a JV player into moving up, or pitch another school's player on transferring ═══════════
 // Every player has one thing that matters most to him. His traits hint at it; the right pitch makes a big difference.
 const PITCH={time:'You will play right away',exposure:'College coaches will see you here',win:'Come win a championship with us',coach:'We will develop you: coaching, weight room, film',team:'The guys in this locker room want you here'};
+// v2.16 what a player cares about comes from his character traits and interests, with a personal twist; you only know it for sure once he is scouted
 function plPriority(p){
-  const t=p.traits||[];
-  if(t.includes('competitor')||t.includes('big-game'))return'win';
-  if(t.includes('academic')||t.includes('film-junkie')||t.includes('coachable'))return'coach';
-  if(t.includes('showboat')||p.dev==='Star'||p.dev==='Elite Dev')return'exposure';
-  if(t.includes('leader')||t.includes('workhorse')||t.includes('gym-rat'))return'time';
-  if(t.includes('humble'))return'team';
-  return['time','exposure','win','coach','team'][Math.abs(p.id|0)%5];
+  if(p.prio)return p.prio;
+  const t=p.traits||[],I=p.interests||[],w={time:1,exposure:1,win:1,coach:1,team:1};
+  if(t.includes('competitor')||t.includes('big-game'))w.win+=3;if(t.includes('academic')||t.includes('film-junkie')||t.includes('coachable'))w.coach+=3;
+  if(t.includes('showboat'))w.exposure+=3;if(p.dev==='Star'||p.dev==='Elite Dev')w.exposure+=1.5;if(t.includes('leader')||t.includes('workhorse')||t.includes('gym-rat'))w.time+=2.5;if(t.includes('humble'))w.team+=3;
+  for(const k of I){if(['weightroom','wrestling'].includes(k))w.time+=1;else if(['reading','chess'].includes(k))w.coach+=1;else if(['sneakers','music','movies'].includes(k))w.exposure+=1;else if(['volunteering','cooking'].includes(k))w.team+=1;else if(['basketball','baseball'].includes(k))w.win+=1;}
+  let h=Math.abs((p.id|0)*2654435761|0),best='time',bv=-1;for(const k in w){h=(h*1103515245+12345)&0x7fffffff;const v=w[k]*(0.55+(h%1000)/1000);if(v>bv){bv=v;best=k;}}
+  return(p.prio=best);
 }
-function plHint(p){return{time:'He wants to be on the field.',exposure:'He talks about college scouts a lot.',win:'He hates losing more than anything.',coach:'He is always asking how to get better.',team:'He cares about the guys around him.'}[plPriority(p)];}
+function plScouted(p){return!!(p&&p.scout&&p.scout.by===G.myId);}
+const PRIO_TXT={time:'playing time',exposure:'college exposure',win:'winning',coach:'getting coached up',team:'his teammates'};
+// your own JV players you know fairly well (usually right); other schools' players only after a scouting report
+function plHintOwn(p){const h=Math.abs(((p.id|0)+G.yr*7)*2654435761|0)%4,k=h===0?['time','exposure','win','coach','team'][(h+(p.id|0))%5]:plPriority(p);return plHintTxt(k);}
+function plHintTxt(k){return{time:'He wants to be on the field.',exposure:'He talks about college scouts a lot.',win:'He hates losing more than anything.',coach:'He is always asking how to get better.',team:'He cares about the guys around him.'}[k];}
 // where he would sit on your depth chart at his position (0 = starter)
 function myDepthRank(p){return myP().filter(q=>q.pos===p.pos&&q.id!==p.id&&!(q.inj>0)&&q.rat>p.rat).length;}
 function pitchHtml(fn){return Object.entries(PITCH).map(([k,l])=>`<button class="bgh" style="text-align:left;padding:9px 12px" onclick="${fn}('${k}')">${l}</button>`).join('');}
@@ -12915,7 +12952,7 @@ window.talkOpen=function(pid){
   if(p.talkKey===talkKey()){notify(`You already talked to ${p.fn} this week.`,'w');return;}
   window._talkPid=pid;const rk=myDepthRank(p);
   openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:4px">Talk with ${p.fn} ${p.ln}</div>
-    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.pos} · ${yrL(p.yr)} · OVR ${p.rat}. He would be <b>${rk===0?'a starter':rk===1?'first off the bench':'deep on the depth chart'}</b> on varsity. ${plHint(p)}</div>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.pos} · ${yrL(p.yr)} · OVR ${p.rat}. He would be <b>${rk===0?'a starter':rk===1?'first off the bench':'deep on the depth chart'}</b> on varsity. ${plHintOwn(p)}</div>
     <div style="display:flex;flex-direction:column;gap:6px">${pitchHtml('talkPitch')}</div>
     <div style="text-align:right;margin-top:10px"><button class="bgh" onclick="clo()">Never mind</button></div>`);
 };
@@ -12931,16 +12968,43 @@ window.talkPitch=function(k){
   openMo(`<div style="font-weight:900;font-size:18px;margin-bottom:6px">${p.fn} wants to stay on JV for now</div><div style="font-size:13px;color:var(--mu);margin-bottom:12px">"${say}" You can try again next week${k!==plPriority(p)?', maybe with a different pitch':''}.</div><div style="text-align:right"><button class="btn" onclick="clo();nav('jv')">OK</button></div>`);
 };
 const MEET_MAX=4,MEET_COST=1500;
+function transferWindow(){return G.phase==='offseason'&&!G.sched.some(g=>g.type==='regular'&&g.result);}
+// you scout a player the season before you recruit him (in your first season, scouting in the same preseason counts)
+function meetEligible(p){return plScouted(p)&&(p.scout.yr<G.yr||(G.yr===1&&transferWindow()));}
+function scoutMax(){return Math.max(2,2*Math.round(G.prestige||1));}
+function scoutLeft(){if(!G.scoutN||G.scoutN.yr!==G.yr)G.scoutN={yr:G.yr,n:0};return Math.max(0,scoutMax()-G.scoutN.n);}
+function scoutPlayer(pid){const p=getP(pid);if(!p||p.sId===G.myId)return;if(plScouted(p)){notify('Already scouted.','w');return;}
+  if(scoutLeft()<=0){notify(`No scouting reports left this season (${scoutMax()} per season: 2 per prestige star).`,'w');return;}
+  G.scoutN.n++;p.scout={yr:G.yr,by:G.myId};notify(`Scouting report on ${p.fn} ${p.ln} is in.`);nav(G._page||'scout',G._arg);}
+function schState(s){return s?(s.intl?String(s.intl):(s.state||'home')):'home';}
+function pgScout(){
+  const ms=myS(),f=window._scF||(window._scF={pos:'ALL',min:0,q:''});
+  const pool=G.players.filter(p=>!p.grad&&p.sId!==G.myId&&getS(p.sId)&&!getS(p.sId).fp&&(f.pos==='ALL'||p.pos===f.pos)&&p.rat>=f.min&&(!f.q||(p.fn+' '+p.ln).toLowerCase().includes(f.q.toLowerCase())));
+  const mine=G.players.filter(p=>plScouted(p)&&!p.grad&&p.sId!==G.myId).sort((a,b)=>b.rat-a.rat);
+  const top=pool.filter(p=>!plScouted(p)).sort((a,b)=>b.rat-a.rat).slice(0,60);
+  const row=p=>{const s=getS(p.sId),sc=plScouted(p),el=meetEligible(p)&&transferWindow(),oos=schState(s)!==schState(ms);
+    return`<tr class="cl" onclick="showPlayer(${p.id})"><td style="white-space:nowrap">${face(p.fs,24)} ${p.fn} ${p.ln}</td><td>${p.pos}</td><td>${yrL(p.yr)}</td><td>${sLogo(s,20)} ${s.name}${oos?' <span title="Out of state" style="color:var(--rd);font-size:10px;font-weight:800">OUT OF STATE</span>':''}</td><td><b>${p.rat}</b></td>
+      <td>${sc?`<span style="color:var(--gn)">${p.pot}</span>`:'?'}</td><td>${sc?PRIO_TXT[plPriority(p)]:'?'}</td>
+      <td>${sc?(el?`<button class="btn bxs" onclick="event.stopPropagation();meetOpen(${p.id})">Meet</button>`:`<span style="font-size:11px;color:var(--mu)">${p.scout.yr<G.yr||G.yr===1?'Meet in the offseason':'Meet next offseason'}</span>`):`<button class="bgh bxs" onclick="event.stopPropagation();scoutPlayer(${p.id})">Scout</button>`}</td></tr>`;};
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Scouting <span style="font-size:12px;color:var(--mu)">${scoutLeft()} of ${scoutMax()} reports left this season</span></div><div class="pb">
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">Scout other schools' players to learn their true potential and what they care about. You can hold a transfer meeting with a scouted player the season after you scout him, in the offseason before your first game. You get 2 reports per prestige star each season. Bringing in players from out of state can draw an investigation.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select onchange="window._scF.pos=this.value;nav('scout')">${['ALL',...POS].map(x=>`<option ${x===f.pos?'selected':''}>${x}</option>`).join('')}</select>
+      <label style="font-size:12px;color:var(--mu)">Min OVR <input type="number" value="${f.min}" style="width:70px" onchange="window._scF.min=+this.value||0;nav('scout')"></label>
+      <input placeholder="Search name" value="${f.q.replace(/"/g,'&quot;')}" onchange="window._scF.q=this.value;nav('scout')" style="flex:1 1 140px"></div></div></div>
+    ${mine.length?`<div class="pnl" style="margin-bottom:14px"><div class="ph">Your scouting reports</div><div style="overflow-x:auto"><table><thead><tr><th>Player</th><th>Pos</th><th>Yr</th><th>School</th><th>OVR</th><th>Pot</th><th>Cares about</th><th></th></tr></thead><tbody>${mine.map(row).join('')}</tbody></table></div></div>`:''}
+    <div class="pnl"><div class="ph">Players to scout</div><div style="overflow-x:auto"><table><thead><tr><th>Player</th><th>Pos</th><th>Yr</th><th>School</th><th>OVR</th><th>Pot</th><th>Cares about</th><th></th></tr></thead><tbody>${top.map(row).join('')||'<tr><td colspan="8" style="color:var(--mu)">No players match.</td></tr>'}</tbody></table></div></div>`;
+}
 function meetLeft(){if(!G.meet||G.meet.yr!==G.yr)G.meet={yr:G.yr,n:0};return Math.max(0,MEET_MAX-G.meet.n);}
 window.meetOpen=function(pid){
   const p=getP(pid),from=p&&getS(p.sId);if(!p||!from||p.sId===G.myId)return;
   if(meetLeft()<=0){notify('No meetings left this season.','w');return;}
   if(p.meetYr===G.yr){notify(`You already met with ${p.fn} this season.`,'w');return;}
-  if(G.phase==='playoffs'){notify('No transfers during the playoffs.','w');return;}
+  if(!transferWindow()){notify('Transfers only happen in the offseason, before your first game of the season.','w');return;}
+  if(!meetEligible(p)){notify(plScouted(p)?`You scouted ${p.fn} this season: you can meet with him before next season.`:`Scout ${p.fn} first (Team → Scouting), then meet with him before next season.`,'w');return;}
   if(!hasFunds(MEET_COST)){notify(`A meeting costs $${MEET_COST.toLocaleString()} (travel and dinner).`,'e');return;}
   window._meetPid=pid;const rk=myDepthRank(p);
   openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:4px">Meeting with ${p.fn} ${p.ln}</div>
-    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.pos} · ${yrL(p.yr)} · OVR ${p.rat} at ${from.name} ${from.mascot}. On your team he would be <b>${rk===0?'a starter':rk===1?'first off the bench':'a backup'}</b>. ${plHint(p)} The meeting costs $${MEET_COST.toLocaleString()}.</div>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.pos} · ${yrL(p.yr)} · OVR ${p.rat} at ${from.name} ${from.mascot}. On your team he would be <b>${rk===0?'a starter':rk===1?'first off the bench':'a backup'}</b>. Scouting report: he cares most about <b>${PRIO_TXT[plPriority(p)]}</b>. The meeting costs $${MEET_COST.toLocaleString()}.</div>
     <div style="display:flex;flex-direction:column;gap:6px">${pitchHtml('meetPitch')}</div>
     <div style="text-align:right;margin-top:10px"><button class="bgh" onclick="clo()">Cancel</button></div>`);
 };
@@ -12965,6 +13029,9 @@ function transferIn(p,from){
   if(used.has(p.num))p.num=posN(p.pos,G.myId);
   if(canBeOnJV(p)&&myP().length>=MAX_VARSITY){p.onJV=true;(G.jvRoster||(G.jvRoster=[])).push(p.id);}else p.onJV=false;
   addLog(`<span style="color:var(--gn)">Transfer: ${p.fn} ${p.ln} (${p.pos}, OVR ${p.rat}) leaves ${from.name} ${from.mascot} for your program.</span>`);
+  // out-of-state transfers can draw a look from the state association
+  if(schState(from)!==schState(myS())&&Math.random()<0.4){p.inj=Math.max(p.inj||0,4);p.injName='Ineligible (transfer review)';if(!G.unlimitedMoney)G.budget-=10000;G.prestige=clamp(G.prestige-0.1,1,5);
+    addLog(`<span style="color:var(--rd)">The state association is reviewing the out-of-state transfer of ${p.fn} ${p.ln}: $10,000 fine, he sits the first 4 games.</span>`);try{addNews('bad','Transfer under review',`${p.fn} ${p.ln} must sit 4 games; the program was fined $10,000.`);}catch(e){}}
   try{addNews('general',`${p.fn} ${p.ln} transfers in`,`${p.pos} from ${from.name} ${from.mascot} after a meeting with the coaching staff.`);}catch(e){}
   try{checkAndFillRosters();}catch(e){}
 }
@@ -13147,7 +13214,7 @@ function editPlayer(pid){
   <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" onclick="savePlayer(${pid})">Save</button><button class="bgh" onclick="clo()">Cancel</button></div>`);setTimeout(eqPrev,0);}
 
 // v2.15 bulk editor: change ratings for a whole group in one go
-function bulkOpen(){
+function bulkOpen(sid){window._bkSid=sid&&sid!==G.myId?sid:null;
   openMo(`<h2>Edit many players</h2><p style="font-size:13px;color:var(--mu);margin:4px 0 10px">Change the ratings of a whole group at once, like a team-wide boost.</p>
   <div class="g2" style="gap:10px">
     <div class="fg"><label>Players</label><select class="ei" id="bk-who"><option value="all">Whole varsity</option><option value="off">Offense</option><option value="def">Defense</option>${POS.map(p=>`<option value="${p}">${p}s</option>`).join('')}<option value="jv">JV team</option></select></div>
@@ -13161,14 +13228,32 @@ function bulkOpen(){
   const up=()=>{const L=bulkGroup();const el=document.getElementById('bk-prev');if(el)el.textContent=`${L.length} player${L.length===1?'':'s'} will change.`;};
   ['bk-who'].forEach(id=>document.getElementById(id).onchange=up);up();}
 function bulkGroup(){const w=(document.getElementById('bk-who')||{}).value||'all',OFF=['QB','RB','WR','TE','OL'],DEF=['DL','LB','CB','S'];
-  if(w==='jv')return G.players.filter(p=>p.sId===G.myId&&!p.grad&&p.onJV);
-  const L=myP();return w==='all'?L:w==='off'?L.filter(p=>OFF.includes(p.pos)):w==='def'?L.filter(p=>DEF.includes(p.pos)):L.filter(p=>p.pos===w);}
+  const sid=window._bkSid||G.myId;if(w==='jv')return G.players.filter(p=>p.sId===sid&&!p.grad&&p.onJV);
+  const L=sid===G.myId?myP():sPlayers(sid).filter(p=>!p.onJV);return w==='all'?L:w==='off'?L.filter(p=>OFF.includes(p.pos)):w==='def'?L.filter(p=>DEF.includes(p.pos)):L.filter(p=>p.pos===w);}
 function bulkApply(){
   const how=document.getElementById('bk-how').value,n=parseInt(document.getElementById('bk-n').value,10),ks=[...document.querySelectorAll('.bk-k:checked')].map(i=>i.value),L=bulkGroup();
   if(!Number.isFinite(n)){notify('Enter a number','e');return;}if(!ks.length){notify('Pick at least one rating','e');return;}if(!L.length){notify('No players in that group','e');return;}
   for(const p of L){for(const k of ks){const v=p[k]||0;p[k]=clamp(Math.round(how==='add'?v+n:how==='set'?n:Math.max(v,n)),1,99);}
     if(p.pot<p.rat)p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}
   try{updateRats();}catch(e){}clo();nav(G._page,G._arg);notify(`${L.length} player${L.length===1?'':'s'} updated`);}
+// v2.16 coach any school: take over another program in the offseason, before its first game
+function coachTakeOver(sid){
+  const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;
+  if(ns.intl||!G.divisions.some(d=>d.teams.some(t=>t.id===ns.id))){notify('You can only take over a school in your league.','e');return;}
+  if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result)){notify('Coaching changes happen in the offseason, before the first game of a season.','w');return;}
+  if(!confirm(`Leave ${os.name} and become the head coach of ${ns.name} ${ns.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
+  os.prestige=G.prestige;os.trainLevel=G.trainLevel;os.isP=false;os.staff=G.staff;os.fac=G.fac;
+  ns.isP=true;ns.staff=ns.staff||genStaff(true);ns.fac=ns.fac||{weight:1,film:1,train:1,med:1};
+  G.myId=ns.id;G.cls=ns.cls;G.prestige=ns.prestige||1;G.offS=ns.offS;G.defS=ns.defS;G.staff=ns.staff;G.fac=ns.fac;G.trainLevel=ns.trainLevel||1;
+  G.budget=Math.max(20000,40000+Math.round(G.prestige*8000));G.seasonRivalId=null;G.benched={};
+  if(G.pbData){G.pbData.offSel=null;G.pbData.defSel=null;}
+  G.jvRoster=G.players.filter(p=>p.sId===ns.id&&!p.grad&&p.onJV).map(p=>p.id);
+  try{initJVRoster();}catch(e){}
+  genSched();updateRats();
+  addLog(`<span style="color:var(--gd)">New job: you are the head coach of ${ns.name} ${ns.mascot}.</span>`);
+  try{addNews('myteam',`New head coach at ${ns.name}`,`You left ${os.name} to take over the ${ns.mascot}.`);}catch(e){}
+  try{updateTb();}catch(e){}clo();nav('dash');notify(`Welcome to ${ns.name}! Build your schedule to start the season.`);
+}
 function savePlayer(pid){const p=getP(pid);if(!p)return;p.fn=document.getElementById('ef').value||p.fn;p.ln=document.getElementById('el').value||p.ln;{const nv=parseInt(document.getElementById('en').value,10);p.num=Number.isFinite(nv)?clamp(nv,0,99):p.num;}{const p2=(document.getElementById('ep2')||{}).value||'';p.pos2=p2&&p2!==document.getElementById('ep').value?p2:null;}const newPos=document.getElementById('ep').value;if(newPos!==p.pos){p.pos=newPos;const sch=getS(p.sId);p.arch=pickArchetype(newPos,sch?sch.offS:'Pro Style',sch?sch.defS:'4-3');}p.rat=clamp(parseInt(document.getElementById('er').value)||p.rat,1,99);p.pot=clamp(parseInt(document.getElementById('ept').value)||p.pot,p.rat,99);p.spd=clamp(parseInt(document.getElementById('es').value)||p.spd,1,99);p.str=clamp(parseInt(document.getElementById('est').value)||p.str,1,99);p.awr=clamp(parseInt(document.getElementById('ea').value)||p.awr,1,99);p.gpa=clamp(parseFloat(document.getElementById('eg').value)||p.gpa,1.5,4.0);p.dev=document.getElementById('ed').value;p.traits=Array.from(document.getElementById('et').selectedOptions).map(o=>o.value);const eintEl=document.getElementById('eint');if(eintEl)p.interests=Array.from(eintEl.selectedOptions).map(o=>o.value);{const eq=eqRead();if(eq)p.eq=eq;}
   {const ft=parseInt(document.getElementById('eht-ft').value,10),inch=parseInt(document.getElementById('eht-in').value,10),w=parseInt(document.getElementById('ewt').value,10);
    if(Number.isFinite(ft)&&Number.isFinite(inch))p.ht=clamp(ft*12+clamp(inch,0,11),54,90);if(Number.isFinite(w))p.wt=clamp(w,90,420);
