@@ -303,3 +303,40 @@ language sql security definer set search_path = '' as $$
 $$;
 revoke all on function public.community_download(uuid) from public, anon;
 grant execute on function public.community_download(uuid) to authenticated;
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 8. Community Creations: worlds (League Setup with real or custom states) that players share
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.community_worlds (
+  id uuid primary key default gen_random_uuid(),
+  owner uuid not null references auth.users(id) on delete cascade,
+  username text not null default '',
+  name text not null check (char_length(name) between 1 and 80),
+  info text not null default '' check (char_length(info) <= 200),
+  data jsonb not null check (pg_column_size(data) < 400000),
+  downloads int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists community_worlds_created on public.community_worlds (created_at desc);
+create index if not exists community_worlds_owner on public.community_worlds (owner);
+alter table public.community_worlds enable row level security;
+drop policy if exists "Read community worlds" on public.community_worlds;
+create policy "Read community worlds" on public.community_worlds
+  for select to authenticated using (true);
+drop policy if exists "Publish your own worlds" on public.community_worlds;
+create policy "Publish your own worlds" on public.community_worlds
+  for insert to authenticated with check ((select auth.uid()) = owner
+    and (select count(*) from public.community_worlds w where w.owner = (select auth.uid())) < 10);
+drop policy if exists "Remove your own worlds" on public.community_worlds;
+create policy "Remove your own worlds" on public.community_worlds
+  for delete to authenticated using ((select auth.uid()) = owner);
+revoke all on public.community_worlds from anon, authenticated;
+grant select, insert, delete on public.community_worlds to authenticated;
+
+-- counts a download without letting anyone edit other players' worlds
+create or replace function public.community_world_download(wid uuid) returns void
+language sql security definer set search_path = '' as $$
+  update public.community_worlds set downloads = downloads + 1 where id = wid;
+$$;
+revoke all on function public.community_world_download(uuid) from public, anon;
+grant execute on function public.community_world_download(uuid) to authenticated;

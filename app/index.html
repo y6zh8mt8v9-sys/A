@@ -740,6 +740,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
       <button class="tt-btn" onclick="ttLoad()">Load Game</button>
       <button class="tt-btn" onclick="fpOpen()">Free Practice</button>
       <button class="tt-btn" onclick="olOpen()">Online Play<small>Play a friend with a code</small></button>
+      <button class="tt-btn" onclick="ccOpen()">Community Creations<small>Worlds and teams from other players</small></button>
     </div>
   </div>
   <div id="tt-load" class="tt-panel hid">
@@ -12196,6 +12197,13 @@ function cloudSupabaseExt(B,cfg,getSb,err){
   B.commGet=async id=>{const sb=getSb();const{data,error}=await sb.from('community_teams').select('data').eq('id',id).maybeSingle();err(error);if(!data)throw new Error('That team was removed.');try{await sb.rpc('community_download',{tid:id});}catch(e){}return data.data;};
   B.commPublish=async(uid,username,name,ovr,data)=>{const{error}=await getSb().from('community_teams').insert({owner:uid,username,name,ovr,data});if(error&&miss15(error))throw new Error(NEED15);if(error&&/row-level|security/i.test(error.message||''))throw new Error('You can publish up to 20 teams. Remove one first.');err(error);};
   B.commDel=async id=>{const{error}=await getSb().from('community_teams').delete().eq('id',id);err(error);};
+  // v2.16 community worlds
+  const NEED16='Your online database needs the update for Community Creations: run the new supabase_setup.sql in the Supabase SQL Editor (it keeps all your data).',
+    miss16=e=>e&&/does not exist|42P01|42883|PGRST20[0-9]|schema cache|community_worlds/i.test((e.message||'')+' '+(e.code||''));
+  B.worldList=async sort=>{const{data,error}=await getSb().from('community_worlds').select('id,owner,username,name,info,downloads,created_at').order(sort==='top'?'downloads':'created_at',{ascending:false}).limit(60);if(error&&miss16(error))throw new Error(NEED16);err(error);return data||[];};
+  B.worldGet=async id=>{const sb=getSb();const{data,error}=await sb.from('community_worlds').select('data').eq('id',id).maybeSingle();err(error);if(!data)throw new Error('That world was removed.');try{await sb.rpc('community_world_download',{wid:id});}catch(e){}return data.data;};
+  B.worldPublish=async(uid,username,name,info,data)=>{const{error}=await getSb().from('community_worlds').insert({owner:uid,username,name,info,data});if(error&&miss16(error))throw new Error(NEED16);if(error&&/row-level|security/i.test(error.message||''))throw new Error('You can publish up to 10 worlds. Remove one first.');err(error);};
+  B.worldDel=async id=>{const{error}=await getSb().from('community_worlds').delete().eq('id',id);err(error);};
   B.deleteAccount=async uid=>{const sb=getSb();
     try{const L=await B.cloudList(uid);if(L.length)await sb.storage.from('saves').remove(L.map(r=>`${uid}/${r.id}.save`));}catch(e){}
     try{const S=await B.sharedList(uid);if(S.length)await sb.storage.from('shared').remove(S.map(r=>r.path));}catch(e){}
@@ -12228,7 +12236,11 @@ function cloudLocalExt(B){
   B.commGet=async id=>{const d=ld(),c=(d.comm||[]).find(x=>x.id===id);if(!c)throw new Error('That team was removed.');c.downloads=(c.downloads||0)+1;sv(d);return c.data;};
   B.commPublish=async(uid,username,name,ovr,data)=>{const d=ld();d.comm=d.comm||[];if(d.comm.filter(c=>c.owner===uid).length>=20)throw new Error('You can publish up to 20 teams. Remove one first.');d.comm.push({id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),owner:uid,username,name,ovr,data,downloads:0,created_at:new Date().toISOString()});sv(d);};
   B.commDel=async id=>{const d=ld();d.comm=(d.comm||[]).filter(c=>c.id!==id);sv(d);};
-  B.deleteAccount=async uid=>{const d=ld();d.users=d.users.filter(u=>u.id!==uid);d.comm=(d.comm||[]).filter(c=>c.owner!==uid);d.fr=d.fr.filter(f=>f.requester!==uid&&f.addressee!==uid);d.blocks=(d.blocks||[]).filter(b=>b[0]!==uid&&b[1]!==uid);sv(d);
+  B.worldList=async sort=>{const L=(ld().worlds||[]).map(c=>({id:c.id,owner:c.owner,username:c.username,name:c.name,info:c.info,downloads:c.downloads||0,created_at:c.created_at}));return L.sort((a,b)=>sort==='top'?b.downloads-a.downloads:(a.created_at<b.created_at?1:-1));};
+  B.worldGet=async id=>{const d=ld(),c=(d.worlds||[]).find(x=>x.id===id);if(!c)throw new Error('That world was removed.');c.downloads=(c.downloads||0)+1;sv(d);return c.data;};
+  B.worldPublish=async(uid,username,name,info,data)=>{const d=ld();d.worlds=d.worlds||[];if(d.worlds.filter(c=>c.owner===uid).length>=10)throw new Error('You can publish up to 10 worlds. Remove one first.');d.worlds.push({id:'w'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),owner:uid,username,name,info,data,downloads:0,created_at:new Date().toISOString()});sv(d);};
+  B.worldDel=async id=>{const d=ld();d.worlds=(d.worlds||[]).filter(c=>c.id!==id);sv(d);};
+  B.deleteAccount=async uid=>{const d=ld();d.users=d.users.filter(u=>u.id!==uid);d.comm=(d.comm||[]).filter(c=>c.owner!==uid);d.worlds=(d.worlds||[]).filter(c=>c.owner!==uid);d.fr=d.fr.filter(f=>f.requester!==uid&&f.addressee!==uid);d.blocks=(d.blocks||[]).filter(b=>b[0]!==uid&&b[1]!==uid);sv(d);
     const all=(await tx('readonly',s=>s.getAll()))||[];for(const r of all)if(r.uid===uid||r.sender===uid||r.recipient===uid)await tx('readwrite',s=>s.delete(r.k));try{sessionStorage.removeItem('gpm_ol_local_sess');}catch(e){}};
   return B;}
 
@@ -14908,6 +14920,108 @@ window.usaPickSave=function(){const P=_usaPick,W=worldLoad(),old=JSON.stringify(
   notify('Building your world…');setTimeout(()=>{try{_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();usaSetupInfo();}catch(e){console.error('world',e);}},40);};
 function usaSetupInfo(){const el=document.getElementById('usa-info');if(!el)return;const g=usaGeoCfg();
   el.innerHTML=g.mode==='usa'?`<b>Real USA</b> · ${g.states.length} state${g.states.length===1?'':'s'} · home: ${usaWorld(g.custom).st[g.home].name}${g.custom&&g.custom.length?` · ${g.custom.length} custom`:''}`:'<b>Classic</b> fictional country';}
+// ═══════════ v2.16 WORLD EDITOR: custom states from real counties, world files, Community Creations ═══════════
+const ME={view:null,active:null};
+const ME_COL=['#e4572e','#17bebb','#ffc914','#76b041','#8f5bd6','#ff8fab','#2e86ab','#f18f01','#3bb273','#c44536'];
+function meCfg(){const D=WS.draft;if(!D.geo)D.geo=usaDefault();if(D.geo.mode==='classic')return null;D.geo.mode='usa';D.geo.custom=Array.isArray(D.geo.custom)?D.geo.custom:[];return D.geo;}
+function meBody(){
+  const g=meCfg();
+  if(!g)return`<div style="font-size:13px;color:var(--mu);margin-bottom:10px">The map editor works with the Real USA world. Your League Setup uses the classic made-up country.</div><button class="btn" onclick="WS.draft.geo=usaDefault();wsRender()">Switch to the Real USA</button>`;
+  const cu=g.custom,X=usaWorld(cu),G0=usaGeo(),all=Object.keys(X.st).sort((a,b)=>X.st[a].name.localeCompare(X.st[b].name));
+  if(!ME.view||!G0.st[ME.view])ME.view='TX';if(ME.active&&!cu.some(c=>c.ab===ME.active))ME.active=null;
+  // owner of every county in the draft (custom states win), and the box around the state on screen
+  const own={};cu.forEach((c,i)=>c.counties.forEach(k=>{if(!(k in own))own[k]=i;}));
+  const R=G0.st[ME.view].rings.flat(),xs=R.map(p=>p[0]),ys=R.map(p=>p[1]);let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const pw=(x1-x0)*0.35+10,ph=(y1-y0)*0.35+10;x0-=pw;x1+=pw;y0-=ph;y1+=ph;
+  let paths='';
+  for(const ab in G0.cn)for(const c of G0.cn[ab]){const[cx,cy]=_ugCen(c.rings[0]);if(cx<x0||cx>x1||cy<y0||cy>y1)continue;
+    const i=own[c.key],fill=i!=null?ME_COL[i%ME_COL.length]:ab===ME.view?'#d9cfa8':'#c4c8b8';
+    paths+=`<path d="${c.rings.map(_polyPath).join(' ')}" fill="${fill}" stroke="#fff" stroke-width="${(x1-x0)/900}" style="cursor:pointer" onclick="meClick('${c.key.replace(/'/g,"\\'")}')"><title>${c.name} (${ab})${i!=null?' → '+cu[i].name:''}</title></path>`;}
+  for(const ab in X.st){const S=X.st[ab];paths+=`<path d="${S.rings.map(_polyPath).join(' ')}" fill="none" stroke="#2c2416" stroke-width="${(x1-x0)/300}" pointer-events="none"/>`;}
+  const list=cu.map((c,i)=>{const n=c.counties.length,st=X.st[c.ab];return`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px;border-radius:8px;background:${ME.active===c.ab?'rgba(63,162,243,.18)':'var(--s2)'};border:1px solid var(--bd)">
+    <span style="width:14px;height:14px;border-radius:4px;background:${ME_COL[i%ME_COL.length]}"></span>
+    <input id="me-n-${i}" value="${c.name}" maxlength="30" style="width:150px" placeholder="State name">
+    <input id="me-a-${i}" value="${c.ab}" maxlength="3" style="width:56px;text-transform:uppercase" placeholder="ABR">
+    <span style="font-size:11px;color:var(--mu)">${n} counties${st?` · about ${usaTeams(c.ab,X)} schools`:''}</span>
+    <button class="${ME.active===c.ab?'btn':'bgh'} bxs" onclick="wsGrab();ME.active='${c.ab}';wsRender()">${ME.active===c.ab?'Painting':'Paint'}</button>
+    <button class="bgh bxs" onclick="wsGrab();meDel(${i})">Delete</button></div>`;}).join('');
+  return`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">Make your own states out of real counties. Create a state, press <b>Paint</b>, then tap counties on the map to move them into it (tap again to give one back). Its school count and style follow the people it holds.</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><button class="btn bxs" onclick="wsGrab();meNew()">+ New state</button>
+      <label style="font-size:12px;font-weight:800">Show <select onchange="wsGrab();ME.view=this.value;wsRender()" style="padding:5px 8px;border-radius:8px">${Object.keys(G0.st).sort((a,b)=>G0.st[a].name.localeCompare(G0.st[b].name)).map(a=>`<option value="${a}"${a===ME.view?' selected':''}>${G0.st[a].name}</option>`).join('')}</select></label>
+      ${ME.active?`<button class="bgh bxs" onclick="wsGrab();mePaintState()">Paint all of ${G0.st[ME.view].name}</button>`:''}</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">${list||'<div style="font-size:12px;color:var(--mu)">No custom states yet.</div>'}</div>
+    <svg viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" style="width:100%;max-height:44vh;background:#7fc6ee;border-radius:10px">${paths}</svg>`;
+}
+function meGrab(){const g=meCfg();if(!g)return;g.custom.forEach((c,i)=>{const n=document.getElementById('me-n-'+i),a=document.getElementById('me-a-'+i);
+  if(n)c.name=wsClean(n.value)||c.name;if(a){const v=String(a.value||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);if(v.length>=2&&!USST[v]&&!USA_RESERVED.has(v)&&!g.custom.some((o,j)=>j!==i&&o.ab===v)){if(ME.active===c.ab)ME.active=v;c.ab=v;}}});}
+window.meNew=function(){const g=meCfg();if(!g)return;let k=1,ab;do{ab='N'+String.fromCharCode(64+k);k++;}while(g.custom.some(c=>c.ab===ab)||USST[ab]);
+  g.custom.push({ab,name:'New State '+(g.custom.length+1),counties:[]});ME.active=ab;wsRender();};
+window.meDel=function(i){const g=meCfg();if(!g)return;if(!confirm(`Delete ${g.custom[i].name}? Its counties go back to their real states.`))return;g.custom.splice(i,1);wsRender();};
+window.meClick=function(key){const g=meCfg();if(!g)return;wsGrab();const c=g.custom.find(x=>x.ab===ME.active);if(!c){notify('Make a state and press Paint first','w');return;}
+  const j=c.counties.indexOf(key);if(j>=0)c.counties.splice(j,1);else{for(const o of g.custom){const q=o.counties.indexOf(key);if(q>=0)o.counties.splice(q,1);}c.counties.push(key);}wsRender();};
+window.mePaintState=function(){const g=meCfg();if(!g)return;const c=g.custom.find(x=>x.ab===ME.active);if(!c)return;const keys=usaGeo().cn[ME.view].map(x=>x.key);
+  for(const o of g.custom)o.counties=o.counties.filter(k=>!keys.includes(k));c.counties.push(...keys);wsRender();};
+// ── world files ──
+function worldSanitize(W){
+  if(!W||typeof W!=='object')throw new Error('That is not a world file.');const str=v=>wsClean(v),o={};
+  const map=(m,f)=>{const r={};if(m&&typeof m==='object'&&!Array.isArray(m))for(const k of Object.keys(m).slice(0,6000)){const v=f(m[k]);if(v!=null&&v!=='')r[String(k).slice(0,60)]=v;}return r;};
+  if(W.geo&&typeof W.geo==='object'){
+    const cu=Array.isArray(W.geo.custom)?W.geo.custom.slice(0,30).map(c=>({ab:String((c&&c.ab)||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),name:str(c&&c.name),counties:Array.isArray(c&&c.counties)?c.counties.slice(0,4000).map(k=>String(k).slice(0,60)):[]})).filter(c=>c.ab.length>=2&&c.name&&!USST[c.ab]&&!USA_RESERVED.has(c.ab)):[];
+    o.geo=W.geo.mode==='classic'?{mode:'classic'}:{mode:'usa',states:Array.isArray(W.geo.states)?W.geo.states.slice(0,80).map(x=>String(x).slice(0,3)):undefined,home:String(W.geo.home||'').slice(0,3),custom:cu};}
+  o.states=map(W.states,str);o.counties=map(W.counties,str);
+  const L=(a,n)=>Array.isArray(a)?a.slice(0,n).map(str).filter(Boolean):undefined;
+  if(W.colleges&&typeof W.colleges==='object'){o.colleges={};for(const k of['FBS','FCS','D2','D3','NAIA','JUCO']){const v=L(W.colleges[k],400);if(v&&v.length)o.colleges[k]=v;}}
+  if(W.pro&&typeof W.pro==='object'){o.pro={};for(const k of['NGL','SFL','MGL']){const v=L(W.pro[k],64);if(v&&v.length)o.pro[k]=v;}}
+  o.divs=map(W.divs,a=>L(a,64));o.xdivs=map(W.xdivs,a=>L(a,200));
+  o.size=map(W.size,z=>z&&typeof z==='object'?{t:clamp(Math.round(+z.t)||8,8,160),d:clamp(Math.round(+z.d)||1,1,16)}:null);
+  if(W.stars&&typeof W.stars==='object'){o.stars={};for(const k of[5,4,3,2])if(W.stars[k]!=null)o.stars[k]=clamp(Math.round(+W.stars[k])||0,0,5000);}
+  for(const k of['frMult','colMult'])if(W[k]!=null)o[k]=clamp(+W[k]||1,0.5,2);
+  o.custFor=W.custFor==='usa'?'usa':W.custFor==='classic'?'classic':(o.geo&&o.geo.mode==='usa'?'usa':'classic');
+  if(W.meta&&typeof W.meta==='object')o.meta={name:str(W.meta.name),desc:String(W.meta.desc||'').replace(/[<>&"'`\\]/g,'').slice(0,200)};
+  return o;
+}
+function worldSummary(W){const g=W&&W.geo;if(!g||g.mode==='classic')return'Classic country';const n=(g.states||Object.keys(USST)).length,c=(g.custom||[]).length;return`Real USA · ${n} state${n===1?'':'s'}${c?` · ${c} custom`:''}`;}
+function worldExport(){try{wsGrab();}catch(e){}const W=worldSanitize(WS.draft||{}),nm=(W.meta&&W.meta.name)||'My world';
+  const blob=new Blob([JSON.stringify({app:'Gridiron 27',type:'world',v:1,name:nm,world:W},null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nm.replace(/[^A-Za-z0-9]+/g,'_').slice(0,40)+'.gpworld.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);notify('World file saved');}
+function worldImportFile(inp){const f=inp&&inp.files&&inp.files[0];if(!f)return;if(f.size>3e6){notify('That file is too big for a world file','e');return;}
+  const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j||j.type!=='world')throw new Error('That is not a world file.');WS.draft=worldSanitize(j.world);if(!WS.draft.meta)WS.draft.meta={name:wsClean(j.name)};WS.tab='share';wsRender();notify('World loaded. Press Save League Setup to use it.');}
+    catch(e){notify(e.message&&/world file/.test(e.message)?e.message:'That file could not be read','e');}};r.readAsText(f);}
+function shareBody(){const D=WS.draft,m=D.meta||{};
+  return`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Save your whole League Setup (states, custom states, names, colleges, pro teams, sizes and stars) as a file, load one from a friend, or share it with every player in Community Creations.</div>
+    <div class="g2" style="gap:8px;margin-bottom:10px"><div class="fg"><label>World name</label><input id="ws-mn" value="${m.name||''}" maxlength="40" placeholder="My world"></div>
+      <div class="fg"><label>Description</label><input id="ws-md" value="${m.desc||''}" maxlength="200" placeholder="What makes it special"></div></div>
+    <div style="font-size:12px;margin-bottom:10px"><b>${worldSummary(D.geo?D:Object.assign({},D,{geo:usaDefault()}))}</b></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="worldExport()">Download world file</button>
+      <label class="bgh" style="cursor:pointer;display:inline-flex;align-items:center">Upload a world file<input type="file" accept=".json,application/json" style="display:none" onchange="worldImportFile(this)"></label>
+      <button class="bgh" onclick="ccPublishWorld()">Publish to Community Creations</button><button class="bgh" onclick="ccOpen('worlds')">Browse Community Creations</button></div>`;}
+// ── Community Creations: worlds and teams other players made ──
+async function ccB(){const B=await olBackend().catch(e=>{throw e;});if(!B)throw new Error('Online Play is not set up in this copy of the game.');
+  if(!OLS.user)throw new Error('Sign in under Online Play to use Community Creations.');if(!B.worldList)throw new Error('Community Creations are not available on this server.');return B;}
+async function ccPublishWorld(){try{wsGrab();}catch(e){}
+  try{const B=await ccB(),W=worldSanitize(WS.draft||{}),nm=(W.meta&&W.meta.name)||'';if(!nm){notify('Give your world a name first (File & sharing)','w');return;}
+    if(pfBad(nm+' '+((W.meta&&W.meta.desc)||'')+' '+JSON.stringify(W.states||{})+' '+JSON.stringify((W.geo&&W.geo.custom)||[]))){notify('Please change the names first: they break the community rules.','e');return;}
+    if(!confirm(`Publish "${nm}" for every player to download? Your username is shown with it.`))return;
+    await B.worldPublish(OLS.user.id,olName(),nm.slice(0,80),(worldSummary(W)+(W.meta&&W.meta.desc?' · '+W.meta.desc:'')).slice(0,200),W);notify('Published to Community Creations');}
+  catch(e){notify(e.message||String(e),'e');}}
+async function ccOpen(tab){
+  tab=tab||window._ccTab||'worlds';window._ccTab=tab;if(tab==='teams'){commOpen();return;}
+  const sort=window._ccSort||'new';
+  openMo(`<h2>Community Creations</h2><div class="tabs" style="margin-bottom:10px"><button class="tab on">Worlds</button><button class="tab" onclick="ccOpen('teams')">Teams</button></div><div id="cc-b" style="color:var(--mu)">Loading…</div>`);
+  try{const B=await ccB(),blocked=B.blocks?await B.blocks(OLS.user.id).catch(()=>[]):[],L=(await B.worldList(sort)).filter(r=>!blocked.includes(r.owner));window._cc=L;
+    const el=document.getElementById('cc-b');if(!el)return;
+    el.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:10px"><button class="${sort==='new'?'btn bbl':'bgh'} bsm" onclick="window._ccSort='new';ccOpen('worlds')">Newest</button><button class="${sort==='top'?'btn bbl':'bgh'} bsm" onclick="window._ccSort='top';ccOpen('worlds')">Most downloaded</button></div>
+      ${L.length?`<div style="display:grid;gap:8px;max-height:60vh;overflow-y:auto">${L.map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;color:var(--tx)">
+        <div style="flex:1;min-width:0"><div style="font-weight:800">${olEsc(r.name)}</div><div style="font-size:12px;color:var(--mu)">${olEsc(r.info||'')} · by ${olEsc(r.username||'player')} · ${r.downloads||0} downloads</div></div>
+        <button class="btn bsm" onclick="ccTake(${i})">Use</button>${r.owner===OLS.user.id?`<button class="bgh bsm" onclick="ccDel(${i})">Remove</button>`:`<button class="bgh bsm" onclick="ccReport(${i})">Report</button>`}</div>`).join('')}</div>`:'<p>No worlds yet. Make one in League Setup and publish it.</p>'}`;}
+  catch(e){const el=document.getElementById('cc-b');if(el)el.innerHTML=`<p>${olEsc(e.message||String(e))}</p>`;}}
+async function ccTake(i){const r=(window._cc||[])[i];if(!r)return;try{const B=await ccB(),d=await B.worldGet(r.id),W=worldSanitize(typeof d==='string'?JSON.parse(d):d);
+  if(!confirm(`Use "${r.name}" for your new careers? It replaces your League Setup on this device (saves keep their own world).`))return;
+  worldStore(W);clo();try{if(!document.getElementById('setup').classList.contains('hid')){_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();}}catch(e){}
+  notify(`${r.name} is your world now. Start a new game to play it.`);}catch(e){notify(e.message||String(e),'e');}}
+async function ccDel(i){const r=(window._cc||[])[i];if(!r||!confirm('Remove this world from Community Creations?'))return;try{const B=await ccB();await B.worldDel(r.id);ccOpen('worlds');}catch(e){notify(e.message||String(e),'e');}}
+async function ccReport(i){const r=(window._cc||[])[i];if(!r)return;const why=prompt('What is wrong with this world? (offensive names, etc.)');if(why==null)return;
+  try{const B=await ccB();await B.reportUser(OLS.user.id,r.owner,('community world "'+r.name+'": '+why).slice(0,500));if(confirm('Thanks, the report was sent. Also block this player (hides their creations)?'))await B.block(OLS.user.id,r.owner);ccOpen('worlds');}catch(e){notify(e.message||String(e),'e');}}
 
 let _mapSt=null; // null = the whole country
 // offer colours: the state's smaller, middle and bigger classes
@@ -15349,7 +15463,7 @@ function onSch(){}
 const WORLD_KEY='gpgm_world';let _worldOrig=null,WORLD={};
 function worldOrig(){
   if(_worldOrig)return _worldOrig;
-  const st={CF:CF_NAME};for(const k in XST)st[k]=XST[k].name;const cn={};for(const c of MAPC)cn[c.id]=c.name;
+  const st={CF:CF_NAME};for(const k in XST)st[k]=XST[k].name;const cn={};for(const c of MAPC)cn[c.key||c.id]=c.name;
   const sz={};for(const c of CLS_ORDER)sz[c]={t:CLS_SZ[c].t,d:CLS_SZ[c].d};for(const c in XCLS)sz[c]={t:XCLS[c].t,d:XCLS[c].d};
   const cp=o=>JSON.parse(JSON.stringify(o));
   return _worldOrig={states:st,counties:cn,colleges:{FBS:D1FBS.slice(),FCS:D1FCS.slice(),D2:D2.slice(),D3:D3.slice(),NAIA:NAIA.slice(),JUCO:JUCO.slice()},
@@ -15365,7 +15479,7 @@ function worldApply(W,fromSave){
   if((W.custFor||'classic')!==(USA.on?'usa':'classic')){W=Object.assign({},W);for(const k of['states','counties','divs','xdivs','size'])delete W[k];}
   const S=W.states||{};CF_NAME=S.CF||O.states.CF;for(const k in XST)XST[k].name=S[k]||O.states[k];
   for(const k in MAP_STATES)MAP_STATES[k].name=stName(k);
-  const C=W.counties||{};for(const c of MAPC)c.name=C[c.id]||O.counties[c.id];
+  const C=W.counties||{};for(const c of MAPC){const k=c.key||c.id;c.name=C[k]||O.counties[k]||c.name;}
   const CL=W.colleges||{},L=(k,a)=>_setArr(a,CL[k]&&CL[k].length>=3?CL[k]:O.colleges[k]);
   L('FBS',D1FBS);L('FCS',D1FCS);L('D2',D2);L('D3',D3);L('NAIA',NAIA);L('JUCO',JUCO);buildColleges();try{aiConfRebuild();}catch(e){}
   const PR=W.pro||{};_setArr(AI_NGL,PR.NGL&&PR.NGL.length>=4?PR.NGL:O.pro.NGL);_setArr(_STORY_DRAFT_TEAMS,AI_NGL);
@@ -15388,23 +15502,25 @@ function wsTab(t){wsGrab();WS.tab=t;wsRender();}
 function wsGrab(){
   const D=WS.draft,O=worldOrig(),v=id=>{const e=document.getElementById(id);return e?e.value:null;};
   if(WS.tab==='states'){D.states=D.states||{};for(const k of ST_ORDER){const x=v('ws-st-'+k);if(x!=null){const n=wsClean(x);if(n&&n!==O.states[k])D.states[k]=n;else delete D.states[k];}}
-    D.counties=D.counties||{};for(const c of MAPC){if(c.st!==WS.st)continue;const x=v('ws-cn-'+c.id);if(x==null)continue;const n=wsClean(x);if(n&&n!==O.counties[c.id])D.counties[c.id]=n;else delete D.counties[c.id];}}
+    D.counties=D.counties||{};for(const c of MAPC){if(c.st!==WS.st)continue;const x=v('ws-cn-'+c.id);if(x==null)continue;const n=wsClean(x);const kk=c.key||c.id;if(n&&n!==O.counties[kk])D.counties[kk]=n;else delete D.counties[kk];}}
   if(WS.tab==='divs'){D.size=D.size||{};D.divs=D.divs||{};D.xdivs=D.xdivs||{};
     const cls=clsOfSt(WS.st);for(const c of cls){const t=+v('ws-t-'+c),d=+v('ws-d-'+c);if(t&&d)D.size[c]={t,d};}
     const x=v('ws-dn');if(x!=null){const names=wsList(x,200);if(WS.st==='CF'){let i=0;for(const c of CLS_ORDER){const n=(D.size[c]||O.size[c]).d;D.divs[c]=names.slice(i,i+n);i+=n;}}else D.xdivs[WS.st]=names;}}
+  if(WS.tab==='map')meGrab();
+  if(WS.tab==='share'){const n=v('ws-mn'),d=v('ws-md');if(n!=null||d!=null)D.meta={name:wsClean(n||''),desc:String(d||'').replace(/[<>&"'`\\]/g,'').slice(0,200)};}
   if(WS.tab==='colleges'){const x=v('ws-col');if(x!=null){D.colleges=D.colleges||{};D.colleges[WS.lvl]=wsList(x,400);}}
   if(WS.tab==='pro'){D.pro=D.pro||{};for(const k of['NGL','SFL','MGL']){const x=v('ws-pro-'+k);if(x!=null)D.pro[k]=wsList(x,64);}}
   if(WS.tab==='stars'){D.stars=D.stars||{};for(const s of[5,4,3,2]){const x=v('ws-s'+s);if(x!=null)D.stars[s]=clamp(Math.round(+x)||0,0,5000);}const f=v('ws-fr'),c=v('ws-cm');if(f!=null)D.frMult=+f;if(c!=null)D.colMult=+c;}
 }
 function wsRender(){
-  const{O,D}=wsCur(),tabs=[['states','States & counties'],['divs','Divisions & sizes'],['colleges','Colleges'],['pro','Pro teams'],['stars','Stars & classes']];
+  const{O,D}=wsCur(),tabs=[['states','States & counties'],['map','Map editor'],['divs','Divisions & sizes'],['colleges','Colleges'],['pro','Pro teams'],['stars','Stars & classes'],['share','File & sharing']];
   const stSel=(fn)=>`<select onchange="wsGrab();WS.st=this.value;wsRender()" style="padding:6px 8px;border-radius:8px">${ST_ORDER.map(k=>`<option value="${k}"${WS.st===k?' selected':''}>${(D.states&&D.states[k])||O.states[k]}</option>`).join('')}</select>`;
   let body='';
   if(WS.tab==='states'){
     body=`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">Rename any state. Pick a state to rename its counties too.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin-bottom:12px">${ST_ORDER.map(k=>`<label style="font-size:11px;color:var(--mu)">${O.states[k]}<input id="ws-st-${k}" value="${(D.states&&D.states[k])||O.states[k]}" maxlength="40" style="width:100%"></label>`).join('')}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b style="font-size:13px">Counties in</b>${stSel()}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:34vh;overflow-y:auto">${MAPC.filter(c=>c.st===WS.st).map(c=>`<input id="ws-cn-${c.id}" value="${(D.counties&&D.counties[c.id])||O.counties[c.id]}" maxlength="40" title="${O.counties[c.id]}">`).join('')}</div>`;
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:34vh;overflow-y:auto">${MAPC.filter(c=>c.st===WS.st).map(c=>`<input id="ws-cn-${c.id}" value="${(D.counties&&D.counties[c.key||c.id])||O.counties[c.key||c.id]}" maxlength="40" title="${O.counties[c.key||c.id]}">`).join('')}</div>`;
   }else if(WS.tab==='divs'){
     const cls=clsOfSt(WS.st),sz=c=>(D.size&&D.size[c])||O.size[c];
     const names=WS.st==='CF'?CLS_ORDER.flatMap(c=>{const a=(D.divs&&D.divs[c])||O.divs[c]||[];const n=sz(c).d;return Array.from({length:n},(_,i)=>a[i]||`${c} Division ${i+1}`);}):(()=>{const a=(D.xdivs&&D.xdivs[WS.st])||O.xdivs[WS.st]||[];const n=cls.reduce((s,c)=>s+sz(c).d,0);return Array.from({length:n},(_,i)=>a[i]||`District ${i+1}`);})();
@@ -15413,6 +15529,8 @@ function wsRender(){
       <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:150px;font-size:12px;font-weight:800">${clsName(c)}</span><label style="font-size:12px">Teams <input id="ws-t-${c}" type="number" min="8" max="160" value="${sz(c).t}" style="width:76px"></label><label style="font-size:12px">Divisions <input id="ws-d-${c}" type="number" min="1" max="16" value="${sz(c).d}" style="width:64px"></label></div>`).join('')}</div>
       <div style="font-size:12px;color:var(--mu);margin-bottom:4px">Division names, one per line, in order (smallest classification first). Add lines for new divisions.</div>
       <textarea id="ws-dn" rows="10" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${names.join('\n')}</textarea>`;
+  }else if(WS.tab==='map'){body=meBody();
+  }else if(WS.tab==='share'){body=shareBody();
   }else if(WS.tab==='colleges'){
     const lv=[['FBS','FBS'],['FCS','FCS'],['D2','Division II'],['D3','Division III'],['NAIA','NAIA'],['JUCO','Junior college']];
     const list=(D.colleges&&D.colleges[WS.lvl]&&D.colleges[WS.lvl].length?D.colleges[WS.lvl]:O.colleges[WS.lvl]);
@@ -15440,7 +15558,9 @@ function wsRender(){
       <button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="wsGrab();wsSave()">Save League Setup</button></div>`);
 }
 function wsSave(){
-  const D=WS.draft||{};D.custFor=USA.on?'usa':'classic';worldStore(D);worldApply(D);
+  const D=WS.draft||{};D.custFor=USA.on?'usa':'classic';
+  // new custom states join the world right away
+  if(D.geo&&D.geo.mode!=='classic'&&Array.isArray(D.geo.custom)){D.geo.mode='usa';D.geo.states=Array.isArray(D.geo.states)?D.geo.states:Object.keys(USST);for(const c of D.geo.custom)if(c.counties&&c.counties.length&&!D.geo.states.includes(c.ab))D.geo.states.push(c.ab);}worldStore(D);worldApply(D);
   try{_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();}catch(e){console.error('league setup',e);}
   clo();notify('League Setup saved. New careers use it.');
 }
