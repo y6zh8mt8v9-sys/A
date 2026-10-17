@@ -737,6 +737,10 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
 :root:not(.light) h1,:root:not(.light) h2{font-weight:900!important;}
 :root:not(.light) #tb,:root:not(.light) #nav-bar{background:linear-gradient(90deg,rgba(var(--tRGB,140,32,25),.55),rgba(14,15,18,.96) 45%)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 2px 10px rgba(0,0,0,.45)!important;border-color:rgba(255,255,255,.07)!important;}
 :root:not(.light) .logo .r{background:none!important;color:#fff!important;-webkit-text-fill-color:#fff;}
+:root:not(.light) #setup h1{font-family:var(--head,'Barlow Condensed'),sans-serif!important;letter-spacing:.04em!important}
+:root:not(.light) #setup h1 .r{background:none!important;color:#fff!important;-webkit-text-fill-color:#fff}
+:root:not(.light) #setup h1 .b{color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a)}
+:root:not(.light) #setup h1+p{color:#b9c0cc!important}
 :root:not(.light) .logo .b{color:var(--tA,#d8443a)!important;}
 :root:not(.light) .pnl,:root:not(.light) .dash-hero,:root:not(.light) .dash-stat,:root:not(.light) .win-panel,:root:not(.light) .dash-next-game,:root:not(.light) .sbox{background:var(--s1)!important;border:1px solid var(--bd)!important;border-radius:4px!important;box-shadow:var(--shadow)!important;}
 :root:not(.light) #mb,:root:not(.light) #pui{background:#15171b!important;border:1px solid rgba(255,255,255,.1)!important;border-top:4px solid var(--tA,#d8443a)!important;border-radius:4px!important;box-shadow:0 18px 50px rgba(0,0,0,.6)!important;}
@@ -786,6 +790,9 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
 :root.light #tb,:root.light #nav-bar{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 2px 10px rgba(0,0,0,.08)!important;border-color:rgba(0,0,0,.08)!important;}
 :root.light #tb{border-bottom:3px solid var(--tA,#d8443a)!important}
 :root.light .logo .r{background:none!important;color:#15181d!important;-webkit-text-fill-color:#15181d;}
+:root.light #setup h1 .r{background:none!important;color:#15181d!important;-webkit-text-fill-color:#15181d}
+:root.light #setup h1 .b{color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a)}
+:root.light #setup h1+p{color:#4a525e!important}
 :root.light .logo .b{color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a);}
 :root.light .pnl,:root.light .dash-hero,:root.light .dash-stat,:root.light .win-panel,:root.light .dash-next-game,:root.light .sbox{background:#fff!important;border:1px solid rgba(0,0,0,.08)!important;border-radius:4px!important;box-shadow:var(--shadow)!important;}
 :root.light #mb,:root.light #pui{background:#fff!important;border:1px solid rgba(0,0,0,.1)!important;border-top:4px solid var(--tA,#d8443a)!important;border-radius:4px!important;box-shadow:0 18px 50px rgba(0,0,0,.25)!important;}
@@ -881,7 +888,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
         <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:14px;">
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--mu);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
             <span id="map-st-title">State of Crestfield</span>
-            <span style="font-size:10px;font-weight:400;color:var(--bd)">— tap a state, then a highlighted county to view job offers</span>
+            <span style="font-size:11px;font-weight:400;color:var(--mu)">— tap a state, then a highlighted county to view job offers</span>
           </div>
           <div id="map-st-tabs" style="margin-bottom:8px;width:700px;max-width:calc(100vw - 60px)"></div>
           <div id="county-map-wrap" style="position:relative;width:700px;max-width:calc(100vw - 60px);border-radius:6px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain">
@@ -8355,7 +8362,7 @@ function pgSched(){
       return`<tr class="${rowCls}${opp?' cl':''}" ${opp?`onclick="viewSchool(${opp.id})"`:''} ${isRiv?'style="background:rgba(245,192,48,.04);border-left:2px solid var(--gd)"':isEmpty?'style="opacity:.5"':''}>
         <td>${isRiv?`<strong style="color:var(--gd)">${g.wk}</strong>`:g.wk}</td>
         <td style="color:var(--mu)">${g.date||'—'}</td>
-        <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--b2)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--bd)">OPEN</span>':'<span style="font-size:10px;font-weight:700;color:var(--bd)">BYE</span>'}</td>
+        <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--b2)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--mu)">OPEN</span>':'<span style="font-size:10px;font-weight:700;color:var(--mu)">BYE</span>'}</td>
         <td>${isEmpty?`<span style="color:var(--bd);font-style:italic">— open slot —</span>`:opp?`<div style="display:flex;align-items:center;gap:6px">${sLogo(opp,32)} ${isRiv?`<strong style="color:var(--gd)">${opp.name} ${opp.mascot}</strong>`:opp.name+' '+opp.mascot}</div>`:isBye?`<span style="color:var(--mu)">— Bye Week —</span>`:'—'}</td>
         <td>${opp?`<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:${oppCls===G.cls?'var(--b2)':clsNum(oppCls)>clsNum(G.cls)?'var(--rd)':'var(--gn)'}" title="${clsName(oppCls)}">${oppCls}</span>`:'—'}</td>
         <td>${opp?rb(teamOvr(opp.id)):'—'}</td>
@@ -15522,9 +15529,9 @@ function _landColorSt(c){const M=MAP_STATES[c.st]||MAP_STATES.CF,L=M.land,b=M.bb
 function renderMapTabs(){
   const box=document.getElementById('map-st-tabs');if(!box)return;
   const cnt={};_mapOffers.forEach(o=>{cnt[o.st]=(cnt[o.st]||0)+1;});
-  const chip=(k,l,on,n)=>`<button onclick="mapSetSt(${k?`'${k}'`:'null'})" style="background:${on?'var(--ac)':'var(--s2)'};border:1px solid ${on?'var(--ac)':'var(--bd)'};color:${on?'#fff':'var(--tx)'};border-radius:999px;padding:3px 10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;white-space:nowrap">${l}${n?` <span style="opacity:.75">${n}</span>`:''}</button>`;
+  const chip=(k,l,on,n)=>`<button onclick="mapSetSt(${k?`'${k}'`:'null'})" style="background:${on?'var(--ac)':'var(--s2)'};border:1px solid ${on?'var(--ac)':'var(--bd)'};color:${on?'#fff':'var(--tx)'};border-radius:6px;padding:3px 10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;white-space:nowrap">${l}${n?` <span style="opacity:.75">${n}</span>`:''}</button>`;
   const many=ST_ORDER.length>13,sorted=ST_ORDER.slice().sort((a,b)=>a==='CF'?-1:b==='CF'?1:stName(a).localeCompare(stName(b)));
-  box.innerHTML=`<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">${chip(null,'Whole country',_mapSt==null,0)}${many?`${chip('CF',stName('CF'),_mapSt==='CF',cnt.CF||0)}<select onchange="mapSetSt(this.value||null)" style="padding:4px 8px;border-radius:999px;font-weight:800;font-size:12px"><option value="">Jump to a state…</option>${sorted.map(k=>`<option value="${k}"${_mapSt===k?' selected':''}>${stName(k)}${cnt[k]?` (${cnt[k]} jobs)`:''}</option>`).join('')}</select>`:ST_ORDER.map(k=>chip(k,stName(k),_mapSt===k,cnt[k]||0)).join('')}</div>
+  box.innerHTML=`<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">${chip(null,'Whole country',_mapSt==null,0)}${many?`${chip('CF',stName('CF'),_mapSt==='CF',cnt.CF||0)}<select onchange="mapSetSt(this.value||null)" style="padding:4px 8px;border-radius:6px;font-weight:800;font-size:12px"><option value="">Jump to a state…</option>${sorted.map(k=>`<option value="${k}"${_mapSt===k?' selected':''}>${stName(k)}${cnt[k]?` (${cnt[k]} jobs)`:''}</option>`).join('')}</select>`:ST_ORDER.map(k=>chip(k,stName(k),_mapSt===k,cnt[k]||0)).join('')}</div>
     ${_mapSt?`<div style="font-size:11px;color:var(--mu);margin-top:6px">${MAP_STATES[_mapSt].tag}</div>`:`<div style="font-size:11px;color:var(--mu);margin-top:6px">Scroll or drag the map, then tap a state to zoom in. Colored counties have job offers.</div>`}`;
   const ttl=document.getElementById('map-st-title');if(ttl)ttl.textContent=_mapSt?'State of '+MAP_STATES[_mapSt].name:'The country';
 }
