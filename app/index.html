@@ -16425,8 +16425,9 @@ const TUT_PAGES=[
     <div class="tip">Tip: Enshrine seniors with Star or Elite development and high ratings. Ask the advisor about "Hall of Fame picks" to see their projected draft odds first.</div>
   `},
   {tab:'States & National',icon:'',title:'Your States and the National Title',body:`
-    <p><strong>Real USA (new careers):</strong> on the setup screen, <b>Choose states</b> lets you play in any of the <strong>50 real states</strong>, from just your home state to all fifty. The map uses each state's real counties and towns, and every high school is fictional, named after the real town it sits in. Bigger states have more schools (league sizes follow each state's real number of football programs), and each state names its classes its own way (1A to 6A, Division I to V, Class C to AA and so on).</p>
-    <p>The number of colleges, the national star counts and the recruiting quotas grow with the part of the country you pick. With all 50 states you get the full national numbers (about 32 five-stars, 280 four-stars and 1,150 three-stars a class) and roughly 840 colleges; a smaller world gets its share, never more. College and pro team names are invented from real places, never a real school's or team's name. Your home state offers you nine jobs; every other state offers a few.</p>
+    <p><strong>Real USA (new careers):</strong> on the setup screen, <b>Choose states</b> lets you play in any of the <strong>50 real states</strong>, from just your home state to all fifty. The map uses each state's real counties and towns, and every high school is fictional, named after the real town it sits in. Every state has its <strong>real number of high schools</strong> (about 15,100 for the whole country), and each state names its classes its own way (1A to 6A, Division I to V, Class C to AA and so on).</p>
+    <p><strong>Full detail and light states:</strong> up to <b>5 states</b> are played in full detail, with every player on every team (your home state always is). Every other state is a <b>light state</b>: its schools play every game with their own strength, keep records and game logs, and crown a champion in a state playoff. The game follows each light state's top prospects as real players, so stars, offers, camps and commitments work everywhere. A school's profile shows whether it is light. You can take jobs only in detailed states, and the detailed states together hold up to 1,500 schools so the game stays fast on phones.</p>
+    <p>The number of colleges, the national star counts and the recruiting quotas grow with the part of the country you pick. With all 50 states you get the full national numbers (about 32 five-stars, 280 four-stars and 1,150 three-stars a class) and roughly 840 colleges; a smaller world gets its share, never more. College and pro team names are invented from real places, never a real school's or team's name. Your home state offers you nine jobs; every other detailed state offers a few.</p>
     <p><strong>Classic country:</strong> you can still pick the original fictional country in the same window. Older saves keep the world they started with.</p>
     <p>In the classic country there are <strong>13 states</strong>, and every one is fully simulated: real rosters, divisions, schedules, stats, recruiting, rankings and state champions. You can <strong>start your career in any of them</strong>. The career map shows the whole country (scroll or drag it, then tap a state to zoom in on its counties); Crestfield offers you nine jobs and every other state five.</p>
     <ul>
@@ -22908,13 +22909,17 @@ function gpControlsHtml(){
     <div>${K('T')} timeout<\/div><div>${K('P')} or ${K('Esc')} pause<\/div>
     <div class="ctlh">Passing<\/div>
     <div>${K('1')}–${K('5')} throw to that receiver (numbers float over them)<\/div><div>Mouse / finger: pull back like a slingshot, let go to throw<\/div>
-    <div>${K('Space')} pass type: bullet / lob<\/div><div>${B('scramble')} tuck it and run with the QB<\/div>
+    <div>${K('Space')} or a quick tap: switch bullet / lob (every play starts with a bullet)<\/div><div>${B('scramble')} or the QB run button: tuck it and run<\/div>
     <div class="ctlh">Ball carrier<\/div>
     <div>${K('↑')}${K('↓')}${K('←')}${K('→')} steer your runner (full speed every way)<\/div><div>${B('jukeU')}/${B('jukeD')} juke · ${B('dive')} dive · ${B('slow')} slow down<\/div>
     <div>${B('spin')} spin · ${B('stiff')} stiff arm<\/div><div>${B('truck')} truck · ${B('hurdle')} hurdle · ${K('K')} take a knee (kickoff)<\/div>
+    <div>Touch: the skill-move wheel (bottom right): tap a slice, or press and slide onto one<\/div><div>Each slice shows its key or controller button (Settings → Move buttons: Row or Wheel)<\/div>
     <div class="ctlh">Defense<\/div>
     <div>${K('W')}${K('A')}${K('S')}${K('D')} or arrows: move your player<\/div><div>${B('tackle')} tackle · ${B('switch')} switch to the man nearest the ball<\/div>
     <div>Click / tap a defender: take control of him<\/div><div>${B('play')} or ${K('Space')}: play the ball when the meter is up<\/div>
+    <div class="ctlh">Player Career<\/div>
+    <div>The coach calls the play: its card shows your job before the snap<\/div><div>Receivers: steer your route (drag, stick or arrows); let go and he runs it as drawn<\/div>
+    <div>${K('B')} / Y / Triangle: call for the ball, before or during the play<\/div><div>Defense: you always control your own player<\/div>
     <div class="ctlh">Kicking and catches<\/div>
     <div>${K('Space')} or click: stop the kick meters<\/div><div>${K('Space')} or click: catch meter (hit the green)<\/div>
     <div>${B('fair')} fair catch on punts<\/div><div>${K('1')}–${K('9')} pick a touchdown celebration<\/div>
