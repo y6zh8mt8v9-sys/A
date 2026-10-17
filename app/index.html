@@ -1085,6 +1085,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:10px">Game Day</div>
       <div id="set-gd"></div>
     </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px"><button class="bgh" style="flex:1" onclick="closeSettings();errReport()">Error report</button></div>
 
     <button onclick="closeSettings()" class="btn" style="width:100%">Done</button>
   </div>
@@ -8464,7 +8465,7 @@ function pgTeams(){
       <div style="font-size:10px;color:var(--mu)">${s.mascot}</div>
       <div style="font-size:10px;font-weight:700;color:var(--b2)">${XCLS[sCls]?clsName(sCls):sCls}</div>
       <div>${recStr(s.wins,s.losses)}</div><div>${rb(teamOvr(s.id))}</div>
-      <div style="font-size:10px;color:var(--mu)">${sPlayers(s.id).length} players</div>
+      <div style="font-size:10px;color:var(--mu)">${s.lite?`light state · ${sPlayers(s.id).length} prospect${sPlayers(s.id).length===1?'':'s'}`:`${sPlayers(s.id).length} players`}</div>
       ${isMe?'<div style="font-size:10px;color:var(--ac);font-weight:700">◀ YOU</div>':''}
     </div>`;}).join('')}
   </div>`;
@@ -10159,7 +10160,16 @@ function _menuInit(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_menuInit);else setTimeout(_menuInit,0);
 
-window.addEventListener('error',function(e){try{if(e&&e.message&&typeof notify==='function')notify('Something went wrong: '+e.message,'e');}catch(_){}});
+// error log: the last errors (menus and Game Day) stay on this device, so a player can send a report (Settings → Error report)
+function gpErrLog(msg,stack,where){try{const L=JSON.parse(localStorage.getItem('gpgm_errlog')||'[]');let ctx='';try{ctx=G&&G.myId?`yr${G.yr} ${G.phase} wk${G.week||0} pl${G.players.length}`:'menu';}catch(_){}
+  L.push({t:new Date().toISOString(),w:where||'app',m:String(msg||'').slice(0,300),s:String(stack||'').split('\n').slice(0,6).join(' | ').slice(0,700),c:ctx,ua:navigator.userAgent.slice(0,140)});while(L.length>25)L.shift();localStorage.setItem('gpgm_errlog',JSON.stringify(L));}catch(_){}}
+window.gpErrLog=gpErrLog;
+window.addEventListener('error',function(e){try{gpErrLog(e&&e.message,e&&e.error&&e.error.stack,'app');if(e&&e.message&&typeof notify==='function')notify('Something went wrong: '+e.message,'e');}catch(_){}});
+window.addEventListener('unhandledrejection',function(e){try{const r=e&&e.reason;gpErrLog(r&&r.message||String(r),r&&r.stack,'promise');}catch(_){}});
+window.errReport=function(){let L=[];try{L=JSON.parse(localStorage.getItem('gpgm_errlog')||'[]');}catch(e){}
+  const txt=L.length?L.map(x=>`${x.t} [${x.w}] ${x.m}\n  at ${x.s}\n  (${x.c}) ${x.ua}`).join('\n\n'):'No errors recorded on this device.';
+  openMo(`<h2>Error report</h2><div style="font-size:12px;color:var(--mu);margin-bottom:8px">If the game misbehaves or crashes, copy this and send it with a short note about what you were doing.</div><textarea id="err-txt" readonly style="width:100%;height:42vh;font-size:11px;font-family:monospace">${txt.replace(/</g,'&lt;')}</textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="bgh" onclick="try{localStorage.removeItem('gpgm_errlog');}catch(e){}clo();notify('Error report cleared.')">Clear</button><button class="btn" onclick="const t=document.getElementById('err-txt');t.select();try{navigator.clipboard.writeText(t.value).then(()=>notify('Copied.'),()=>{document.execCommand('copy');notify('Copied.');});}catch(e){document.execCommand('copy');notify('Copied.');}">Copy</button><button class="bgh" onclick="clo()">Close</button></div>`);};
 
 // ═══════════ LEAGUE ENGINE: real weekly pairings, realistic scores, team schedules ═══════════
 function lgDrive(off,def,r){const d=off-def,pTD=clamp(.3+.012*d,.05,.72),pFG=clamp(.1+.002*d,.04,.14),x=r();
@@ -17581,6 +17591,8 @@ R0 R1 R1 R0 R0 . .
 <script>
 const DEMO=(()=>{try{return!!(window.frameElement&&window.frameElement.getAttribute('data-demo'));}catch(e){return false;}})();
 const GP=(()=>{try{if(DEMO)return null;return window.parent&&window.parent!==window&&window.parent.__GP?window.parent.__GP:null;}catch(e){return null;}})();
+try{if(window.parent&&window.parent!==window&&window.parent.gpErrLog){window.addEventListener('error',e=>{try{window.parent.gpErrLog(e&&e.message,e&&e.error&&e.error.stack,'gameday');}catch(_){}});
+  window.addEventListener('unhandledrejection',e=>{try{const r=e&&e.reason;window.parent.gpErrLog(r&&r.message||String(r),r&&r.stack,'gameday');}catch(_){}});}}catch(e){}
 try{const u=GP&&GP.ui,R=document.documentElement;if(u){R.classList.add('g27');if(u.light)R.classList.add('g27l');R.style.setProperty('--tA',u.tA);R.style.setProperty('--tB',u.tB);R.style.setProperty('--tRGB',u.tRGB);R.style.setProperty('--tOn',u.tOn);}}catch(e){}
 
 'use strict';

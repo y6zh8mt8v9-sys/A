@@ -23,6 +23,33 @@ High school football career game with a playable Game Day engine.
 
 ## What's new
 
+### Latest update
+- **Real number of high schools in every state** (about 15,100 for the whole country).
+  - Pick up to **5 states in full detail** (League Setup → Choose your states). Every player on every team is simulated there.
+  - Every other state is a **light state**. Its schools play every game, keep their strength and records, and crown a champion in a **state playoff**. The game tracks their top prospects, so stars, offers, camps and commitments work everywhere.
+  - Light-state prospects are drawn from the detailed states' real rating spread, so stars are shared fairly. **At most 32 five-stars per class.**
+  - Detailed states together hold up to 1,500 schools; your home state always counts as detailed. Every other league now also crowns its champion in a playoff bracket.
+- **Fewer crashes on phones.**
+  - The default world tracks about 70,000 players instead of 154,000.
+  - Saves are about 40% smaller.
+  - A big save from before this update can be made lighter when you load it.
+- **Transfers** now show up on your roster right away.
+- **Offensive line:** good linemen win again. Runners were going down on first contact after the new ratings arrived.
+- **Look:**
+  - The console look now also covers light mode, Settings and the Game Day menus, all in your team's colors.
+  - The header no longer pops back on tiny scrolls.
+- **Game Day:**
+  - Skill moves sit on a wheel by default, with PlayStation, Xbox or keyboard buttons on each slice.
+  - There are only two throws, bullet and lob. Tap the screen (or press Space) to switch; every play starts with a bullet. "QB run" sits on its own button.
+- **Helmets:** finish and stripe are set for the whole team in Customize → Uniforms.
+- **Player Career:**
+  - Before every snap, a card shows the coach's call with your player circled and your job ("Run a post", "Man coverage on #84").
+  - Receivers can steer their own route and call for the ball during the play.
+- **Team Builder:**
+  - Works for every state, with a search and real 3-letter abbreviations.
+  - Every change is saved on the device as you go, so you can build your league over several sessions. League Setup keeps unsaved progress the same way.
+  - Any school can be edited mid-season from its profile or from Customize.
+
 ### Player Career
 - **Player Career** on the title screen. You create one player, pick his high school, and in Game Day you control only him.
 - **The coach does the rest:**
