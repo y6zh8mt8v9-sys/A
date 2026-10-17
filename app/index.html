@@ -4885,6 +4885,87 @@ function pgTrophy(){
       ${ind.map(x=>`<div class="cl" style="display:flex;gap:10px;align-items:center;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:8px" onclick="showPlayer(${x.a.pid})">${trophySvg(x.l==='Mr. Football'?'#d9a520':'#7fa6d8',false)}<div><div style="font-weight:800">${x.l}</div><div>${x.a.name}</div><div style="font-size:11px;color:var(--mu)">${(G.baseYear||2026)+x.yr-1}${x.a.pos?' · '+x.a.pos:''}</div></div></div>`).join('')}</div></div>`:''}`;}
 function ticketSet(k){if(!TICKET[k])return;G.ticket=k;nav(G._page||'staff',G._arg);}
 
+
+// ═══════════ v2.16 7-ON-7 SUMMER LEAGUE: after the state championship, an optional passing tournament ═══════════
+// Pick seven players for offense and seven for defense, pay the entry fee and play the best programs of your class.
+// Quarterfinal and semifinal are single games, the league title is a best-of-five series. Standouts get college looks.
+const S7_FEE=5000;
+function s7Avail(){return G&&G.phase==='postseason'&&!(G.s7&&G.s7.yr===G.yr&&G.s7.done);}
+function s7Str(sid,picks){const L=(picks?G.players.filter(p=>picks.includes(p.id)):(sid===G.myId?myP():sPlayers(sid))).filter(p=>!(p.inj>0));
+  const top=(pos,n)=>L.filter(p=>p.pos===pos).sort((a,b)=>b.rat-a.rat).slice(0,n).map(p=>p.rat);
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:40,qb=top('QB',1),rec=[...top('WR',3),...top('TE',1),...top('RB',1)],def=[...top('LB',2),...top('CB',3),...top('S',2)];
+  return{off:(qb.length?qb[0]:45)*0.45+avg(rec)*0.55,def:avg(def)};}
+function s7SimGame(a,b){const A=s7Str(a,a===G.myId?G.s7.picks:null),B=s7Str(b,b===G.myId?G.s7.picks:null);
+  const pts=(o,d)=>{let p=0;for(let i=0;i<8;i++){const pr=clamp(0.42+(o-d)/55,0.12,0.82);if(Math.random()<pr)p+=Math.random()<0.6?7:Math.random()<0.5?8:6;}return p;};
+  let x=pts(A.off,B.def),y=pts(B.off,A.def);if(x===y){if(Math.random()<0.5)x+=7;else y+=7;}return[x,y];}
+function s7Start(){
+  const opps=allSchools().filter(t=>t.id!==G.myId&&t.cls===G.cls).sort((a,b)=>teamOvr(b.id)-teamOvr(a.id)).slice(0,7);
+  if(opps.length<3){notify('Not enough teams in your class for a 7-on-7 league','w');return;}
+  const field=[G.myId,...opps.map(t=>t.id)].sort((a,b)=>teamOvr(b)-teamOvr(a));
+  // bracket by seed: 1v8, 4v5, 2v7, 3v6
+  const sd=[0,7,3,4,1,6,2,5].filter(i=>i<field.length).map(i=>field[i]);const pairs=[];for(let i=0;i+1<sd.length;i+=2)pairs.push([sd[i],sd[i+1]]);
+  G.s7={yr:G.yr,picks:G.s7&&G.s7.yr===G.yr?G.s7.picks:[],field,round:0,rounds:[pairs.map(([a,b])=>({a,b,w:null,sc:null}))],series:null,done:false,res:[]};}
+window.s7Open=function(){
+  if(!G.s7||G.s7.yr!==G.yr||!G.s7.paid){s7Signup();return;}s7Render();};
+function s7Signup(){
+  const pl=myP().filter(p=>!(p.inj>0)),O=['QB','WR','TE','RB'],D=['CB','S','LB'],sel=new Set((G.s7&&G.s7.yr===G.yr&&G.s7.picks)||s7AutoPick());
+  const row=p=>`<label style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:13px"><input type="checkbox" class="s7-ck" value="${p.id}" style="width:auto;min-height:0" ${sel.has(p.id)?'checked':''} onchange="s7Count()"><b style="width:30px">${p.pos}</b>${p.fn} ${p.ln}<span style="margin-left:auto;color:var(--mu)">${p.rat} · ${['','','','','','','','','','Fr','So','Jr','Sr'][p.yr]||''}</span></label>`;
+  openMo(`<h2>7-on-7 Summer League</h2>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">The season is over, but the passing league is just starting. Seven on seven, no helmets or pads, two-hand touch and a four-second pass clock. You face the best programs of your class: single-game quarterfinal and semifinal, then a <b>best-of-five</b> series for the league title. College coaches come to watch: your standouts can pick up offers. Entry fee <b>$${S7_FEE.toLocaleString()}</b>, the champion takes home $10,000.</div>
+    <div class="g2" style="gap:12px"><div><div style="font-weight:800;margin-bottom:4px">Offense: pick 7 (one QB)</div><div style="max-height:40vh;overflow-y:auto">${pl.filter(p=>O.includes(p.pos)).sort((a,b)=>O.indexOf(a.pos)-O.indexOf(b.pos)||b.rat-a.rat).map(row).join('')}</div></div>
+      <div><div style="font-weight:800;margin-bottom:4px">Defense: pick 7</div><div style="max-height:40vh;overflow-y:auto">${pl.filter(p=>D.includes(p.pos)).sort((a,b)=>D.indexOf(a.pos)-D.indexOf(b.pos)||b.rat-a.rat).map(row).join('')}</div></div></div>
+    <div id="s7-cnt" style="font-size:12px;margin:8px 0"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="bgh" onclick="s7Auto()">Best 14</button><button class="bgh" onclick="clo()">Not this year</button><button class="btn bgn" id="s7-go" onclick="s7Pay()">Enter for $${S7_FEE.toLocaleString()}</button></div>`);
+  s7Count();}
+function s7AutoPick(){const pl=myP().filter(p=>!(p.inj>0)),t=(pos,n)=>pl.filter(p=>p.pos===pos).sort((a,b)=>b.rat-a.rat).slice(0,n);
+  const off=[...t('QB',1),...t('WR',4),...t('TE',1),...t('RB',1)],def=[...t('CB',3),...t('S',2),...t('LB',2)];
+  const fill=(arr,poss)=>{for(const p of pl.filter(q=>poss.includes(q.pos)&&!arr.includes(q)).sort((a,b)=>b.rat-a.rat)){if(arr.length>=7)break;arr.push(p);}return arr.slice(0,7);};
+  return[...fill(off,['WR','TE','RB']),...fill(def,['CB','S','LB'])].map(p=>p.id);}
+window.s7Auto=function(){const ids=new Set(s7AutoPick());document.querySelectorAll('.s7-ck').forEach(c=>c.checked=ids.has(+c.value));s7Count();};
+window.s7Count=function(){const ids=[...document.querySelectorAll('.s7-ck:checked')].map(c=>+c.value),ps=ids.map(getP).filter(Boolean),o=ps.filter(p=>['QB','WR','TE','RB'].includes(p.pos)),d=ps.filter(p=>['CB','S','LB'].includes(p.pos)),qb=o.filter(p=>p.pos==='QB').length;
+  const ok=o.length===7&&d.length===7&&qb===1,el=document.getElementById('s7-cnt'),b=document.getElementById('s7-go');
+  if(el)el.innerHTML=`Offense ${o.length}/7${qb!==1?` · <span style="color:var(--rd)">exactly one QB</span>`:''} · Defense ${d.length}/7`;if(b){b.disabled=!ok;b.style.opacity=ok?1:.45;}return ok?ids:null;};
+window.s7Pay=function(){const ids=s7Count();if(!ids)return;if(!G.unlimitedMoney&&G.budget<S7_FEE){notify('Not enough money for the entry fee','e');return;}
+  if(!G.unlimitedMoney)G.budget-=S7_FEE;s7Start();G.s7.picks=ids;G.s7.paid=true;addLog(`<span style="color:var(--gd)">Entered the 7-on-7 Summer League (-$${S7_FEE.toLocaleString()})</span>`);clo();s7Render();};
+function s7Name(id){const t=getS(id);return t?`${t.name} ${t.mascot}`:'?';}
+function s7MyGame(){const S=G.s7;if(!S||S.done)return null;
+  if(S.series){const sr=S.series;return sr.w==null?{kind:'series',opp:sr.a===G.myId?sr.b:sr.a}:null;}
+  const R=S.rounds[S.round];const g=R&&R.find(x=>(x.a===G.myId||x.b===G.myId)&&x.w==null);return g?{kind:'game',g,opp:g.a===G.myId?g.b:g.a}:null;}
+function s7Render(){const S=G.s7;if(!S)return;const my=s7MyGame(),rn=['Quarterfinals','Semifinals','League final'];
+  const rows=S.rounds.map((R,i)=>`<div style="margin-bottom:8px"><div style="font-weight:800;font-size:12px;color:var(--mu)">${rn[i]||'Round '+(i+1)}</div>${R.map(g=>`<div class="dr"><span>${g.a===G.myId?'<b>':''}${s7Name(g.a)}${g.a===G.myId?'</b>':''} vs ${g.b===G.myId?'<b>':''}${s7Name(g.b)}${g.b===G.myId?'</b>':''}</span><span>${g.sc?g.sc.join('-'):'—'}</span></div>`).join('')}</div>`).join('')
+    +(S.series?`<div style="font-weight:800;font-size:12px;color:var(--mu)">League final · best of five</div><div class="dr"><span>${s7Name(S.series.a)} vs ${s7Name(S.series.b)}</span><span>${S.series.wa}-${S.series.wb}</span></div>${S.series.games.map((g,i)=>`<div style="font-size:12px;color:var(--mu)">Game ${i+1}: ${g.join('-')}</div>`).join('')}`:'');
+  openMo(`<h2>7-on-7 Summer League</h2><div style="font-size:13px;margin-bottom:10px">${S.done?(S.champ===G.myId?'<b style="color:var(--gd)">League champions!</b>':`Your run is over. Champion: <b>${s7Name(S.champ)}</b>`):my?`Next: <b>${s7Name(my.opp)}</b>${my.kind==='series'?` · league final, game ${S.series.games.length+1}`:''}`:'Waiting on the other games…'}</div>
+    ${rows}<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap">${my?`<button class="btn bgn" onclick="s7Play()">Play it</button><button class="bgh" onclick="s7Sim()">Simulate</button>`:''}<button class="bgh" onclick="clo()">Close</button></div>`);}
+window.s7Play=function(){const my=s7MyGame();if(!my)return;const opp=getS(my.opp);clo();window._gdMode='all';window._gdInfo={kind:'s7',info:{opp,label:'7-on-7 Summer League'}};gdStart();};
+window.s7Sim=function(){const my=s7MyGame();if(!my)return;const[a,b]=s7SimGame(G.myId,my.opp);s7Record(a,b);};
+// a result for your game; the other games of the round are simulated, then the bracket moves on
+function s7Record(my,op){const S=G.s7,g=s7MyGame();if(!g)return;
+  if(g.kind==='series'){const sr=S.series,mineA=sr.a===G.myId;sr.games.push(mineA?[my,op]:[op,my]);if(my>op){if(mineA)sr.wa++;else sr.wb++;}else{if(mineA)sr.wb++;else sr.wa++;}
+    if(sr.wa>=3||sr.wb>=3){sr.w=sr.wa>=3?sr.a:sr.b;s7Finish(sr.w);}}
+  else{const x=g.g;x.sc=x.a===G.myId?[my,op]:[op,my];x.w=my>op?G.myId:g.opp;s7Advance();}
+  S.res.push([g.opp,my,op]);notify(`7-on-7: ${my>op?'Win':'Loss'} ${my}-${op}`);s7Render();}
+function s7Advance(){const S=G.s7,R=S.rounds[S.round];
+  for(const x of R)if(x.w==null&&x.a!==G.myId&&x.b!==G.myId){const sc=s7SimGame(x.a,x.b);x.sc=sc;x.w=sc[0]>sc[1]?x.a:x.b;}
+  if(R.some(x=>x.w==null))return;
+  const win=R.map(x=>x.w);
+  if(!win.includes(G.myId)){// you are out: the rest of the bracket plays out
+    let W=win;while(W.length>2){const nr=[];for(let i=0;i+1<W.length;i+=2){const sc=s7SimGame(W[i],W[i+1]);nr.push(sc[0]>sc[1]?W[i]:W[i+1]);}W=nr;}
+    let wa=0,wb=0;while(wa<3&&wb<3){const sc=s7SimGame(W[0],W[1]);if(sc[0]>sc[1])wa++;else wb++;}s7Finish(wa>=3?W[0]:W[1]);return;}
+  if(win.length===2){S.series={a:win[0],b:win[1],wa:0,wb:0,games:[],w:null};return;}
+  const nr=[];for(let i=0;i+1<win.length;i+=2)nr.push({a:win[i],b:win[i+1],w:null,sc:null});S.rounds.push(nr);S.round++;}
+function s7Finish(champ){const S=G.s7;S.done=true;S.champ=champ;
+  const won=S.res.filter(r=>r[1]>r[2]).length,me=champ===G.myId;
+  if(me){G.budget+=10000;G.prestige=clamp((G.prestige||1)+0.05,1,5);G.trophies=G.trophies||[];G.trophies.push({type:'7v7',yr:G.yr,rec:`${won}-${S.res.length-won}`,cls:G.cls});
+    addNews('myteam','7-on-7 League Champions!',`Your passing league team won the title (+$10,000).`);}
+  // college coaches were watching: standouts pick up offers
+  let n=0;for(const id of S.picks){const p=getP(id);if(!p||p.committed)continue;const ch=0.12+won*0.07+(me?0.15:0)+clamp((p.rat-55)/100,0,0.3);
+    if(Math.random()<ch){try{genOffers(p,true,null);n++;}catch(e){}p.morale=clamp((p.morale||65)+4,0,100);}}
+  if(n)addNews('offer',`${n} of your 7-on-7 players drew college offers`,'Coaches liked what they saw at the summer passing league.');
+  addLog(`<span style="color:var(--gd)">7-on-7 league ${me?'champions':'finished'} · ${won} win${won===1?'':'s'}${n?` · ${n} new offer${n===1?'':'s'}`:''}</span>`);}
+function s7Panel(){if(!G||G.phase!=='postseason')return'';const S=G.s7&&G.s7.yr===G.yr?G.s7:null;
+  if(S&&S.done)return'';
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">7-on-7 Summer League</div><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:13px;color:var(--mu)">${S&&S.paid?'Your passing league team is in the bracket.':'Optional: pick 7 on offense and 7 on defense and play the best programs of your class. Best-of-five final; standouts get college looks. Entry $'+S7_FEE.toLocaleString()+'.'}</div><button class="btn" onclick="s7Open()">${S&&S.paid?'Open bracket':'Enter the league'}</button></div></div>`;}
+const _pgDash0=pgDash;pgDash=function(){let x='';try{x=s7Panel();}catch(e){}return x+_pgDash0();};
 // ═══════════ v2.16 PROGRAM MONEY: boosters, merchandise, broadcasts, sponsors, fundraisers, summer camps ═══════════
 function finYr(){if(!G.fin||G.fin.yr!==G.yr)G.fin={yr:G.yr,boost:0,merch:0,tv:0,spons:0,fund:0,camp:0,sign:0,fundDone:false,sponsDone:false,campDone:false};return G.fin;}
 function finAdd(k,v,msg){v=Math.round(v);if(!(v>0))return;G.budget+=v;const F=finYr();F[k]=(F[k]||0)+v;if(msg)addLog(`<span style="color:var(--gn)">${msg} +$${v.toLocaleString()}</span>`);}
@@ -10122,7 +10203,7 @@ function gdForm(p){const s=p.seasStats||{},e=stEff(s),o={};if(e.drop!=null&&((s.
 const GD_AFF={QB:['WR','RB','S','CB'],RB:['WR','CB','LB','S'],WR:['CB','RB','S','TE'],TE:['OL','LB','DL','WR'],OL:['DL','TE','LB'],DL:['OL','LB','TE'],LB:['S','DL','RB','TE'],CB:['S','WR','RB'],S:['CB','LB','WR'],K:['QB','WR','S','CB','RB']};
 const GD_OFF=new Set(['QB','RB','WR','TE','OL']),GD_DEF=new Set(['DL','LB','CB','S']);
 function gdTeam(s,kind,kitOv,opt){
-  const isMe=!s.fp&&!!G&&s.id===G.myId,base=s.fp?s.roster.slice():(isMe?myP():sPlayers(s.id)).filter(p=>!(p.inj>0)),jv=isMe?G.players.filter(p=>p.sId===G.myId&&p.onJV&&!(p.inj>0)&&p.yr>=9):[];
+  const isMe=!s.fp&&!!G&&s.id===G.myId,base=s.fp?s.roster.slice():(isMe?myP():sPlayers(s.id)).filter(p=>!(p.inj>0)&&!(opt&&opt.only&&!opt.only.has(p.id))),jv=isMe&&!(opt&&opt.only)?G.players.filter(p=>p.sId===G.myId&&p.onJV&&!(p.inj>0)&&p.yr>=9):[];
   // v2.14 scout team for practice: the JV goes first, then varsity backups (worst first), so the JV gets real reps
   const scout=!!(opt&&opt.scout&&isMe);
   const roster=[],cnt={},uOff=new Set(),uDef=new Set(),uSp=new Set();
@@ -10184,6 +10265,7 @@ function gdStart(){
   _gdTAdj=Math.round((_o2-_gdAnchor)*0.5);const _t2=Object.assign(gdTeam(opp,gdOppKind(opp,mk)),{ovr:Math.round(_o2)});_gdTAdj=0;
   window.__GP={mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
+  if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
   gdLaunch();
 }
 // v2.16: closing Game Day frees the whole engine first (blank frame, no references), so a phone low on memory does not reload the page
@@ -10250,6 +10332,7 @@ window.gdFinish=function(res){
     if(ctx.kind==='free'){fpFinish(res,ctx);return;}
     if(ctx.kind==='prac'&&ctx.mode==='tut'){tutFinish(res);return;}
     if(ctx.kind==='prac'){res.pracMode=ctx.mode;pracFinish(res);return;}
+    if(ctx.kind==='s7'){let a=res.score[0],b=res.score[1];if(a===b){if(Math.random()<.5)a+=7;else b+=7;}nav('dash');s7Record(a,b);return;}
     let my=res.score[0],op=res.score[1];if(my===op){if(Math.random()<.5)my+=3;else op+=3;}
     const mine={},theirs={};
     (res.played||[]).forEach(mid=>{const p=getP(+mid);if(!p)return;const st=gdConv((res.stats||{})[mid]||{});(p.sId===G.myId?mine:theirs)[p.id]=st;});
@@ -16096,6 +16179,7 @@ const TUT_PAGES=[
     <p><b>Edit many players at once</b> (Team → Roster): add points to, set or raise the overall, potential, speed, strength or awareness of the whole team, the offense, the defense, one position or the JV.</p>
   `},
   {tab:'Money & trophies',icon:'',title:'Ticket Sales and the Trophy Case',body:`
+    <p><strong>7-on-7 Summer League:</strong> after the state championship you can enter your program's passing league team (entry $5,000). Pick 7 players for offense (one quarterback) and 7 for defense. It is played without helmets or pads, two-hand touch, passes only, with a four-second pass clock, and every drive starts at your own 40. The quarterfinal and semifinal are single games; the league title is a best-of-five series. Play each game yourself or simulate it. College coaches come to watch, so your standouts can pick up offers, and the champion wins $10,000 and a trophy.</p>
     <p><strong>Program income:</strong> besides ticket sales, boosters give after every game (more after wins and in rivalries), home games sell team gear, playoff and rivalry games bring broadcast money, and each senior who signs with a college earns a placement bonus: up to $25,000 for an FBS signee plus up to $25,000 more for a five-star. Once a season you can sign a local sponsor and hold a fundraiser, and in the offseason you can host a youth summer camp (Program &gt; Facilities &gt; Program income).</p>
     <p><b>Ticket sales</b> (Team → Staff): every home game earns money from tickets and concessions. Winning, prestige, rivalry games and playoff games bring bigger crowds; a bigger stadium holds more fans. Pick the price: low prices fill the stands, high prices earn more per fan but keep some away. Playoff games pay a share of the gate.</p>
     <p>Your <b>Assistant Head Coach</b> is a staff member: you are the head coach.</p>
@@ -19234,7 +19318,20 @@ function setRoute(e,name,out,col){
 const RCOL=['#ffd23f','#4fd1ff','#ff7ad9','#b6ff6a','#ff9f43'];
 function setupScrimmage(offCall,defCall){
   G.lastPos={};for(const e of G.ents)if(e.pl)G.lastPos[e.pl.id]=[e.x,e.y];
-  const _r=setupScrimmage0(offCall,defCall);gpAfterSetup();return _r;
+  const _r=setupScrimmage0(offCall,defCall);if(SEVENS())gpSevensSetup();gpAfterSetup();return _r;
+}
+/* ===================== v2.16 7-on-7: the summer passing league ===================== */
+// seven a side: quarterback, center and five eligibles against two linebackers, three corners and two safeties.
+// No helmets or pads, two-hand touch, no runs, a four-second pass clock, every drive starts at your own 40.
+function SEVENS(){return!!(GP&&GP.sevens);}
+function gpSevensSetup(){
+  G.ents=G.ents.filter(e=>!(e.side==='o'&&e.role==='OL'&&e.slot!=='C')&&!(e.side==='d'&&e.role==='DL'));
+  G.ol=(G.ol||[]).filter(e=>G.ents.includes(e));
+  for(const e of G.ents)if(e.pl)e.pl.helmetOff=true;
+}
+function gpSevensTick(){
+  if(!SEVENS()||G.phase!=='live'||!G.play||G.play.kind!=='scrimmage')return;
+  if(G.ballState==='qb'&&!G.pendThrow&&G.t>4.2){flash('4-second clock: sack!');endPlay({type:'tackle',spot:G.linesW.los});}
 }
 function setupScrimmage0(offCall,defCall){
   const O=G.teams[G.offTeam],D=G.teams[1-G.offTeam];autoSubs(O);autoSubs(D);
@@ -19320,7 +19417,7 @@ function setupDefense(D,ly,L,call){
 }
 function resetBall(){
   Object.assign(G,{im:null,cm:null,cball:null,celebPick:null,rtp:false,pendingFoul:null,injNote:null,fumbleBy:null,prevCarrierSide:'o',kickRecovered:false,seq:null,carrier:null,ballState:'pre',air:null,loose:null,kick:null,snapB:null,seq:null,aim:null,bullet:G.ptype==='bullet',lob:G.ptype==='lob',fouls:[],flags:[],parts:[],cele:null,picker:null,fair:false,turnover:false,kneelOK:0,krFrom:null,prFrom:null,catchY:null,helmets:[]});
-  for(const T of G.teams||[])for(const q of T.roster)if(q.helmetOff)q.helmetOff=false;
+  if(!SEVENS())for(const T of G.teams||[])for(const q of T.roster)if(q.helmetOff)q.helmetOff=false;
 }
 
 /* ===================== special teams setup ===================== */
@@ -20170,7 +20267,7 @@ function gpMoveWheel(box){
 function gpAutoJuke(){const c=G.carrier;if(!c)return;let best=null,bd=1e9;for(const d of foesOf(c)){const dd=dist(d,c);if(dd<bd&&!d.down){bd=dd;best=d;}}
   tryJuke(best?(best.x>c.x?-1:1):(c.x<CX?1:-1));}
 function trySlow(){if(G.client){olCmd('mv',{mv:'slow'});return;}const c=G.carrier;if(c&&!(c.dive>0)&&!c.down&&!c.seqLock)c.slow=0.5;}
-function scramble(){if(G.ballState!=='qb')return;if(G.client){olCmd('scr');return;}G.carrier=G.qb;G.ballState='carrier';G.qbCarT=G.t;setCtl();}
+function scramble(){if(G.ballState!=='qb')return;if(SEVENS()){flash('No QB runs in 7-on-7');return;}if(G.client){olCmd('scr');return;}G.carrier=G.qb;G.ballState='carrier';G.qbCarT=G.t;setCtl();}
 // a scrambling quarterback can still throw until he crosses the line of scrimmage (pass plays only)
 function gpScrOK(){const q=G.qb,P=G.play;return!!(q&&G.phase==='live'&&G.ballState==='carrier'&&G.carrier===q&&!q.down&&!q.seqLock&&!(q.slideT>0)&&!(q.dive>0)&&P&&P.kind==='scrimmage'&&!P.special&&P.off&&P.off.kind==='pass'&&!G.gpThrown&&!G.pendThrow&&G.linesW&&q.y<G.linesW.los-0.3);}
 function scrUser(){return gpScrOK()&&!isAI(G.offTeam)&&G.offTeam===G.act&&!G.test;}
@@ -20543,6 +20640,7 @@ function updateLive(dt){
       if(c.dive>0&&c.diveK==='over'){const u=1-c.dive/(c.diveT||0.5);if(c.diveClear&&u>0.1&&u<0.9&&!(d.lt==='jump'&&d.lunge>0))continue;if(!c.diveClear&&dd<0.75&&u>0.15){startSeq(c,d,'hit');return;}}
       if(d.lunge>0){if(dd<(d.lt==='jump'?1.0:0.8)){const t=d.lt||'wrap';d.lunge=0;d.jz=0;if(air){startSeq(c,d,'wrap');return;}resolveTackle(d,c,t);if(G.seq||G.phase!=='live')return;}continue;}
       if(c.juke>0&&!(d.ctrRead>G.t))continue;
+      if(SEVENS()&&dd<0.85&&!air){flash('Two-hand touch');endPlay({type:'tackle',spot:c.y});return;}
       if(dd<0.62&&!air&&(d!==G.uctl||!G.joyV||dd<0.5)){if(c.spin>0||c.stiff>0||c.truck>0||c.hurdle>0){resolveTackle(d,c,c.hurdle>0?'dive':'wrap');if(G.seq)return;continue;}startSeq(c,d,'wrap');return;}
       const isUser=d===G.uctl&&!isAI(d.team)&&!G.test;
       const closing=(c.x-d.x)*(d.vx-c.vx)+(c.y-d.y)*(d.vy-c.vy)>0;
@@ -20708,7 +20806,7 @@ function endPlay(r){
   // v2.16 dirty play: a late hit after the whistle is a 15-yard personal foul on top of the play (rivalry games run hotter)
   if(P.kind==='scrimmage'&&S&&r.type==='tackle'&&!S.to&&!S.td&&!G.conv&&!fouls.length&&!G.demo&&!G.test){
     const hot=G.ents.some(e=>e.side!==(G.carrier&&G.carrier.side)&&e.pl&&gpTr(e.pl,'hothead')&&G.carrier&&dist(e,G.carrier)<3);
-    if(Math.random()<(GP&&GP.rival?0.035:0.01)*(hot?2:1)){fouls.push({team:1-G.offTeam,kind:'Personal foul (late hit)',yds:15,endSpot:true});try{throwFlag(G.refs[0]);SFX.hit(true);sndCrowdFor(G.offTeam,false);}catch(e){}}
+    if(!SEVENS()&&Math.random()<(GP&&GP.rival?0.035:0.01)*(hot?2:1)){fouls.push({team:1-G.offTeam,kind:'Personal foul (late hit)',yds:15,endSpot:true});try{throwFlag(G.refs[0]);SFX.hit(true);sndCrowdFor(G.offTeam,false);}catch(e){}}
   }
   if(r.type==='presnap'||fouls.length){
     const f=fouls[0];
@@ -20765,7 +20863,7 @@ function commit(S,r){
 // the crowd and the stadium react to the result of every snap
 // v2.16 scuffles after the whistle: two players shove, the refs break it up, sometimes someone is thrown out
 function gpMaybeFight(S,r){
-  if(G.demo||G.test||G.noDraw||G.simming||S.td!=null||!r||!['tackle','oob'].includes(r.type))return;
+  if(SEVENS()||G.demo||G.test||G.noDraw||G.simming||S.td!=null||!r||!['tackle','oob'].includes(r.type))return;
   const c=G.carrier;if(!c||!c.pl)return;let b=null,bd=3;for(const e of G.ents)if(e.team!==c.team&&e.pl&&!e.hurt){const d=dist(e,c);if(d<bd){bd=d;b=e;}}if(!b)return;
   const hot=gpTr(c.pl,'hothead')||gpTr(b.pl,'hothead'),p=(GP&&GP.rival?0.05:0.012)*(hot?2.2:1)*(GP&&GP.big?1.3:1);
   if(Math.random()>=p)return;
@@ -20841,6 +20939,8 @@ function otAdjust(S){
 function nextSnap(){
   G.cele=null;G.injNote=null;
   if(G.next==='over'){gameOver();return;}
+  if(G.next==='kickoff'&&SEVENS()){const R=1-G.kickTeam;G.poss=R;G.offTeam=R;G.los=40;G.down=1;G.toGo=10;G.next='scrimmage';G.conv=null;G.onsideNext=false;G.clockRun=false;
+    G.phase='dead';setTray('none');$('ctl').innerHTML='';toast('New possession',`${G.teams[R].abbr} ball at its own 40`);updateHUD();G.after={t:1.1,fn:proceed};return;}
   if(G.next==='kickoff'){
     if(G.ot){otAdjust({next:'kickoff',poss:G.poss});if(G.next==='over'){gameOver();return;}return nextSnap();}
     const kt=G.kickTeam,trail=G.score[1-kt]-G.score[kt];
@@ -20852,7 +20952,7 @@ function nextSnap(){
   if(G.next==='conv'){
     const t=G.conv.team;G.offTeam=G.poss=t;
     const sp=G.conv.los||97,go=two=>{if(two){G.los=sp;G.down=1;G.toGo=100-sp;G.conv.two=true;openCall();}else{G.conv.two=false;G.los=sp;setupFG('xp');toPresnap();}};
-    if(G.conv.force2||G.conv.rep){go(true);return;}
+    if(G.conv.force2||G.conv.rep||SEVENS()){go(true);return;}
     if(userDecides(t)&&!G.simming){olAsk(t,'Conversion','Kick the extra point from the 3, or go for two?',[['Extra point','go'],['Go for two','alt']],i=>go(i===1));return;}
     const d=G.score[t]-G.score[1-t];go(G.q>=4&&[-2,-5,-10,1,-1].includes(d)&&Math.random()<0.8);return;
   }
@@ -20920,6 +21020,7 @@ function gameOver(){
 /* ===================== play calling ===================== */
 function aiOffCall(){
   const ly=G.los,d=G.down,tg=G.toGo,t=G.offTeam,diff=G.score[t]-G.score[1-t];
+  if(SEVENS()){const r=Math.random();if(r<0.3){const f=pick(['trips','tripsTE']);return{kind:'pass',data:{...pick(TRIPS_PLAYS),f}};}if(r<0.55){const f=pick(['empty','emptyTE']);return{kind:'pass',data:{...pick(EMPTY_PLAYS),f}};}return{kind:'pass',data:pick(PASSES)};}
   if(G.conv)return Math.random()<0.5?{kind:'run',data:pick(RUNS.slice(0,4))}:{kind:'pass',data:pick(PASSES)};
   if(!G.ot&&(G.q===2||G.q===4)&&diff>0&&G.clock<35&&G.clockRun)return{kind:'kneel'};
   if(d===4&&!G.ot){
@@ -21152,6 +21253,7 @@ function showCall(mode,cb){
   const tabs=$('cTabs');tabs.innerHTML='';
   const PB=mode==='off'?gpPB(G.me):null,DPB=mode==='def'?gpDPB(G.me):null;
   const T=mode==='off'?(PB?(G.conv?[['pbp',PB.name+' passes'],['pbr','Runs']]:[['pbp',PB.name+' passes'],['pbr','Runs'],['st','Special']]):(G.conv?[['pass','Shotgun'],['trips','Trips'],['empty','Empty'],['run','Run']]:[['pass','Shotgun'],['trips','Trips'],['empty','Empty'],['run','Run'],['st','Special']])):[['def',DPB?DPB.name:'Coverage']];
+  if(SEVENS()&&mode==='off'){for(let i=T.length-1;i>=0;i--)if(['run','pbr','st'].includes(T[i][0]))T.splice(i,1);if(['run','pbr','st'].includes(callTab))callTab=PB?'pbp':'pass';}
   if(mode==='def')callTab='def';else if(PB&&!['pbp','pbr','st'].includes(callTab))callTab='pbp';else if(!PB&&(callTab==='def'||callTab==='pbp'||callTab==='pbr'))callTab='pass';if(G.conv&&callTab==='st')callTab=PB?'pbp':'pass';
   for(const[k,l]of T){const b=document.createElement('button');b.className='tab'+(k===callTab?' on':'');b.textContent=l;b.onclick=()=>{callTab=k;showCall(mode,cb);};tabs.appendChild(b);}
   const cards=$('cCards');cards.innerHTML='';
@@ -22569,7 +22671,7 @@ function step(dt){
   G.time+=dt;
   try{gpSideStep(dt);}catch(e){}
   try{sndStep(dt);gpNervesFx(dt);}catch(e){}
-  gpHideDefense();try{gpPassBtnTick();}catch(e){}
+  gpHideDefense();try{gpPassBtnTick();}catch(e){}try{gpSevensTick();}catch(e){}
   if(G.phase==='replay'){
     const P=G.replay;if(P.playing){P.i+=dt*30*P.speed;if(P.i>=P.R.frames.length-1){P.i=P.R.frames.length-1;P.playing=false;$('rPlay').textContent='Play again';if(P.demo)P.doneAt=G.time;}}
     if(P.demo&&!P.playing&&G.time-(P.doneAt||G.time)>0.7){gpDemoNext();return;}
