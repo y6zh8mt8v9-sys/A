@@ -10067,14 +10067,14 @@ function _svRehydrate(root){
   return root;
 }
 function parseSave(txt){const d=JSON.parse(txt);if(d&&d.G&&d.v>=8)_svRehydrate(d.G);return d;}
-let _svBusy=false,_svAgain=false;
+let _svBusy=false,_svAgain=false,_svP=null;
 function saveGame(silent){
   if(typeof G==='undefined'||!G||!G.myId)return Promise.resolve(false);
   if(!G.saveId)G.saveId='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   if(silent&&_svBusy){_svAgain=true;return Promise.resolve(false);}   // one save at a time; a queued autosave runs right after
   const ms=myS()||{};
   const meta={id:G.saveId,name:ms.name||'',mascot:ms.mascot||'',c1:ms.c1,c2:ms.c2,cls:G.cls,season:(G.baseYear||2026)+(G.yr-1),rec:(G.wins||0)+'-'+(G.losses||0),phase:G.phase,week:G.week||0,coach:(G.coach&&G.coach.name)||'',savedAt:Date.now(),size:0};
-  _svBusy=true;const done=()=>{_svBusy=false;if(_svAgain){_svAgain=false;setTimeout(()=>saveGame(true),400);}};
+  _svBusy=true;let fin;_svP=new Promise(r=>fin=r);const done=()=>{_svBusy=false;fin();if(_svAgain){_svAgain=false;setTimeout(()=>{if(_gdBusy())_autoSaveSoon();else saveGame(true);},400);}};
   if(window.indexedDB&&typeof CompressionStream!=='undefined'&&!window._svOld){
     return saveParts().then(parts=>{if(!parts){_svAgain=true;done();return false;}meta.size=parts.reduce((a,x)=>a+(x.d.byteLength||x.d.length||0),0);
         return svSaveParts(meta,parts).then(()=>{done();const cl=cloudAutoOn()&&cloudMaySignedIn();if(!silent&&!cl)notify('Game saved on this device. Find it under Load Game.');try{cloudAfterSave(meta,null,!silent);}catch(e){}return true;});})
@@ -10423,7 +10423,7 @@ function gdLaunch(){
   try{if(window.__GP){const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();window.__GP.ui={tA:v('--tA')||'#d8443a',tB:v('--tB')||'#8c2019',tRGB:v('--tRGB')||'140,32,25',tOn:v('--tOn')||'#fff',light:document.documentElement.classList.contains('light')};}}catch(e){}
   // v2.16: a career game saves first, so a crash or reload during or right after the game never costs more than that game
   // the frame is only built once that save is written, so the save and the game never use memory at the same time
-  let sv=null;try{if(_gdCtx&&!['prac','free','online'].includes(_gdCtx.kind)&&typeof G!=='undefined'&&G&&G.myId&&gdsMain().autosave!==false)sv=saveGame(true);}catch(e){}
+  let sv=null;try{if(_gdCtx&&!['prac','free','online'].includes(_gdCtx.kind)&&typeof G!=='undefined'&&G&&G.myId&&gdsMain().autosave!==false)sv=_svBusy&&_svP?_svP.then(()=>saveGame(true)):saveGame(true);}catch(e){}  // a running autosave is waited for, then this one is written
   if(sv&&sv.then){const ld=document.getElementById('loading-screen');try{if(ld){document.getElementById('loading-label').textContent='Saving before kickoff…';ld.classList.add('active');}}catch(e){}
     let done=false;const go=()=>{if(done)return;done=true;try{if(ld)ld.classList.remove('active');}catch(e){}gdLaunchFrame();};sv.then(go,go);setTimeout(go,10000);return;}
   gdLaunchFrame();
