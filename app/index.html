@@ -3720,7 +3720,7 @@ function getStarters(sid){
   return st;
 }
 
-function teamOvr(sid){const st=getStarters(sid);if(!st.length)return 50;return Math.round(st.reduce((a,p)=>a+p.rat,0)/st.length);}
+function teamOvr(sid){{const s=getS(sid);if(s&&s.lite)return s.str||50;}const st=getStarters(sid);if(!st.length)return 50;return Math.round(st.reduce((a,p)=>a+p.rat,0)/st.length);}
 
 function updateRats(){
   const st=getStarters(G.myId);
@@ -3739,6 +3739,7 @@ function checkAndFillRosters(){
   const FILL_COUNT=5;
   const allSchs=allSchoolsAll();
   for(const sch of allSchs){
+    if(sch.lite)continue;
     const roster=sPlayers(sch.id);
     if(roster.length<MIN_ROSTER){
       const needed=FILL_COUNT;
@@ -5297,9 +5298,11 @@ const NAT_YR_F={12:1,11:1,10:0.6,9:0.25};    // underclassmen are only partly ra
 function _recPools(){
   const key=G.yr+'|'+(G.week||0)+'|'+(G.phase||'')+'|'+G.players.length;
   if(!G._thr||G._thr.key!==key){const by={};
-    for(const p of G.players){if(p.grad||p.yr<9||p.yr>12||!p.sId)continue;(by[p.yr]=by[p.yr]||[]).push(recScore(p));}
-    const T={},N={};for(const y in by){const a=by[y].sort((x,z)=>z-x),n=a.length;T[y]=STAR_SHARE.map((f,i)=>i?a[Math.min(n-1,Math.max(0,Math.ceil(n*f)-1))]:-1e9);
-      const sc=Math.min(1,n/NAT_POOL_FULL)*(NAT_YR_F[y]||1);let cum=0;const t=[-1e9,Infinity,0,0,0,0];
+    const byD={};
+    for(const p of G.players){if(p.grad||p.yr<9||p.yr>12||!p.sId)continue;const v=recScore(p);(by[p.yr]=by[p.yr]||[]).push(v);if(!p.lt)(byD[p.yr]=byD[p.yr]||[]).push(v);}
+    const virt=USA.on&&USA.virt?USA.virt:0;
+    const T={},N={};for(const y in by){const a=by[y].sort((x,z)=>z-x),n=a.length,D=(byD[y]||a).slice().sort((x,z)=>z-x),nd=D.length||1;T[y]=STAR_SHARE.map((f,i)=>i?D[Math.min(nd-1,Math.max(0,Math.ceil(nd*f)-1))]:-1e9);
+      const sc=Math.min(1,(virt?(byD[y]||[]).length+virt:n)/NAT_POOL_FULL)*(NAT_YR_F[y]||1);let cum=0;const t=[-1e9,Infinity,0,0,0,0];
       for(let s=5;s>=2;s--){cum+=NAT_STARS[s]*sc;const i=Math.round(cum)-1;t[s]=i<0?Infinity:a[Math.min(n-1,i)];}
       N[y]=t;}
     Object.defineProperty(G,'_thr',{value:{key,T,N},writable:true,configurable:true,enumerable:false});}
@@ -6509,8 +6512,8 @@ function finalizeOffseason(){
   const _otherLeagueChamps={};
   if(G.allLeagues){
     for(const [cls,lg] of Object.entries(G.allLeagues)){
-      const allT=lg.divisions.flatMap(d=>d.teams);
-      const champ=[...allT].sort((a,b)=>{const aw=a.wins/(a.wins+a.losses+.001),bw=b.wins/(b.wins+b.losses+.001);return bw-aw;})[0];
+      const allT=lg.divisions.flatMap(d=>d.teams),_po=cls==='INTL'||cls==='OOS'?null:lgStatePO(lg,cls);
+      const champ=_po&&_po.champ!=null?allT.find(t=>t.id===_po.champ):[...allT].sort((a,b)=>{const aw=a.wins/(a.wins+a.losses+.001),bw=b.wins/(b.wins+b.losses+.001);return bw-aw;})[0];
       if(champ)_otherLeagueChamps[cls]={id:champ.id,name:`${champ.name} ${champ.mascot}`,rec:`${champ.wins}-${champ.losses}`};
     }
   }
@@ -6552,15 +6555,16 @@ function finalizeOffseason(){
   // ── End-of-season for other leagues: determine champ, reset, regenerate ──
   if(G.allLeagues){
     for(const [cls,lg] of Object.entries(G.allLeagues)){
-      // Pick state champ: best win% across all divisions
-      const allOtherTeams=lg.divisions.flatMap(d=>d.teams);
-      const champ=[...allOtherTeams].sort((a,b)=>{
+      // the state champion is the winner of the playoff bracket played at the end of the season
+      const allOtherTeams=lg.divisions.flatMap(d=>d.teams),_poC=_otherLeagueChamps[cls];
+      const champ=(_poC&&allOtherTeams.find(t=>t.id===_poC.id))||[...allOtherTeams].sort((a,b)=>{
         const aw=a.wins/(a.wins+a.losses+.001),bw=b.wins/(b.wins+b.losses+.001);return bw-aw;
       })[0];
       lg.champId=champ?champ.id:null;
       lg.champName=champ?`${champ.name} ${champ.mascot}`:null;
       // Reset wins/losses for next season
       for(const t of allOtherTeams){t.wins=0;t.losses=0;}
+      if(isLiteCls(cls))continue; // light states: liteOffseason below
       // Age + graduate + recruit AI players for other leagues (one pass per league instead of a full scan per school)
       const lgIds=new Set(allOtherTeams.map(s=>s.id)),srCnt={};
       G.players=G.players.filter(p=>{if(lgIds.has(p.sId)&&p.yr===12){srCnt[p.sId]=(srCnt[p.sId]||0)+1;return false;}return true;});
@@ -6577,6 +6581,7 @@ function finalizeOffseason(){
     }
   }
 
+  try{liteOffseason();}catch(e){console.error('light states',e);}
   buildSeasonDates(2026+(G.yr-1));genSched();updateRats();
   // Open schedule builder for the new season
   const _demResult=checkClassification(_snapDivWinners,_endWins,_endLosses);
@@ -9994,7 +9999,8 @@ const _PL_ARR={offers:1,perfHistory:1,gameLog:1,seasons:1},_SV_Z=emS(),_hasO=(o,
 function _isPl(o){return!!o&&typeof o==='object'&&!Array.isArray(o)&&o.sId!==undefined&&o.pos!==undefined&&o.ln!==undefined&&o.fs!==undefined;}
 function _svRep(k,v){
   if(!_isPl(this))return v;
-  if(k==='stats'||k==='seasStats'||k==='carStats'){if(v&&typeof v==='object'&&!Array.isArray(v)){const o={};for(const q in v){if(v[q]===0&&_hasO(_SV_Z,q))continue;o[q]=v[q];}return o;}return v;}
+  if(k==='stats')return undefined; // a duplicate of carStats nothing reads
+  if(k==='seasStats'||k==='carStats'){if(v&&typeof v==='object'&&!Array.isArray(v)){const o={};for(const q in v){if(v[q]===0&&_hasO(_SV_Z,q))continue;o[q]=v[q];}return o;}return v;}
   if(_hasO(_PL_DEF,k)&&v===_PL_DEF[k])return undefined;
   if(_hasO(_PL_ARR,k)&&Array.isArray(v)&&!v.length)return undefined;
   if(k==='depth'&&v&&typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length)return undefined;
@@ -10007,6 +10013,7 @@ function _svRehydrate(root){
     if(Array.isArray(o)){for(let i=0;i<o.length;i++){const v=o[i];if(v&&typeof v==='object')st.push(v);}continue;}
     if(_isPl(o)){
       for(const q of['stats','seasStats','carStats'])if(o[q]&&typeof o[q]==='object'&&!Array.isArray(o[q]))o[q]=Object.assign(emS(),o[q]);
+      if(!o.stats)o.stats=emS();
       for(const q in _PL_DEF)if(!_hasO(o,q))o[q]=_PL_DEF[q];
       for(const q in _PL_ARR)if(!_hasO(o,q))o[q]=[];
       if(!_hasO(o,'depth'))o.depth={};
@@ -10175,7 +10182,7 @@ function lgPairs(teams,wk){
 function lgMyOppAt(wk){const g=(G.sched||[]).find(x=>x.wk===wk&&x.type==='regular');return g?g.oppId:null;}
 function lgLog(s,e){if(!s.gl||s.gl.yr!==G.yr)s.gl={yr:G.yr,g:[]};s.gl.g=s.gl.g.filter(x=>!(x.wk===e.wk&&!x.po&&!e.po));s.gl.g.push(e);}
 function lgPlay(s,score,win,oppId){
-  const pl=sPlayers(s.id).filter(p=>p.inj===0);
+  let pl=sPlayers(s.id).filter(p=>p.inj===0);if(s.lite&&pl.length&&!(window._gdOppStats&&window._gdOppStats.sid===s.id))pl=pl.concat(litePH(s));
   if(window._gdOppStats&&window._gdOppStats.sid===s.id){applyStats(window._gdOppStats.sm);}
   else if(pl.length){const sm=genStats(pl,score,win,s.offS,s.defS,s.id,oppId);applyStats(sm);for(const p of pl)if(Math.random()<.02)p.inj=rng(1,2);}
   for(const p of sPlayers(s.id))if(p.inj>0)p.inj--;
@@ -10226,7 +10233,7 @@ function lgTeamSchedHtml(s){
 // (a 10-point OVR gap is about 11 engine points on every attribute, including speed).
 let _gdAnchor=55;
 function _gdE(v){return Math.max(30,Math.min(99,Math.round(66+((+v||50)-_gdAnchor)*1.1)));}
-function _gdTop(s){const ps=(s.fp?s.roster:(G&&s.id===G.myId?myP():sPlayers(s.id))).filter(p=>!(p.inj>0)).sort((a,b)=>b.rat-a.rat).slice(0,22);return ps.length?ps.reduce((a,p)=>a+p.rat,0)/ps.length:50;}
+function _gdTop(s){if(s&&s.lite)return(s.str||55)+4;const ps=(s.fp?s.roster:(G&&s.id===G.myId?myP():sPlayers(s.id))).filter(p=>!(p.inj>0)).sort((a,b)=>b.rat-a.rat).slice(0,22);return ps.length?ps.reduce((a,p)=>a+p.rat,0)/ps.length:50;}
 function _gdLum(c){const h=String(c||'#777').replace('#','');const f=h.length===3?h.split('').map(x=>x+x).join(''):h;const n=parseInt(f,16);return((n>>16&255)*.299+(n>>8&255)*.587+(n&255)*.114)/255;}
 function _gdDark(c,t){const h=String(c||'#333').replace('#','');const f=h.length===3?h.split('').map(x=>x+x).join(''):h;const n=parseInt(f,16);const k=1-(t||.35);return'#'+[n>>16&255,n>>8&255,n&255].map(v=>Math.round(v*k).toString(16).padStart(2,'0')).join('');}
 function gdKit(s,home){
@@ -10271,7 +10278,7 @@ const GD_AFF={QB:['WR','RB','S','CB'],RB:['WR','CB','LB','S'],WR:['CB','RB','S',
 const GD_OFF=new Set(['QB','RB','WR','TE','OL']),GD_DEF=new Set(['DL','LB','CB','S']);
 let _gdPc=null;
 function gdTeam(s,kind,kitOv,opt){
-  const isMe=!s.fp&&!!G&&s.id===G.myId,base=s.fp?s.roster.slice():(isMe?myP():sPlayers(s.id)).filter(p=>!(p.inj>0)&&!(opt&&opt.only&&!opt.only.has(p.id))),jv=isMe&&!(opt&&opt.only)?G.players.filter(p=>p.sId===G.myId&&p.onJV&&!(p.inj>0)&&p.yr>=9):[];
+  const isMe=!s.fp&&!!G&&s.id===G.myId,base=s.fp?s.roster.slice():(isMe?myP():s.lite?liteGameRoster(s):sPlayers(s.id)).filter(p=>!(p.inj>0)&&!(opt&&opt.only&&!opt.only.has(p.id))),jv=isMe&&!(opt&&opt.only)?G.players.filter(p=>p.sId===G.myId&&p.onJV&&!(p.inj>0)&&p.yr>=9):[];
   // v2.14 scout team for practice: the JV goes first, then varsity backups (worst first), so the JV gets real reps
   const scout=!!(opt&&opt.scout&&isMe);
   const roster=[],cnt={},uOff=new Set(),uDef=new Set(),uSp=new Set();
@@ -11037,7 +11044,7 @@ function intlEnsure(){
     if(s.intlYr!==G.yr){s.intlYr=G.yr;s.intlTarget=intlTarget(t);intlFit(s,t);}
   }
   // every AI team keeps a full roster at every position (same roster rules as yours), once per season
-  if(G.rosterFixYr!==G.yr){G.rosterFixYr=G.yr;for(const s of allSchoolsAll())if(s.id!==G.myId)rosterFix(s);}
+  if(G.rosterFixYr!==G.yr){G.rosterFixYr=G.yr;for(const s of allSchoolsAll())if(s.id!==G.myId&&!s.lite)rosterFix(s);}
 }
 
 // ═══════════ v2.00 NEIGHBOR STATES: Wakota (Midwest) and Tierra Alta (Mexican border) ═══════════
@@ -11327,6 +11334,78 @@ function xStylePlayer(p,s){
     if(sk&&typeof faceSkinHex==='function'&&typeof FACE_SKIN!=='undefined'){let seed=p.fs||p.id;for(let k=0;k<60;k++){const i=FACE_SKIN.indexOf(faceSkinHex(seed));if(i>=sk[0]&&i<=sk[1])break;seed=seed*31+7;}p.fs=seed;}
     return;}
 }
+
+// ═══════════ LIGHT STATES: real schools without full rosters ═══════════
+// A light state keeps every school (name, town, logo, class, division, record, game log) and a team strength, plays its
+// season and a state playoff bracket, and tracks only its top prospects as real players: the top tail of the class a full
+// roster would have, so stars, offers, camps and commitments work there exactly like in a detailed state.
+const LITE_SD=6.5;
+function isLiteCls(c){const X=XCLS[c];return!!(X&&X.lite);}
+function liteQuota(ab,yr){const X=USA.X,m=X&&X.st[ab]?X.st[ab].meta[0]:(USST[ab]||[100])[0];return Math.ceil((2462*m/USST_PROG_ALL*1.2+2)*({9:0.45,10:0.75}[yr]||1));}
+function _phi(x){const t=1/(1+0.2316419*Math.abs(x)),d=0.3989423*Math.exp(-x*x/2),p=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-p:p;}
+function _phiInv(p){p=clamp(p,1e-9,1-1e-9);const a=[-39.69683,220.9461,-275.9285,138.3578,-30.66480,2.506628],b=[-54.47610,161.5858,-155.6990,66.80131,-13.28068],c=[-0.007784894,-0.3223964,-2.400758,-2.549732,4.374664,2.938164],d=[0.007784696,0.3224671,2.445134,3.754409];
+  const q=p<0.02425?Math.sqrt(-2*Math.log(p)):p>1-0.02425?Math.sqrt(-2*Math.log(1-p)):0;
+  if(p<0.02425)return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+  if(p>1-0.02425)return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+  const r=p-0.5,t=r*r;return(((((a[0]*t+a[1])*t+a[2])*t+a[3])*t+a[4])*t+a[5])*r/(((((b[0]*t+b[1])*t+b[2])*t+b[3])*t+b[4])*t+1);}
+function liteAdj(s){return({'5A':0,'4A':3,'3A':6,'2A':9,'1A':12}[clsEq(s.cls)]||0)+(XCLS[s.cls]?1:0);}
+function liteMu(s,yr){const X=XCLS[s.cls],q=teamQ(s,s.id,0.5,s.tier==='good'?0.55:s.tier==='bad'?0.1:0.3);return(X?X.mean:56)+(q-0.5)*24+((yr||10.5)-10.5)*3;}
+function liteN(s){const r=clsSz(s.cls).r;return(r[0]+r[1])/8;}   // players a full roster would have in one class year
+function liteStates(){const by={};if(!G||!G.allLeagues)return by;for(const c in G.allLeagues){if(!isLiteCls(c))continue;const st=XCLS[c].st;for(const d of G.allLeagues[c].divisions)for(const t of d.teams){t.lite=1;(by[st]=by[st]||[]).push(t);}}return by;}
+// the line (rating + class adjustment) above which a full class year of this state would have `quota` players
+function liteThr(teams,yr,quota){let lo=10,hi=150;const P=teams.map(s=>[liteAdj(s)+liteMu(s,yr),liteN(s)]);
+  for(let it=0;it<36;it++){const T=(lo+hi)/2;let e=0;for(const[m,n]of P)e+=n*(1-_phi((T-m)/LITE_SD));if(e>quota)lo=T;else hi=T;}return(lo+hi)/2;}
+function liteMake(s,yr,T){const a=liteAdj(s),mu=liteMu(s,yr),u0=_phi((T-a-mu)/LITE_SD),r=mu+LITE_SD*_phiInv(u0+Math.random()*(1-u0));
+  const p=genPlayer(s.id,yr,s.cls,null),R=clamp(Math.round(r),20,99);p.rat=R;p.potLo=clamp(R+rng(3,12),R,99);p.potHi=clamp(p.potLo+rng(8,20),p.potLo,99);p.pot=p.potLo;
+  const tr=Math.random();p.dev=p.potHi>=94&&tr<.5?'Elite Dev':p.potHi>=85&&tr<.35?'Star':p.potHi>=75&&tr<.3?'Impact':'Normal';try{adjDev(p,s);}catch(e){}
+  try{xStylePlayer(p,s);}catch(e){}p.lt=1;G.players.push(p);return p;}
+// add `k` prospects of class year `yr` to a state's schools, each school in proportion to how many it would have
+function liteAdd(teams,yr,T,k){if(k<=0||!teams.length)return[];const w=teams.map(s=>liteN(s)*(1-_phi((T-liteAdj(s)-liteMu(s,yr))/LITE_SD))),tot=w.reduce((a,b)=>a+b,0)||1,out=[];
+  for(let i=0;i<k;i++){let r=Math.random()*tot,j=0;for(;j<w.length-1;j++){r-=w[j];if(r<=0)break;}out.push(liteMake(teams[j],yr,T));}return out;}
+function liteStr(s){const o=G.liteOfs!=null?G.liteOfs:6;return clamp(Math.round(liteMu(s,11)+o+gaussR()*2.5),25,92);}
+function liteCalib(){if(G.liteOfs!=null)return;const L=[];for(const s of allSchoolsAll()){if(s.lite||s.intl||s.id===G.myId)continue;L.push(s);if(L.length>=500)break;}
+  G.liteOfs=L.length?+(L.reduce((a,s)=>a+teamOvr(s.id)-liteMu(s,11),0)/L.length).toFixed(2):6;}
+function liteInit(){const by=liteStates(),fresh=[];if(!Object.keys(by).length)return fresh;liteCalib();
+  for(const st in by){const T0=by[st];for(const s of T0)if(s.str==null)s.str=liteStr(s);
+    if(sPlayersAny(T0))continue; // this state already has its prospects (a loaded career)
+    const ab=USA.ab[st]||st;for(const yr of[9,10,11,12]){const q=liteQuota(ab,yr),T=liteThr(T0,yr,q);for(const p of liteAdd(T0,yr,T,q))fresh.push(p);}}
+  return fresh;}
+function sPlayersAny(teams){for(const s of teams)if(sPlayers(s.id).length)return true;return false;}
+// the offseason: seniors leave, everyone grows, new freshmen, late bloomers join, the ones who fell away are dropped, strengths move
+function liteOffseason(){const by=liteStates();if(!Object.keys(by).length)return;liteCalib();
+  const ids=new Set();for(const st in by)for(const s of by[st])ids.add(s.id);
+  G.players=G.players.filter(p=>!(p.lt&&ids.has(p.sId)&&p.yr>=12));
+  for(const p of G.players){if(!p.lt||!ids.has(p.sId))continue;p.yr++;try{bodyGrow(p);}catch(e){}const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
+  const byS={};for(const p of G.players)if(p.lt&&ids.has(p.sId))(byS[p.sId]=byS[p.sId]||[]).push(p);
+  const drop=new Set(),fresh=[];
+  for(const st in by){const T0=by[st],ab=USA.ab[st]||st;for(const s of T0)s.str=liteStr(s);
+    for(const yr of[9,10,11,12]){const q=liteQuota(ab,yr),T=liteThr(T0,yr,q);let have=0;
+      for(const s of T0)for(const p of byS[s.id]||[]){if(p.yr!==yr)continue;const v=p.rat+liteAdj(s);if(v>=T)have++;else if(v<T-10&&!p.committed&&!(p.offers&&p.offers.length)&&p.id!==G.myPlayerId)drop.add(p.id);}
+      for(const p of liteAdd(T0,yr,T,Math.max(0,Math.round(q-have))))fresh.push(p);}}
+  if(drop.size)G.players=G.players.filter(p=>!drop.has(p.id));
+  G._thr=null;for(const p of fresh)starsInit(p);}
+// stand-ins for a light school's untracked players, so its prospects get a normal share of the team's stats (never stored)
+const _LT_PH={};
+function litePH(s){const need={QB:1,RB:2,WR:3,TE:1,OL:5,K:1,DL:4,LB:3,CB:3,S:2},out=[];let k=0;
+  for(const pos in need)for(let i=0;i<need[pos];i++){const key=pos+i;const o=_LT_PH[key]||(_LT_PH[key]={id:-100-k,pos,traits:[],depth:{},spd:62,seasStats:emS()});o.rat=Math.round((s.str||55)-4);o.inj=0;out.push(o);k++;}return out;}
+// a full roster for one game against a light school: its prospects plus players made for the day (not kept)
+const _LT_TMP=new Map();
+function liteGameRoster(s){const k=s.id+'|'+G.yr;let L=_LT_TMP.get(k);if(L)return L.concat(sPlayers(s.id));if(_LT_TMP.size>6)_LT_TMP.clear();
+  const n0=_pId,gen=[];for(let i=0;i<46;i++){const p=_genPlayer0(s.id,[9,10,11,12][i%4],s.cls,null);p.rat=clamp(Math.round((s.str||55)-5+gaussR()*5+((p.yr||10)-10.5)*2),20,95);p.pot=Math.max(p.pot,p.rat);gen.push(p);}
+  _LT_TMP.set(k,gen);return gen.concat(sPlayers(s.id));}
+// ── state playoffs for every league (detailed and light): division winners and the best records, seeded, single elimination ──
+function lgStatePO(lg,cls){
+  if(lg.po&&lg.po.yr===G.yr)return lg.po;
+  const T=lg.divisions.flatMap(d=>d.teams);if(T.length<2){lg.po={yr:G.yr,champ:T[0]?T[0].id:null};return lg.po;}
+  const wp=t=>(t.wins+0.5)/(t.wins+t.losses+1),srt=(a,b)=>wp(b)-wp(a)||b.wins-a.wins||teamOvr(b.id)-teamOvr(a.id);
+  const n=T.length<=12?4:T.length<=40?8:T.length<=120?16:32,q=[];
+  for(const d of lg.divisions){const b=d.teams.slice().sort(srt)[0];if(b&&q.length<n)q.push(b);}
+  for(const t of T.slice().sort(srt)){if(q.length>=n)break;if(!q.includes(t))q.push(t);}
+  q.sort(srt);let field=q.slice(),round=0,fin=null;const order=k=>{const o=[0,1];while(o.length<k){const m=o.length*2,x=[];for(const i of o)x.push(i,m-1-i);o.splice(0,o.length,...x);}return o;};
+  field=order(field.length).map(i=>field[i]).filter(Boolean);
+  while(field.length>1){const nx=[];for(let i=0;i<field.length;i+=2){const a=field[i],b=field[i+1];if(!b){nx.push(a);continue;}
+      const pa=1/(1+Math.exp(-(teamOvr(a.id)-teamOvr(b.id)+(wp(a)-wp(b))*6)/7)),w=Math.random()<pa?a:b;if(field.length===2)fin={a:a.id,b:b.id,w:w.id};nx.push(w);}field=nx;round++;}
+  lg.po={yr:G.yr,champ:field[0]?field[0].id:null,fin,n:q.length};return lg.po;}
 function ensureStates(skipStars){
   if(typeof G==='undefined'||!G||!G.allLeagues)return false;xLogoMap();
   const fresh=[];
@@ -11335,8 +11414,10 @@ function ensureStates(skipStars){
     const divs=(typeof _allClsDivs!=='undefined'&&_allClsDivs&&_allClsDivs[c]&&!_allClsDivs[c].some(d=>d.teams.some(t=>getS(t.id))))?_allClsDivs[c]:makeStateDivisions(c);
     for(const d of divs)for(const t of d.teams)t.cls=c;
     G.allLeagues[c]={divisions:divs,champId:null,champName:null};
+    if(isLiteCls(c)){for(const d of divs)for(const s of d.teams)s.lite=1;continue;}
     for(const d of divs)for(const s of d.teams){const n0=G.players.length;genTeamPlayers(s);for(let i=n0;i<G.players.length;i++){xStylePlayer(G.players[i],s);fresh.push(G.players[i]);}}
   }
+  try{for(const p of liteInit())fresh.push(p);}catch(e){console.error('light states',e);}
   if(fresh.length&&!skipStars){G._thr=null;for(const p of fresh)if(!p.grad)starsInit(p);
     for(const p of fresh)if(!p.grad&&p.yr>=11&&p.sg>=1){p.offers=p.offers||[];for(let k=0;k<1+p.sg;k++)genOffers(p,true,null);}}
   if(fresh.length){G.lsch=null;if(typeof _RK!=='undefined')_RK=null;_rkNames=null;}
@@ -11364,9 +11445,8 @@ const NAT_VENUES=['Crestfield Capital Stadium','Llano Grande Lone Star Field','C
 function natVenue(yr){return NAT_VENUES[((yr||1)-1)%NAT_VENUES.length];}
 function natChampIds(){
   const ids=new Set();if(G.playoff&&G.playoff.stateChampId)ids.add(G.playoff.stateChampId);
-  // the other classifications crown the team with the best record
-  for(const c of[...CLS_ORDER,...XCLS_ORDER]){if(c===G.cls)continue;const t=divisionsForCls(c).flatMap(d=>d.teams);if(!t.length)continue;
-    const b=t.slice().sort((x,y)=>(y.wins/(y.wins+y.losses+.001))-(x.wins/(x.wins+x.losses+.001))||y.wins-x.wins||teamOvr(y.id)-teamOvr(x.id))[0];if(b)ids.add(b.id);}
+  // the other classifications crown their state playoff champion
+  for(const c of[...CLS_ORDER,...XCLS_ORDER]){if(c===G.cls||!G.allLeagues||!G.allLeagues[c])continue;const po=lgStatePO(G.allLeagues[c],c);if(po&&po.champ)ids.add(po.champ);}
   return ids;
 }
 function natEnsure(){
@@ -11461,14 +11541,15 @@ function lgBuildSchedule(){
   const stOfId={};for(const id of pool)stOfId[id]=clsSt(clsOf[id]);
   for(const w of W){
     const free=pool.filter(id=>!B(id,w));for(let i=free.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[free[i],free[j]]=[free[j],free[i]];}
-    const left=new Set(free);
-    for(const a of free){if(!left.has(a))continue;left.delete(a);
-      let best=null,bs=-1e9;
-      for(const b of left){if(divOf[b]===divOf[a]||played.has(K(a,b)))continue;
+    const left=new Set(free),byStL={};for(const id of free)(byStL[stOfId[id]]=byStL[stOfId[id]]||new Set()).add(id);
+    const del=id=>{left.delete(id);const S=byStL[stOfId[id]];if(S)S.delete(id);};
+    for(const a of free){if(!left.has(a))continue;del(a);
+      let best=null,bs=-1e9;const sa=stOfId[a],cand=sa==='INTL'?(byStL.CF||[]):[...(byStL[sa]||[]),...(byStL.INTL||[])];
+      for(const b of cand){if(divOf[b]===divOf[a]||played.has(K(a,b)))continue;
         const ca=clsOf[a],cb=clsOf[b],ia=ca==='INTL',ib=cb==='INTL';let sc=R()*1.5;
         if(ia||ib)sc+=ia&&ib?-2:(stOfId[ia?b:a]==='CF'?1.2:-1.5);else{const gap=Math.abs(clsNum(ca)-clsNum(cb));sc+=gap===0?0.6:gap===1?1.4:gap===2?0.2:-2;if(stOfId[a]!==stOfId[b])sc-=1.1;}
         sc-=Math.max(0,(cnt[b]||0)-(cnt[a]||0))*0.1;if(sc>bs){bs=sc;best=b;}}
-      if(best!=null){left.delete(best);add(w,a,best);}
+      if(best!=null){del(best);add(w,a,best);}
       else{const c=pool.filter(x=>x!==a&&!B(x,w)&&!played.has(K(a,x))&&stOfId[x]!=='INTL'&&stOfId[x]!==stOfId[a]);if(c.length)add(w,a,c[Math.floor(R()*c.length)]);}
     }
   }
@@ -13058,13 +13139,14 @@ function viewSchool(id){
       <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
         <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:${w>=l?'var(--gn)':'var(--ac)'}">${w}-${l}</span>
         ${rb(teamOvr(id))}<span class="sbh">${s.offS}/${s.defS}</span>
-        <span style="color:var(--mu);font-size:12px">${pl.length} players</span>
+        <span style="color:var(--mu);font-size:12px">${s.lite?`${pl.length} tracked prospect${pl.length===1?'':'s'}`:`${pl.length} players`}</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="bgh bsm" onclick="clo();nav('roster',${id})">Full roster / edit players</button><button class="bgh bsm" onclick="clo();openEditSch(${id})">Edit team</button>${id!==G.myId&&!s.intl?`<button class="bgh bsm" onclick="coachTakeOver(${id})">Coach this team…</button>`:''}</div>
     </div>
   </div>
+  ${s.lite?`<div style="font-size:12px;color:var(--mu);margin:-6px 0 10px;padding:8px 10px;border:1px solid var(--bd);border-radius:6px">${stName(clsSt(s.cls))} is a light state: the school plays its full season and state playoffs, and the game follows its top prospects. Team strength ${s.str||50}.</div>`:''}
   <div class="tabs"><button class="tab on" onclick="swMTab(this,'sv-o')">Overview</button>
-    <button class="tab" onclick="swMTab(this,'sv-r')">Roster</button>
+    <button class="tab" onclick="swMTab(this,'sv-r')">${s.lite?'Prospects':'Roster'}</button>
     <button class="tab" onclick="swMTab(this,'sv-s')" id="sv-s-btn">Stats</button>
     <button class="tab" onclick="swMTab(this,'sv-g')">Schedule</button>
   </div>
@@ -13402,7 +13484,7 @@ window.meetPitch=function(k){
 function transferIn(p,from){
   const side=x=>POS_OFFENSE.has(x.pos)?'o':POS_DEFENSE.has(x.pos)?'d':'s';
   const used=new Set(myP().filter(q=>side(q)===side(p)).map(q=>q.num));
-  p.sId=G.myId;p.depth={};p.mood='good';p.morale=clamp((p.morale||70)+8,0,100);
+  p.sId=G.myId;_spVer++;p.depth={};p.mood='good';  // _spVer: the per-school lists must see him on your team right awayp.morale=clamp((p.morale||70)+8,0,100);
   if(used.has(p.num))p.num=posN(p.pos,G.myId);
   if(canBeOnJV(p)&&myP().length>=MAX_VARSITY){p.onJV=true;(G.jvRoster||(G.jvRoster=[])).push(p.id);}else p.onJV=false;
   addLog(`<span style="color:var(--gn)">Transfer: ${p.fn} ${p.ln} (${p.pos}, OVR ${p.rat}) leaves ${from.name} ${from.mascot} for your program.</span>`);
@@ -14986,9 +15068,18 @@ function usaWorld(custom){
   for(const ab in G0.st){const t={};for(const c of G0.cn[ab]){const o=take.get(c.key)||ab;t[o]=(t[o]||0)+c.pop;}owner[ab]=Object.keys(t).sort((a,b)=>t[b]-t[a])[0];}
   USA._wk=key;return USA._w={st,owner,custom:cu};
 }
-function usaDefault(){return{mode:'usa',states:Object.keys(USST),home:'TX'};}
+function usaDefault(){return{mode:'usa',states:Object.keys(USST),home:'TX',v:2};}
+// detailed states get full rosters; every other state is light: real schools, results, state playoffs and its top prospects
+const USA_DETAIL_MAX=5,USA_DETAIL_CAP=1500; // schools in full detail (all detailed states together); the home state always fits
+function usaDetailSize(list,X){return list.reduce((a,ab)=>a+usaTeams(ab,X,1),0);}
+function usaDetailFix(list,home,sel,X){const out=[home];for(const a of list){if(out.length>=USA_DETAIL_MAX)break;if(a===home||!sel.includes(a)||out.includes(a))continue;
+    if(usaDetailSize(out.concat(a),X)>USA_DETAIL_CAP)continue;out.push(a);}return out;}
+function usaAutoDetail(sel,home,X){const c=ab=>_ugCen(X.st[ab].rings[0]),h=c(home);
+  return usaDetailFix(sel.filter(a=>a!==home&&a!=='AK'&&a!=='HI').sort((a,b)=>{const p=c(a),q=c(b);return Math.hypot(p[0]-h[0],p[1]-h[1])-Math.hypot(q[0]-h[0],q[1]-h[1]);}),home,sel,X);}
 function usaNorm(cfg){const X=usaWorld(cfg&&cfg.custom),all=Object.keys(X.st);let s=(cfg&&Array.isArray(cfg.states)?cfg.states:all).filter(a=>X.st[a]);if(!s.length)s=[X.st.TX?'TX':all[0]];
-  s=[...new Set(s)].sort();let h=cfg&&X.st[cfg.home]&&s.includes(cfg.home)?cfg.home:s.slice().sort((a,b)=>X.st[b].meta[0]-X.st[a].meta[0])[0];const o={mode:'usa',states:s,home:h};if(X.custom.length)o.custom=X.custom;return o;}
+  s=[...new Set(s)].sort();let h=cfg&&X.st[cfg.home]&&s.includes(cfg.home)?cfg.home:s.slice().sort((a,b)=>X.st[b].meta[0]-X.st[a].meta[0])[0];const o={mode:'usa',states:s,home:h};if(X.custom.length)o.custom=X.custom;
+  if(cfg&&cfg.v===1){o.v=1;return o;} // a career saved before light states: every chosen state keeps full detail at the scaled size
+  o.v=2;o.detail=cfg&&Array.isArray(cfg.detail)?usaDetailFix(cfg.detail,h,s,X):usaAutoDetail(s,h,X);return o;}
 // class labels in each state's style, smallest class first
 function usaLbls(style,n){const R=['I','II','III','IV','V','VI','VII','VIII'];
   if(style==='Div')return Array.from({length:n},(_,i)=>'Division '+R[n-1-i]);
@@ -15020,7 +15111,7 @@ function geoBuild(cfg){
     _setArr(AI_NGL,C.NGL);_setArr(NAT_VENUES,C.VEN);_repl(COL_HS_Q,cp(C.HSQ));NAT_POOL_FULL=22000;
     XNAMES.CF=C.XNAMES_CF;XMASC.CF=C.XMASC_CF;XOFF.CF=C.XOFF_CF;for(const k of['XNAMES','XMASC','XOFF']){const o={XNAMES,XMASC,XOFF}[k];for(const s in o)if(s.length===2&&USST[s]&&!C.XST[s]&&s!=='CO')delete o[s];}
     buildColleges();return true;}
-  const G0=usaGeo(),X=usaWorld(want.custom),sel=want.states;USA.X=X;USA.on=true;USA_SCALE=usaScaleFor(sel,X);USA.cur={};USA.cfg=want;USA.home=want.home;USA.code={};USA.ab={};
+  const G0=usaGeo(),X=usaWorld(want.custom),sel=want.states;USA.X=X;USA.on=true;USA_SCALE=want.v===1?usaScaleFor(sel,X):1;USA.detail=want.v===1?sel.slice():want.detail.slice();USA.virt=0;USA.cur={};USA.cfg=want;USA.home=want.home;USA.code={};USA.ab={};
   for(const ab of sel){const c=usaCode(ab);USA.code[ab]=c;USA.ab[c]=ab;}
   const rnd=_colRand('usa|'+key);const pick=a=>a[Math.floor(rnd()*a.length)];
   // classes and divisions for every state; the home state uses the 1A-5A slots
@@ -15041,8 +15132,9 @@ function geoBuild(cfg){
     const lb=usaClsList(ab,X),n=lb.length,w=lb.map(()=>1),ws=n;
     const cls=[];let dtot=0;
     for(let i=0;i<n;i++){const c=code+'-'+(i+1),eq=['1A','2A','3A','4A','5A'][Math.round(i*4/Math.max(1,n-1))],t=Math.max(8,Math.round(N*w[i]/ws)),d=Math.max(1,Math.round(t/8));
-      XCLS[c]={st:code,lbl:lb[i],t,d,r:rEq[eq].map(v=>v+M[4]),mean:meanEq[eq]+M[4]*0.6,eq};cls.push(c);XCLS_ORDER.push(c);dtot+=d;}
-    XST[code]={name:nm,abbr:ab,tag:`${USA_REG[M[1]]} · ${N} schools · ${lb[0]} to ${lb[lb.length-1]}`,cls};XDIV_NAMES[code]=divNames(ab,dtot);ST_ORDER.push(code);
+      const lite=!USA.detail.includes(ab);
+      XCLS[c]={st:code,lbl:lb[i],t,d,r:rEq[eq].map(v=>v+M[4]),mean:meanEq[eq]+M[4]*0.6,eq};if(lite){XCLS[c].lite=true;USA.virt+=t*(XCLS[c].r[0]+XCLS[c].r[1])/8;}cls.push(c);XCLS_ORDER.push(c);dtot+=d;}
+    XST[code]={name:nm,abbr:ab,tag:`${USA_REG[M[1]]} · ${N.toLocaleString()} schools · ${lb[0]} to ${lb[lb.length-1]}${USA.detail.includes(ab)?' · full detail':' · light: results, playoffs and top prospects'}`,cls};if(!USA.detail.includes(ab))XST[code].lite=true;XDIV_NAMES[code]=divNames(ab,dtot);ST_ORDER.push(code);
     // regional flavor borrowed from the classic state it resembles
     const F=M[2];XMASC[code]=XMASC[F]||MCTS;if(XOFF[F])XOFF[code]=XOFF[F];if(XNAMES[F])XNAMES[code]=XNAMES[F];else delete XNAMES[code];}
   {const F=X.st[want.home].meta[2];XNAMES.CF=XNAMES[F]||C.XNAMES_CF;XMASC.CF=XMASC[F]||C.XMASC_CF;XOFF.CF=XOFF[F]||C.XOFF_CF;}
@@ -15053,7 +15145,7 @@ function geoBuild(cfg){
     const code=USA.code[ab],xs=S.rings.flat().map(p=>p[0]),ys=S.rings.flat().map(p=>p[1]);let[lx,ly]=_ugCen(S.rings[0]);
     if(ab==='HI'){lx=(Math.min(...xs)+Math.max(...xs))/2;ly=Math.max(...ys)+8;}
     const land=(_geoClassic.MAP_STATES[X.st[ab].meta[2]]||_geoClassic.MAP_STATES.TA).land;
-    MAP_STATES[code]={name:S.name,polys:S.rings,poly:S.rings[0],path,land,tag:code==='CF'?`Your home state · ${usaTeams(ab)} schools`:XST[code].tag,bb:[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)],lx,ly};
+    MAP_STATES[code]={name:S.name,polys:S.rings,poly:S.rings[0],path,land,tag:code==='CF'?`Your home state · ${usaTeams(ab).toLocaleString()} schools · full detail`:XST[code].tag,bb:[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)],lx,ly};
     for(const c of X.st[ab].counties){const[cx,cy]=_ugCen(c.rings[0]);MAPC.push({id:MAPC.length,st:code,name:c.name,key:c.key,pts:c.rings[0],multi:c.rings.length>1?c.rings:null,ptsStr:'',cx,cy,teams:[],offers:[],towns:c.towns,pop:c.pop});}}
   USA.cnty={};for(const c of MAPC)(USA.cnty[c.st]=USA.cnty[c.st]||[]).push(c);
   USA.cid={};for(const c of MAPC)if(c.key)USA.cid[c.key]=c.id;
@@ -15085,7 +15177,7 @@ function geoBuild(cfg){
   big.sort((a,b)=>b[0]-a[0]);_setArr(NAT_VENUES,big.slice(0,10).map(([,n],i)=>`${n} ${['Stadium','Bowl','Field','Coliseum','Memorial Stadium'][i%5]}`));
   NAT_POOL_FULL=Math.round(13.2*Object.keys(USST).reduce((a,s)=>a+usaTeamsReal(s),0));
   // more schools per state means more seniors for the same colleges: each college takes more high schoolers (never past its class size)
-  {const Tsel=sel.reduce((a,s)=>a+usaTeams(s),0),m=clamp(13.2*Tsel/(22000*Math.max(0.01,share)),1,6);for(const lvl in COL_HS_Q){const cap=(COL_CLS_RNG[lvl]||[20,26])[1];COL_HS_Q[lvl]=COL_HS_Q[lvl].map(v=>Math.max(1,Math.min(cap,Math.round(v*m))));}} // seniors in a full 50-state class (about 13.2-13.8 a school): stars never pass the national numbers
+  {const Tsel=want.v===1?sel.reduce((a,s)=>a+usaTeams(s),0):USA.detail.reduce((a,s)=>a+usaTeams(s),0)+sel.filter(s=>!USA.detail.includes(s)).reduce((a,s)=>a+liteQuota(s,12),0)/13.2,m=clamp(13.2*Tsel/(22000*Math.max(0.01,share)),1,6);for(const lvl in COL_HS_Q){const cap=(COL_CLS_RNG[lvl]||[20,26])[1];COL_HS_Q[lvl]=COL_HS_Q[lvl].map(v=>Math.max(1,Math.min(cap,Math.round(v*m))));}} // seniors in a full 50-state class (about 13.2-13.8 a school): stars never pass the national numbers
   buildColleges();return true;
 }
 // ── fictional high schools in real towns: bigger classes in the bigger towns, small schools out in the country ──
@@ -15152,34 +15244,47 @@ const USA_PRESETS=[['Every state',()=>Object.keys(_upX().st)],['The South',()=>_
   ['The West',()=>_upR('W')],['The Northeast',()=>_upR('NE')],['Football hotbeds',()=>['TX','FL','GA','AL','LA','CA','OH','PA','MS','SC','OK','TN'].filter(s=>_upX().st[s])]];
 let _usaPick=null;
 function usaGeoCfg(){const W=worldLoad();return W.geo&&W.geo.mode==='classic'?{mode:'classic'}:usaNorm(W.geo||usaDefault());}
-function usaPickOpen(){const g=usaGeoCfg(),cu=(worldLoad().geo||{}).custom;_usaPick=g.mode==='usa'?{mode:'usa',states:new Set(g.states),home:g.home,custom:g.custom||[]}:{mode:'classic',states:null,home:'TX',custom:cu||[]};_usaPick.X=usaWorld(_usaPick.custom);if(!_usaPick.states)_usaPick.states=new Set(Object.keys(_usaPick.X.st));usaPickRender();}
+function usaPickOpen(){const g=usaGeoCfg(),cu=(worldLoad().geo||{}).custom;_usaPick=g.mode==='usa'?{mode:'usa',states:new Set(g.states),home:g.home,custom:g.custom||[],detail:new Set(g.detail||[g.home])}:{mode:'classic',states:null,home:'TX',custom:cu||[],detail:null};_usaPick.X=usaWorld(_usaPick.custom);if(!_usaPick.states)_usaPick.states=new Set(Object.keys(_usaPick.X.st));usaPickRender();}
 function usaPickRender(){
   const P=_usaPick,X=P.X,G0={st:X.st},names=Object.keys(X.st).sort((a,b)=>(X.st[a].custom-X.st[b].custom)||X.st[a].name.localeCompare(X.st[b].name)),n=P.states.size;
-  const tot=[...P.states].reduce((a,s)=>a+usaTeams(s,X),0),sh=[...P.states].reduce((a,s)=>a+X.st[s].meta[0],0)/USST_PROG_ALL;
-  const map=Object.keys(X.st).map(ab=>{const on=P.states.has(ab),hm=P.home===ab;return`<path d="${X.st[ab].rings.map(_polyPath).join(' ')}" fill="${hm?'#f7b928':on?'#3fa2f3':'#cfc6ae'}" stroke="#2c2416" stroke-width="1" style="cursor:pointer" onclick="usaPickTog('${ab}')"><title>${G0.st[ab].name}</title></path>`;}).join('');
+  if(!P.detail)P.detail=new Set(usaAutoDetail([...(P.states||[])],P.home,X));
+  {const fx=usaDetailFix([...P.detail],P.home,[...P.states],X);P.detail=new Set(fx);}
+  const tot=[...P.states].reduce((a,s)=>a+usaTeams(s,X,1),0),sh=[...P.states].reduce((a,s)=>a+X.st[s].meta[0],0)/USST_PROG_ALL,dSz=usaDetailSize([...P.detail],X);
+  const map=Object.keys(X.st).map(ab=>{const on=P.states.has(ab),hm=P.home===ab;return`<path d="${X.st[ab].rings.map(_polyPath).join(' ')}" fill="${hm?'#f7b928':on&&P.detail.has(ab)?'#1f6fd1':on?'#8cc8f5':'#cfc6ae'}" stroke="#2c2416" stroke-width="1" style="cursor:pointer" onclick="usaPickTog('${ab}')"><title>${G0.st[ab].name}</title></path>`;}).join('');
   openMo(`<div style="font-weight:900;font-size:22px">Choose your states</div>
-    <div style="font-size:12px;color:var(--mu);margin:2px 0 8px">Real states, real counties and towns, fictional high schools. Tap states on the map or in the list (1 to 50). Gold is your home state. More states means more schools, colleges and recruiting.</div>
+    <div style="font-size:12px;color:var(--mu);margin:2px 0 8px">Real states, real counties and towns, fictional high schools. Tap states on the map or in the list (1 to 50). Gold is your home state, dark blue the states played in full detail, light blue the light states. Every state has its real number of high schools.</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><label style="font-size:12px;font-weight:800;display:flex;gap:6px;align-items:center"><input style="width:auto;margin:0;flex:none" type="radio" name="usam" ${P.mode==='usa'?'checked':''} onchange="_usaPick.mode='usa';usaPickRender()"> Real USA</label>
       <label style="font-size:12px;font-weight:800;display:flex;gap:6px;align-items:center"><input style="width:auto;margin:0;flex:none" type="radio" name="usam" ${P.mode==='classic'?'checked':''} onchange="_usaPick.mode='classic';usaPickRender()"> Classic fictional country (13 made-up states)</label></div>
     ${P.mode==='usa'&&P.custom&&P.custom.length?`<div style="font-size:11px;color:var(--mu);margin-bottom:6px">★ = your custom states (make more in League Setup → Map editor)</div>`:''}
     ${P.mode==='usa'?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${USA_PRESETS.map(([l],i)=>`<button class="bgh bxs" onclick="usaPickPreset(${i})">${l}</button>`).join('')}<button class="bgh bxs" onclick="_usaPick.states=new Set([_usaPick.home]);usaPickRender()">Only my home state</button></div>
     <svg viewBox="0 0 1100 720" style="width:100%;max-height:42vh;background:#7fc6ee;border-radius:10px">${map}</svg>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0"><label style="font-size:12px;font-weight:800">Home state <select id="usa-home" onchange="_usaPick.home=this.value;_usaPick.states.add(this.value);usaPickRender()" style="padding:5px 8px;border-radius:8px">${names.map(a=>`<option value="${a}"${a===P.home?' selected':''}>${G0.st[a].name}</option>`).join('')}</select></label>
-      <span style="font-size:12px;color:var(--mu)"><b>${n}</b> state${n===1?'':'s'} · about <b>${tot.toLocaleString()}</b> high schools · about <b>${Math.max(3,Math.round(837*sh))+0}</b> colleges · up to <b>${Math.round(32*Math.min(1,sh))}</b> five-stars a class</span></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:3px 8px;max-height:22vh;overflow-y:auto;font-size:12px">${names.map(a=>`<label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input style="width:auto;margin:0;flex:none" type="checkbox" ${P.states.has(a)?'checked':''} onchange="usaPickTog('${a}')">${G0.st[a].name}${G0.st[a].custom?' ★':''}</label>`).join('')}</div>`
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0"><label style="font-size:12px;font-weight:800">Home state <select id="usa-home" onchange="_usaPick.home=this.value;_usaPick.states.add(this.value);_usaPick.detail=null;usaPickRender()" style="padding:5px 8px;border-radius:8px">${names.map(a=>`<option value="${a}"${a===P.home?' selected':''}>${G0.st[a].name}</option>`).join('')}</select></label>
+      <span style="font-size:12px;color:var(--mu)"><b>${n}</b> state${n===1?'':'s'} · <b>${tot.toLocaleString()}</b> high schools · about <b>${Math.max(3,Math.round(837*sh))+0}</b> colleges · up to <b>${Math.round(32*Math.min(1,sh))}</b> five-stars a class</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:3px 8px;max-height:22vh;overflow-y:auto;font-size:12px">${names.map(a=>`<label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input style="width:auto;margin:0;flex:none" type="checkbox" ${P.states.has(a)?'checked':''} onchange="usaPickTog('${a}')">${G0.st[a].name}${G0.st[a].custom?' ★':''}</label>`).join('')}</div>
+    <div style="margin-top:10px;padding:10px;border:1px solid var(--bd);border-radius:6px">
+      <div style="font-weight:800;font-size:13px">Full detail: up to ${USA_DETAIL_MAX} states</div>
+      <div style="font-size:11px;color:var(--mu);margin:2px 0 6px">Detailed states have every player on every team. Light states still play every game, crown state champions in a playoff, and track their top prospects, so stars, offers and commitments work everywhere. To keep the game fast on phones the detailed states together can have up to ${USA_DETAIL_CAP.toLocaleString()} schools (your home state always counts as detailed).</div>
+      <div style="font-size:12px;margin-bottom:6px">${[...P.detail].map(a=>X.st[a].name).join(', ')} · <b style="color:${dSz>USA_DETAIL_CAP?'var(--gd)':'var(--gn)'}">${dSz.toLocaleString()}</b> / ${USA_DETAIL_CAP.toLocaleString()} schools</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;max-height:16vh;overflow-y:auto">${[...P.states].sort((a,b)=>X.st[a].name.localeCompare(X.st[b].name)).map(a=>{const on=P.detail.has(a),hm=a===P.home,fits=on||(P.detail.size<USA_DETAIL_MAX&&usaDetailSize([...P.detail,a],X)<=USA_DETAIL_CAP);
+        return`<button class="${on?'btn':'bgh'} bxs" style="padding:3px 8px;min-height:26px;${!fits&&!on?'opacity:.45':''}" ${hm?'disabled title="Your home state is always detailed"':''} onclick="usaPickDet('${a}')">${X.st[a].name} <span style="opacity:.7">${usaTeams(a,X,1).toLocaleString()}</span></button>`;}).join('')}</div>
+    </div>`
     :`<div style="font-size:13px;color:var(--mu);margin:10px 0">The original made-up country: Crestfield, Llano Grande, Coralina and ten more invented states.</div>`}
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="usaPickSave()">Use these states</button></div>`);
 }
+window.usaPickDet=function(ab){const P=_usaPick,X=P.X;if(ab===P.home)return;if(P.detail.has(ab)){P.detail.delete(ab);usaPickRender();return;}
+  if(P.detail.size>=USA_DETAIL_MAX){notify(`Up to ${USA_DETAIL_MAX} states in full detail. Turn one off first.`,'w');return;}
+  if(usaDetailSize([...P.detail,ab],X)>USA_DETAIL_CAP){notify(`${X.st[ab].name} would put the detailed states over ${USA_DETAIL_CAP.toLocaleString()} schools. Turn a big one off first, or pick a smaller state.`,'w');return;}
+  P.detail.add(ab);usaPickRender();};
 window.usaPickTog=function(ab){const P=_usaPick;if(P.states.has(ab)){if(P.states.size===1)return;P.states.delete(ab);if(P.home===ab)P.home=[...P.states].sort((a,b)=>P.X.st[b].meta[0]-P.X.st[a].meta[0])[0];}else P.states.add(ab);usaPickRender();};
 window.usaPickPreset=function(i){const s=USA_PRESETS[i][1]();_usaPick.states=new Set(s);if(!s.includes(_usaPick.home))_usaPick.home=s.slice().sort((a,b)=>_usaPick.X.st[b].meta[0]-_usaPick.X.st[a].meta[0])[0];usaPickRender();};
 window.usaPickSave=function(){const P=_usaPick,W=worldLoad(),old=JSON.stringify(W.geo||null);
-  W.geo=P.mode==='usa'?usaNorm({states:[...P.states],home:P.home,custom:P.custom}):{mode:'classic',custom:P.custom&&P.custom.length?P.custom:undefined};
+  W.geo=P.mode==='usa'?usaNorm({states:[...P.states],home:P.home,custom:P.custom,detail:P.detail?[...P.detail]:null,v:2}):{mode:'classic',custom:P.custom&&P.custom.length?P.custom:undefined};
   // renames and sizes were made for the other map: they don't carry over
   if(JSON.stringify(W.geo)!==old&&(W.custFor||'classic')!==(W.geo.mode)){for(const k of['states','counties','divs','xdivs','size'])delete W[k];}
   W.custFor=W.geo.mode;worldStore(W);clo();
   notify('Building your world…');setTimeout(()=>{try{_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();usaSetupInfo();}catch(e){console.error('world',e);}},40);};
 function usaSetupInfo(){const el=document.getElementById('usa-info');if(!el)return;const g=usaGeoCfg();
-  el.innerHTML=g.mode==='usa'?`<b>Real USA</b> · ${g.states.length} state${g.states.length===1?'':'s'} · home: ${usaWorld(g.custom).st[g.home].name}${g.custom&&g.custom.length?` · ${g.custom.length} custom`:''}`:'<b>Classic</b> fictional country';}
+  el.innerHTML=g.mode==='usa'?`<b>Real USA</b> · ${g.states.length} state${g.states.length===1?'':'s'} · home: ${usaWorld(g.custom).st[g.home].name}${g.detail&&g.detail.length>1?` · full detail: ${g.detail.map(a=>usaWorld(g.custom).st[a].name).join(', ')}`:''}${g.custom&&g.custom.length?` · ${g.custom.length} custom`:''}`:'<b>Classic</b> fictional country';}
 // ═══════════ v2.16 WORLD EDITOR: custom states from real counties, world files, Community Creations ═══════════
 const ME={view:null,active:null};
 const ME_COL=['#e4572e','#17bebb','#ffc914','#76b041','#8f5bd6','#ff8fab','#2e86ab','#f18f01','#3bb273','#c44536'];
@@ -15319,7 +15424,7 @@ function generateStartingOffers(allDivsByClass){
   }
   const picks=[...pickFrom('1A','low',3),...pickFrom('2A','mid',3),...pickFrom('3A','low',3)];
   const _few=USA.on&&ST_ORDER.length>13;
-  for(const st of ST_ORDER){if(st==='CF')continue;const L=clsOfSt(st),n=L.length;
+  for(const st of ST_ORDER){if(st==='CF'||(XST[st]&&XST[st].lite))continue;const L=clsOfSt(st),n=L.length;
     const mi=Math.floor((n-1)/2),li=Math.max(0,n-2);
     if(_few){picks.push(...pickFrom(L[0],'low',1),...pickFrom(L[mi],'mid',1));continue;}
     picks.push(...pickFrom(L[0],'low',2),...(mi===li?pickFrom(L[mi],'mid',3):[...pickFrom(L[mi],'mid',2),...pickFrom(L[li],'low',1)]));}
@@ -15734,6 +15839,7 @@ function worldStore(W){try{localStorage.setItem(WORLD_KEY,JSON.stringify(W||{}))
 const _setArr=(a,b)=>{a.length=0;for(const x of b)a.push(x);};
 function worldApply(W,fromSave){
   W=W&&typeof W==='object'?W:{};
+  if(fromSave&&W.geo&&W.geo.mode==='usa'&&!W.geo.v)W.geo.v=1;
   try{geoBuild(W.geo?W.geo:(fromSave?null:usaDefault()));}catch(e){console.error('geography',e);}
   const O=worldOrig();WORLD=W;
   if((W.custFor||'classic')!==(USA.on?'usa':'classic')){W=Object.assign({},W);for(const k of['states','counties','divs','xdivs','size'])delete W[k];}
@@ -16004,8 +16110,8 @@ window.pcTransferOpen=function(){
     <div style="text-align:right;margin-top:8px"><button class="bgh" onclick="clo()">Stay</button></div>`);};
 window.pcTransfer=function(sid){
   const p=pcActive(),ns=getS(sid);if(!p||!ns)return;if(!confirm(`Transfer to ${ns.name} ${ns.mascot}?`))return;
-  const os=myS();p.sId=ns.id;p.onJV=false;p.rel=50;p.transfers=(p.transfers||0)+1;
-  coachTakeOver(ns.id,true);if(G.myId!==ns.id){p.sId=os.id;return;}
+  const os=myS();p.sId=ns.id;_spVer++;p.onJV=false;p.rel=50;p.transfers=(p.transfers||0)+1;
+  coachTakeOver(ns.id,true);if(G.myId!==ns.id){p.sId=os.id;_spVer++;return;}
   try{addNews('myteam',`${p.fn} ${p.ln} transfers to ${ns.name}`,`The ${p.pos} leaves ${os.name} for the ${ns.mascot}.`);}catch(e){}
   addLog(`<span style="color:var(--gd)">Player Career: ${p.fn} ${p.ln} transfers to ${ns.name}.</span>`);};
 function myPlayer(){if(!G||G.myPlayerId==null)return null;return getP(G.myPlayerId)||(G.hofArchive||[]).find(x=>x.id===G.myPlayerId)||null;}
