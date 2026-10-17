@@ -21971,9 +21971,13 @@ function celebrateAfter(S){
 /* ===================== v2.14 PC controls: keyboard throws, key badges, a controls guide ===================== */
 const GPC=(()=>{try{return matchMedia('(hover:hover) and (pointer:fine)').matches;}catch(e){return false;}})();
 if(GPC&&!DEMO)document.body.classList.add('kbm');
-function gpThrowTargets(){return(G.recv||[]).filter(r=>r.route&&!r.block&&!r.down);}
+function gpThrowTargets(){
+  // v2.16 online guest: the receivers are the host's players at their live spots (the guest's own copy of the field doesn't move)
+  if(G.client){const F=OL.lastF;if(!F||!OL.recvN)return[];return OL.recvN.filter(r=>F.ents.some(S=>S.nk===r.n)).map(r=>{const e=olProxyOf(r.n,G.me,F);e.route={name:r.r,col:r.c};return e;});}
+  return(G.recv||[]).filter(r=>r.route&&!r.block&&!r.down);}
 function gpKeyThrow(i){
-  if(!passingUser()||G.client)return false;const r=gpThrowTargets()[i];if(!r)return false;
+  if(!passingUser())return false;const r=gpThrowTargets()[i];if(!r)return false;
+  if(G.client){olCmd('throwr',{n:r.nk,b:G.bullet?1:0,l:G.lob?1:0});return true;}
   const q=G.qb,D0=dist(q,r),lb=!!G.lob&&D0>=8,bul=G.bullet||D0<12&&!lb,f=flight(D0,bul,lb);
   throwTo(r.x+r.vx*f.T,r.y+r.vy*f.T+(D0>16?0.6:0.2),bul,0.8,userThrowMeter,lb);return true;
 }
@@ -22399,6 +22403,7 @@ function olRemote(m){
         P.kres=kickResult(kk,clamp(num(m.p,0.8),0,1),clamp(num(m.a,0),-1,1));G.rmeter=null;doSnap();return;}
       case 'throw':{if(!passingUser())return;const dx=num(m.dx,0),dy=num(m.dy,1),l=Math.hypot(dx,dy)||1;
         G.aim={run:false,dx:dx/l,dy:dy/l,D:clamp(num(m.D,10),4,gpMaxD())};const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;userThrow();G.aim=null;G.bullet=b0;G.lob=l0;return;}
+      case 'throwr':{if(!passingUser())return;const T=gpThrowTargets(),i=T.findIndex(e=>e.nk===m.n&&e.team===R);if(i<0)return;const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;gpKeyThrow(i);G.bullet=b0;G.lob=l0;return;}
       case 'scr':if(passingUser())scramble();return;
       case 'repass':if(gpScrambling()&&G.offTeam===R){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}return;
       case 'mv':{if(!userCarrier())return;const f={juke:()=>tryJuke(Math.sign(num(m.d,1))||1),spin:trySpin,stiff:tryStiff,truck:tryTruck,hurdle:tryHurdle,dive:tryDive,slow:trySlow}[m.mv];
@@ -22496,7 +22501,7 @@ function olFrameIn(m){
   if(m.es)for(const k in m.es){const st=m.es[k];st.pl=st.p!=null?olPl(st.p):null;OL.es.set(+k,st);}
   for(const d of m.e||[])OL.cur.set(d[0],d);
   if(m.ids){OL.ids=m.ids;const keep=new Set(m.ids);for(const k of[...OL.cur.keys()])if(!keep.has(k))OL.cur.delete(k);}
-  if(m.rt!==undefined)OL.routes=m.rt;
+  if(m.rt!==undefined){OL.routes=m.rt;if(m.rt&&m.rt.length)OL.recvN=m.rt.filter(r=>r.n).map(r=>({n:r.n,c:r.c,r:r.r}));}
   const snap={t:m.t,rt:now,ents:new Map(OL.ids.map(k=>[k,OL.cur.get(k)]).filter(x=>x[1])),b:m.b,fl:m.fl||[],c:m.c,ln:m.ln||null,s:m.s,tg:m.tg||null,rg:m.rg||null,sr:m.sr||null,r:m.r||10};
   OL.buf.push(snap);if(OL.buf.length>24)OL.buf.shift();
   // clock offset between the two devices: the smallest (arrival - send) seen recently
