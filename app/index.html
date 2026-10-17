@@ -10086,9 +10086,20 @@ function gdStart(){
   gdLaunch();
 }
 // v2.16: closing Game Day frees the whole engine first (blank frame, no references), so a phone low on memory does not reload the page
-function gdTeardown(){const ov=document.getElementById('gd-ov');if(!ov)return;const f=ov.querySelector('iframe');
+function gdTeardown(){try{const f=document.getElementById('gd-if');if(f&&f.contentWindow&&f.contentWindow.__gpSndStop)f.contentWindow.__gpSndStop();}catch(e){}const ov=document.getElementById('gd-ov');if(!ov)return;const f=ov.querySelector('iframe');
   try{if(f&&f.contentWindow){try{f.contentWindow.__G=null;}catch(e){}f.src='about:blank';}}catch(e){}try{if(f)f.remove();}catch(e){}ov.remove();window.__GP=null;}
+// v2.16 sound: the audio starts from the tap or click that opens Game Day, and iOS plays it through the speaker even with the
+// ringer switch on silent (media playback instead of the ambient category)
+function gpAudioUnlock(){
+  try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback';}catch(e){}
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!window.__GPAC)window.__GPAC=new AC({latencyHint:'interactive'});if(window.__GPAC.state!=='running')window.__GPAC.resume().catch(()=>{});}catch(e){}
+  // older iOS: a silent media element in a loop moves the page to the playback audio session
+  try{if(!window.__GPSIL){const a=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');a.loop=true;a.volume=0.01;a.setAttribute('playsinline','');window.__GPSIL=a;}
+    const p=window.__GPSIL.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
+}
+addEventListener('pointerdown',gpAudioUnlock,{passive:true});addEventListener('keydown',gpAudioUnlock);
 function gdLaunch(){
+  try{gpAudioUnlock();}catch(e){}
   // v2.16: a career game saves first, so a crash or reload during or right after the game never costs more than that game
   try{if(_gdCtx&&!['prac','free','online'].includes(_gdCtx.kind)&&typeof G!=='undefined'&&G&&G.myId&&gdsMain().autosave!==false)saveGame(true);}catch(e){}
   let ov=document.getElementById('gd-ov');if(ov)gdTeardown();
@@ -21673,8 +21684,17 @@ function packBare(team,skin){const k=team+':'+skin;if(PACK_BARE[k])return PACK_B
 const SND={ctx:null,master:null,crowd:null,crowdF:null,murmur:null,noise:null,on:false,lvl:0,beatT:0,last:{}};
 function sndInit(){
   if(SND.ctx||DEMO||!GDS.sound)return;
-  try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const c=new AC();SND.ctx=c;
-    SND.master=c.createGain();SND.master.gain.value=GDS.vol;SND.master.connect(c.destination);
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    let c=null;try{const P=window.parent&&window.parent!==window?window.parent.__GPAC:null;if(P&&P.state!=='closed')c=P;}catch(e){}
+    if(!c)c=new AC({latencyHint:'interactive'});SND.ctx=c;try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    // v2.16 speaker chain: cut the rumble small speakers can't play, lift the presence range, compress and make up the level
+    const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=70;
+    const pres=c.createBiquadFilter();pres.type='peaking';pres.frequency.value=2400;pres.Q.value=0.8;pres.gain.value=4;
+    const comp=c.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=12;comp.ratio.value=4;comp.attack.value=0.004;comp.release.value=0.2;
+    const mkup=c.createGain();mkup.gain.value=1.9;
+    SND.master=c.createGain();SND.master.gain.value=GDS.vol;SND.master.connect(hp);hp.connect(pres);pres.connect(comp);comp.connect(mkup);mkup.connect(c.destination);SND.out=mkup;
+    // when Game Day closes the parent stops this game's sound (the audio context outlives the game)
+    window.__gpSndStop=()=>{try{SND.on=false;mkup.disconnect();}catch(e){}};
     const n=c.createBuffer(1,c.sampleRate*2,c.sampleRate),d=n.getChannelData(0);let b=0;
     for(let i=0;i<d.length;i++){const w=Math.random()*2-1;b=(b+0.02*w)/1.02;d[i]=w*0.6+b*3.5;}SND.noise=n;
     // crowd bed: filtered noise, two layers (a low murmur and a brighter roar)
@@ -21684,7 +21704,9 @@ function sndInit(){
     SND.murmur=mk(420,0.7,0);SND.crowd=mk(900,0.5,0);SND.on=true;
   }catch(e){SND.ctx=null;}
 }
-function sndUnlock(){sndInit();if(SND.ctx&&SND.ctx.state==='suspended')SND.ctx.resume().catch(()=>{});}
+function sndUnlock(){sndInit();if(SND.ctx&&SND.ctx.state!=='running')SND.ctx.resume().catch(()=>{});}
+// a controller button counts too (the parent's click already started the audio)
+function sndPadKick(){if(!SND.ctx||SND.ctx.state!=='running')sndUnlock();}
 addEventListener('pointerdown',sndUnlock,{passive:true});addEventListener('keydown',sndUnlock);
 function sndOK(k,gap){if(!SND.on||!GDS.sound||G.noDraw||G.simming||DEMO)return false;const t=SND.ctx.currentTime;if(k&&SND.last[k]!=null&&t-SND.last[k]<(gap||0.05))return false;if(k)SND.last[k]=t;return true;}
 function sndEnv(g,t,a,peak,dec){g.gain.cancelScheduledValues(t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(0.0002,peak),t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+dec);}
@@ -21694,21 +21716,25 @@ function sndNoise(fType,f,q,dur,vol,delay,f1){if(!SND.ctx)return;const c=SND.ctx
   const fl=c.createBiquadFilter();fl.type=fType;fl.frequency.setValueAtTime(f,t);if(f1)fl.frequency.exponentialRampToValueAtTime(f1,t+dur);fl.Q.value=q;const g=c.createGain();
   src.connect(fl);fl.connect(g);g.connect(SND.master);sndEnv(g,t,0.004,vol,dur);src.start(t,Math.random()*1.5);src.stop(t+dur+0.1);}
 const SFX={
-  whistle(){if(!sndOK('wh',0.4))return;const o=sndTone('sine',2850,2700,0.42,0.16);if(o){const l=SND.ctx.createOscillator(),lg=SND.ctx.createGain();l.frequency.value=28;lg.gain.value=90;l.connect(lg);lg.connect(o.frequency);l.start();l.stop(SND.ctx.currentTime+0.5);}},
-  hut(){if(!sndOK('hut',0.3))return;sndNoise('bandpass',700,2,0.09,0.22);sndTone('triangle',190,140,0.1,0.12);},
-  pads(n){if(!sndOK('pads',0.15))return;for(let i=0;i<(n||5);i++)sndNoise('bandpass',1400+Math.random()*1600,3,0.05,0.07+Math.random()*0.05,0.02+Math.random()*0.22);},
-  hit(big){if(!sndOK('hit',0.08))return;sndNoise('lowpass',big?900:600,0.8,big?0.22:0.12,big?0.5:0.28);sndTone('sine',big?95:120,45,big?0.25:0.14,big?0.5:0.3);if(big)sndNoise('bandpass',2600,2,0.08,0.18,0.01);
+  whistle(){if(!sndOK('wh',0.4))return;sndNoise('bandpass',2900,6,0.4,0.08);const o=sndTone('sine',2850,2700,0.42,0.22);if(o){const l=SND.ctx.createOscillator(),lg=SND.ctx.createGain();l.frequency.value=28;lg.gain.value=90;l.connect(lg);lg.connect(o.frequency);l.start();l.stop(SND.ctx.currentTime+0.5);}},
+  hut(){if(!sndOK('hut',0.3))return;sndNoise('bandpass',900,2.5,0.12,0.3);sndTone('sawtooth',210,150,0.12,0.07);sndNoise('bandpass',2200,3,0.05,0.1,0.02);},
+  pads(n){if(!sndOK('pads',0.15))return;for(let i=0;i<(n||5);i++){const d=0.02+Math.random()*0.22;sndNoise('bandpass',1100+Math.random()*1800,2.5,0.06,0.12+Math.random()*0.07,d);sndNoise('bandpass',350+Math.random()*200,2,0.07,0.08,d);}},
+  hit(big){if(!sndOK('hit',0.08))return;
+    // body (felt on big speakers) + plastic crack of helmets and pads (heard on any speaker) + a short grunt
+    sndNoise('lowpass',big?900:650,0.8,big?0.2:0.12,big?0.45:0.26);sndTone('sine',big?110:130,55,big?0.22:0.13,big?0.4:0.24);
+    sndNoise('bandpass',big?1900:2300,2.2,big?0.07:0.05,big?0.42:0.26);sndNoise('bandpass',420,1.5,big?0.12:0.08,big?0.3:0.18,0.005);
+    if(big){sndNoise('bandpass',3200,3,0.06,0.2,0.012);sndTone('sawtooth',170,120,0.16,0.05,0.03);}
     if(big&&GDS.haptics){try{navigator.vibrate&&navigator.vibrate(40);}catch(e){}}},
-  throw(){if(!sndOK('thr',0.2))return;sndNoise('bandpass',600,1.2,0.28,0.12,0,2400);},
-  catch_(){if(!sndOK('cat',0.15))return;sndTone('sine',210,140,0.09,0.25);sndNoise('highpass',3000,1,0.03,0.08);},
-  kick(){if(!sndOK('kick',0.3))return;sndTone('sine',150,55,0.18,0.55);sndNoise('lowpass',1200,1,0.06,0.3);},
+  throw(){if(!sndOK('thr',0.2))return;sndNoise('bandpass',700,1.2,0.3,0.2,0,2800);sndNoise('bandpass',1600,2,0.08,0.12);},
+  catch_(){if(!sndOK('cat',0.15))return;sndNoise('bandpass',1400,2.2,0.05,0.35);sndTone('sine',300,180,0.08,0.22);sndNoise('highpass',3200,1,0.03,0.12);},
+  kick(){if(!sndOK('kick',0.3))return;sndNoise('bandpass',1300,1.8,0.06,0.55);sndTone('sine',200,70,0.16,0.45);sndNoise('lowpass',1500,1,0.07,0.35);sndNoise('bandpass',3000,2,0.03,0.2,0.005);},
   horn(){if(!sndOK('horn',1.5))return;for(const f of[233,294,349])sndTone('sawtooth',f,f*0.98,1.1,0.05);},
   chime(){if(!sndOK('chime',0.5))return;sndTone('triangle',784,784,0.16,0.12);sndTone('triangle',1047,1047,0.3,0.12,0.12);},
   flag(){if(!sndOK('flag',0.6))return;SFX.whistle();setTimeout(()=>{SND.last.wh=null;SFX.whistle();},180);},
   beat(k){if(!sndOK('beat',0.25))return;sndTone('sine',58,40,0.13,0.32*k);sndTone('sine',52,38,0.12,0.22*k,0.17);},
   click(){if(!sndOK('clk',0.03))return;sndTone('square',1800,1200,0.025,0.035);},
   // crowd one-shots: a roar swells and fades, a groan bends down, a gasp is short and sharp
-  roar(v,dur){if(!sndOK('roar',0.6)||!GDS.crowd)return;sndNoise('bandpass',1000,0.45,dur||2.6,0.22*(v||1));sndNoise('bandpass',2300,0.7,(dur||2.6)*0.8,0.08*(v||1),0.05);},
+  roar(v,dur){if(!sndOK('roar',0.6)||!GDS.crowd)return;sndNoise('bandpass',1000,0.45,dur||2.6,0.3*(v||1));sndNoise('bandpass',2300,0.7,(dur||2.6)*0.8,0.14*(v||1),0.05);sndNoise('bandpass',600,0.8,(dur||2.6)*0.9,0.12*(v||1),0.08);},
   groan(){if(!sndOK('groan',1)||!GDS.crowd)return;sndNoise('bandpass',700,1.4,1.4,0.16,0,280);},
   gasp(){if(!sndOK('gasp',0.6)||!GDS.crowd)return;sndNoise('bandpass',1300,1.6,0.45,0.2,0,2600);},
   boo(){if(!sndOK('boo',1)||!GDS.crowd)return;sndNoise('bandpass',260,3,1.6,0.2);sndNoise('bandpass',330,3,1.5,0.12,0.1);}
@@ -22004,6 +22030,7 @@ function padOverlay(){
   return null;}
 function padGameStep(){
   const g=padGet();if(!g||DEMO)return;const b=padBtns(g),P=PADN.prev,pr=i=>b[i]&&!P[i];
+  if(b.some((x,i)=>x&&!P[i]))try{sndPadKick();}catch(e){}
   if(pr(9)&&!G.client&&G.phase!=='over'&&!G.recVid){gpPause(!G.paused);PADN.prev=b;return;}
   const ov=padOverlay();
   if(ov){G.pad=null;padNavStep(g,b,ov,()=>{if(G.paused)gpPause(false);});PADN.prev=b;return;}
