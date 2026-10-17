@@ -1,30 +1,89 @@
-# Gridiron Prep GM v2.15
+# Gridiron 27 (beta, web version)
 
-High school football GM with a playable Game Day engine.
+High school football career game with a playable Game Day engine.
 
 ## Files
 
 | File | What it is |
 | --- | --- |
 | `app/` | The web app source (open `app/index.html`, or host the folder). |
-| `Gridiron_web_app_v2_15.zip` | The same folder zipped, ready to upload to your host. |
-| `Gridiron_v2_15_code.txt` | `index.html` as plain text. |
-| `sw215.js` | The offline service worker (same as `app/sw.js`). |
-| `supabase setup.sql` | The Online Play database script, updated for v2.15. |
-| `Gridiron_web_app_v2_13.zip`, `Gridiron_v2_13_code.txt`, `sw213.js` | The previous version, unchanged. |
+| `Gridiron27_web_beta.zip` | The same folder zipped, ready to upload to your host. |
+| `Gridiron27_code.txt` | `index.html` as plain text. |
+| `sw.js` | The offline service worker (same as `app/sw.js`). |
+| `supabase setup.sql` | The Online Play database script, now with Community Creations. |
+| Older `Gridiron_*` zips, code files and `sw213.js` / `sw215.js` | Earlier builds, unchanged. |
 
-## Deploying v2.15
+## Deploying
 
-1. Upload the contents of `Gridiron_web_app_v2_15.zip` to your host (same place as v2.13).
+1. Upload the contents of `Gridiron27_web_beta.zip` to your host, in the same place as before.
 2. **Online Play database:** open Supabase → SQL Editor → paste the whole `supabase setup.sql` → Run.
-   It is safe to run again and keeps all data. It adds what the new online features need:
-   account deletion, blocking, reporting, sending saves to friends and community teams.
-   Until you run it, those buttons show a message asking for the update; everything else keeps working.
-3. Players get the new version the next time they open the game (the service worker cache is now `gpgm-2.15`).
+   You can run it again safely; it keeps all data. It adds the `community_worlds` table for shared worlds.
+   Until you run it, the Community Creations screen asks for the update; everything else keeps working.
+3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-3`).
 
-## What's new in 2.15
+## What's new
+
+### Player Career
+- **Player Career** on the title screen. You create one player, pick his high school, and in Game Day you control only him.
+- **The coach does the rest:**
+  - He calls every play.
+  - The ball is snapped for you (a quarterback snaps it himself).
+  - Drives your player is not on the field for are simulated.
+- **Depth chart and coach trust:** starters play every drive of their side, and backups play some of them. Coach trust (0–100) rises with good games and wins.
+- **Call for the ball** (B key, Y / Triangle, or the button) gets the quarterback looking your way.
+- **Camera:** zoomed in on your player, who has a ring at his feet.
+- **Transfers:** in the offseason, before the first game.
+- **After high school:** college and pro careers are followed on My Player.
 
 ### Game Day
+- **Controller prompts, Madden style:**
+  - PlayStation or Xbox button icons over every receiver.
+  - A legend for skill moves, tackling, switching and the snap.
+- **Running:** sideways moves are as fast as running straight. Arrows or the left stick steer the ball carrier at full speed, and flicking the right stick jukes.
+- **Sound now plays on every device:**
+  - It starts with the tap that opens Game Day.
+  - On iPhone it plays even with the silent switch on.
+  - New, fuller effects are mixed loud enough for phone and laptop speakers.
+- **7-on-7 Summer League** after the state championship:
+  - Optional, with a $5,000 entry fee.
+  - Pick 7 players for offense and 7 for defense.
+  - No helmets or pads, two-hand touch, a four-second pass clock.
+  - Quarterfinal and semifinal, then a best-of-five series for the league title.
+  - Standouts pick up college offers.
+- **Online Play fix:** the away team can pass again on PC, and the receiver numbers no longer get stuck on the sideline.
+
+### World and schools
+- **Real US states** with real counties and cities, and fictional high schools with fixed names. The same school is always in the same town.
+- **Abbreviations:** three letters for every school, unique within each state.
+- **Each state:**
+  - Real classification and division counts.
+  - Realistic numbers of schools.
+  - Leagues with fictional names.
+- **Colleges:** more than 135, with at most 32 five-star recruits per class.
+- **World editor** (League Setup → Map editor):
+  - Build custom states from real counties.
+  - Rename counties.
+- **Sharing:** save and load world files, or share them in **Community Creations** on the title screen.
+
+### Look and money
+- **New name:** Gridiron 27, labeled as a beta / web version (no version numbers in the game).
+- **Look:** a console-style dark design in your team's colors.
+- **New income:**
+  - Sponsors
+  - Booster fundraisers
+  - Summer camps
+  - Gate money after every game
+- **Signing bonuses:** bigger for seniors who sign with colleges, scaled by level and star rating.
+
+### Fixes
+- The "divs.length" crash at the start of a new game after using Team Builder is fixed.
+- A full test sweep of Game Day, careers, saves, playoffs and the US world shows no errors.
+
+## Earlier updates
+
+### Update 2.15
+
+#### Game Day
 - **Move buttons and keys:** Juke and Dive buttons join Spin, Stiff arm, Truck and Hurdle, all labelled with their key.
   Every key can be changed (Pause → Settings → Change keys).
 - **Controllers:** Xbox, PlayStation and most other gamepads work in the game and in the menus.
@@ -48,7 +107,7 @@ High school football GM with a playable Game Day engine.
   - Fans in the stands: Light or Off.
 - **Halftime** now explains who kicks off and why.
 
-### Career
+#### Career
 - **Edit Player:** height, weight, class and the face (skin tone, hairstyle, hair and eye color, facial hair).
 - **Edit many players at once** (Roster): add to, set or raise ratings for the whole team, offense, defense, a position or the JV.
 - **Ticket sales:**
@@ -57,19 +116,19 @@ High school football GM with a playable Game Day engine.
 - **Trophy Case** (Program): titles, player awards and program records.
 - The staff "Head Coach" slot is now the **Assistant Head Coach**; you are the head coach.
 
-### Free Practice
+#### Free Practice
 - Click any player on a Free Practice roster to edit him: name, number, position, ratings, size and face.
 - **Share codes** to send a team to a friend.
 - **Community teams** (Online Play account): publish your teams, browse and download other players' teams, report or block.
 
-### Fixes
+#### Fixes
 - A player who changes position keeps his height and weight.
   His body no longer gets forced into the new position's size range.
 - The Sliders, Privacy policy and Terms windows no longer open behind the Settings window.
 
-## What's new in 2.14
+### Update 2.14
 
-### Game Day
+#### Game Day
 - **Celebrations:** 8 new touchdown celebrations (14 in total), plus sack celebrations and better first-down celebrations.
   Big first downs and 3rd/4th-down conversions get a crowd reaction.
 - **Sound:** synthesized sound effects (whistle, snap, pads, hits, throws, catches, kicks, horn) and crowd noise that follows the home team.
@@ -86,14 +145,14 @@ High school football GM with a playable Game Day engine.
   Key labels appear on the buttons, and a controls guide shows the first time you play on a computer.
 - **Replay video:** recording is lighter, so saving a replay no longer makes the game stutter.
 
-### Stats and careers
+#### Stats and careers
 - New stats: tackles for loss, yards after catch, punt returns and safeties (Game Day and simulated games).
 - Player cards gain **Game Log** and **Career** (season by season) tabs.
 - **Play-call splits** for each game, plus season totals on Staff & Playbook.
 - **XP for game performances** (10 XP = 1 skill point).
 - **Player Career:** create your own player at the start. Follow him on Home → My Player through high school, college and the pros.
 
-### Team and league
+#### Team and league
 - JV players form the practice scout team and earn XP.
 - **Talk to JV players** to move them up, and hold **transfer meetings** with other schools' players. The right pitch matters.
 - New plays in every standard playbook (13 passes, 4 Trips/Empty, 9 runs), plus 4 new defenses.
@@ -105,7 +164,7 @@ High school football GM with a playable Game Day engine.
   - rename and resize divisions
   - set star-rating counts and recruiting class sizes
 
-### Fixes
+#### Fixes
 - Jersey **#0**: the editor accepts it, and loading old saves no longer replaces it.
 - **Hot/cold streaks:**
   - they now need 3 games
@@ -117,13 +176,13 @@ High school football GM with a playable Game Day engine.
 - **Begin Offseason** asks before simulating remaining games.
   A new season's main button is now "Play Week 1" instead of an offseason button that simmed the whole season.
 
-### Interface
+#### Interface
 - **Navigation:** 5 sections (Home, Team, Season, League, Program), each with its own short row of pages. On phones the sections are a bottom tab bar.
 - The Game Day "sky" look is now the default theme (dark is still in Settings).
 - The schedule builder has an **Auto-fill** button.
 - The tutorial has new pages for every feature.
 
-### Online, privacy and App Store
+#### Online, privacy and App Store
 - In-app **Delete my account** (removes the account, cloud saves and shared saves), plus a **privacy policy**.
 - **Block** and **report** players, and a word filter on usernames and display names.
 - **Send a career save to a friend**; it shows up under Account → Saves from friends.
