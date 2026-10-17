@@ -19,7 +19,7 @@ High school football career game with a playable Game Day engine.
 2. **Online Play database:** open Supabase → SQL Editor → paste the whole `supabase setup.sql` → Run.
    You can run it again safely; it keeps all data. It adds the `community_worlds` table for shared worlds.
    Until you run it, the Community Creations screen asks for the update; everything else keeps working.
-3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-3`).
+3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-4`).
 
 ## What's new
 
@@ -49,6 +49,8 @@ High school football career game with a playable Game Day engine.
   - Works for every state, with a search and real 3-letter abbreviations.
   - Every change is saved on the device as you go, so you can build your league over several sessions. League Setup keeps unsaved progress the same way.
   - Any school can be edited mid-season from its profile or from Customize.
+- **Saving:** the career is saved right before every game, even when an autosave was still running when you pressed Play Game.
+- **Error report:** Settings → Error report shows the last errors on your device, so you can copy them when you report a problem.
 
 ### Player Career
 - **Player Career** on the title screen. You create one player, pick his high school, and in Game Day you control only him.
