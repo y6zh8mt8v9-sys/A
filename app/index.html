@@ -10291,6 +10291,7 @@ function gdTeam(s,kind,kitOv,opt){
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
   for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);
+  for(const q of roster){q.eq=q.eq||{};q.eq.helm={shell:u.hShell||'gloss',stripe:u.hStripe||'team',mask:''};}
   if(u.shoulder&&u.shoulder!=='none')for(const q of roster){q.eq=q.eq||{};q.eq.shoulder={mode:u.shoulder,c:u.shoulderC||u.trim};}
   const pack={helmet:kit.helmet,helmetStripe:kit.hstripe,helmetLogo:kit.hstripe,facemask:kit.mask,jersey:kit.jersey,jerseyTrim:kit.trim,pants:kit.pants,pantsStripe:kit.pstripe,belt:'#1d1d22',socks:kit.sock,sockStripe:kit.trim,cleats:kit.cleat,cleatAccent:kit.trim,gloves:kit.glove,number:kit.num,numberTrim:_gdLum(kit.jersey)>.6?null:'#f4f4f4',armSleeve:'skin'};
   const logo=sLogoStandalone(s,100),inner=logo.slice(logo.indexOf('>')+1,logo.lastIndexOf('</svg>')),c1=s.c1||'#1d3557';
@@ -10483,9 +10484,9 @@ function uniSvg(k,num,w){
   <path d="M42,36 Q50,44 58,36" fill="none" stroke="${k.trim}" stroke-width="3"/>
   <text x="50" y="72" text-anchor="middle" font-size="24" font-weight="900" font-family="Arial,sans-serif" fill="${k.num}" stroke="${k.trim}" stroke-width="1" paint-order="stroke">${n}</text>
   <path d="M30,22 C30,6 70,6 70,22 L70,30 Q50,38 30,30Z" fill="${k.helmet}"/>
-  <path d="M48,6.5 L52,6.5 L52,30 L48,30Z" fill="${k.hstripe}"/>
+  ${k.hStripe==='none'?'':`<path d="M48,6.5 L52,6.5 L52,30 L48,30Z" fill="${k.hstripe}"/>`}
   <path d="M34,26 H66 M36,31 H64 M50,26 V36" stroke="${k.mask}" stroke-width="2.4" fill="none"/>
-  <path d="M33,14 Q40,8 48,8" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/></svg>`;
+  ${k.hShell==='matte'?'':k.hShell==='chrome'?'<path d="M33,14 Q40,8 48,8" stroke="#fff" stroke-opacity=".85" stroke-width="3" fill="none"/><path d="M60,10 Q66,13 67,20" stroke="#fff" stroke-opacity=".55" stroke-width="2" fill="none"/>':'<path d="M33,14 Q40,8 48,8" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/>'}</svg>`;
 }
 function _uniS(){return window._fpMode&&window._fpEditT?window._fpEditT:myS();}
 function _uniNum(){const t=_uniS();if(t&&t.fp)return(t.roster.find(p=>p.pos==='QB')||t.roster[0]||{}).num;return(myP()[0]||{}).num;}
@@ -10514,6 +10515,10 @@ function uniEditorHtml(){
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">Shoulder stripes</label>
         <select onchange="uniSet('${kind}','shoulder',this.value);pbRerender()" style="padding:5px 8px;border-radius:8px">${[['none','None'],['single','Single stripe'],['double','Double stripe'],['triple','Triple stripe']].map(([v,l])=>`<option value="${v}"${(u.shoulder||'none')===v?' selected':''}>${l}</option>`).join('')}</select>
         <input type="color" value="${u.shoulderC||u.trim}" oninput="uniSet('${kind}','shoulderC',this.value)" style="width:46px;height:34px;padding:0;border-radius:8px;cursor:pointer" title="Stripe color"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">Helmet finish</label>
+        <select onchange="uniSet('${kind}','hShell',this.value);pbRerender()" style="padding:5px 8px;border-radius:8px">${[['gloss','Gloss'],['matte','Matte'],['chrome','Chrome']].map(([v,l])=>`<option value="${v}"${(u.hShell||'gloss')===v?' selected':''}>${l}</option>`).join('')}</select></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">Helmet stripe</label>
+        <select onchange="uniSet('${kind}','hStripe',this.value);pbRerender()" style="padding:5px 8px;border-radius:8px">${[['team','Center stripe'],['none','No stripe']].map(([v,l])=>`<option value="${v}"${(u.hStripe||'team')===v?' selected':''}>${l}</option>`).join('')}</select></div>
       <button class="bgh bsm" onclick="uniReset('${kind}')">Reset this uniform to team colors</button>
       <div style="font-size:11px;color:var(--mu);margin-top:8px">Pick any color with the color picker or tap a swatch. You choose which uniform to wear before every game you play.</div>
     </div></div>`;
@@ -13467,9 +13472,9 @@ const EQ_VISOR={clear:'#a9bccd',smoke:'#3a414c',black:'#14171c',gold:'#d9a520',b
 function eqCol(c,s){return c==='c1'?(s&&s.c1)||'#1d3557':c==='c2'?(s&&s.c2)||'#ffffff':c;}
 function eqResolve(e,s){if(!e)return null;const C=c=>eqCol(c,s);
   return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,
-    helm:{shell:e.hShell||'gloss',stripe:e.hStripe||'team',mask:e.hMask?C(e.hMask):''},
+    helm:{shell:'gloss',stripe:'team',mask:''}, // the helmet is the team's (Customize → Uniforms)
     pants:e.pants||'knee',socks:e.socks||'high',visor:e.visor?EQ_VISOR[e.visor]||null:null,legS:{mode:e.legS||'none',c:C(e.legSC||'#16181d')},crop:!!e.crop,sleeve:{mode:e.sleeve||'none',c:C(e.sleeveC||'#16181d')},band:{mode:e.band||'none',c:C(e.bandC||'#ffffff')},under:{mode:e.under||'none',c:C(e.underC||'#8d939b')}};}
-function eqDesc(e){const o=[];if(e.hShell&&e.hShell!=='gloss')o.push(e.hShell+' helmet');if(e.hStripe==='none')o.push('no helmet stripe');if(e.hMask)o.push('custom facemask');if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push('mouthpiece');if(e.sleeve!=='none')o.push(e.sleeve==='one'?'arm sleeve':'arm sleeves');
+function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push('mouthpiece');if(e.sleeve!=='none')o.push(e.sleeve==='one'?'arm sleeve':'arm sleeves');
   if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Baggy'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
 // colour picker: presets plus any custom colour
 function eqColHtml(id,val,none){const pre=EQ_COLORS.some(c=>c[0]===val)||(none&&!val);const hex=/^#/.test(val||'')?val:'#ffffff';
@@ -13516,9 +13521,7 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         ${row('Leg sleeves',eqSel('eq-ls',[['none','None'],['one','One leg'],['both','Both legs']],e.legS||'none')+eqColHtml('eq-lsc',e.legSC||'#16181d'))}
         ${row('Visor',eqSel('eq-vi',[['','None'],['clear','Clear'],['smoke','Smoke'],['black','Black'],['gold','Gold mirror'],['blue','Blue mirror'],['red','Red mirror'],['purple','Purple mirror']],e.visor||''))}
         ${row('Jersey',eqSel('eq-cr',[['0','Regular'],['1','Cropped (undershirt / back plate shows)']],e.crop?'1':'0'))}
-        ${row('Helmet finish',eqSel('eq-hs',[['gloss','Gloss'],['matte','Matte'],['chrome','Chrome']],e.hShell||'gloss'))}
-        ${row('Helmet stripe',eqSel('eq-ht',[['team','Team stripe'],['none','No stripe']],e.hStripe||'team'))}
-        ${row('Facemask',eqColHtml('eq-hm',e.hMask||'','Uniform default'))}
+        <div style="font-size:11px;color:var(--mu);margin:2px 0 6px 100px">Helmet and facemask are the same for the whole team: Team → Customize → Uniforms.</div>
         ${p.pos==='QB'?'<div style="font-size:11px;color:var(--mu);margin:-2px 0 6px 100px">Quarterbacks throw bare-handed (no gloves in Game Day).</div>':''}
         <button class="bgh bxs" onclick="eqRandom(${p.id})">Randomize</button> <button class="bgh bxs" onclick="eqClear()">Plain</button></div>
       <div style="flex:0 0 auto;text-align:center"><canvas id="eq-cv" width="330" height="210" style="width:330px;max-width:100%;height:auto;border-radius:10px;background:linear-gradient(#2f7d33,#25692a);image-rendering:pixelated"></canvas>
@@ -13548,7 +13551,7 @@ function eqPrev(){
   const cv=document.getElementById('eq-cv');if(!cv)return;const p=getP(window._eqPid);if(!p)return;const e=eqRead()||eqOf(p),s=getS(p.sId)||myS();
   eqLib().then(lib=>{if(!document.body.contains(cv))return;const x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);x.imageSmoothingEnabled=false;
     const build=(p.pos==='OL'||(p.pos==='DL'&&(p.wt||0)>=275))?'line':(['TE','LB','DL'].includes(p.pos)?'big':'skill'),sh='player_'+build;
-    const sk=Math.round(Math.max(0,FACE_SKIN.indexOf(faceSkinHex(p.fs!=null?p.fs:p.id)))*5/7),sp=lib.lite(sh,gdPackOf(s,'home'),sk),eq=eqResolve(e,s);if(p.pos==='QB'){eq.noGlove=true;eq.glove=null;}
+    const sk=Math.round(Math.max(0,FACE_SKIN.indexOf(faceSkinHex(p.fs!=null?p.fs:p.id)))*5/7),sp=lib.lite(sh,gdPackOf(s,'home'),sk),eq=eqResolve(e,s);{const u=uniOf(s,'home');eq.helm={shell:u.hShell||'gloss',stripe:u.hStripe||'team',mask:''};}if(p.pos==='QB'){eq.noGlove=true;eq.glove=null;}
     const shows=[['idle',0,false],['run',2,true],['stance_qb',0,false],[sp.has('stand_back')?'stand_back':'run_back',0,false]];
     shows.forEach(([an,f,fl],i)=>{if(!sp.has(an))return;sp.draw(x,an,f,46+i*80,200,3,3,fl,p.num,eq);});
   }).catch(()=>{const x=cv.getContext('2d');x.fillStyle='#fff';x.font='12px sans-serif';x.fillText('Preview unavailable',90,95);});
