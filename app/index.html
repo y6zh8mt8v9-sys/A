@@ -1274,8 +1274,14 @@ function padMainStep(){
 addEventListener('gamepadconnected',()=>{if(!PADN.on)try{notify('Controller connected: d-pad to move, A to select, B to go back, LB/RB to switch sections');}catch(e){}padStart(padMainStep);});
 setTimeout(()=>{if(padGet())padStart(padMainStep);},800);
 (function(){const go=()=>{const ct=document.getElementById('ct');if(!ct||ct._hdr)return;ct._hdr=1;let last=0,acc=0;
-  ct.addEventListener('scroll',()=>{const y=ct.scrollTop,d=y-last;last=y;if(y<40){document.body.classList.remove('hdr-hide');acc=0;return;}
-    acc=(d>0)===(acc>0)?acc+d:d;if(acc>28)document.body.classList.add('hdr-hide');else if(acc<-28)document.body.classList.remove('hdr-hide');},{passive:true});};
+  // the header only comes back after a real upward scroll: changes caused by the header itself resizing the page,
+  // the bounce at the bottom of a page and tiny finger wobbles are ignored
+  let hold=0,ch=0;const set=on=>{if(document.body.classList.contains('hdr-hide')===on)return;document.body.classList.toggle('hdr-hide',on);hold=performance.now()+450;acc=0;};
+  ct.addEventListener('scroll',()=>{const y=ct.scrollTop,d=y-last,h=ct.clientHeight,max=ct.scrollHeight-h;last=y;
+    if(y<24){set(false);return;}
+    if(performance.now()<hold||h!==ch){ch=h;acc=0;return;}
+    if(y>=max-6&&d<0){acc=0;return;}
+    acc=(d>0)===(acc>0)?acc+d:d;if(acc>36)set(true);else if(acc<-80)set(false);},{passive:true});};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
 // ── SETTINGS MODAL ──
 // v2.14 Game Day settings shared with the game (stored on this device)
@@ -17817,7 +17823,7 @@ function gpCatchFace(r,type){
 // ── ball-carrier moves succeed by ratings: OVR, speed, awareness, strength (by move) vs the tackler ──
 function _ovE(p){return clamp(38+(p.ovr||60)*0.65,40,99);}
 function gpMoveSkill(k,c){const p=c.pl,a=p.awr||70,o=_ovE(p);
-  const el=p.elu?(p.elu+(p.agi||75))/2:(p.agi||75),bt=p.btk?(p.btk+(p.str||70))/2:(p.str||70);
+  const el=gpElu(p),bt=gpBtk(p);
   if(k==='juke')return 0.35*el+0.25*(p.spd||75)+0.2*a+0.2*o;
   if(k==='spin')return 0.3*el+0.3*a+0.2*bt+0.2*o;
   if(k==='stiff')return 0.45*bt+0.2*o+0.2*a+0.15*(p.spd||75);
@@ -17917,6 +17923,10 @@ function gpPancake(b,d,c){
   (G.gpPk=G.gpPk||[]).push(b);dust(d.x,d.y,10);if(!isAI(b.team)||Math.random()<0.35)flash('Pancake!');
 }
 // v2.06 pass protection vs pass rush: a better rusher beats his block sooner (more pressure and sacks), a better line holds longer
+// ball-carrier skill: centered on agility / strength (as before the skill ratings existed), the skill moves it from there,
+// so a skilled runner gains and nobody drops below what his body alone gives him
+function gpElu(p){const a=p.agi||75;return p.elu?a+(p.elu-a)*0.5+3:a;}
+function gpBtk(p){const s=p.str||70;return p.btk?s+(p.btk-s)*0.5+4:s;}
 function gpPassPro(b,d){
   const base=b.role==='OL'?1:b.fb?0.75:0.8;if(!b.pl||!d.pl)return base;const N=p=>30+(p.ovr||60)*0.7;
   const rush=0.45*N(d.pl)+0.2*(d.pl.pmv||d.pl.str||75)+0.1*(d.pl.fmv||d.pl.spd||70)+0.25*(d.pl.spd||70),pb=0.5*N(b.pl)+0.35*(b.pl.pbk||b.pl.str||80)+0.15*(b.pl.awr||70);
@@ -20561,8 +20571,8 @@ function aiMoves(c,dt){
       const r=Math.random(),pl=c.pl;
       const low=f.lunge>0&&(f.lt==='shoe'||f.lt==='dive');
       if(low&&r<0.6)tryHurdle();
-      else if(r<0.22&&(pl.btk||pl.str)>78)tryTruck();
-      else if(r<0.4&&(pl.btk||pl.str)>70)tryStiff();else if(r<0.58&&(pl.elu||pl.agi)>82)trySpin();else tryJuke(f.x>c.x?-1:1);
+      else if(r<0.22&&gpBtk(pl)>78)tryTruck();
+      else if(r<0.4&&gpBtk(pl)>70)tryStiff();else if(r<0.58&&gpElu(pl)>82)trySpin();else tryJuke(f.x>c.x?-1:1);
     }
     break;
   }
@@ -20594,7 +20604,7 @@ function resolveTackle(f,c,type){
     if(Math.random()<clamp(p0,0.35,0.97)){flash({low:'Low tackle!',ankle:'Ankle tackle!',jump:'Met him in the air!'}[type]);c.spin=0;c.stiff=0;c.truck=0;c.juke=0;if(type==='jump')c.hurdle=0;startSeq(c,f,type==='jump'?'hit':type==='ankle'?'shoe':'wrap');if(G.seq)G.seq.ctr=type;return;}
     f.down=true;f.downT=0.8;f.lunge=0;f.downAnim='tackle_dive';dust(c.x,c.y,6);flash('Missed the tackle!');c.slow=0.15;return;}
   let p={wrap:0.87,hit:0.8,shoe:0.77,dive:0.81}[type]+(f.pl.tkl-75)*0.0065+gpTackleMod(f,c,type);
-  p-=type==='shoe'||type==='dive'?((c.pl.elu||c.pl.agi)-80)*0.005:((c.pl.btk||c.pl.str)-70)*0.006;
+  p-=type==='shoe'||type==='dive'?(gpElu(c.pl)-80)*0.005:(gpBtk(c.pl)-70)*0.006;
   p+=-gpFat(f)*0.14+gpFat(c)*0.1;
   let why='Broke a tackle!';
   if(c.stiff>0&&type!=='shoe'){p-=gpMove('stiff',c,f);why='Stiff arm!';}
