@@ -269,7 +269,7 @@ tr:last-child td{border-bottom:none;}tr.cl:hover td{background:var(--s2);cursor:
 .pbr{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;cursor:pointer;transition:all .12s;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
 .pbr:hover{border-color:var(--b2);transform:translateY(-1px);}
 .dev-e{color:var(--gd);font-weight:700;font-size:11px;}.dev-s{color:var(--gn);font-weight:700;font-size:11px;}
-.dev-i{color:var(--b2);font-weight:700;font-size:11px;}.dev-n{color:var(--mu);font-weight:700;font-size:11px;}
+.dev-i{color:var(--te);font-weight:700;font-size:11px;}.dev-n{color:var(--mu);font-weight:700;font-size:11px;}
 .sbh{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:2px 7px;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:var(--te);}
 .tc{background:linear-gradient(135deg,var(--s2),var(--s3));border:2px solid var(--gd);border-radius:10px;padding:16px;text-align:center;min-width:140px;}
 .rv{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--gd);}
@@ -297,7 +297,7 @@ tr:last-child td{border-bottom:none;}tr.cl:hover td{background:var(--s2);cursor:
 .tut-tab{background:none;border:none;padding:8px 12px;color:var(--mu);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1px;white-space:nowrap;}
 .tut-tab:hover{color:var(--tx);}.tut-tab.on{color:var(--ac);border-bottom-color:var(--ac);}
 .tb-nav-tab{background:none;border:none;padding:8px 12px;color:var(--mu);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1px;white-space:nowrap;}
-.tb-nav-tab:hover{color:var(--tx);}.tb-nav-tab.on{color:var(--b2);border-bottom-color:var(--b2);}
+.tb-nav-tab:hover{color:var(--tx);}.tb-nav-tab.on{color:var(--te);border-bottom-color:var(--b2);}
 .tut-pane{display:none;padding:16px 20px;}.tut-pane.on{display:block;}
 .tut-pane h3{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;color:var(--ac);margin-bottom:8px;}
 .tut-pane p{font-size:13px;color:var(--tx);line-height:1.55;margin-bottom:8px;}
@@ -966,7 +966,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
           <button class="btn bgn" id="btn-start" onclick="openCoachCreator()" style="width:100%;opacity:.4;cursor:not-allowed" disabled> Accept Job →</button>
           <div style="display:flex;gap:8px;">
             <button class="bgh" onclick="showTitle(true)" style="flex:1"> Load Save</button>
-            <button class="bgh" onclick="openTeamBuilder()" style="flex:1;border-color:var(--b2);color:var(--b2)"> Teams</button>
+            <button class="bgh" onclick="openTeamBuilder()" style="flex:1;border-color:var(--b2);color:var(--te)"> Teams</button>
             <button class="bgh" onclick="openWorldSetup()" style="flex:1;border-color:var(--gd);color:var(--gd)">League Setup</button>
             <button class="bgh" onclick="openSettings()" style="flex:1"> Settings</button>
           </div>
@@ -1132,7 +1132,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--b2);border-radius:8px;width:860px;max-width:98vw;max-height:94vh;overflow:hidden;display:flex;flex-direction:column;position:relative;">
     <div style="padding:16px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div>
-        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;text-transform:uppercase;color:var(--b2);margin:0;"> Team Builder</h2>
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;text-transform:uppercase;color:var(--te);margin:0;"> Team Builder</h2>
         <div style="font-size:11px;color:var(--mu);margin-top:2px;">Add, edit and manage teams in every state and division. Your changes are saved as you go, so you can stop and continue later.</div>
       </div>
       <button onclick="closeTeamBuilder()" style="background:none;border:none;color:var(--mu);font-size:22px;cursor:pointer;padding:4px 8px;">✕</button>
@@ -3800,7 +3800,7 @@ function checkAndFillRosters(){
         bodyNew(p,sch);G.players.push(p);
       }
       if(sch.id===G.myId){
-        addLog(`<span style="color:var(--b2)"> Roster below 28 — added ${FILL_COUNT} Normal dev freshmen/sophomores to your roster.</span>`);
+        addLog(`<span style="color:var(--te)"> Roster below 28 — added ${FILL_COUNT} Normal dev freshmen/sophomores to your roster.</span>`);
       }
     }
   }
@@ -4228,7 +4228,7 @@ function renderScheduleBuilder(){
         <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
         ${s?sLogo(s,32):''}
         <span style="font-size:12px;flex:1">${s?s.name+' '+s.mascot:'?'}</span>
-        ${g.isRivalry?'<span style="font-size:10px;font-weight:800;color:var(--gd)"> RIVALRY</span>':'<span style="font-size:10px;color:var(--b2);font-weight:700">DIV</span>'}
+        ${g.isRivalry?'<span style="font-size:10px;font-weight:800;color:var(--gd)"> RIVALRY</span>':'<span style="font-size:10px;color:var(--te);font-weight:700">DIV</span>'}
         ${s?`<span style="font-size:11px">${rb(teamOvr(s.id))}</span>`:''}
       </div>`;
     }
@@ -4246,7 +4246,7 @@ function renderScheduleBuilder(){
       <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
       ${s?sLogo(s,32):''}
       <span style="font-size:12px;flex:1">${s?s.name+' '+s.mascot:'?'}</span>
-      <span style="font-size:10px;font-weight:700;color:var(--b2)">${cls}</span>
+      <span style="font-size:10px;font-weight:700;color:var(--te)">${cls}</span>
       ${s?`<span style="font-size:11px">${rb(teamOvr(s.id))}</span>`:''}
       <button onclick="removeCustomGame(${g.wk})" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:12px;padding:0 2px" title="Remove">✕</button>
     </div>`;
@@ -4288,7 +4288,7 @@ function renderScheduleBuilder(){
             const cls=s.cls||G.cls;
             const isHigher=clsNum(cls)>clsNum(G.cls)&&cls!=='INTL';
             const isLower=clsNum(cls)<clsNum(G.cls)&&cls!=='INTL';
-            const diffLabel=isHigher?`<span style="font-size:9px;color:var(--rd);font-weight:800">▲ ${cls}</span>`:isLower?`<span style="font-size:9px;color:var(--gn);font-weight:800">▼ ${cls}</span>`:`<span style="font-size:9px;color:var(--b2);font-weight:800">${cls}</span>`;
+            const diffLabel=isHigher?`<span style="font-size:9px;color:var(--rd);font-weight:800">▲ ${cls}</span>`:isLower?`<span style="font-size:9px;color:var(--gn);font-weight:800">▼ ${cls}</span>`:`<span style="font-size:9px;color:var(--te);font-weight:800">${cls}</span>`;
             const myOvr=Math.round((G.offR+G.defR)/2);
             const diff=ovr-myOvr;
             const diffStr=diff>0?`<span style="color:var(--rd);font-size:10px">+${diff}</span>`:diff<0?`<span style="color:var(--gn);font-size:10px">${diff}</span>`:`<span style="color:var(--mu);font-size:10px">EVEN</span>`;
@@ -4322,7 +4322,7 @@ function renderScheduleBuilder(){
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:stretch">
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
       <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">Division Games (Locked)</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--b2)">5 Games</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--te)">5 Games</div>
       <div style="font-size:11px;color:var(--mu)">Weeks 1–5 · Rival in Wk 5</div>
     </div>
     ${rivalSch?`<div style="background:rgba(245,192,48,.08);border:1px solid var(--gd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px;display:flex;align-items:center;gap:10px">
@@ -5512,7 +5512,7 @@ function addOffer(p,c,pops,why){
     else if(c.lvl==='FCS')addNews('offer',` FCS Offer! ${p.fn} ${p.ln} → ${c.school}`,`${p.pos} • OVR ${p.rat}`);
     else if(c.lvl==='JUCO')addNews('offer',` JUCO Interest: ${p.fn} ${p.ln}`,`${c.school} wants the ${p.pos}.`);
     else addNews('offer',` ${c.lvl} Offer: ${p.fn} ${p.ln} → ${c.school}`,`${p.pos} • OVR ${p.rat}`);
-    addLog(`<span style="color:var(--b2)"> ${p.fn} ${p.ln} → ${c.lvl}: ${c.school}${why?' — '+why:''}</span>`);}
+    addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln} → ${c.lvl}: ${c.school}${why?' — '+why:''}</span>`);}
   if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&colRoom(COL_BY[o.school+'|'+o.lvl],p,false)){p.committed=o;colTakeCommit(p,o);
     if(p.sId===G.myId){if(pops)pops.push(bEvPop(' Dream School Commit!',`${p.fn} ${p.ln} instantly committed to his dream school — <strong>${o.school}</strong> (${o.lvl})!`,face(p.fs,52),'var(--gd)'));
       addNews('offer',` Dream School! ${p.fn} ${p.ln} → ${o.school}`,`Instant commit — ${p.pos} always dreamed of playing there.`);}}
@@ -5729,7 +5729,7 @@ function ncampSend(cid,pid){
   if(G.ncamp.list.some(x=>x.mine.includes(pid))){notify('He is already going to a needs camp that weekend.','w');return;}
   if(!G.unlimitedMoney&&(G.budget||0)<C.fee){notify('Not enough budget for the camp fee.','e');return;}
   if(!G.unlimitedMoney)G.budget-=C.fee;C.mine.push(pid);
-  addLog(`<span style="color:var(--b2)"> ${p.fn} ${p.ln} (${p.pos}) is going to the ${C.host} needs camp — $${C.fee.toLocaleString()}.</span>`);
+  addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln} (${p.pos}) is going to the ${C.host} needs camp — $${C.fee.toLocaleString()}.</span>`);
   try{updateTb();}catch(e){}nav('recr');}
 function ncampResolve(pops){
   G.ncamp.done=true;const mineRes=[];
@@ -6493,7 +6493,7 @@ function finalizeOffseason(){
   if(_frAwardWinner){
     const isMyPlayer=_frAwardWinner.sId===G.myId;
     pops.push(bAwardPop('fr',_frAwardWinner,_frAwardRunnerUp,G.cls,isMyPlayer,_aiSeasStatsSnap.get(_frAwardWinner.id),_frAwardRunnerUp?_aiSeasStatsSnap.get(_frAwardRunnerUp.id):null));
-    if(isMyPlayer)addLog(`<span style="color:var(--b2)"> ${_frAwardWinner.fn} ${_frAwardWinner.ln} won Freshman of the Year — ${G.cls}!</span>`);
+    if(isMyPlayer)addLog(`<span style="color:var(--te)"> ${_frAwardWinner.fn} ${_frAwardWinner.ln} won Freshman of the Year — ${G.cls}!</span>`);
     if(!_frAwardWinner.awards)_frAwardWinner.awards=[];
     _frAwardWinner.awards.push({type:'Freshman of the Year',cls:G.cls,yr:G.yr});
   }
@@ -7231,7 +7231,7 @@ function buildMoveUpPop(){
     return `<div class="pc" style="border-top-color:var(--mu)">
       <h3 style="color:var(--mu)"> Reclassification</h3>
       <div style="font-size:13px;line-height:1.7;margin-top:10px">
-        <div style="margin-bottom:10px">You are currently in <strong style="color:var(--b2)">${G.cls}</strong>.</div>
+        <div style="margin-bottom:10px">You are currently in <strong style="color:var(--te)">${G.cls}</strong>.</div>
         <div style="margin-bottom:10px">To move up to <strong>${nextCls}</strong> you need:</div>
         <div style="margin-bottom:6px"> <strong>1 State Championship</strong> at ${G.cls} <span style="color:var(--ac)">— not yet achieved</span></div>
         <div> <strong>$${(cost/1000).toFixed(0)}k budget</strong> to reclassify</div>
@@ -7479,7 +7479,7 @@ function bAwardPop(award, winner, runnerUp, cls, isMyPlayer, winnerSnap, ruSnap)
     </div>`:''}
   </div>`;
 }
-function bSenPop(p){let msg='';if(p.committed){const e={FBS:'',FCS:'',D2:'',D3:'',JUCO:''}[p.committed.lvl]||'';msg=`${e} <strong>${p.fn} ${p.ln}</strong> → <strong style="color:var(--b2)">${p.committed.school}</strong> (${p.committed.lvl})`;}else msg=` <strong>${p.fn} ${p.ln}</strong> (${p.pos}) will not play college football.`;return`<div class="pc"><h3> Signing Day</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div>${stars(p.stars)} ${rb(p.rat)}</div><div style="margin-top:10px;font-size:13px;line-height:1.6">${msg}</div>${p.offers.length?`<div style="margin-top:8px;font-size:11px;color:var(--mu)">${p.offers.length} total offer(s)</div>`:''}</div>`;}
+function bSenPop(p){let msg='';if(p.committed){const e={FBS:'',FCS:'',D2:'',D3:'',JUCO:''}[p.committed.lvl]||'';msg=`${e} <strong>${p.fn} ${p.ln}</strong> → <strong style="color:var(--te)">${p.committed.school}</strong> (${p.committed.lvl})`;}else msg=` <strong>${p.fn} ${p.ln}</strong> (${p.pos}) will not play college football.`;return`<div class="pc"><h3> Signing Day</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div>${stars(p.stars)} ${rb(p.rat)}</div><div style="margin-top:10px;font-size:13px;line-height:1.6">${msg}</div>${p.offers.length?`<div style="margin-top:8px;font-size:11px;color:var(--mu)">${p.offers.length} total offer(s)</div>`:''}</div>`;}
 function bFrPop(p){const jvNote=p.onJV?'<div style="margin-top:6px;background:#0a1a30;border:1px solid #336;border-radius:3px;padding:4px 8px;font-size:11px;color:#88ccff"> Starting on <strong>JV Team</strong> — call up to Varsity anytime</div>':'';return`<div class="pc"><h3> New Freshman!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${stars(p.stars)} <span class="pb2">${p.pos}</span> ${rb(p.rat)} → <span style="color:var(--gn)">${p.potLo||p.pot}</span>–<span style="color:#f0b429">${p.potHi||p.pot}</span> pot</div><div>${devB(p.dev)} ${(p.traits||[]).map(t=>trB(t)).join('')}</div><div style="margin-top:6px;font-size:12px;color:var(--mu)">GPA: ${gpaL(p.gpa)} | ${htf(p.ht)}, ${p.wt} lbs</div><div style="margin-top:6px">${interestBadges(p.interests)}</div>${jvNote}</div>`;}
 function bTrPop(p){return`<div class="pc" style="border-top-color:var(--te)"><h3 style="color:var(--te)"> Transfer!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${yrL(p.yr)} <span class="pb2">${p.pos}</span> ${rb(p.rat)}</div><div>${devB(p.dev)}</div></div>`;}
 function showPop(){if(_popI>=_popQ.length){document.getElementById('pu').classList.remove('open');if(_popCb){const cb=_popCb;_popCb=null;cb();}return;}document.getElementById('pui').innerHTML=_popQ[_popI];document.getElementById('pun').textContent=_popI<_popQ.length-1?`Continue (${_popI+1}/${_popQ.length}) →`:'Done ✓';document.getElementById('pu').classList.add('open');}
@@ -8157,7 +8157,7 @@ function pgCust(){
       <div class="fg" style="margin-bottom:9px"><label>Team Name</label><input class="ei" id="cn" value="${ms.name}"></div>
       <div class="fg" style="margin-bottom:9px"><label>Mascot</label><input class="ei" id="cm" value="${ms.mascot}"></div>
       <div class="fg" style="margin-bottom:9px"><label>City</label><input class="ei" id="cc" value="${ms.city}"></div>
-      <div class="fg" style="margin-bottom:9px"><label>Abbreviation (2 letters)</label><input class="ei" id="ca" value="${ms.abbr}" maxlength="2"></div>
+      <div class="fg" style="margin-bottom:9px"><label>Abbreviation (3 letters)</label><input class="ei" id="ca" value="${ms.abbr}" maxlength="3" style="text-transform:uppercase"></div>
       <button class="btn bgn" onclick="applyC()">Apply Changes</button>
     </div>
     <div>
@@ -8275,7 +8275,7 @@ function clearCustomLogo(){
   const ms=myS();ms.customLogo=null;ms._pendingLogo=null;
   updateTb();notify('Custom logo removed.');nav('cust');
 }
-function applyC(){const ms=myS();ms.name=document.getElementById('cn').value||ms.name;ms.mascot=document.getElementById('cm').value||ms.mascot;ms.city=document.getElementById('cc').value||ms.city;ms.abbr=(document.getElementById('ca').value||ms.abbr).toUpperCase().slice(0,2);ms.c1=document.getElementById('cc1').value;ms.c2=document.getElementById('cc2').value;if(ms._pendingLogo){ms.customLogo=ms._pendingLogo;ms._pendingLogo=null;}updateTb();notify('Team updated!');nav('cust');}
+function applyC(){const ms=myS();ms.name=document.getElementById('cn').value||ms.name;ms.mascot=document.getElementById('cm').value||ms.mascot;ms.city=document.getElementById('cc').value||ms.city;ms.abbr=(document.getElementById('ca').value||ms.abbr).toUpperCase().slice(0,3);ms.c1=document.getElementById('cc1').value;ms.c2=document.getElementById('cc2').value;if(ms._pendingLogo){ms.customLogo=ms._pendingLogo;ms._pendingLogo=null;}updateTb();notify('Team updated!');nav('cust');}
 window.schFind=function(q){const el=document.getElementById('schFindL');if(!el)return;q=String(q||'').trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}
   const L=[];for(const s of allSchoolsAll()){if(L.length>=30)break;if((s.name+' '+s.mascot+' '+(s.city||'')).toLowerCase().includes(q))L.push(s);}
   el.innerHTML=L.length?L.map(s=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--bd)">${sLogo(s,22)}<div style="flex:1;min-width:0;font-size:12px"><b>${s.name} ${s.mascot}</b> <span style="color:var(--mu)">${s.city||''} · ${clsName(s.cls)}</span></div><button class="bgh bxs" onclick="openEditSch(${s.id})">Edit</button></div>`).join(''):'<div style="font-size:12px;color:var(--mu)">No school found.</div>';};
@@ -8362,7 +8362,7 @@ function pgSched(){
       return`<tr class="${rowCls}${opp?' cl':''}" ${opp?`onclick="viewSchool(${opp.id})"`:''} ${isRiv?'style="background:rgba(245,192,48,.04);border-left:2px solid var(--gd)"':isEmpty?'style="opacity:.5"':''}>
         <td>${isRiv?`<strong style="color:var(--gd)">${g.wk}</strong>`:g.wk}</td>
         <td style="color:var(--mu)">${g.date||'—'}</td>
-        <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--b2)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--mu)">OPEN</span>':'<span style="font-size:10px;font-weight:700;color:var(--mu)">BYE</span>'}</td>
+        <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--te)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--mu)">OPEN</span>':'<span style="font-size:10px;font-weight:700;color:var(--mu)">BYE</span>'}</td>
         <td>${isEmpty?`<span style="color:var(--bd);font-style:italic">— open slot —</span>`:opp?`<div style="display:flex;align-items:center;gap:6px">${sLogo(opp,32)} ${isRiv?`<strong style="color:var(--gd)">${opp.name} ${opp.mascot}</strong>`:opp.name+' '+opp.mascot}</div>`:isBye?`<span style="color:var(--mu)">— Bye Week —</span>`:'—'}</td>
         <td>${opp?`<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:${oppCls===G.cls?'var(--b2)':clsNum(oppCls)>clsNum(G.cls)?'var(--rd)':'var(--gn)'}" title="${clsName(oppCls)}">${oppCls}</span>`:'—'}</td>
         <td>${opp?rb(teamOvr(opp.id)):'—'}</td>
@@ -8425,7 +8425,7 @@ function pgStand(){
     for(const div of divs){
       const isMyDiv=div.teams.some(t=>t.id===G.myId);
       const sorted=[...div.teams].sort((a,b)=>{const aw=a.wins/(a.wins+a.losses+.001),bw=b.wins/(b.wins+b.losses+.001);return bw-aw||b.wins-a.wins;});
-      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--b2)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--ac);font-size:11px">◀ YOUR DIVISION</span>':''}</div>
+      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--te)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--ac);font-size:11px">◀ YOUR DIVISION</span>':''}</div>
         <table><thead><tr><th>#</th><th>School</th><th>W</th><th>L</th><th>Win%</th><th>Ovr</th><th>Scheme</th></tr></thead>
         <tbody>${sorted.map((s,i)=>{const isMe=s.id===G.myId;const w=s.wins,l=s.losses;const wp=w+l>0?(w/(w+l)*100).toFixed(0)+'%':'—';
           return`<tr class="cl" onclick="viewSchool(${s.id})" ${isMe?'style="background:rgba(204,34,34,.07)"':''}>
@@ -8483,7 +8483,7 @@ function pgTeams(){
     <div class="pbr" onclick="viewSchool(${s.id})" style="${isMe?'border-color:var(--ac);':''}">
       ${sLogo(s,40)}<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;line-height:1.2">${s.name}</div>
       <div style="font-size:10px;color:var(--mu)">${s.mascot}</div>
-      <div style="font-size:10px;font-weight:700;color:var(--b2)">${XCLS[sCls]?clsName(sCls):sCls}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--te)">${XCLS[sCls]?clsName(sCls):sCls}</div>
       <div>${recStr(s.wins,s.losses)}</div><div>${rb(teamOvr(s.id))}</div>
       <div style="font-size:10px;color:var(--mu)">${s.lite?`light state · ${sPlayers(s.id).length} prospect${sPlayers(s.id).length===1?'':'s'}`:`${sPlayers(s.id).length} players`}</div>
       ${isMe?'<div style="font-size:10px;color:var(--ac);font-weight:700">◀ YOU</div>':''}
@@ -8524,7 +8524,7 @@ function pgLeads(){
     return`<tr class="cl" onclick="showPlayer(${p.id})" ${isMe?'style="background:rgba(204,34,34,.05)"':''}>
       <td style="color:var(--mu)">${i+1}</td><td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,24)}${isMe?'<strong>':''}${p.fn} ${p.ln}${isMe?'</strong>':''}</div></td>
       <td><div style="display:flex;align-items:center;gap:4px">${sLogo(sch,26)} <span style="font-size:11px">${sch?sch.name:'?'}</span></div></td>
-      <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--b2)" title="${clsName(sCls)}">${sCls}</span></td>
+      <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--te)" title="${clsName(sCls)}">${sCls}</span></td>
       <td><span class="pb2">${p.pos}</span></td><td>${yrL(p.yr)}</td>
       <td>${rb(p.rat)}</td><td>${devB(p.dev)}</td><td>${stars(p.stars)}</td><td>${gpaL(p.gpa)}</td>
       <td style="font-size:11px">${p.offers.length>0?p.offers.slice(0,2).map(o=>ofB(o)).join('')+(p.offers.length>2?`<span style="color:var(--mu)"> +${p.offers.length-2}</span>`:''):'—'}</td>
@@ -8535,7 +8535,7 @@ function pgLeads(){
 
 window._recrTab='mine';window.recrTab=function(t){window._recrTab=t;nav('recr');};
 function pgRecr(){
-  const tabs=`<div style="display:flex;gap:6px;margin-bottom:12px">${[['mine','Your recruits'],['col','College classes']].map(([k,l])=>`<button onclick="recrTab('${k}')" style="background:${_recrTab===k?'var(--ac)':'var(--s2)'};border:1px solid ${_recrTab===k?'var(--ac)':'var(--bd)'};color:${_recrTab===k?'#fff':'var(--tx)'};border-radius:999px;padding:5px 14px;cursor:pointer;font-weight:800">${l}</button>`).join('')}</div>`;
+  const tabs=`<div style="display:flex;gap:6px;margin-bottom:12px">${[['mine','Your recruits'],['col','College classes']].map(([k,l])=>`<button onclick="recrTab('${k}')" style="background:${_recrTab===k?'var(--ac)':'var(--s2)'};border:1px solid ${_recrTab===k?'var(--ac)':'var(--bd)'};color:${_recrTab===k?'#fff':'var(--tx)'};border-radius:6px;padding:5px 14px;cursor:pointer;font-weight:800;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.03em">${l}</button>`).join('')}</div>`;
   if(_recrTab==='col')return tabs+pgColleges();
   return tabs+_pgRecrMine();
 }
@@ -12992,7 +12992,7 @@ function pgHist(){
     <tbody>${rks.map(k=>{const rec=G.schoolRecs?.[type]?.[k];return`<tr>
       <td style="font-weight:700;color:var(--mu)">${rl[k]}</td>
       <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--gd)">${rec&&rec.val?rec.val:'—'}</span></td>
-      <td>${rec&&rec.pid?`<span class="cl" style="color:var(--b2);cursor:pointer" onclick="showPlayer(${rec.pid})">${rec.name}</span>`:'—'}</td>
+      <td>${rec&&rec.pid?`<span class="cl" style="color:var(--te);cursor:pointer" onclick="showPlayer(${rec.pid})">${rec.name}</span>`:'—'}</td>
       <td>${rec&&rec.pos?`<span class="pb2">${rec.pos}</span>`:'—'}</td>
       <td style="color:var(--mu)">${rec&&rec.date?rec.date:'—'}</td>
     </tr>`;}).join('')}</tbody></table></div>`;
@@ -13019,7 +13019,7 @@ function pgHist(){
       const champName=lg.champName||'TBD';
       return`<tr>
         <td style="font-weight:700;color:var(--gd)">${2026+(G.yr-1)} (Current)</td>
-        <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--b2)">${cls}</span></td>
+        <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${cls}</span></td>
         <td style="color:var(--mu);font-style:italic">In Progress</td>
         <td colspan="3" style="font-size:11px;color:var(--mu)">Current leader: ${leader?`${leader.name} ${leader.mascot} (${leader.wins}-${leader.losses})`:'—'} · Last champ: ${champName}</td>
         <td colspan="2" style="color:var(--mu)">—</td>
@@ -13042,7 +13042,7 @@ function pgHist(){
       // Main state champ cell
       const champCell=h.stateChampName
         ?`<td style="font-weight:700;color:${isMyStateChamp?'var(--gd)':'var(--tx)'}">${isMyStateChamp?' ':''}<span style="color:${isMyStateChamp?'var(--gd)':'var(--b2)'}">${h.stateChampName}</span>${!isMyStateChamp&&_scRec?` <span style="color:var(--mu);font-size:10px">(${_scRec})</span>`:''}</td>`
-        :h.otherChampName?`<td style="color:var(--b2);font-weight:700"> ${h.otherChampName}</td>`
+        :h.otherChampName?`<td style="color:var(--te);font-weight:700"> ${h.otherChampName}</td>`
         :`<td style="color:var(--mu)">—</td>`;
       const divCells=(h.divWinners||[]).length
         ?G.divisions.map(div=>{
@@ -13052,7 +13052,7 @@ function pgHist(){
             return`<td style="font-weight:${isMe?700:400};color:${isMe?'var(--gd)':'var(--tx)'}">${isMe?' ':''}${dw.name} <span style="color:var(--mu);font-size:10px">${dw.rec}</span></td>`;
           }).join('')
         :G.divisions.map(()=>`<td style="color:var(--mu)">—</td>`).join('');
-      const clsCell=`<td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--b2)">${champCls}</span></td>`;
+      const clsCell=`<td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${champCls}</span></td>`;
       return`<tr><td style="font-weight:700;color:var(--gd)">${yr}</td>${clsCell}${champCell}${divCells}${_awardCell(h.mrFootball,'','var(--gd)')}${_awardCell(h.freshmanOTY,'','var(--b2)')}</tr>`;
     }).join('')}${!histToShow.length&&!otherLeagueLiveRows?`<tr><td colspan="20" style="color:var(--mu);text-align:center;padding:14px">No history for this classification yet.</td></tr>`:''}</tbody></table></div>
 
@@ -13074,7 +13074,7 @@ function pgHist(){
               return`<td style="font-weight:${isMine?700:500};color:${isMine?'var(--gd)':'var(--tx)'}">${isMine?' ':''}${nm}</td>`;
             }
             const oc=othChamps[cls];
-            return oc?`<td style="color:var(--b2)">${oc.name} <span style="color:var(--mu);font-size:10px">${oc.rec}</span></td>`:`<td style="color:var(--mu)">—</td>`;
+            return oc?`<td style="color:var(--te)">${oc.name} <span style="color:var(--mu);font-size:10px">${oc.rec}</span></td>`:`<td style="color:var(--mu)">—</td>`;
           }).join('')}
         </tr>`;
       }).join('')}
@@ -13089,7 +13089,7 @@ function pgHist(){
           <td style="font-weight:700">${h.ws}-${h.ls}${h.ot?' OT':''}</td><td style="color:${ml?'var(--ac)':'var(--tx)'}">${h.lName} <span style="font-size:10px;color:var(--mu)">${stName(h.lSt)} · ${h.lCls}</span></td><td style="font-size:11px;color:var(--mu)">${h.venue||''}</td></tr>`;}).join('')}</tbody></table></div>`:'<div style="color:var(--mu);font-size:12px">The first National Championship is played after this season&#39;s state playoffs, between the top two teams in the final national poll.</div>'}</div>`;
       const stT=ST_ORDER.filter(k=>k!=='CF').map(k=>{const cl=clsOfSt(k),xs=G.hist.filter(h=>(h.otherLeagueChamps&&cl.some(c=>h.otherLeagueChamps[c]))||cl.includes(h.cls));if(!xs.length)return'';
         return`<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--ac);text-transform:uppercase;margin-bottom:8px;">${stName(k)} State Champions</div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Season</th>${cl.map(c=>`<th title="${clsName(c)}">${XCLS[c].lbl}</th>`).join('')}</tr></thead><tbody>${xs.slice().reverse().map(h=>`<tr><td style="font-weight:700;color:var(--gd)">${2026+(h.yr-1)}</td>${cl.map(c=>{const oc=c===h.cls?(h.stateChampName?{name:h.stateChampName,rec:''}:null):(h.otherLeagueChamps||{})[c];return oc?`<td style="color:var(--b2)">${oc.name} <span style="color:var(--mu);font-size:10px">${oc.rec}</span></td>`:'<td style="color:var(--mu)">—</td>';}).join('')}</tr>`).join('')}</tbody></table></div></div>`;}).join('');
+        <div style="overflow-x:auto"><table><thead><tr><th>Season</th>${cl.map(c=>`<th title="${clsName(c)}">${XCLS[c].lbl}</th>`).join('')}</tr></thead><tbody>${xs.slice().reverse().map(h=>`<tr><td style="font-weight:700;color:var(--gd)">${2026+(h.yr-1)}</td>${cl.map(c=>{const oc=c===h.cls?(h.stateChampName?{name:h.stateChampName,rec:''}:null):(h.otherLeagueChamps||{})[c];return oc?`<td style="color:var(--te)">${oc.name} <span style="color:var(--mu);font-size:10px">${oc.rec}</span></td>`:'<td style="color:var(--mu)">—</td>';}).join('')}</tr>`).join('')}</tbody></table></div></div>`;}).join('');
       return _histClsFilter==='ALL'?natT+stT:'';})()}
     ${(_histClsFilter==='ALL'&&G.allLeagues&&Object.keys(G.allLeagues).length)?`
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);">
@@ -13131,7 +13131,7 @@ function pgHist(){
     `<table style="margin-bottom:16px"><thead><tr><th>Season</th><th>Record</th><th>Class</th><th>Prestige</th><th>Achievements</th></tr></thead>
     <tbody>${G.hist.map(h=>`<tr>
       <td>${2026+(h.yr-1)}</td><td>${recStr(h.wins,h.losses)}</td>
-      <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--b2)">${h.cls||G.cls}</span></td>
+      <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${h.cls||G.cls}</span></td>
       <td>${''.repeat(Math.round(h.prestige))}</td>
       <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?' State Champion':h.champ?' Division Champ':'—'}</td>
     </tr>`).join('')}</tbody></table>`}
@@ -13171,7 +13171,7 @@ function pgHist(){
         const yr=2026+(h.yr-1);
         const mrIsMe=h.mrFootball&&h.mrFootball.sId===G.myId;
         const frIsMe=h.freshmanOTY&&h.freshmanOTY.sId===G.myId;
-        const cls=`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--b2)">${h.cls||'—'}</span>`;
+        const cls=`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${h.cls||'—'}</span>`;
         function aRow(aw,icon,color,label){
           if(!aw)return`<tr><td style="font-weight:700;color:var(--mu)">${icon} ${label}</td><td>${yr}</td><td>${cls}</td><td colspan="4" style="color:var(--mu)">—</td></tr>`;
           const isMe=aw.sId===G.myId;
@@ -13377,7 +13377,7 @@ function showPlayer(id){
         ${p.pos==='OL'?'<span style="font-size:10px;color:var(--mu)">harder ★ gain</span>':''}
         ${injBadgePopup(p)}
         ${p.committed?`<span style="color:var(--gn);font-size:11px"> ${p.committed.school} (${p.committed.lvl})</span>`:''}
-        ${(p.awards||[]).map(a=>a.type==='Mr. Football'?`<span style="background:#3a2800;border:1px solid var(--gd);color:var(--gd);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${a.cls} '${String(2026+(a.yr-1)).slice(2)}</span>`:`<span style="background:#111a26;border:1px solid var(--b2);color:var(--b2);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${a.cls} '${String(2026+(a.yr-1)).slice(2)}</span>`).join(' ')}
+        ${(p.awards||[]).map(a=>a.type==='Mr. Football'?`<span style="background:#3a2800;border:1px solid var(--gd);color:var(--gd);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${a.cls} '${String(2026+(a.yr-1)).slice(2)}</span>`:`<span style="background:#111a26;border:1px solid var(--b2);color:var(--te);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${a.cls} '${String(2026+(a.yr-1)).slice(2)}</span>`).join(' ')}
       </div>
     </div>
   </div>
@@ -14294,7 +14294,7 @@ function tbRenderBrowse(){
         </button>`).join('')}
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;margin-bottom:10px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--b2)">League: ${clsName(_tbCls)}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--te)">League: ${clsName(_tbCls)}</div>
       ${_tbCls===curGameCls?`<span style="font-size:10px;background:var(--ac);color:#fff;padding:2px 7px;border-radius:3px;font-weight:700;">YOUR CLASS ★</span>`:''}
       <span style="font-size:11px;color:var(--mu)">${divs.reduce((s,d)=>s+d.teams.length,0)} teams · ${divs.length} divisions</span>
     </div>
@@ -14336,7 +14336,7 @@ function tbRenderAdd(dIdx){
   const selDiv=dIdx!==undefined?dIdx:0;
   const divs=tbGetDivs(_tbCls);
   return`<div style="max-width:520px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--b2);margin-bottom:14px;text-transform:uppercase;"> Add New Team</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);margin-bottom:14px;text-transform:uppercase;"> Add New Team</div>
     <div class="fg" style="margin-bottom:10px;">
       <label>Classification</label>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">
@@ -14478,7 +14478,7 @@ function tbEditTeam(dIdx,tIdx){
   tbOk(t);const allClsOptions=clsOfSt(clsSt(_tbCls)).map(cls=>`<optgroup label="${clsName(cls)}">${(tbGetDivs(cls)||[]).map((d,i)=>`<option value="${cls}|${i}"${cls===_tbCls&&i===dIdx?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</optgroup>`).join('');
   // Set active tab to browse context but show edit form inline
   body.innerHTML=`<div style="max-width:520px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;text-transform:uppercase;"> Edit Team — ${t.name} ${t.mascot} <span style="color:var(--b2)">[${_tbCls}]</span></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;text-transform:uppercase;"> Edit Team — ${t.name} ${t.mascot} <span style="color:var(--te)">[${_tbCls}]</span></div>
     <div class="g2" style="gap:10px;margin-bottom:10px;">
       <div class="fg"><label>School Name</label><input class="ei" id="tb-edit-name" value="${t.name}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-edit-mascot" value="${t.mascot}" oninput="tbPreviewLogo('edit')"></div>
@@ -14618,7 +14618,7 @@ function tbRenderExport(){
     return`<div class="dr"><span class="a">${cls}${cls===curCls?' ★':''}</span><span style="font-weight:700">${tc} teams · ${divs.length} divisions</span></div>`;
   }).join('');
   return`<div style="max-width:560px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--b2);margin-bottom:6px;text-transform:uppercase;"> Export Team Pack</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase;"> Export Team Pack</div>
     <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">
       Export all teams for <strong>all classifications (1A–5A)</strong>, division names, and logos as a <strong>.json</strong> file. Load it back on any future save using <strong>Import Teams</strong>. ★ marks your current game classification.
     </p>
@@ -16182,7 +16182,7 @@ function startGame(){
     G.coach=window._coachDraft||null;G.saveId=null;window._coachDraft=null;setTimeout(()=>{try{saveGame(true);}catch(e){}},900);
     document.getElementById('setup').classList.add('hid');
     document.getElementById('app').classList.remove('hid');
-    addLog(`<span style="color:var(--b2)"> Welcome, ${coach}! ${2026+(G.yr-1)} Season &#8212; ${myS().name} ${myS().mascot}.</span>`);
+    addLog(`<span style="color:var(--te)"> Welcome, ${coach}! ${2026+(G.yr-1)} Season &#8212; ${myS().name} ${myS().mascot}.</span>`);
     checkAndFillRosters();
     _allClsDivs=null;_setupDivs=null;_mapOffers=[];for(const c of MAPC){c.offers=[];} // the setup map's lists: free them
     try{if(pcDraft)pcCreate(pcDraft);}catch(e){console.error('player career',e);}
@@ -16885,6 +16885,7 @@ html.g27 .pseg button{border-radius:3px!important;font-family:var(--hd);text-tra
 html.g27 .pseg button.on{background:var(--tA)!important;color:var(--tOn)!important;border-color:transparent!important}
 html.g27 #hint{border-radius:4px}
 html.g27 #pauseBtn,html.g27 #fsBtn{border-radius:4px}
+html.g27 #gpPrevGo,html.g27 #gpRePass,html.g27 #tutGo,html.g27 #tutSkip,html.g27 button[data-k],html.g27 button[data-x]{border-radius:4px!important;font-family:var(--hd)!important;text-transform:uppercase;letter-spacing:.04em}
 html.g27:not(.g27l) #pauseBtn path,html.g27:not(.g27l) #fsBtn path{stroke:#fff}
 html.g27 .mbar{border-radius:3px}
 /* skill-move wheel */
