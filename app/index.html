@@ -783,6 +783,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
     <div class="tt-btns">
       <button id="tt-continue" class="tt-btn pri" style="display:none">Continue<small></small></button>
       <button class="tt-btn pri" onclick="ttNew()">Start New Game</button>
+      <button class="tt-btn" onclick="ttPlayer()">Player Career<small>Be one player: the coach calls the plays</small></button>
       <button class="tt-btn" onclick="ttLoad()">Load Game</button>
       <button class="tt-btn" onclick="fpOpen()">Free Practice</button>
       <button class="tt-btn" onclick="olOpen()">Online Play<small>Play a friend with a code</small></button>
@@ -880,6 +881,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
           <div id="pc-fields" style="display:none;margin-top:8px">
             <div style="display:flex;gap:6px"><div class="fg" style="flex:1"><label>First name</label><input id="pc-fn" placeholder="First" maxlength="18"></div><div class="fg" style="flex:1"><label>Last name</label><input id="pc-ln" placeholder="Last" maxlength="18"></div></div>
             <div style="display:flex;gap:6px"><div class="fg" style="flex:2"><label>Position</label><select id="pc-pos"><option>QB</option><option>RB</option><option selected>WR</option><option>TE</option><option>OL</option><option>DL</option><option>LB</option><option>CB</option><option>S</option><option>K</option></select></div><div class="fg" style="flex:1"><label>Jersey #</label><input id="pc-num" type="number" min="0" max="99" value="1"></div></div>
+            <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:700;cursor:pointer;margin:2px 0 8px"><input type="checkbox" id="pc-lock" style="width:auto;min-height:0;margin-top:2px"> <span>Player Career mode: in Game Day I control only my player. The coach calls every play, decides my playing time and how much he trusts me.</span></label>
             <div style="font-size:11px;color:var(--mu);line-height:1.45">He joins your team as a freshman with star potential. Follow him on the <b>My Player</b> tab: game log, season-by-season stats, offers, and his college and pro career after he graduates.</div>
           </div>
         </div>
@@ -4965,7 +4967,7 @@ function s7Finish(champ){const S=G.s7;S.done=true;S.champ=champ;
 function s7Panel(){if(!G||G.phase!=='postseason')return'';const S=G.s7&&G.s7.yr===G.yr?G.s7:null;
   if(S&&S.done)return'';
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph">7-on-7 Summer League</div><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:13px;color:var(--mu)">${S&&S.paid?'Your passing league team is in the bracket.':'Optional: pick 7 on offense and 7 on defense and play the best programs of your class. Best-of-five final; standouts get college looks. Entry $'+S7_FEE.toLocaleString()+'.'}</div><button class="btn" onclick="s7Open()">${S&&S.paid?'Open bracket':'Enter the league'}</button></div></div>`;}
-const _pgDash0=pgDash;pgDash=function(){let x='';try{x=s7Panel();}catch(e){}return x+_pgDash0();};
+const _pgDash0=pgDash;pgDash=function(){let x='';try{x=s7Panel();}catch(e){}try{x=pcPanel()+x;}catch(e){}return x+_pgDash0();};
 // ═══════════ v2.16 PROGRAM MONEY: boosters, merchandise, broadcasts, sponsors, fundraisers, summer camps ═══════════
 function finYr(){if(!G.fin||G.fin.yr!==G.yr)G.fin={yr:G.yr,boost:0,merch:0,tv:0,spons:0,fund:0,camp:0,sign:0,fundDone:false,sponsDone:false,campDone:false};return G.fin;}
 function finAdd(k,v,msg){v=Math.round(v);if(!(v>0))return;G.budget+=v;const F=finYr();F[k]=(F[k]||0)+v;if(msg)addLog(`<span style="color:var(--gn)">${msg} +$${v.toLocaleString()}</span>`);}
@@ -9990,6 +9992,9 @@ function showTitle(openLoad){
 function hideTitle(){const t=_ttEl('title');if(t)t.classList.add('hid');if(window._sbT){clearInterval(window._sbT);window._sbT=null;}}
 function ttClock(){if(window._sbT)return;let s=120;window._sbT=setInterval(()=>{const el=document.getElementById('sb-clock'),t=_ttEl('title');if(!el||!t||t.classList.contains('hid')){clearInterval(window._sbT);window._sbT=null;return;}s=s<=0?120:s-1;el.textContent='4TH '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s===114){const h=document.getElementById('sb-h');if(h)h.textContent=h.textContent==='21'?'27':'21';}},1000);}
 function ttNew(){hideTitle();_ttEl('app').classList.add('hid');_ttEl('setup').classList.remove('hid');}
+function ttPlayer(){ttNew();const on=document.getElementById('pc-on'),lk=document.getElementById('pc-lock'),f=document.getElementById('pc-fields');
+  if(on)on.checked=true;if(lk)lk.checked=true;if(f){f.style.display='';setTimeout(()=>{try{f.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}},200);}
+  try{notify('Player Career: create your player, then pick the high school he plays for on the map.');}catch(e){}}
 function ttLoad(){_ttEl('tt-main').classList.add('hid');_ttEl('tt-load').classList.remove('hid');ttRefresh();}
 function ttBack(){_ttEl('tt-load').classList.add('hid');_ttEl('tt-main').classList.remove('hid');}
 function ttFmtDate(ms){try{return new Date(ms).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch(e){return'';}}
@@ -10202,6 +10207,7 @@ function gdPlayer(p,i){
 function gdForm(p){const s=p.seasStats||{},e=stEff(s),o={};if(e.drop!=null&&((s.rec||0)+(s.drops||0))>=6)o.dropR=+e.drop.toFixed(3);if(e.ypgA!=null&&(s.gp||0)>=2)o.ypgA=+e.ypgA.toFixed(1);if((s.gp||0)>=2){o.pbuR=+((s.pbu||0)/s.gp).toFixed(2);if(p.pos==='OL')o.pkR=+((s.pancakes||0)/s.gp).toFixed(2);}return o;}
 const GD_AFF={QB:['WR','RB','S','CB'],RB:['WR','CB','LB','S'],WR:['CB','RB','S','TE'],TE:['OL','LB','DL','WR'],OL:['DL','TE','LB'],DL:['OL','LB','TE'],LB:['S','DL','RB','TE'],CB:['S','WR','RB'],S:['CB','LB','WR'],K:['QB','WR','S','CB','RB']};
 const GD_OFF=new Set(['QB','RB','WR','TE','OL']),GD_DEF=new Set(['DL','LB','CB','S']);
+let _gdPc=null;
 function gdTeam(s,kind,kitOv,opt){
   const isMe=!s.fp&&!!G&&s.id===G.myId,base=s.fp?s.roster.slice():(isMe?myP():sPlayers(s.id)).filter(p=>!(p.inj>0)&&!(opt&&opt.only&&!opt.only.has(p.id))),jv=isMe&&!(opt&&opt.only)?G.players.filter(p=>p.sId===G.myId&&p.onJV&&!(p.inj>0)&&p.yr>=9):[];
   // v2.14 scout team for practice: the JV goes first, then varsity backups (worst first), so the JV gets real reps
@@ -10210,7 +10216,7 @@ function gdTeam(s,kind,kitOv,opt){
   const unitOf=pos=>GD_OFF.has(pos)?uOff:GD_DEF.has(pos)?uDef:uSp;
   const add=(p,pos)=>{const q=gdPlayer(Object.assign({},p,{pos}),roster.length);q.mid=p.id;roster.push(q);cnt[pos]=(cnt[pos]||0)+1;unitOf(pos).add(p.id);};
   try{ovrSyncAll();}catch(e){}
-  (scout?jv.slice().sort((a,b)=>b.rat-a.rat).concat(base.slice().sort((a,b)=>a.rat-b.rat)):base.slice().sort((a,b)=>b.rat-a.rat)).forEach(p=>{if(GD_NEED[p.pos]&&(cnt[p.pos]||0)<GD_NEED[p.pos]+(scout?0:3)&&!unitOf(p.pos).has(p.id))add(p,p.pos);});
+  (scout?jv.slice().sort((a,b)=>b.rat-a.rat).concat(base.slice().sort((a,b)=>a.rat-b.rat)):base.slice().sort((a,b)=>(b.id===_gdPc)-(a.id===_gdPc)||b.rat-a.rat)).forEach(p=>{if(GD_NEED[p.pos]&&(cnt[p.pos]||0)<GD_NEED[p.pos]+(scout?0:3)&&!unitOf(p.pos).has(p.id))add(p,p.pos);});
   const avg=base.length?base.reduce((a,p)=>a+p.rat,0)/base.length:45,used=new Set(roster.map(q=>q.num));
   for(const pos in GD_NEED){
     const U=unitOf(pos),need=()=>GD_NEED[pos]-(cnt[pos]||0);
@@ -10256,6 +10262,7 @@ function gdChoose(kind,info,simFn){
 function gdStart(){
   const ctx=window._gdInfo;if(!ctx)return;const opp=ctx.info.opp,me=myS();_gdCtx=ctx;
   const mk=window._gdUni||'home';
+  _gdPc=G.pcLock&&pcActive()?G.myPlayerId:null;
   let homeIdx=0;
   if(ctx.kind==='reg'){const gm=G.sched[ctx.info.idx];homeIdx=gm&&((gm.wk+G.myId)%2===1)?1:0;}else homeIdx=(G.wins||0)>=(opp.wins||0)?0:1;
   const H=homeIdx?opp:me;
@@ -10266,6 +10273,7 @@ function gdStart(){
   window.__GP={mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
   if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
+  try{pcGP(ctx);}catch(e){console.error('player career',e);}
   gdLaunch();
 }
 // v2.16: closing Game Day frees the whole engine first (blank frame, no references), so a phone low on memory does not reload the page
@@ -10325,6 +10333,7 @@ function gdSimRest(){const f=document.getElementById('gd-if');try{f.contentWindo
 function gdConv(st){const o={passYds:0,passTD:0,passInt:0,rushYds:0,rushTD:0,recYds:0,recTD:0,tackles:0,sacks:0,ints:0};const m={passAtt:'passAtt',passCmp:'passCmp',passYds:'passYds',passTD:'passTD',passInt:'passInt',rushAtt:'rushAtt',rushYds:'rushYds',rushTD:'rushTD',rec:'rec',recYds:'recYds',recTD:'recTD',tackles:'tackles',sacks:'sacks',ints:'ints',fga:'fga',fgm:'fgm',xpa:'xpa',xpm:'xpm',krRet:'krRet',krYds:'krYds',krTD:'krTD',drops:'drops',pbu:'pbu',tgtA:'tgtA',ydsA:'ydsA',pancakes:'pancakes',sacksA:'sacksA',tfl:'tfl',yac:'yac',safeties:'safeties',prRet:'prRet',prYds:'prYds',prTD:'prTD',cmpA:'cmpA'};for(const k in st)if(m[k])o[m[k]]=st[k];return o;}
 window.gdFinish=function(res){
   try{res=JSON.parse(JSON.stringify(res));}catch(e){}   // a copy that does not keep the game frame alive
+  try{pcAfterGame(res,_gdCtx);}catch(e){console.error('player career',e);}
   setTimeout(()=>{
     gdTeardown();
     const ctx=_gdCtx;_gdCtx=null;if(!ctx)return;
@@ -13537,11 +13546,11 @@ function bulkApply(){
     if(p.pot<p.rat)p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}
   try{updateRats();}catch(e){}clo();nav(G._page,G._arg);notify(`${L.length} player${L.length===1?'':'s'} updated`);}
 // v2.16 coach any school: take over another program in the offseason, before its first game
-function coachTakeOver(sid){
+function coachTakeOver(sid,quiet){
   const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;
   if(ns.intl||!G.divisions.some(d=>d.teams.some(t=>t.id===ns.id))){notify('You can only take over a school in your league.','e');return;}
   if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result)){notify('Coaching changes happen in the offseason, before the first game of a season.','w');return;}
-  if(!confirm(`Leave ${os.name} and become the head coach of ${ns.name} ${ns.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
+  if(!quiet&&!confirm(`Leave ${os.name} and become the head coach of ${ns.name} ${ns.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
   os.prestige=G.prestige;os.trainLevel=G.trainLevel;os.isP=false;os.staff=G.staff;os.fac=G.fac;
   ns.isP=true;ns.staff=ns.staff||genStaff(true);ns.fac=ns.fac||{weight:1,film:1,train:1,med:1};
   G.myId=ns.id;G.cls=ns.cls;G.prestige=ns.prestige||1;G.offS=ns.offS;G.defS=ns.defS;G.staff=ns.staff;G.fac=ns.fac;G.trainLevel=ns.trainLevel||1;
@@ -13550,9 +13559,9 @@ function coachTakeOver(sid){
   G.jvRoster=G.players.filter(p=>p.sId===ns.id&&!p.grad&&p.onJV).map(p=>p.id);
   try{initJVRoster();}catch(e){}
   genSched();updateRats();
-  addLog(`<span style="color:var(--gd)">New job: you are the head coach of ${ns.name} ${ns.mascot}.</span>`);
+  if(!quiet)addLog(`<span style="color:var(--gd)">New job: you are the head coach of ${ns.name} ${ns.mascot}.</span>`);
   try{addNews('myteam',`New head coach at ${ns.name}`,`You left ${os.name} to take over the ${ns.mascot}.`);}catch(e){}
-  try{updateTb();}catch(e){}clo();nav('dash');notify(`Welcome to ${ns.name}! Build your schedule to start the season.`);
+  try{updateTb();}catch(e){}clo();nav('dash');notify(quiet?`Welcome to ${ns.name}!`:`Welcome to ${ns.name}! Build your schedule to start the season.`);
 }
 function savePlayer(pid){const p=getP(pid);if(!p)return;p.fn=document.getElementById('ef').value||p.fn;p.ln=document.getElementById('el').value||p.ln;{const nv=parseInt(document.getElementById('en').value,10);p.num=Number.isFinite(nv)?clamp(nv,0,99):p.num;}{const p2=(document.getElementById('ep2')||{}).value||'';p.pos2=p2&&p2!==document.getElementById('ep').value?p2:null;}const newPos=document.getElementById('ep').value;if(newPos!==p.pos){p.pos=newPos;const sch=getS(p.sId);p.arch=pickArchetype(newPos,sch?sch.offS:'Pro Style',sch?sch.defS:'4-3');}{const r0=p.rat,rIn=clamp(parseInt(document.getElementById('er').value)||p.rat,1,99);ovrSync(p,true);document.querySelectorAll('.at-in').forEach(i=>{const k=i.dataset.k,v=clamp(parseInt(i.value)||1,1,99);if(ATOP.has(k))p[k]=v;else p.at[k]=v;});if(rIn!==r0)attrShift(p,rIn);p.rat=ovrCalc(p);p._rc=p.rat;}p.pot=clamp(parseInt(document.getElementById('ept').value)||p.pot,p.rat,99);p.gpa=clamp(parseFloat(document.getElementById('eg').value)||p.gpa,1.5,4.0);p.dev=document.getElementById('ed').value;p.traits=Array.from(document.getElementById('et').selectedOptions).map(o=>o.value);const eintEl=document.getElementById('eint');if(eintEl)p.interests=Array.from(eintEl.selectedOptions).map(o=>o.value);{const eq=eqRead();if(eq)p.eq=eq;}
   {const ft=parseInt(document.getElementById('eht-ft').value,10),inch=parseInt(document.getElementById('eht-in').value,10),w=parseInt(document.getElementById('ewt').value,10);
@@ -15876,7 +15885,7 @@ function pcReadForm(){
   const v=id=>(document.getElementById(id)||{}).value||'';
   const clean=t=>String(t).replace(/[<>&"'`]/g,'').trim().slice(0,18);
   const n=parseInt(v('pc-num'),10);
-  return{fn:clean(v('pc-fn'))||'Jordan',ln:clean(v('pc-ln'))||'Player',pos:v('pc-pos')||'WR',num:Number.isFinite(n)?clamp(n,0,99):1};
+  return{fn:clean(v('pc-fn'))||'Jordan',ln:clean(v('pc-ln'))||'Player',pos:v('pc-pos')||'WR',num:Number.isFinite(n)?clamp(n,0,99):1,lock:!!(document.getElementById('pc-lock')||{}).checked};
 }
 function pcCreate(d){
   const p=genPlayer(G.myId,9,G.cls,null),sch=myS();
@@ -15888,9 +15897,51 @@ function pcCreate(d){
   p.onJV=false;p.mine=true;p.hof=true;p.wl=true;
   try{bodyNew(p,sch);}catch(e){}
   if(!G.players.includes(p))G.players.push(p);
-  G.myPlayerId=p.id;
+  G.myPlayerId=p.id;p.rel=50;G.pcLock=!!d.lock;
   addLog(`<span style="color:var(--gd)">Player Career: ${p.fn} ${p.ln} (${p.pos}, #${p.num}) joins the program as a freshman.</span>`);
 }
+// ── Player Career mode: coach trust, playing time and transfers ──
+const PC_STARTERS={QB:1,RB:1,WR:3,TE:1,OL:5,DL:4,LB:3,CB:2,S:2,K:1,P:1};
+function pcActive(){const p=myPlayer();return!!(G&&G.pcLock&&p&&G.players.includes(p)&&p.sId===G.myId&&!p.grad)?p:null;}
+function pcRole(p){const rel=p.rel==null?50:p.rel,sc=q=>q.rat+((q.id===p.id?rel:50)-50)/8;
+  const mates=myP().filter(q=>q.pos===p.pos&&!(q.inj>0)).sort((a,b)=>sc(b)-sc(a)),rank=Math.max(0,mates.findIndex(q=>q.id===p.id)),n=PC_STARTERS[p.pos]||1;
+  return{start:rank<n,rank:rank+1,n,share:clamp(0.18+(rel-40)/140,0.12,0.6)};}
+function pcRelMsg(r){return r>=85?'Team leader: the coach builds the game plan around you':r>=70?'Trusted: the coach counts on you':r>=50?'Earning it: good games move you up':r>=35?'On thin ice: the coach wants to see more':'In the doghouse: practice hard and take your chances';}
+function pcGP(ctx){
+  if(!window.__GP||!G.pcLock||!['reg','playoff','nat','s7'].includes(ctx.kind))return;const p=pcActive();if(!p||p.inj>0)return;
+  if(ctx.kind==='s7'&&!(G.s7&&G.s7.picks.includes(p.id)))return;
+  const r=pcRole(p);window.__GP.pc={mid:p.id,pos:p.pos,start:ctx.kind==='s7'||r.start,share:r.share,two:false};window.__GP.mode='all';}
+function pcAfterGame(res,ctx){
+  if(!G||!G.pcLock||!ctx||!['reg','playoff','nat'].includes(ctx.kind))return;const p=pcActive();if(!p)return;
+  const st=gdConv(((res&&res.stats)||{})[p.id]||{}),win=res&&res.score&&res.score[0]>res.score[1];
+  const perf=st.passYds/60+st.passTD*1.5-st.passInt*2+st.rushYds/25+st.rushTD*1.5+st.recYds/25+st.recTD*1.5+st.tackles*0.35+st.sacks*1.5+st.ints*3+(st.pancakes||0)*0.4+(st.fgm||0)*0.8-(st.drops||0)*1.2;
+  const asks=(res&&res.pcAsks)||0;let d=Math.round(clamp(perf,-4,6)+(win?1.5:-1)-(asks>8?2:0));
+  const before=p.rel==null?50:p.rel;p.rel=clamp(before+d,0,100);
+  if(p.rel!==before)setTimeout(()=>{try{notify(`Coach trust ${p.rel>before?'+':''}${p.rel-before} (${p.rel}/100)`);}catch(e){}},900);}
+function pcPanel(){
+  const p=pcActive();if(!p)return'';const r=pcRole(p),rel=p.rel==null?50:p.rel,first=!G.sched.some(g=>g.type==='regular'&&g.result);
+  const bar=`<div style="height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden;margin:4px 0 2px"><div style="height:100%;width:${rel}%;background:${rel>=70?'var(--gn)':rel>=40?'var(--gd)':'var(--rd,#d33)'}"></div></div>`;
+  return`<div class="pnl"><div class="ph">Player Career</div><div class="pb">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><div style="flex:1;min-width:200px"><div style="font-weight:900;font-size:16px">#${p.num} ${p.fn} ${p.ln} · ${p.pos} · ${rb(p.rat)}</div>
+      <div style="font-size:13px;margin-top:2px">${r.start?`<b style="color:var(--gn)">Starter</b> (${p.pos}${r.rank})`:`<b style="color:var(--gd)">Backup</b> (${p.pos}${r.rank}): you play about ${Math.round(r.share*100)}% of the drives`}</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:6px">Coach trust ${rel}/100</div>${bar}<div style="font-size:12px;color:var(--mu)">${pcRelMsg(rel)}</div></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><button class="btn" onclick="nav('mine')">My Player</button>${G.phase==='offseason'&&first?`<button class="bgh" onclick="pcTransferOpen()">Transfer</button>`:''}</div></div>
+    <div style="font-size:11px;color:var(--mu);margin-top:8px">In Game Day you control only your player and the coach calls every play. Drives you are not on the field for are simulated. Big games raise his trust; turnovers, drops and losses cost it. ${p.pos==='QB'?'':'Call for the ball (B key, Y / Triangle) to get the quarterback looking your way, but do not overdo it.'} Transfers are allowed in the offseason, before the first game.</div>
+  </div></div>`;}
+window.pcTransferOpen=function(){
+  const p=pcActive();if(!p)return;if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result)){notify('Transfers happen in the offseason, before the first game.','w');return;}
+  const L=[];for(const d of G.divisions)for(const t of d.teams){if(t.id===G.myId||t.intl)continue;const S=getS(t.id);if(!S)continue;
+    const at=sPlayers(t.id).filter(q=>q.pos===p.pos).sort((a,b)=>b.rat-a.rat),n=PC_STARTERS[p.pos]||1,rank=at.filter(q=>q.rat>p.rat).length+1;L.push({S,rank,n,ovr:teamOvr(t.id)});}
+  L.sort((a,b)=>(a.rank<=a.n?0:1)-(b.rank<=b.n?0:1)||b.ovr-a.ovr);
+  openMo(`<h2>Transfer</h2><div style="font-size:13px;color:var(--mu);margin-bottom:8px">Schools in your league. A transfer starts with neutral coach trust, and your old coach will not be happy.</div>
+    <div style="max-height:55vh;overflow-y:auto">${L.slice(0,40).map(x=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(127,127,127,.2)"><div style="flex:1"><b>${x.S.name}</b> ${x.S.mascot}<div style="font-size:11px;color:var(--mu)">OVR ${x.ovr} · you would be ${p.pos}${x.rank}${x.rank<=x.n?' (starter)':''}</div></div><button class="bgh" onclick="pcTransfer(${x.S.id})">Transfer</button></div>`).join('')}</div>
+    <div style="text-align:right;margin-top:8px"><button class="bgh" onclick="clo()">Stay</button></div>`);};
+window.pcTransfer=function(sid){
+  const p=pcActive(),ns=getS(sid);if(!p||!ns)return;if(!confirm(`Transfer to ${ns.name} ${ns.mascot}?`))return;
+  const os=myS();p.sId=ns.id;p.onJV=false;p.rel=50;p.transfers=(p.transfers||0)+1;
+  coachTakeOver(ns.id,true);if(G.myId!==ns.id){p.sId=os.id;return;}
+  try{addNews('myteam',`${p.fn} ${p.ln} transfers to ${ns.name}`,`The ${p.pos} leaves ${os.name} for the ${ns.mascot}.`);}catch(e){}
+  addLog(`<span style="color:var(--gd)">Player Career: ${p.fn} ${p.ln} transfers to ${ns.name}.</span>`);};
 function myPlayer(){if(!G||G.myPlayerId==null)return null;return getP(G.myPlayerId)||(G.hofArchive||[]).find(x=>x.id===G.myPlayerId)||null;}
 function pgMine(){
   const p=myPlayer();
@@ -16178,6 +16229,17 @@ const TUT_PAGES=[
     <p><b>Edit Player</b> also changes height, weight, class and the player's <b>face</b>: skin tone, hairstyle, hair and eye color, facial hair. Changing a position no longer changes a player's size.</p>
     <p><b>Edit many players at once</b> (Team → Roster): add points to, set or raise the overall, potential, speed, strength or awareness of the whole team, the offense, the defense, one position or the JV.</p>
   `},
+  {tab:'Player Career',icon:'',title:'Player Career: be one player',body:`
+    <p>Pick <b>Player Career</b> on the title screen (or tick <b>Player Career mode</b> under <b>Create my own player</b>). You create one freshman and choose his high school on the map.</p>
+    <ul>
+      <li><b>In Game Day you control only your player.</b> The coach calls every play on both sides of the ball and the ball is snapped for you (a quarterback snaps it himself). Your player wears a ring under his feet and the camera is zoomed in on him.</li>
+      <li><b>Drives without you are simulated.</b> An offensive player sits while the defense is out there, and the other way round.</li>
+      <li><b>Playing time</b>: starters play every drive of their side; a backup plays only some of them. The Dashboard shows your spot on the depth chart.</li>
+      <li><b>Coach trust</b> (0 to 100) goes up with good games and wins and down with turnovers, drops and losses. Trust also moves you up the depth chart.</li>
+      <li><b>Call for the ball</b> (B key, Y / Triangle or the button) makes your quarterback look your way, and a running back gets a run called for him. Do not ask on every play: the coach notices.</li>
+      <li><b>Transfer</b> from the Dashboard in the offseason, before the first game: you join a school in your league and start over with neutral trust.</li>
+      <li>After your senior year, follow his college and pro career on <b>My Player</b>.</li>
+    </ul>`},
   {tab:'Money & trophies',icon:'',title:'Ticket Sales and the Trophy Case',body:`
     <p><strong>7-on-7 Summer League:</strong> after the state championship you can enter your program's passing league team (entry $5,000). Pick 7 players for offense (one quarterback) and 7 for defense. It is played without helmets or pads, two-hand touch, passes only, with a four-second pass clock, and every drive starts at your own 40. The quarterfinal and semifinal are single games; the league title is a best-of-five series. Play each game yourself or simulate it. College coaches come to watch, so your standouts can pick up offers, and the champion wins $10,000 and a trophy.</p>
     <p><strong>Program income:</strong> besides ticket sales, boosters give after every game (more after wins and in rivalries), home games sell team gear, playoff and rivalry games bring broadcast money, and each senior who signs with a college earns a placement bonus: up to $25,000 for an FBS signee plus up to $25,000 more for a five-star. Once a season you can sign a local sponsor and hold a fundraiser, and in the offseason you can host a youth summer camp (Program &gt; Facilities &gt; Program income).</p>
@@ -19244,9 +19306,20 @@ const isAI=t=>G.ai[t];
 const userOff=()=>!isAI(G.offTeam);
 // v2.14 coach mode: the player calls every play (offense and defense) and the team plays them out on its own.
 // Game modes: 'all' (play everything), 'off' (opponent drives are simulated), 'def' (your drives are simulated)
-function coachOn(){return!!(G.coachMode&&!ON&&!(GP&&GP.practice));}
-function userDecides(t){return!G.test&&(!isAI(t)||(coachOn()&&t===G.me));}
-function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;const m=G.playMode||'all';return m==='off'?G.poss!==G.me:m==='def'?G.poss===G.me:false;}
+// Player Career (Road to Glory style): you control only your own player. The coach calls every play and picks the drives you play.
+function pcOn(){return!!(GP&&GP.pc&&!ON&&!G.test&&!GP.practice);}
+function pcMe(e){return!!(e&&e.pl&&GP&&GP.pc&&e.pl.mid!=null&&e.pl.mid===GP.pc.mid);}
+function pcAI(e){return pcOn()&&!!e&&e.team===G.me&&!pcMe(e);}
+function pcAIQB(){return pcOn()&&G.offTeam===G.me&&!pcMe(G.qb);}
+function pcUnit(){const p=GP.pc.pos;return['QB','RB','WR','TE','OL'].includes(p)?'o':['DL','LB','CB','S'].includes(p)?'d':'k';}
+function pcDrive(){const u=pcUnit(),mine=G.poss===G.me,on=GP.pc.two?true:u==='d'?!mine:mine;
+  G.pcIn=on&&(u==='k'||GP.pc.start||Math.random()<(GP.pc.share||0.3));return G.pcIn;}
+function pcLineup(){if(!pcOn()||!G.pcIn)return;const T=G.teams[G.me],rp=T.roster.find(p=>p.mid===GP.pc.mid&&healthy(p));if(!rp)return;
+  const all=OSLOTS.concat(DSLOTS);if(all.some(([x])=>T.lineup[x]===rp.id))return;const sl=all.find(([x,pos])=>pos===rp.pos);if(sl)T.lineup[sl[0]]=rp.id;}
+function pcCallBall(){if(!pcOn()||G.offTeam!==G.me||pcMe(G.qb)||G.pcWant)return;G.pcWant=true;G.pcAsks=(G.pcAsks||0)+1;flash('Calling for the ball!');setCtl();if(G.phase==='presnap')setTray('presnap');}
+function coachOn(){return!!(G.coachMode&&!ON&&!(GP&&GP.practice))&&!pcOn();}
+function userDecides(t){return!G.test&&!pcOn()&&(!isAI(t)||(coachOn()&&t===G.me));}
+function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;if(pcOn())return!pcDrive();const m=G.playMode||'all';return m==='off'?G.poss!==G.me:m==='def'?G.poss===G.me:false;}
 function gpSetCoach(on){
   if(ON||(GP&&GP.practice))return;G.coachMode=!!on;
   if(!G.simming)G.ai[G.me]=!!on;else if(G.simPrevAI)G.simPrevAI[G.me]=!!on;
@@ -19334,7 +19407,7 @@ function gpSevensTick(){
   if(G.ballState==='qb'&&!G.pendThrow&&G.t>4.2){flash('4-second clock: sack!');endPlay({type:'tackle',spot:G.linesW.los});}
 }
 function setupScrimmage0(offCall,defCall){
-  const O=G.teams[G.offTeam],D=G.teams[1-G.offTeam];autoSubs(O);autoSubs(D);
+  const O=G.teams[G.offTeam],D=G.teams[1-G.offTeam];autoSubs(O);autoSubs(D);pcLineup();
   G.flip=gpFlipFor(G.offTeam);
   const ly=10+G.los,L=[];
   const OD=offCall.data||{},F=FORMS[((offCall.kind==='pass'||offCall.kind==='run')&&OD.f&&FORMS[OD.f]&&OD.f)||'base'],FP=Object.assign({},F.pos,OD.pos||{});
@@ -19466,7 +19539,7 @@ function setupPunt(puntTeam,los){
   G.linesW={los:ly,fd:null};resetBall();
 }
 function setupFG(kind){
-  const O=G.teams[G.offTeam],D=G.teams[1-G.offTeam];autoSubs(O);autoSubs(D);G.flip=gpFlipFor(G.offTeam);
+  const O=G.teams[G.offTeam],D=G.teams[1-G.offTeam];autoSubs(O);autoSubs(D);pcLineup();G.flip=gpFlipFor(G.offTeam);
   const ly=10+G.los,L=[];
   const k=O.byPos('K')[0],holder=O.byPos('P')[0];
   const ke=addE(L,O,k,'o','K',CX-1.6,ly-9.6,'K'),he=addE(L,O,holder,'o','H',CX,ly-7,'H');
@@ -19822,7 +19895,7 @@ function launchKick(type,from,res){
   G.kick={type,sx:from[0],sy:from[1],tx,ty,hp,T,t:0,R,res,crossed:false,good:null};
   G.ballState='kick';dust(from[0],from[1],5);
   const kt=G.play.kind==='kickoff'?G.play.kickTeam:G.play.kind==='punt'?G.play.puntTeam:-1;
-  if(kt>=0&&!isAI(kt)&&!G.test){let b=null,bd=1e9;for(const e of G.ents)if(e.side==='d'&&e.role!=='K'&&e.role!=='P'){const d=Math.hypot(e.x-tx,e.y-ty);if(d<bd){bd=d;b=e;}}G.uctl=b;setCtl();}
+  if(kt>=0&&!isAI(kt)&&!G.test){let b=null,bd=1e9;for(const e of G.ents)if(e.side==='d'&&e.role!=='K'&&e.role!=='P'){const d=Math.hypot(e.x-tx,e.y-ty);if(d<bd){bd=d;b=e;}}G.uctl=pcOn()?(G.ents.find(e=>pcMe(e)&&e.side==='d')||null):b;setCtl();}
 }
 function launchOnside(){
   const P=G.play,F=P.oform||'std',sd=F==='left'?-1:F==='right'?1:Math.random()<0.5?-1:1;
@@ -19920,7 +19993,7 @@ function throwTo(tx,ty,bullet,errScale,after,lob){
   const qb=G.qb;if(G.pendThrow)return;
   if(G.ballState!=='qb'){if(!gpScrOK())return;G.ballState='qb';G.carrier=null;qb.path=null;}
   const M=gpMotion(qb,bullet,Math.hypot(tx-qb.x,ty-qb.y),lob);
-  G.pendThrow=Object.assign({tx,ty,bullet,lob:!!lob,errScale,after,t:0,ai:(isAI(G.offTeam)||G.test)&&!after},M);
+  G.pendThrow=Object.assign({tx,ty,bullet,lob:!!lob,errScale,after,t:0,ai:(isAI(G.offTeam)||G.test||pcAIQB())&&(!after||pcAIQB())},M);
   qb.relKind=M.kind;qb.relArch=M.arch;qb.relMove=M.moving;qb.thrU=0;
   G.aim=null;setCtl();
 }
@@ -20176,7 +20249,7 @@ function aiQB(dt){
     const D0=dist(q,r),f=flight(D0,D0<14);const px=r.x+r.vx*f.T,py=r.y+r.vy*f.T;
     if(px<1||px>FW-1||py>118)continue;
     let m=99;for(const d of G.ents)if(d.side==='d'&&!d.down)m=Math.min(m,Math.hypot(d.x-px,d.y-py)-d.spd*f.T*0.45);
-    let s=m+(py-q.y>G.toGo+2?0.4:0)-(r.role==='RB'?0.4:0)+gpTargetForm(r);
+    let s=m+(py-q.y>G.toGo+2?0.4:0)-(r.role==='RB'?0.4:0)+gpTargetForm(r)+(pcOn()&&pcMe(r)?(G.pcWant?1.8:0.45):0);
     if(s>bs){bs=s;best=r;bp=[px,py,D0<14];}
   }
   G.qbLook=best;
@@ -20187,7 +20260,7 @@ function aiQB(dt){
   const early=G.t<G.aiRead,thr=early?99:Math.max(0.3,2.2-(G.t-G.aiRead)*0.45);
   const react=clamp(0.42-(((q.pl&&q.pl.awr)||75)-80)*0.012,0.15,0.7);
   let press=99;for(const d of G.ents)if(d.side==='d'&&d.eng<=0&&!d.down&&G.t-(d.freeAt||0)>react)press=Math.min(press,dist(d,q));
-  if(best&&(bs>=thr||(press<2.1&&bs>0.2))){G.aiRecv=best;throwTo(bp[0],bp[1],bp[2],1.25);return;}
+  if(best&&(bs>=thr||(press<2.1&&bs>0.2))){G.aiRecv=best;throwTo(bp[0],bp[1],bp[2],1.25,pcOn()&&pcMe(best)?userThrowMeter:undefined);return;}
   if(press<2.4&&G.t>2.2&&Math.random()<0.18){
     let lane=true;for(const d of G.ents)if(d.side==='d'&&!d.down&&d.y>q.y&&Math.abs(d.x-q.x)<3&&d.y-q.y<5)lane=false;
     if(lane){G.carrier=q;G.ballState='carrier';G.qbCarT=G.t;setCtl();return;}
@@ -20270,7 +20343,7 @@ function trySlow(){if(G.client){olCmd('mv',{mv:'slow'});return;}const c=G.carrie
 function scramble(){if(G.ballState!=='qb')return;if(SEVENS()){flash('No QB runs in 7-on-7');return;}if(G.client){olCmd('scr');return;}G.carrier=G.qb;G.ballState='carrier';G.qbCarT=G.t;setCtl();}
 // a scrambling quarterback can still throw until he crosses the line of scrimmage (pass plays only)
 function gpScrOK(){const q=G.qb,P=G.play;return!!(q&&G.phase==='live'&&G.ballState==='carrier'&&G.carrier===q&&!q.down&&!q.seqLock&&!(q.slideT>0)&&!(q.dive>0)&&P&&P.kind==='scrimmage'&&!P.special&&P.off&&P.off.kind==='pass'&&!G.gpThrown&&!G.pendThrow&&G.linesW&&q.y<G.linesW.los-0.3);}
-function scrUser(){return gpScrOK()&&!isAI(G.offTeam)&&G.offTeam===G.act&&!G.test;}
+function scrUser(){return gpScrOK()&&!isAI(G.offTeam)&&!pcAIQB()&&G.offTeam===G.act&&!G.test;}
 // defenders were reading their keys / covering receivers: they need a beat to see the scramble, and the
 // secondary stays on receivers while the QB can still throw (unless he runs right at them)
 function gpQbScrHold(e,c){
@@ -20315,19 +20388,19 @@ function controlCarrier(c,dt){
   let tvx=0,tvy;
   if(c.slideT>0){c.slideT-=dt;const u=Math.max(0,c.slideT/0.6);c.vy=ad*c.slideV*u;c.vx*=Math.exp(-dt*4);if(c.slideT<=0){c.down=true;c.slid=true;c.downAnim='qb_slide';c.guDur=0.3;c.downT=0.9;endPlay({type:'tackle',spot:c.slideSpot+ad*Math.min(1.2,c.slideV*0.12)});}return;}
   // AI quarterbacks give themselves up when a defender closes in past the line
-  if(c===G.qb&&(isAI(c.team)||G.test)&&!c.slideT&&G.linesW&&(c.y-G.linesW.los)*ad>1.5){const A=c.pl.arch||'',w=A==='Pure Runner'||A==='Tank'?0.15:A==='Scrambler'?0.45:0.85;
+  if(c===G.qb&&(isAI(c.team)||G.test||pcAI(c))&&!c.slideT&&G.linesW&&(c.y-G.linesW.los)*ad>1.5){const A=c.pl.arch||'',w=A==='Pure Runner'||A==='Tank'?0.15:A==='Scrambler'?0.45:0.85;
     if(foesOf(c).some(o=>!o.down&&dist(o,c)<2.3&&(o.y-c.y)*ad>-0.3)&&Math.random()<w*dt*6&&tryQbSlide())return;}
   // AI ball carriers dive for the goal line or the sticks when a tackler arrives
-  if((isAI(c.team)||G.test)&&!(c.dive>0)&&!(c.juke>0)&&G.play){const toEZ=110-c.y,fd=G.linesW&&G.linesW.fd,toFD=fd!=null?fd-c.y:99;
+  if((isAI(c.team)||G.test||pcAI(c))&&!(c.dive>0)&&!(c.juke>0)&&G.play){const toEZ=110-c.y,fd=G.linesW&&G.linesW.fd,toFD=fd!=null?fd-c.y:99;
     if((toEZ<3.6||(toFD>0&&toFD<2.2))&&foesOf(c).some(o=>!o.down&&dist(o,c)<1.7&&o.y-c.y>-0.4)&&Math.random()<dt*6)tryDive();}
   if(c.dive>0){c.dive-=dt;tvy=(DIVE_K[c.diveK||'norm']||DIVE_K.norm).v*ad;if(c.dive<=0){if(ad>0&&c.y>=110){c.dive=0;endPlay({type:'td'});return;}c.down=true;c.downAnim='catch_dive';dust(c.x,c.y,c.diveK==='over'||c.diveK==='leap'?12:8);endPlay({type:'tackle',spot:c.y});return;}}
   else if(c.juke>0){c.juke-=dt;tvx=c.jdir*Math.max(7,c.spd*0.86);tvy=c.spd*0.52*ad;} // v2.16 a cut is as fast as running straight
   else{
     if(c.slow>0)c.slow-=dt;
     let sp=(c.slow>0?c.spd*0.4:c.spd)*0.93*slowC*(c.spin>0?0.8:1)*(c.truck>0?0.88:1);
-    if((isAI(c.team)||G.test)&&gpScrambleThrow(c,dt))return;
+    if((isAI(c.team)||G.test||pcAI(c))&&gpScrambleThrow(c,dt))return;
     sp*=gpRunBurst(c);if(c===G.qb)sp*=1.08;
-    if(isAI(c.team)||G.test){const[ax,ay]=aiRunDir(c);tvx=ax*sp;tvy=ay*sp;aiMoves(c,dt);}
+    if(isAI(c.team)||G.test||pcAI(c)){const[ax,ay]=aiRunDir(c);tvx=ax*sp;tvy=ay*sp;aiMoves(c,dt);}
     else if(gpCarrierInput(c)){const d=gpCarrierInput(c);tvx=d[0]*sp;tvy=d[1]*sp;c.path=null;}
     else if(c.path&&c.path.length&&(c.y-G.linesW.los)*ad<0.5){const p=c.path[0];if(Math.hypot(p[0]-c.x,p[1]-c.y)<0.8)c.path.shift();const q=c.path[0]||[c.x,c.y+ad*5];const d=Math.hypot(q[0]-c.x,q[1]-c.y)||1;tvx=(q[0]-c.x)/d*sp;tvy=(q[1]-c.y)/d*sp;}
     else tvy=sp*ad;
@@ -20336,7 +20409,7 @@ function controlCarrier(c,dt){
 }
 // v2.16 steer your ball carrier with the left stick or the arrow keys: every direction at full speed (sideways as fast as straight)
 function gpCarrierInput(c){
-  if(G.client||isAI(c.team)||G.test)return null;let sx=0,sy=0;
+  if(G.client||isAI(c.team)||G.test||pcAI(c))return null;let sx=0,sy=0;
   if(G.pad){sx=G.pad.x*30;sy=G.pad.y*30;}
   else{if(keys.has('arrowleft'))sx-=30;if(keys.has('arrowright'))sx+=30;if(keys.has('arrowup'))sy-=30;if(keys.has('arrowdown'))sy+=30;}
   if(Math.hypot(sx,sy)<9)return null;return screenToSimDir(c,sx,sy);}
@@ -20542,7 +20615,7 @@ function updateLive(dt){
       if(RD.option){const de=G.ents.find(d=>d.slot==='DE2');keep=!!de&&(de.x<CX+6.2||de.eng<=0&&Math.abs(de.x-G.rb.x)<3.5);if(Math.random()<0.15)keep=!keep;}
       if(keep){G.carrier=G.qb;G.ballState='carrier';G.qb.path=RD.keep.map(([dx,dy])=>[CX+dx,G.linesW.los+dy]);flash('QB keeps it!');setCtl();}
       else{G.carrier=G.rb;G.ballState='carrier';G.rb.path=RD.path.map(([dx,dy])=>[CX+dx,G.linesW.los+dy]);{const lp=RD.path[RD.path.length-1];G.rb.pathFull=!!(RD.jet||RD.toss||(lp&&Math.abs(lp[0])>=8));}setCtl();}
-    }else if(P.off.kind==='pass'&&(isAI(G.offTeam)||G.test))aiQB(dt);
+    }else if(P.off.kind==='pass'&&(isAI(G.offTeam)||G.test||pcAIQB()))aiQB(dt);
   }
   if(G.seq){seqStep(dt);if(G.phase!=='live')return;}
   // movement
@@ -20972,6 +21045,7 @@ function gpQuickKick(kt){
 }
 /* ===================== drive simulation ===================== */
 function drivePrompt(){
+  if(pcOn()){G.offTeam=G.poss;openCall();return;}
   const mine=G.poss===G.me,T=G.teams[G.poss];
   showModal(mine?'Your ball':`${T.name} ball`,`${mine?'Offense':'Defense'}: ${spotTxt(G.los)}. Play this drive yourself, or simulate it?`,
     [['Play it','go',()=>{G.offTeam=G.poss;openCall();}],['Sim drive','alt',()=>startSim()]]);
@@ -21013,7 +21087,7 @@ function gameOver(){
   try{if(G.phase!=='over'&&!G.noDraw){SFX.whistle();setTimeout(()=>{try{SFX.horn();}catch(e){}},500);}}catch(e){}
   G.phase='over';const[a,b]=G.score,s=G.stats;
   if(ON&&!G.gpDone)olGameOver();
-  if(GP&&!G.gpDone){G.gpDone=true;try{window.parent.gdFinish({online:ON||undefined,ot:G.q>4,practice:!!GP.practice,tut:G.tutResult||null,score:[a,b],stats:G.st||{},splits:G.splits||null,played:Object.keys(G.played||{}),yds:[s[0].yds,s[1].yds]});}catch(e){}return;}
+  if(GP&&!G.gpDone){G.gpDone=true;try{window.parent.gdFinish({online:ON||undefined,pcAsks:G.pcAsks||0,ot:G.q>4,practice:!!GP.practice,tut:G.tutResult||null,score:[a,b],stats:G.st||{},splits:G.splits||null,played:Object.keys(G.played||{}),yds:[s[0].yds,s[1].yds]});}catch(e){}return;}
   showModal(a>b?'You win':a<b?(G.teams[1].name+' win'):'Tie game',`Final: ${scoreLine()}. Total yards: ${G.teams[0].name} ${s[0].yds}, ${G.teams[1].name} ${s[1].yds}.`,[['Play again','go',newGame]]);
 }
 
@@ -21050,6 +21124,8 @@ function aiDefCall(){
 function openCall(){
   G.phase='call';setTray('none');$('ctl').innerHTML='';
   const off=G.offTeam;
+  if(pcOn()&&!G.simming){const o=off===G.me&&G.pcWant&&GP.pc.pos==='RB'&&!G.conv&&G.down<4?{kind:'run',data:pick(RUNS.filter(r=>!r.qb))}:aiOffCall();
+    applyCall(o,['punt','fg','kneel','fakepunt','fakefg'].includes(o.kind)?DCALLS[3]:aiDefCall());return;}
   if(coachOn()&&!G.simming&&!G.simQtr&&!G.gpFast&&!G.test){
     if(off===G.me){showCall('off',(o)=>applyCall(o,aiDefCall()));return;}
     const o=aiOffCall();if(o.kind==='punt'||o.kind==='fg'||o.kind==='kneel'){applyCall(o,DCALLS[3]);return;}showCall('def',(d)=>applyCall(o,d));return;}
@@ -21060,7 +21136,7 @@ function openCall(){
 }
 function applyCall(o,d){
   if(G.phase==='replay'){G.pendCall=[o,d];return;} // a replay is running on this screen: snap once it closes
-  hide('call');
+  hide('call');G.pcWant=false;
   G.pbp={d:G.down,tg:G.toGo,los:G.los,team:G.offTeam,conv:!!G.conv,call:o.kind==='pass'||o.kind==='run'?((o.data.f?FORMS[o.data.f].n+' ':'')+o.data.n):o.kind==='fg'?'Field goal':o.kind==='punt'?'Punt':o.kind==='fakepunt'?'Fake punt':o.kind==='fakefg'?'Fake field goal':o.kind==='kneel'?'Kneel':o.kind==='spike'?'Spike':o.kind};
   if(G.clockRun&&G.q<=4){G.clock=Math.max(0,G.clock-6);if(G.clock<=0){proceed();return;}}
   if(o.kind==='punt'){setupPunt(G.offTeam,G.los);}
@@ -21081,12 +21157,13 @@ function toPresnap(){
   G.snapIn=rnd(2.2,4.5);G.rmeter=null;
   if(P.kind==='scrimmage'){
     if(!isAI(dT)&&!G.test){const pref=G.uSlotT[dT]||(dT===0&&G.uSlot)||'MLB';G.uctl=G.ents.find(e=>e.side==='d'&&e.slot===pref)||G.ents.find(e=>e.slot==='MLB');}
+    if(pcOn())G.uctl=dT===G.me?(G.ents.find(e=>pcMe(e)&&e.side==='d')||null):null;
     const diff=G.score[G.offTeam]-G.score[1-G.offTeam];
     if(isAI(G.offTeam)&&G.clockRun&&diff>0&&G.q>=4&&!G.ot)G.snapIn=Math.max(2,G.playClock-1.5);
   }else{
     const kicker=P.kind==='kickoff'?P.kickTeam:P.kind==='punt'?P.puntTeam:G.offTeam;
     G.snapIn=1.3;
-    if(!isAI(kicker)&&!G.test&&!P.fake){G.meter={stage:'power',t:0,power:0,acc:0,val:0};}
+    if(!isAI(kicker)&&!G.test&&!P.fake&&(!pcOn()||pcUnit()==='k')){G.meter={stage:'power',t:0,power:0,acc:0,val:0};}
     gpKickSetup();
     if(ON&&G.meter&&kicker!==G.me){G.rmeter=Object.assign({team:kicker,at:G.time},G.meter);G.meter=null;}
     if(G.meter)showMeter();
@@ -21141,7 +21218,10 @@ function setTray(mode){
   if(G.test)return;
   if(mode==='presnap'){
     const P=G.play,uOff=G.offTeam===G.me;
-    if(P.kind==='scrimmage'){
+    if(P.kind==='scrimmage'&&pcOn()){const me=G.ents.find(e=>pcMe(e));
+      if(uOff&&!pcAIQB())btn(box,'Snap','go',doSnap,'enter');else if(uOff&&me&&me.role!=='OL')btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');
+      G.hint=me?`Coach's call: ${(G.pbp&&G.pbp.call)||'—'}. You are #${me.pl.num}, the ringed player${uOff&&!pcAIQB()?'. Snap when ready.':'. The ball is snapped for you.'}`:'Coach has you on the sideline for this play.';
+    }else if(P.kind==='scrimmage'){
       if(uOff){btn(box,'Snap','go',doSnap,'enter');G.hint='Routes and names show before the snap. Tap Snap when ready.';}
       else{btn(box,'Switch player','alt',switchUser);G.hint=ON?'Tap a linebacker or defensive back to control him. Your opponent snaps the ball.':'Tap a linebacker or defensive back to control him. The offense will snap soon.';}
       if(G.to[G.me]>0)btn(box,`Timeout (${G.to[G.me]})`,'alt',()=>{if(callTimeout(G.me))setTray('presnap');},'t');
@@ -21161,6 +21241,10 @@ function setCtl(){
   const box=$('ctl');box.innerHTML='';
   if(G.test||G.phase!=='live'&&G.phase!=='presnap')return;
   const c=G.carrier,P=G.play;
+  if(pcOn()&&G.phase==='live'&&!pcMe(c)&&!passingUser()&&!(G.ballState==='air'&&(G.cm&&G.cm.target&&pcMe(G.cm.target)||G.im&&G.im.def&&pcMe(G.im.def)))){
+    if(G.offTeam===G.me&&G.ballState==='qb'&&!pcMe(G.qb)&&GP.pc.pos!=='OL'){btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');padLegend(box,[[3,'Call for ball']]);G.hint='Get open on your route. Call for the ball and your quarterback looks your way.';}
+    else if(G.uctl&&G.uctl.team===G.me&&!G.uctl.down&&gpDefending(G.me)){btn(box,'Tackle','go',userTackle,kb('tackle'));padLegend(box,[[0,'Tackle']]);G.hint='Drag anywhere to move your player. Tackle near the ball carrier.';}
+    return;}
   if(G.phase==='live'&&c&&!isAI(c.team)&&c.team===G.me){
     if(GDS.moveUI==='wheel')gpMoveWheel(box);
     else{btn(box,'Dive','alt',tryDive,kb('dive'));btn(box,'Hurdle','alt',tryHurdle,kb('hurdle'));btn(box,'Truck','alt',tryTruck,kb('truck'));btn(box,'Stiff arm','alt',tryStiff,kb('stiff'));btn(box,'Spin','',trySpin,kb('spin'));btn(box,'Juke','',gpAutoJuke,kb('jukeU')+'/'+kb('jukeD'));}
@@ -21181,14 +21265,15 @@ function setCtl(){
     btn(box,'Pass: '+PT_N[G.ptype||'touch'],G.ptype==='bullet'?'go':'alt',gpCyclePT,'Space');
     {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[6,'Scramble'],[7,'Pass type']]));}
   }
-  if(G.phase==='presnap'&&P&&!isAI(G.me)&&!G.meter){if(G.offTeam===G.me&&P.kind==='scrimmage')padLegend(box,[[0,'Snap'],[9,'Pause']].filter(x=>x[0]<8));else if(gpDefending(G.me))padLegend(box,[[6,'Switch player']]);}
+  if(G.phase==='presnap'&&P&&pcOn()&&!G.meter){if(pcAIQB()&&G.offTeam===G.me)padLegend(box,[[3,'Call for ball']]);}
+  else if(G.phase==='presnap'&&P&&!isAI(G.me)&&!G.meter){if(G.offTeam===G.me&&P.kind==='scrimmage')padLegend(box,[[0,'Snap'],[9,'Pause']].filter(x=>x[0]<8));else if(gpDefending(G.me))padLegend(box,[[6,'Switch player']]);}
   if(G.phase==='live'&&P&&P.kind==='punt'&&G.offTeam===G.me&&!isAI(G.me)&&(G.ballState==='kick'||G.ballState==='punter'||G.ballState==='snap'))btn(box,G.fair?'Fair catch called':'Fair catch','go',()=>olFair(),kb('fair'));
 }
 // is team t the defending side right now (no ball, or chasing the man who has it)?
 function gpDefending(t){if(G.phase==='presnap')return G.offTeam!==t&&!!G.play;if(G.phase!=='live')return false;
   if(G.carrier)return G.carrier.team!==t;if(G.ballState==='loose')return false;return G.offTeam!==t;}
 function switchUser(){
-  if(G.client){olCmd('switch');return;}
+  if(G.client){olCmd('switch');return;}if(pcOn())return;
   const t=G.act;if(!gpDefending(t))return;const live=G.phase==='live';
   const cands=G.ents.filter(e=>e.team===t&&e.pl&&!e.down&&!e.hurt&&!(e.seqLock)&&!['K','P','H'].includes(e.role)&&(live||['DL','LB','CB','NB','S'].includes(e.role)));
   if(!cands.length)return;
@@ -21456,7 +21541,7 @@ function snapOf(e,copy){
   const cf=gpFx(e,dir);if(cf.flip)dir=-dir;
   return{wx,wy,dir,pp,bob:e.pp.bob||0,flat:e.pp.flat,jz:(e.jz||0)+cf.jz,rot:cf.rot,sq:cf.sq,body:e.pl?e.pl.body:e.body,kit:e.pl?KITS[e.team]:REFKIT,look:e.pl?e.pl.look:e.refLook,
     num:e.pl?e.pl.num:null,ball:e.pp.ball?[...e.pp.ball]:null,ref:!e.pl,team:e.team,cap:e.slot==='R'?'#f4f4f4':'#151515',
-    mark:G.phase==='live'&&e===G.carrier?'c':e===G.uctl&&!G.test?'u':null,ring:G.phase==='presnap'&&e.route&&!isAI(G.offTeam)?e.route.col:null,
+    mark:G.phase==='live'&&e===G.carrier?'c':(e===G.uctl||pcOn()&&pcMe(e))&&!G.test?'u':null,ring:G.phase==='presnap'&&e.route&&!isAI(G.offTeam)?e.route.col:null,
     star:G.phase==='presnap'&&e.pl&&!e.bench&&e.pl.stars>=2?Math.min(5,e.pl.stars|0):0,
     tag:G.phase==='presnap'&&e.pl&&!e.bench&&(['QB','RB','WR','TE','KR','PR'].includes(e.role)||e.side==='d'||e===G.uctl)?`#${e.pl.num} ${nm(e.pl)}${e.pl.ovr?' · '+e.pl.ovr:''}${e.pl.stamina!=null&&e.pl.stamina<70?' · '+Math.round(e.pl.stamina)+'% legs':''}`:null,
     stun:e.stun>0&&!e.down,hurt:e.hurt,pk:packInfo(e),fade:e.bench&&e.team===0&&gpNearAction(e),qbBall:e===G.qb&&(G.ballState==='qb'||e.slideT>0)&&(G.phase==='live'||G.phase==='replay')};
@@ -21588,7 +21673,7 @@ function drawRoutes(){
   }
   ctx.restore();
 }
-function passingUser(){return G.phase==='live'&&G.ballState==='qb'&&!G.pendThrow&&G.play&&G.play.kind==='scrimmage'&&G.play.off.kind==='pass'&&!G.play.special&&!isAI(G.offTeam)&&G.offTeam===G.act&&!G.test;}
+function passingUser(){return!pcAIQB()&&G.phase==='live'&&G.ballState==='qb'&&!G.pendThrow&&G.play&&G.play.kind==='scrimmage'&&G.play.off.kind==='pass'&&!G.play.special&&!isAI(G.offTeam)&&G.offTeam===G.act&&!G.test;}
 function drawAim(){
   if(!G.aim||!passingUser())return;
   const q=G.qb,[qwx,qwy]=toW(q.x,q.y),qp=proj(qwx,qwy),z=qp.k*0.0212;
@@ -21620,7 +21705,7 @@ function padIcon(i,x,y,s){const K=padKind();if(!K)return;const P=PADG[K],t=P.l[i
   if(t.length>1)ctx.roundRect(x-r*1.1,y-r*0.75,r*2.2,r*1.5,r*0.5);else ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
   ctx.lineWidth=1.3*s;ctx.strokeStyle=c;ctx.stroke();ctx.fillStyle=c;ctx.font=`900 ${(t.length>1?6.2:8.5)*s}px Nunito, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,x,y+0.6*s);ctx.restore();}
 function drawPadIcons(){
-  if(!padKind()||G.noDraw||!G.play||G.play.kind!=='scrimmage'||isAI(G.me)||G.offTeam!==G.me)return;
+  if(!padKind()||G.noDraw||!G.play||G.play.kind!=='scrimmage'||isAI(G.me)||pcAIQB()||G.offTeam!==G.me)return;
   const pass=G.play.off&&G.play.off.kind==='pass';
   if(!(G.phase==='presnap'&&pass)&&!passingUser())return;
   const T=gpThrowTargets(),k0=proj(CX,G.camY).k||1;
@@ -21654,6 +21739,7 @@ function drawScene(F){
   if(F.lines&&G.phase!=='replay'&&G.play&&G.play.kind==='scrimmage'&&!G.conv)drawChains(F.lines.los,F.lines.fd,G.down);
   drawGoalposts();drawCheerSquad();drawFlags(F.flags.filter(f=>f.h<=0));
   ctx=MAINCTX;ctx.setTransform(SC*DPR,0,0,SC*DPR,0,0);ctx.imageSmoothingEnabled=false;
+  {const z=pcOn()&&G.phase!=='replay'?1.24:1;let cy=H*0.62;if(z>1){const me=(F.ents||[]).find(S=>S.mid!=null&&S.mid===GP.pc.mid)||(G.ents||[]).find(e=>pcMe(e));if(me){const w=me.wx!=null?[me.wx,me.wy]:toW(me.x,me.y),q=proj(w[0],w[1]);cy=clamp(q.sy-30,H*0.3,H*0.78);}G.zcy=G.zcy==null?cy:G.zcy+(cy-G.zcy)*0.08;}G.zm=z>1?{z,cx:W*G.anch,cy:G.zcy}:null;if(G.zm){const Z=G.zm,k=SC*DPR;ctx.fillStyle='#0b1220';ctx.fillRect(0,0,W,H);ctx.setTransform(k*z,0,0,k*z,k*(Z.cx-Z.cx*z),k*(Z.cy-Z.cy*z));}}
   ctx.drawImage(BGC,0,0,W,H);
   drawRoutes();
   const list=[...F.ents].sort((a,b)=>a.wx-b.wx);
@@ -22383,7 +22469,7 @@ function celebrateAfter(S){
   const c=G.carrier;if(!c||!c.pl)return false;
   if(S.td!=null&&c.team===S.td&&!c.hurt){
     const land=c.tdLand?(c.dive||0)+1.2:0;
-    if(!isAI(c.team)&&!G.test){G.celebPick=c;G.celebAuto=G.time+(ON?3.5:7)+land+(ON&&c.team!==G.me?1.5:0);if(c.team===G.me)setTray('celebrate');}
+    if(!isAI(c.team)&&!G.test&&!pcAI(c)){G.celebPick=c;G.celebAuto=G.time+(ON?3.5:7)+land+(ON&&c.team!==G.me?1.5:0);if(c.team===G.me)setTray('celebrate');}
     else setTimeout(()=>{if(G.phase==='dead'&&!c.celeb)startCeleb(c,pick(TD_CELEBS)[0]);},350+land*1000);
     return'td';
   }
@@ -22510,10 +22596,12 @@ function padGameStep(){
   if(!G.paused){const ph=G.phase;
     if(ph==='presnap'){
       if(G.meter){if(pr(0))meterTap();}
+      else if(pcOn()&&G.play&&G.play.kind==='scrimmage'){if(pcAIQB()){if(pr(3))pcCallBall();}else if(G.offTeam===G.me&&pr(0))doSnap();}
       else if(G.play&&G.play.kind==='scrimmage'&&G.offTeam===G.me){if(pr(0))doSnap();}
       else if(gpDefending(G.me)&&(pr(6)||pr(8)))switchUser();
     }else if(ph==='live'){
       if(G.ballState==='air'&&pr(0)&&(G.cm||G.im)){if(G.cm&&G.cm.target&&G.cm.target.team===G.me)catchMeterTap();else intMeterTap();}
+      else if(pcAIQB()&&G.ballState==='qb'){if(pr(3))pcCallBall();}
       else if(passingUser()){[0,1,2,3,5].forEach((k,i)=>{if(pr(k))gpKeyThrow(i);});if(pr(6))scramble();if(pr(7))gpCyclePT();}
       else if(userCarrier()){if(pr(2))trySpin();if(pr(1))tryStiff();if(pr(3))tryHurdle();if(pr(5))tryTruck();if(pr(7))tryDive();if(pr(4))gpAutoJuke();if(pr(6))trySlow();if(pr(0)&&G.kneelOK>0)olKneel();
         const ry=g.axes[3]||0,fl=ry<-0.75?-1:ry>0.75?1:0;if(fl&&fl!==PADN.flick)tryJuke(fl*(G.flip?-1:1));PADN.flick=fl;}
@@ -22525,7 +22613,7 @@ function padGameStep(){
 addEventListener('gamepadconnected',()=>{if(DEMO)return;if(!PADN.on)try{flash((padKind()==='ps'?'PlayStation':'Xbox')+' controller connected');}catch(e){}padStart(padGameStep);try{setCtl();}catch(e){}});
 setTimeout(()=>{if(!DEMO&&padGet())padStart(padGameStep);},500);
 /* ===================== input ===================== */
-function lp(ev){const r=cv.getBoundingClientRect();return{x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height};}
+function lp(ev){const r=cv.getBoundingClientRect(),x=(ev.clientX-r.left)*W/r.width,y=(ev.clientY-r.top)*H/r.height,Z=G.zm;return Z?{x:Z.cx+(x-Z.cx)/Z.z,y:Z.cy+(y-Z.cy)/Z.z}:{x,y};}
 function screenToSimDir(e,sx,sy){
   const[wx,wy]=toW(e.x,e.y),o=proj(wx,wy),ax=proj(wx+1,wy),ay=proj(wx,wy+1);
   const a=ax.sx-o.sx,b=ay.sx-o.sx,c=ax.sy-o.sy,d=ay.sy-o.sy,det=a*d-b*c;
@@ -22538,7 +22626,7 @@ function aimFromPtr(){
   if(L<16||fy<-0.35){G.aim={run:true};return;}
   {const mx=gpMaxD(),D=L*0.3;G.aim={run:false,dx:fx,dy:fy,D:clamp(D,4,mx),max:D>=mx};}
 }
-function userCarrier(){return G.phase==='live'&&G.carrier&&!isAI(G.carrier.team)&&G.carrier.team===G.act&&!G.test&&G.ballState==='carrier';}
+function userCarrier(){return G.phase==='live'&&G.carrier&&!isAI(G.carrier.team)&&!pcAI(G.carrier)&&G.carrier.team===G.act&&!G.test&&G.ballState==='carrier';}
 // v2.16 pocket movement
 function gpPocketStep(){
   G.pocketV=null;if(G.client||!passingUser()||!G.qb)return;
@@ -22554,11 +22642,11 @@ cv.addEventListener('pointerdown',ev=>{
   ev.preventDefault();
   if(G.meter&&G.phase==='presnap'){meterTap();return;}
   const p=lp(ev),now=performance.now();
-  if(G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.offTeam!==G.me&&!isAI(G.me)&&!G.test){
+  if(G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.offTeam!==G.me&&!isAI(G.me)&&!G.test&&!pcOn()){
     let best=null,bd=22;for(const e of(G.client?olEnts():G.ents)){if(e.team!==G.me||!['LB','CB','NB','S'].includes(e.role))continue;const[wx,wy]=toW(e.x,e.y),q=proj(wx,wy);const d=Math.hypot(q.sx-p.x,q.sy-12-p.y);if(d<bd){bd=d;best=e;}}
     if(best){if(G.client){olCmd('pick',{n:best.nk});return;}G.uctl=best;G.uSlot=best.slot;G.uSlotT[G.me]=best.slot;setCtl();}return;
   }
-  if(G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.play.off.kind==='pass'&&G.offTeam===G.me&&!isAI(G.me)&&!G.test){
+  if(G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.play.off.kind==='pass'&&G.offTeam===G.me&&!isAI(G.me)&&!G.test&&!pcAIQB()){
     let best=null,bd=26;for(const e of(G.client?olRecvEnts():G.ents)){if(e.team!==G.me||!['WR','TE','RB'].includes(e.role))continue;const[wx,wy]=toW(e.x,e.y),q=proj(wx,wy);const d=Math.hypot(q.sx-p.x,q.sy-14-p.y);if(d<bd){bd=d;best=e;}}
     if(best){gpAudOpen(best);return;}
   }
@@ -22567,7 +22655,7 @@ cv.addEventListener('pointerdown',ev=>{
   if(G.im&&G.ballState==='air'&&G.im.tapped==null&&intMeterTap())return;
   if(G.ptr&&ev.pointerId!==G.ptr.id){if(passingUser())gpCyclePT();return;}
   // v2.14: on defense, tap one of your players during the play to take control of him (then keep holding to steer him)
-  if(gpDefending(G.me)&&!isAI(G.me)&&!G.test&&!userCarrier())try{
+  if(gpDefending(G.me)&&!isAI(G.me)&&!G.test&&!userCarrier()&&!pcOn())try{
     let best=null,bd=20;for(const e of(G.client?olEnts():G.ents)){if(e.team!==G.me||e===G.uctl||e.down||e.hurt||['K','P','H'].includes(e.role))continue;
       const[wx,wy]=toW(e.x,e.y),q=proj(wx,wy);const d=Math.hypot(q.sx-p.x,q.sy-12-p.y);if(d<bd){bd=d;best=e;}}
     if(best){if(G.client)olCmd('pick',{n:best.nk});else{best.idle=0;G.uctl=best;if(['LB','CB','NB','S'].includes(best.role)){G.uSlot=best.slot;G.uSlotT[G.me]=best.slot;}setCtl();}}
@@ -22611,6 +22699,7 @@ addEventListener('keydown',ev=>{
   if(G.celebPick&&G.celebPick.team===G.me&&!G.celebPick.celeb&&/^[0-9]$/.test(k)){const c=TD_CELEBS[(+k||10)-1];if(c){startCeleb(G.celebPick,c[0]);setTray('dead');ev.preventDefault();return;}}
   if(k==='t'&&G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.to[G.me]>0&&!isAI(G.me)){if(callTimeout(G.me))setTray('presnap');return;}
   if(KB.wait){return;}
+  if(k==='b'&&pcOn()){pcCallBall();ev.preventDefault();return;}
   if(G.phase==='live'&&passingUser()){if(/^[1-5]$/.test(k)&&gpKeyThrow(+k-1)){ev.preventDefault();return;}if(k===kb('scramble')){scramble();ev.preventDefault();return;}
     if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){keys.add(k);ev.preventDefault();return;}}
   if(k===' '&&G.meter&&G.phase==='presnap'){meterTap();ev.preventDefault();return;}
@@ -22682,13 +22771,13 @@ function step(dt){
     if(clockTicks()){G.clock-=dt;if(G.clock<=0){G.clock=0;hide('meter');G.meter=null;setTray('none');$('ctl').innerHTML='';G.phase='dead';proceed();return;}}
     if(G.play.kind==='scrimmage'){
       G.playClock-=dt;
-      const aiO=isAI(G.offTeam)||G.test;
+      const aiO=isAI(G.offTeam)||G.test||pcAIQB();
       if(G.motion){gpMotionStep(dt);if(G.phase!=='presnap')return;}
       else if(aiO){G.snapIn-=dt;if(G.snapIn<=0)doSnap();}
       else if(G.playClock<=0){setTray('none');preSnapFoul(G.offTeam,'Delay of game',5);}
     }else{
       const kicker=G.play.kind==='kickoff'?G.play.kickTeam:G.play.kind==='punt'?G.play.puntTeam:G.offTeam;
-      if(isAI(kicker)||G.test){G.snapIn-=dt;if(G.snapIn<=0)doSnap();}
+      if(isAI(kicker)||G.test||(pcOn()&&!G.meter)){G.snapIn-=dt;if(G.snapIn<=0)doSnap();}
       else if(G.rmeter&&G.time-G.rmeter.at>40){G.rmeter=null;doSnap();} // the other player never kicked: the kicker does it himself
       // v2.16 the play clock runs on kicks too: let it expire before starting the kick and it is delay of game, 5 yards back
       else if(!ON&&!(GP&&GP.practice)){G.playClock-=dt;if(G.playClock<=0&&(!G.meter||G.meter.stage==='power')){gpKickDelay();return;}}
