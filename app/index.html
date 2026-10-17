@@ -21157,7 +21157,7 @@ function toPresnap(){
   G.snapIn=rnd(2.2,4.5);G.rmeter=null;
   if(P.kind==='scrimmage'){
     if(!isAI(dT)&&!G.test){const pref=G.uSlotT[dT]||(dT===0&&G.uSlot)||'MLB';G.uctl=G.ents.find(e=>e.side==='d'&&e.slot===pref)||G.ents.find(e=>e.slot==='MLB');}
-    if(pcOn())G.uctl=dT===G.me?(G.ents.find(e=>pcMe(e)&&e.side==='d')||null):null;
+    if(pcOn())G.uctl=dT===G.me?(G.ents.find(e=>pcMe(e)&&e.side==='d')||null):pcAIQB()?(G.ents.find(e=>pcMe(e)&&e.side==='o'&&e.role!=='OL')||null):null;
     const diff=G.score[G.offTeam]-G.score[1-G.offTeam];
     if(isAI(G.offTeam)&&G.clockRun&&diff>0&&G.q>=4&&!G.ot)G.snapIn=Math.max(2,G.playClock-1.5);
   }else{
@@ -21242,7 +21242,7 @@ function setCtl(){
   if(G.test||G.phase!=='live'&&G.phase!=='presnap')return;
   const c=G.carrier,P=G.play;
   if(pcOn()&&G.phase==='live'&&!pcMe(c)&&!passingUser()&&!(G.ballState==='air'&&(G.cm&&G.cm.target&&pcMe(G.cm.target)||G.im&&G.im.def&&pcMe(G.im.def)))){
-    if(G.offTeam===G.me&&G.ballState==='qb'&&!pcMe(G.qb)&&GP.pc.pos!=='OL'){btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');padLegend(box,[[3,'Call for ball']]);G.hint='Get open on your route. Call for the ball and your quarterback looks your way.';}
+    if(G.offTeam===G.me&&G.ballState==='qb'&&!pcMe(G.qb)&&GP.pc.pos!=='OL'){btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');padLegend(box,[[3,'Call for ball']]);G.hint='Run your route: drag, use the stick or the arrow keys to move him, or let go and he runs the play as drawn. Call for the ball when you are open.';}
     else if(G.uctl&&G.uctl.team===G.me&&!G.uctl.down&&gpDefending(G.me)){btn(box,'Tackle','go',userTackle,kb('tackle'));padLegend(box,[[0,'Tackle']]);G.hint='Drag anywhere to move your player. Tackle near the ball carrier.';}
     return;}
   if(G.phase==='live'&&c&&!isAI(c.team)&&c.team===G.me){
@@ -22734,7 +22734,8 @@ function userJoyStep(){
   if(G.joy){sx=G.joy.x-G.joy.ox;sy=G.joy.y-G.joy.oy;}
   else if(G.pad){sx=G.pad.x*30;sy=G.pad.y*30;}
   else{if(keys.has('arrowleft')||keys.has('a'))sx-=30;if(keys.has('arrowright')||keys.has('d'))sx+=30;if(keys.has('arrowup')||keys.has('w'))sy-=30;if(keys.has('arrowdown')||keys.has('s'))sy+=30;}
-  const m=Math.hypot(sx,sy);if(m<4){u.idle=(u.idle||0)+1/60;if(u.idle<0.7&&!G.joy)G.joyV=[u.vx*0.9,u.vy*0.9];return;}
+  const m=Math.hypot(sx,sy);if(m<4){u.idle=(u.idle||0)+1/60;if(u.pcRan&&u.side==='o'){G.joyV=[u.vx,u.vy];return;}if(u.idle<0.7&&!G.joy)G.joyV=[u.vx*0.9,u.vy*0.9];return;}
+  if(pcOn()&&u.side==='o')u.pcRan=true;
   u.idle=0;const[fx,fy]=screenToSimDir(u,sx,sy),mag=Math.min(1,m/26);
   G.joyV=[fx*u.spd*mag,fy*u.spd*mag];
 }
