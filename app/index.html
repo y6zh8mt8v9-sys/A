@@ -16630,6 +16630,9 @@ html.g27 .srow:nth-child(odd){background:rgba(127,127,127,.08)}
 html.g27 .srow.sel{background:rgba(var(--tRGB),.35);outline:2px solid var(--tA)}
 html.g27 .srow .sl{color:var(--tA)}
 html.g27 .subpick button{background:var(--cs2);color:var(--ink);border:1px solid var(--cb);border-radius:3px}
+#pcPlay{position:absolute;left:calc(var(--s)*8px);top:calc(var(--s)*44px);width:min(36%,230px);padding:8px 10px 9px;border-radius:6px;z-index:5;pointer-events:none;font-size:12px;color:var(--ink)}
+#pcPlay.rt{left:auto;right:calc(var(--s)*8px)}#pcPlay.rt{left:auto;right:calc(var(--s)*8px)}#pcPlay[hidden]{display:none}#pcPlay svg{width:100%;height:auto;display:block;border-radius:3px;background:linear-gradient(180deg,#5fbf55,#4aa543);margin:4px 0 5px}
+#pcPlay .pck{font-weight:900;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}#pcPlay b{display:block;font-size:14px}
 html.g27 .pseg button{border-radius:3px!important;font-family:var(--hd);text-transform:uppercase;letter-spacing:.04em;background:var(--cs2)!important;color:var(--ink)!important;border:1px solid var(--cb)!important;box-shadow:none!important;text-shadow:none!important}
 html.g27 .pseg button.on{background:var(--tA)!important;color:var(--tOn)!important;border-color:transparent!important}
 html.g27 #hint{border-radius:4px}
@@ -16669,6 +16672,7 @@ html.g27l .mw-c{fill:rgba(255,255,255,.85);stroke:rgba(0,0,0,.1)}
     <div id="tray"><\/div>
     <div id="ctl"><\/div>
     <div id="hint" class="glass"><\/div>
+    <div id="pcPlay" class="glass" hidden><\/div>
     <div id="flash" class="glass"><\/div>
     <div id="toast"><b id="t1"><\/b><span id="t2" class="glass"><\/span><\/div>
     <div id="meter" class="glass" hidden><div id="mLabel"><\/div><div class="mbar" id="mBar"><div class="mneedle" id="mNeedle"><\/div><\/div><div class="msub" id="mSub"><\/div><\/div>
@@ -19945,7 +19949,7 @@ function snapScrimmage(){
   // pre-snap fouls
   if(!G.conv&&Math.random()<0.012){return preSnapFoul(G.offTeam,'False start',5);}
   if(!G.conv&&Math.random()<0.012){return preSnapFoul(1-G.offTeam,'Offside',5);}
-  G.phase='live';G.t=0;G.throwT=0;G.flK=slf(G.offTeam,'bsp',0.18);
+  G.phase='live';G.t=0;G.throwT=0;try{const pp=$('pcPlay');if(pp)pp.hidden=true;}catch(e){}G.flK=slf(G.offTeam,'bsp',0.18);
   for(const d of G.ents){
     if(d.side!=='d')continue;d.freeAt=0;d.beat=null;
     const blk=d.role==='DL'?(O.kind==='pass'?rnd(1.6,3.5):rnd(2.4,4.0)):(O.kind==='run'?rnd(1.4,2.6):rnd(0.8,2.0));
@@ -21282,6 +21286,24 @@ function applyCall(o,d){
   else setupScrimmage(o,d);
   G.play.defCall=d;
   toPresnap();
+  if(pcOn())try{pcShowPlay(o,d);}catch(e){}
+}
+const PC_RT={go:'go route',seam:'seam',slant:'slant',qout:'quick out',out:'out route',hitch:'hitch',curl:'curl',comeback:'comeback',dig:'dig',post:'post',corner:'corner',drag:'drag',flat:'flat route',wheel:'wheel route',check:'check-down',angle:'angle route',stick:'stick',in6:'in route',cross:'crossing route',stutter:'stutter-go',screen:'screen',bubble:'bubble screen',swing:'swing route',block:'pass protection'};
+function pcShowPlay(o,d){
+  const el=$('pcPlay');if(!el)return;el.hidden=true;if(G.simming||G.noDraw||!G.play||G.play.kind!=='scrimmage')return;
+  const me=G.ents.find(e=>pcMe(e));if(!me){return;}
+  const off=me.side==='o',name=off?(G.pbp&&G.pbp.call)||'':(d&&d.n)||'';
+  let job='';
+  if(off){if(me.role==='QB')job=o.kind==='pass'?'Read the field and deliver the ball':o.data&&o.data.qb?'Keep it and run':'Hand the ball off';
+    else if(o.kind==='run'&&(G.rb===me))job='You get the ball: follow the yellow path';
+    else if(me.route)job='Run a '+(PC_RT[me.route.name]||me.route.name||'route').replace(/^Run a ([aeiou])/i,'Run an $1');
+    else job=me.role==='OL'?(o.kind==='pass'?'Protect the quarterback':'Open the hole'):'Block for the ball carrier';
+}
+  else{const C=me.cover||{};job=C.type==='man'&&C.man&&C.man.pl?`Man coverage on #${C.man.pl.num}`:C.type==='zone'?(C.deep?'Zone: keep everything in front of you, deep':'Zone: cover your area underneath'):C.type==='blitz'?'Blitz: get to the quarterback':C.type==='rush'?'Rush the passer, stop the run':'Read and react';}
+  const hi=me.slot,svg=off?(o.kind==='pass'||o.kind==='run'?diagramSVG(o.kind,o.data,hi):''):diagramSVG('def',d,hi);
+  {const w=toW(me.x,me.y),q=proj(w[0],w[1]),Z=G.zm,sx=Z?Z.cx+(q.sx-Z.cx)*Z.z:q.sx;el.classList.toggle('rt',sx<W*0.5);}
+  {const w=toW(me.x,me.y),q=proj(w[0],w[1]),Z=G.zm,sx=Z?Z.cx+(q.sx-Z.cx)*Z.z:q.sx;el.classList.toggle('rt',sx<W*0.5);}
+  el.innerHTML=`<span class="pck">Coach's call<\/span><b>${name}<\/b>${svg}<span class="pck">Your job<\/span><div style="font-weight:800">${job}<\/div>`;el.hidden=false;
 }
 function toPresnap(){
   G.phase='presnap';G.presnapAt=G.time;G.playClock=20;G.t=0;G.started=true;
@@ -21427,7 +21449,7 @@ function userTackle(){
   else{u.lunge=0.28;u.lt='dive';}
 }
 /* ---- play call screen ---- */
-function diagramSVG(kind,data){
+function diagramSVG(kind,data,hi){
   const X=x=>6+x/FW*108,Y=d=>46-d*1.55;let s=`<svg viewBox="0 0 120 64"><line x1="2" y1="46" x2="118" y2="46" stroke="#fff" stroke-opacity=".6" stroke-width=".8"/>`;
   const dot=(x,d,c='#fff')=>s+=`<circle cx="${X(x).toFixed(1)}" cy="${Y(d).toFixed(1)}" r="2.1" fill="${c}" stroke="#0d2a43" stroke-width=".7"/>`;
   const FF=FORMS[(data&&data.f&&FORMS[data.f]&&data.f)||'base'],pos={QB:[CX,-(FF.qbD||5)]},FPd=Object.assign({},FF.pos,(data&&data.pos)||{});for(const k in FPd)pos[k]=[FPd[k][0],-FPd[k][1]];
@@ -21446,6 +21468,7 @@ function diagramSVG(kind,data){
       s+=`<polyline points="${pth.map(([x,d])=>X(x).toFixed(1)+','+Y(d).toFixed(1)).join(' ')}" fill="none" stroke="#ffd23f" stroke-width="2.2" stroke-linecap="round"/>`;}
     for(const k in start)dot(start[k][0],start[k][1],'rgba(255,255,255,.45)');
     for(const k in pos)dot(pos[k][0],pos[k][1],(k==='TE'&&FF.sub.TE)||(k==='RB'&&FF.sub.RB)?'#bfe7ff':(k==='SL'&&FF.sub.SL==='FB')?'#ffe6a8':'#fff');
+    if(hi&&pos[hi])s+=`<circle cx="${X(pos[hi][0]).toFixed(1)}" cy="${Y(pos[hi][1]).toFixed(1)}" r="4.6" fill="none" stroke="#ffd23f" stroke-width="1.4"/>`;
   }else if(kind==='def'){
     // build the coverage on stand-in players so the card always matches what the defense really does
     const ly=0,mk=(x,y,role)=>({x,y,hx:x,hy:y,role,pl:{cov:75}}),O={X:mk(4,-0.9),Z:mk(FW-4,-1.6),SL:mk(FW-12,-1.6),TE:mk(CX+5.8,-1.1),RB:mk(CX-1.6,-5.3)};
@@ -21459,6 +21482,7 @@ function diagramSVG(kind,data){
       else if(C.type==='man')s+=`<line x1="${X(d.x).toFixed(1)}" y1="${Y(d.y).toFixed(1)}" x2="${X(C.man.x).toFixed(1)}" y2="${Y(C.man.y+1.5).toFixed(1)}" stroke="#ffd23f" stroke-width="1.2" stroke-dasharray="2 1.5"/>`;
       else if(C.type==='blitz')s+=`<line x1="${X(d.x).toFixed(1)}" y1="${Y(d.y).toFixed(1)}" x2="${X(lerp(d.x,CX,0.5)).toFixed(1)}" y2="${Y(-1.5).toFixed(1)}" stroke="#ff6b6b" stroke-width="1.8" stroke-linecap="round"/>`;}
     for(const sl in P)dot(P[sl].x,P[sl].y,P[sl].cover.type==='rush'||P[sl].cover.type==='blitz'?'#ff6b6b':'#ffe0e0');
+    if(hi&&P[hi])s+=`<circle cx="${X(P[hi].x).toFixed(1)}" cy="${Y(P[hi].y).toFixed(1)}" r="4.6" fill="none" stroke="#ffd23f" stroke-width="1.4"/>`;
   }else{
     const ttl=kind==='punt'?'P':kind==='fg'?'K':kind==='kneel'?'QB':'QB';
     s+=`<text x="60" y="34" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" font-family="Nunito,sans-serif">${ttl}<\/text>`;
