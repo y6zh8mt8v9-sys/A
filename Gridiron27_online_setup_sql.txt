@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
--- Gridiron Prep GM · Online Play database (Supabase) · v2.15: community teams (also: account deletion, blocks, reports, saves with friends)
+-- Gridiron 27 (beta) · Online Play database (Supabase): everything online needs in one script (accounts, matches, friends, cloud saves, saves with friends, blocks, reports, community teams and worlds)
 -- Run once: Supabase dashboard → SQL Editor → New query → paste this whole file → Run.
 -- It is safe to run again later (it updates the rules without touching saved data).
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
