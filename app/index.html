@@ -769,6 +769,56 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
 :root:not(.light) #title .tt-name .a{background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important}
 :root:not(.light) #title .tt-name .b{background:none!important;-webkit-text-fill-color:var(--tA,#d8443a)!important;color:var(--tA,#d8443a)!important}
 :root:not(.light) #county-svg{border-radius:4px;}
+
+/* ════════ Gridiron 27 — console look, light version ════════ */
+:root.light{--bg:#eceef1;--s1:#ffffff;--s2:#f4f5f7;--s3:#e7e9ed;--bd:rgba(0,0,0,.1);--tx:#15181d;--mu:#5c6672;
+  --ac:var(--tA,#d8443a);--b2:var(--tB,#8c2019);--te:var(--tA,#d8443a);--glass:none;--shadow:0 4px 14px rgba(0,0,0,.08);--rad:4px;
+  --font:'Barlow','Segoe UI',system-ui,sans-serif;--head:'Barlow Condensed','Arial Narrow',sans-serif;}
+:root.light body{background:repeating-linear-gradient(118deg,rgba(0,0,0,.018) 0 2px,transparent 2px 26px),
+  linear-gradient(118deg,rgba(var(--tRGB,140,32,25),.28) 0%,rgba(var(--tRGB,140,32,25),.08) 32%,#eceef1 60%,#e5e7eb 100%),#eceef1!important;background-attachment:fixed!important;}
+:root.light body::before{display:none;}
+:root.light .btn,:root.light .bgh,:root.light .dash-ng-title,:root.light .tab,:root.light .logo{font-family:var(--head)!important;text-transform:uppercase!important;letter-spacing:.04em!important;}
+:root.light h1,:root.light h2{font-weight:900!important;}
+:root.light #nav-prim .np{border-radius:3px 3px 0 0!important;font-family:var(--head)!important;text-transform:uppercase!important;letter-spacing:.06em!important;color:#aeb6bf}
+:root.light #title .tt-btn{border-radius:3px!important;background:#1b1e23!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:none!important;text-shadow:none!important;font-family:var(--head)!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:#eef1f4!important}
+:root.light #title .tt-name{font-family:var(--head)!important;text-transform:uppercase!important;letter-spacing:.04em!important;font-weight:900!important}
+:root.light #title .tt-name span,:root.light .logo span{text-transform:uppercase!important;letter-spacing:.04em!important}
+:root.light #tb,:root.light #nav-bar{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 2px 10px rgba(0,0,0,.08)!important;border-color:rgba(0,0,0,.08)!important;}
+:root.light #tb{border-bottom:3px solid var(--tA,#d8443a)!important}
+:root.light .logo .r{background:none!important;color:#15181d!important;-webkit-text-fill-color:#15181d;}
+:root.light .logo .b{color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a);}
+:root.light .pnl,:root.light .dash-hero,:root.light .dash-stat,:root.light .win-panel,:root.light .dash-next-game,:root.light .sbox{background:#fff!important;border:1px solid rgba(0,0,0,.08)!important;border-radius:4px!important;box-shadow:var(--shadow)!important;}
+:root.light #mb,:root.light #pui{background:#fff!important;border:1px solid rgba(0,0,0,.1)!important;border-top:4px solid var(--tA,#d8443a)!important;border-radius:4px!important;box-shadow:0 18px 50px rgba(0,0,0,.25)!important;}
+:root.light .ph{background:linear-gradient(90deg,rgba(var(--tRGB,140,32,25),.95),rgba(var(--tRGB,140,32,25),.6) 60%,rgba(var(--tRGB,140,32,25),.25))!important;color:#fff!important;border-bottom:0!important;font-size:16px!important;}
+:root.light .ph *{color:inherit}
+:root.light .dash-stat-v{background:none!important;color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a);}
+:root.light .nb{border-radius:3px!important;color:#3d4650;}
+:root.light .nb.on{background:var(--tA,#d8443a)!important;color:var(--tOn,#fff)!important;box-shadow:none!important;}
+:root.light .btn{border-radius:3px!important;background:var(--tA,#d8443a)!important;background-image:linear-gradient(180deg,rgba(255,255,255,.14),rgba(0,0,0,.1))!important;color:var(--tOn,#fff)!important;box-shadow:0 2px 6px rgba(0,0,0,.18)!important;text-shadow:none!important;border:0!important;}
+:root.light .btn.bgn{background:#2f9e57!important;color:#fff!important;}:root.light .btn.bgd{background:#e0a92c!important;color:#1b1400!important;}
+:root.light .bgh{border-radius:3px!important;background:#f1f2f4!important;border:1px solid rgba(0,0,0,.14)!important;box-shadow:none!important;color:#1d2127!important;}
+:root.light .bgh:hover{background:#e5e7ea!important;}
+:root.light input,:root.light select,:root.light textarea{border-radius:3px!important;background:#fff!important;border:1px solid rgba(0,0,0,.16)!important;box-shadow:none!important;}
+:root.light table th{background:#eef0f3!important;color:#4a535d!important;font-size:12px!important;}
+:root.light #ct tbody tr:nth-child(even) td{background:rgba(0,0,0,.022);}
+:root.light #ct tbody tr:hover td{background:rgba(var(--tRGB,140,32,25),.1)!important;}
+:root.light .tab{border-radius:3px!important;}
+:root.light .tab.on{background:var(--tA,#d8443a)!important;color:var(--tOn,#fff)!important;border-color:transparent!important;}
+:root.light .pill{border-radius:3px!important;background:#f1f2f4!important;}
+:root.light #nav-prim{background:#fff!important;border-bottom:1px solid rgba(0,0,0,.08)}
+:root.light #nav-prim .np{border-radius:3px 3px 0 0!important;font-family:var(--head)!important;text-transform:uppercase!important;letter-spacing:.06em!important;color:#4a535d;background:none!important;box-shadow:none!important}
+:root.light #nav-prim .np.on{background:var(--tA,#d8443a)!important;color:var(--tOn,#fff)!important;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2)!important}
+:root.light .dash-hero-name{-webkit-text-fill-color:currentColor}
+:root.light #title .tt-btns{border-radius:6px!important;background:rgba(255,255,255,.9)!important;border:1px solid rgba(0,0,0,.08)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+:root.light #title .tt-btn{border-radius:3px!important;background:#f4f5f7!important;border:1px solid rgba(0,0,0,.12)!important;box-shadow:none!important;text-shadow:none!important;font-family:var(--head)!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:#15181d!important}
+:root.light #title .tt-btn:hover{background:#e9ebee!important}
+:root.light #title .tt-btn.pri{background:var(--tA,#d8443a)!important;color:var(--tOn,#fff)!important;border-color:transparent!important}
+:root.light #title .tt-btn small{text-transform:none!important;letter-spacing:0!important;opacity:.75}
+:root.light #title .tt-name{font-family:var(--head)!important;text-transform:uppercase!important;letter-spacing:.04em!important;font-weight:900!important}
+:root.light #title .tt-name span{text-transform:uppercase!important;letter-spacing:.04em!important}
+:root.light #title .tt-name .a{background:none!important;-webkit-text-fill-color:#15181d!important;color:#15181d!important}
+:root.light #title .tt-name .b{background:none!important;-webkit-text-fill-color:var(--tA,#d8443a)!important;color:var(--tA,#d8443a)!important}
+:root.light #county-svg{border-radius:4px;}
 </style>
 </head>
 <body>
@@ -1136,6 +1186,12 @@ var IS_NATIVE=!!(window.Capacitor&&(window.Capacitor.isNativePlatform?window.Cap
 // ═══════════ v2.16 team colors: the whole menu takes your school's colors ═══════════
 function _thHex(h){h=String(h||'').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return isNaN(n)?null:[n>>16&255,n>>8&255,n&255];}
 function _thLum(c){return(0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;}
+function _thBright(c){ // raise HSL lightness to at least .46 (saturation kept) so dark maroon becomes red, not pink
+  let[r,g,b]=c.map(v=>v/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,S=0,L=(mx+mn)/2;
+  if(mx!==mn){const d=mx-mn;S=L>0.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h/=6;}
+  if(_thLum(c)>=0.3)return c.slice();L=Math.max(L,S<0.15?0.62:0.46);if(S>0.15)S=Math.max(S,0.62);
+  const f=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;return t<1/6?p+(q-p)*6*t:t<1/2?q:t<2/3?p+(q-p)*(2/3-t)*6:p;};
+  if(!S)return[L,L,L].map(v=>Math.round(v*255));const q=L<0.5?L*(1+S):L+S-L*S,p=2*L-q;return[f(p,q,h+1/3),f(p,q,h),f(p,q,h-1/3)].map(v=>Math.round(v*255));}
 function _thSat(c){const mx=Math.max(...c),mn=Math.min(...c);return mx?((mx-mn)/mx):0;}
 let _thKey='';
 function applyTeamTheme(){
@@ -1146,7 +1202,7 @@ function applyTeamTheme(){
   // the main color is the more colorful one (white or black trim stays the second color)
   const sc=c=>{const l=_thLum(c);return _thSat(c)*0.55+(l>0.12&&l<0.88?0.45:0)+(l>0.25&&l<0.75?0.2:0);};
   let m=a;if(b&&sc(b)>sc(a))m=b;
-  let acc=m.slice();for(let i=0;i<10&&_thLum(acc)<0.36;i++)acc=acc.map(v=>Math.round(v+(255-v)*0.2));
+  let acc=_thBright(m);
   const dk=(_thLum(m)>0.5?m.map(v=>Math.round(v*0.45)):m.map(v=>Math.round(v*0.7))),hex=c=>'#'+c.map(v=>v.toString(16).padStart(2,'0')).join('');
   R.setProperty('--tA',hex(acc));R.setProperty('--tB',hex(dk));{let d=(_thLum(m)<0.08?acc:m).slice();for(let i=0;i<12&&_thLum(d)>0.3;i++)d=d.map(v=>Math.round(v*0.82));R.setProperty('--tRGB',d.join(','));}R.setProperty('--tOn',_thLum(acc)>0.62?'#111':'#fff');
   try{const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.setAttribute('content',hex(dk));}catch(e){}
@@ -1223,7 +1279,7 @@ setTimeout(()=>{if(padGet())padStart(padMainStep);},800);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
 // ── SETTINGS MODAL ──
 // v2.14 Game Day settings shared with the game (stored on this device)
-const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'row',clickTk:true};
+const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'wheel',clickTk:true};
 const SL_KEYS_M=[['spd','Speed'],['acc','Acceleration'],['str','Strength'],['iq','Awareness (IQ)'],['thr','Throwing accuracy'],['bsp','Ball speed'],['cat','Catching'],['int','Interceptions'],['man','Man coverage'],['zone','Zone coverage'],['fum','Fumbles'],['juk','Juke ability']];
 function slOpen(){try{closeSettings();}catch(e){}const o=gdsMain(),S=o.sl||{u:{},c:{}},v=(w,k)=>{const x=S[w]&&S[w][k];return x==null?50:x;};
   openMo(`<h2>Difficulty sliders</h2><p style="font-size:13px;color:var(--mu);margin:4px 0 10px">How your team and the CPU play in Game Day. 50 is normal; higher means better at it (for Fumbles, higher means more fumbles). Online games always use 50.</p>
@@ -10291,6 +10347,7 @@ function gpAudioUnlock(){
 addEventListener('pointerdown',gpAudioUnlock,{passive:true});addEventListener('keydown',gpAudioUnlock);
 function gdLaunch(){
   try{gpAudioUnlock();}catch(e){}
+  try{if(window.__GP){const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();window.__GP.ui={tA:v('--tA')||'#d8443a',tB:v('--tB')||'#8c2019',tRGB:v('--tRGB')||'140,32,25',tOn:v('--tOn')||'#fff',light:document.documentElement.classList.contains('light')};}}catch(e){}
   // v2.16: a career game saves first, so a crash or reload during or right after the game never costs more than that game
   try{if(_gdCtx&&!['prac','free','online'].includes(_gdCtx.kind)&&typeof G!=='undefined'&&G&&G.myId&&gdsMain().autosave!==false)saveGame(true);}catch(e){}
   let ov=document.getElementById('gd-ov');if(ov)gdTeardown();
@@ -16161,7 +16218,7 @@ const TUT_PAGES=[
     <p>Before the first game of every new career you are offered an <strong>interactive gameplay tutorial</strong> on your own practice field with your own players. A coach card walks you through each control and waits until you have done it:</p>
     <ul>
       <li><strong>Calling a play</strong> and snapping the ball</li>
-      <li><strong>Passing</strong>: press and pull back like a slingshot, release to throw; a second finger throws a bullet, a quick tap scrambles</li>
+      <li><strong>Passing</strong>: press and pull back like a slingshot, release to throw; a quick tap switches between a bullet and a lob, the QB run button scrambles</li>
       <li><strong>Catch meters</strong>: tap while the marker is in the green</li>
       <li><strong>Running</strong>: swipe up or down to juke, forward to dive, back to slow down, plus the Spin, Stiff arm, Truck and Hurdle buttons</li>
       <li><strong>Defense</strong>: pick your defender, drag to move, tap Tackle</li>
@@ -16198,7 +16255,7 @@ const TUT_PAGES=[
     <p>Every action has a key (the guide also opens the first time you play on a computer, and lives under Pause → Settings and controls).</p>
     <ul>
       <li><b>Snap</b>: Enter or Space · <b>Timeout</b>: T · <b>Pause</b>: P or Esc</li>
-      <li><b>Pass</b>: 1–5 throw to that receiver (the numbers float over them), Space for a bullet, C to run with the QB, or pull back with the mouse like a slingshot</li>
+      <li><b>Pass</b>: 1–5 throw to that receiver (the numbers float over them), Space switches bullet / lob, C to run with the QB, or pull back with the mouse like a slingshot</li>
       <li><b>Ball carrier</b>: W/S or ↑/↓ juke, D or → dive, A or ← slow down, E spin, Q stiff arm, R truck, H hurdle</li>
       <li><b>Defense</b>: WASD or arrows move, J tackle, Tab switch, click a player to control him, K or Space when the ball meter is up</li>
       <li><b>Kicks and catches</b>: Space or click to stop the meters · F fair catch · 1–9 pick a celebration</li>
@@ -16312,7 +16369,7 @@ initCountyMap();
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gridiron 27: Game Day<\/title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --pg1:#eaf7ff; --pg2:#bfe4fb; --ink:#0d2a43; --ink2:#46657f;
@@ -16536,6 +16593,54 @@ body:not(.bugtv) #bug .nm .rec{display:none}
   #meter{top:100%;bottom:auto;margin-top:120px}
   #rbar{top:100%;margin-top:70px}
 }
+
+/* Gridiron 27 console menus: charcoal (or white) panels, condensed caps, your team's color */
+html.g27{--ink:#eef1f4;--ink2:#9aa4ae;--cs:rgba(17,19,23,.94);--cs2:#1d2026;--cb:rgba(255,255,255,.09);--hd:'Barlow Condensed','Arial Narrow',sans-serif}
+html.g27.g27l{--ink:#15181d;--ink2:#5c6672;--cs:rgba(255,255,255,.97);--cs2:#f1f2f4;--cb:rgba(0,0,0,.1)}
+html.g27 .glass{background:var(--cs);border:1px solid var(--cb);box-shadow:0 8px 24px rgba(0,0,0,.45);-webkit-backdrop-filter:none;backdrop-filter:none}
+html.g27.g27l .glass{box-shadow:0 8px 24px rgba(0,0,0,.18)}
+html.g27 .ov{background:rgba(0,0,0,.55)}
+html.g27 .panel{border-radius:4px;border-top:4px solid var(--tA)}
+html.g27 .ph h3,html.g27 .pm h2,html.g27 #simTitle,html.g27 .secth{font-family:var(--hd);text-transform:uppercase;letter-spacing:.05em;font-weight:900}
+html.g27 .pm{border-radius:4px;border-top:4px solid var(--tA)}
+html.g27 .btn{font-family:var(--hd);text-transform:uppercase;letter-spacing:.06em;border-radius:3px;border:0;background:#2a2e35;color:#eef1f4;text-shadow:none;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+html.g27.g27l .btn{background:#e9ebee;color:#15181d;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+html.g27 .btn.go{background:var(--tA);color:var(--tOn);box-shadow:0 3px 10px rgba(0,0,0,.35)}
+html.g27 .btn.alt{background:rgba(32,36,43,.92);color:#eef1f4;border:1px solid rgba(255,255,255,.14)}
+html.g27.g27l .btn.alt{background:rgba(255,255,255,.95);color:#15181d;border:1px solid rgba(0,0,0,.14)}
+html.g27 .btn:focus-visible{outline:2px solid var(--tA);box-shadow:none}
+html.g27 .tab{border-radius:3px;font-family:var(--hd);text-transform:uppercase;letter-spacing:.05em;background:var(--cs2);color:var(--ink);border:1px solid var(--cb)}
+html.g27 .tab.on{background:var(--tA);color:var(--tOn);border-color:transparent;text-shadow:none}
+html.g27 .pcard{border-radius:4px;background:var(--cs2);border:1px solid var(--cb);box-shadow:none;color:var(--ink)}
+html.g27 .pcard:hover,html.g27 .pcard:focus-visible{border-color:var(--tA);outline:none;box-shadow:0 0 0 2px var(--tA)}
+html.g27 .pcard svg{border-radius:2px}
+html.g27 .pcard b{font-family:var(--hd);text-transform:uppercase;letter-spacing:.03em;font-size:14px}
+html.g27 .pfoot{border-top:1px solid var(--cb)}
+html.g27 .srow{border-radius:3px}
+html.g27 .srow:nth-child(odd){background:rgba(127,127,127,.08)}
+html.g27 .srow.sel{background:rgba(var(--tRGB),.35);outline:2px solid var(--tA)}
+html.g27 .srow .sl{color:var(--tA)}
+html.g27 .subpick button{background:var(--cs2);color:var(--ink);border:1px solid var(--cb);border-radius:3px}
+html.g27 .pseg button{border-radius:3px!important;font-family:var(--hd);text-transform:uppercase;letter-spacing:.04em;background:var(--cs2)!important;color:var(--ink)!important;border:1px solid var(--cb)!important;box-shadow:none!important;text-shadow:none!important}
+html.g27 .pseg button.on{background:var(--tA)!important;color:var(--tOn)!important;border-color:transparent!important}
+html.g27 #hint{border-radius:4px}
+html.g27 #pauseBtn,html.g27 #fsBtn{border-radius:4px}
+html.g27:not(.g27l) #pauseBtn path,html.g27:not(.g27l) #fsBtn path{stroke:#fff}
+html.g27 .mbar{border-radius:3px}
+/* skill-move wheel */
+.mwheel{position:relative;width:min(210px,40vw);aspect-ratio:1/1;touch-action:none;user-select:none;-webkit-user-select:none;pointer-events:auto}
+.mwheel svg{width:100%;height:100%;display:block;overflow:visible}
+.mw-s{fill:rgba(26,28,32,.88);stroke:rgba(255,255,255,.1);stroke-width:1;cursor:pointer;transition:fill .08s}
+.mw-s.on{fill:var(--tA,#1fa6ef)}
+.mw-ic{stroke:#fff;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.mw-k{font:900 10px 'Barlow Condensed','Arial Narrow',sans-serif;fill:#cfd6de;pointer-events:none;text-anchor:middle;dominant-baseline:central}
+.mw-c{fill:rgba(16,18,21,.8);stroke:rgba(255,255,255,.08)}
+.mw-lbl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:.28em .9em;border-radius:999px;background:rgba(112,116,122,.9);color:#fff;font:800 13px 'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.05em;pointer-events:none;white-space:nowrap}
+html.g27l .mw-s{fill:rgba(255,255,255,.92);stroke:rgba(0,0,0,.14)}
+html.g27l .mw-s.on{fill:var(--tA,#1fa6ef)}
+html.g27l .mw-ic{stroke:#1d2127}
+html.g27l .mw-k{fill:#4a535d}
+html.g27l .mw-c{fill:rgba(255,255,255,.85);stroke:rgba(0,0,0,.1)}
 <\/style>
 <main id="stage">
   <div id="wrap">
@@ -17278,6 +17383,7 @@ R0 R1 R1 R0 R0 . .
 <script>
 const DEMO=(()=>{try{return!!(window.frameElement&&window.frameElement.getAttribute('data-demo'));}catch(e){return false;}})();
 const GP=(()=>{try{if(DEMO)return null;return window.parent&&window.parent!==window&&window.parent.__GP?window.parent.__GP:null;}catch(e){return null;}})();
+try{const u=GP&&GP.ui,R=document.documentElement;if(u){R.classList.add('g27');if(u.light)R.classList.add('g27l');R.style.setProperty('--tA',u.tA);R.style.setProperty('--tB',u.tB);R.style.setProperty('--tRGB',u.tRGB);R.style.setProperty('--tOn',u.tOn);}}catch(e){}
 
 'use strict';
 /* ===================== core ===================== */
@@ -17287,7 +17393,7 @@ const D0=91.4,HC=35.7,SS=250/(HC*(1/D0-1/(D0+FW))),HOR=345-HC*SS/D0,KFAR=SS/(D0+
 const $=id=>document.getElementById(id);
 const cv=$('c'),MAINCTX=cv.getContext('2d');let ctx=MAINCTX;
 /* v2.14 Game Day settings (shared with the main menu's Settings): sound, crowd, tips, ball size, drive direction, controls */
-const GDS_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,keys:{},gfx:'auto',crowdV:'full',bug:'tv',moveUI:'row',clickTk:true};
+const GDS_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,keys:{},gfx:'auto',crowdV:'full',bug:'tv',moveUI:'wheel',clickTk:true};
 // v2.15 rebindable keys: [action, label, default key]. W A S D and the arrows always move your defender.
 const KB_ACT=[['jukeU','Juke up','w'],['jukeD','Juke down','s'],['dive','Dive','d'],['slow','Slow down','a'],['spin','Spin','e'],['stiff','Stiff arm','q'],['truck','Truck','r'],['hurdle','Hurdle','h'],
   ['tackle','Tackle','j'],['switch','Switch player','tab'],['play','Play the ball','k'],['scramble','QB tuck and run','c'],['fair','Fair catch','f']];
@@ -17299,7 +17405,7 @@ function sla(t,k,span){return(slv(t,k)-50)/50*span;}
 function gspd(){if(ON||G.test||G.demo||DEMO)return 1;const v=+GDS.gspd;return v>0?Math.max(0.75,Math.min(1.25,v)):1;}
 function kb(a){const d=KB_ACT.find(x=>x[0]===a);return((GDS.keys&&GDS.keys[a])||(d?d[2]:'')).toLowerCase();}
 function kbLabel(k){return{tab:'Tab',' ':'Space',enter:'Enter',arrowup:'↑',arrowdown:'↓',arrowleft:'←',arrowright:'→',escape:'Esc'}[k]||k.toUpperCase();}
-const GDS=(()=>{let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}return Object.assign({},GDS_DEF,o);})();
+const GDS=(()=>{let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}if(!o.mw2){o.moveUI='wheel';o.mw2=true;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}}return Object.assign({},GDS_DEF,o);})();
 function gdsSave(){try{localStorage.setItem('gpgm_gd',JSON.stringify(GDS));}catch(e){}}
 // which way the offense attacks on screen: always right (default), always left, or real (teams switch ends every quarter)
 function gpFlipFor(off){
@@ -17534,7 +17640,7 @@ function tutTick(){
     if(G.ballState==='air'){TUT.st='o_air';}
     else if(G.ballState==='carrier'&&G.carrier){TUT.st='o_carry';}
     else if(ph==='dead'){TUT.st='o_done';}
-    else{tutShow(step+1,'Throw the ball',`Press anywhere on the field and <b>pull back like a slingshot<\/b>: the arrow shows where the ball goes. <b>Let go<\/b> to throw.<br><br>A second finger (or Space) switches the pass: <b>touch<\/b>, hard <b>bullet<\/b> or high <b>lob<\/b>, and back again. A quick tap tucks the ball and runs with the quarterback.`);return;}
+    else{tutShow(step+1,'Throw the ball',`Press anywhere on the field and <b>pull back like a slingshot<\/b>: the arrow shows where the ball goes. <b>Let go<\/b> to throw.<br><br>A quick tap on the screen (or Space) switches between a hard <b>bullet<\/b> and a high <b>lob<\/b>; every play starts with a bullet. <b>QB run<\/b> (or pulling back toward the quarterback) tucks the ball and runs.`);return;}
   }
   if(TUT.st==='o_air'){
     if(G.ballState==='carrier'&&G.carrier&&G.carrier.team===0){TUT.st='o_carry';}
@@ -19489,7 +19595,7 @@ function setupDefense(D,ly,L,call){
   }
 }
 function resetBall(){
-  Object.assign(G,{im:null,cm:null,cball:null,celebPick:null,rtp:false,pendingFoul:null,injNote:null,fumbleBy:null,prevCarrierSide:'o',kickRecovered:false,seq:null,carrier:null,ballState:'pre',air:null,loose:null,kick:null,snapB:null,seq:null,aim:null,bullet:G.ptype==='bullet',lob:G.ptype==='lob',fouls:[],flags:[],parts:[],cele:null,picker:null,fair:false,turnover:false,kneelOK:0,krFrom:null,prFrom:null,catchY:null,helmets:[]});
+  Object.assign(G,{im:null,cm:null,cball:null,celebPick:null,rtp:false,pendingFoul:null,injNote:null,fumbleBy:null,prevCarrierSide:'o',kickRecovered:false,seq:null,carrier:null,ballState:'pre',air:null,loose:null,kick:null,snapB:null,seq:null,aim:null,ptype:'bullet',bullet:true,lob:false,fouls:[],flags:[],parts:[],cele:null,picker:null,fair:false,turnover:false,kneelOK:0,krFrom:null,prFrom:null,catchY:null,helmets:[]});
   if(!SEVENS())for(const T of G.teams||[])for(const q of T.roster)if(q.helmetOff)q.helmetOff=false;
 }
 
@@ -19980,7 +20086,7 @@ function flight(D,bullet,lob){const v=(bullet?21+D*0.26:lob?9.6+D*0.165:12.5+D*0
 // v2.16 pass type: touch (normal), bullet (fast and flat), lob (high and soft over the underneath defenders). Second finger, Space, the Pass button or Y cycles it
 const PT_N={touch:'Touch',bullet:'Bullet',lob:'Lob'};
 function gpSetPT(t){G.ptype=t;G.bullet=t==='bullet';G.lob=t==='lob';setCtl();}
-function gpCyclePT(){const o=['touch','bullet','lob'],c=G.ptype||(G.bullet?'bullet':G.lob?'lob':'touch');gpSetPT(o[(o.indexOf(c)+1)%3]);try{SFX.click&&SFX.click();}catch(e){}}
+function gpCyclePT(){gpSetPT(G.lob?'bullet':'lob');try{flash(G.lob?'Lob':'Bullet');}catch(e){}try{SFX.click&&SFX.click();}catch(e){}}
 function ballAt(a,t){return{x:a.sx+a.dx*a.v*t,y:a.sy+a.dy*a.v*t,h:2+a.vz*t-GRAV*t*t/2};}
 function gpMotion(qb,bullet,D,lb){
   const A=(qb.pl&&qb.pl.arch)||'',moving=Math.hypot(qb.vx,qb.vy)>1.5,lob=!!lb||!bullet&&D>28;
@@ -20325,17 +20431,33 @@ function diveFx(e,dir){const o={rot:0,jz:0};if(!(e.dive>0)||e.down)return o;cons
 // the Juke button cuts away from the nearest defender
 // v2.16 move wheel: one round button; press it and slide (or tap) to a move
 const MOVE_W=[['Juke','⚡',()=>gpAutoJuke()],['Spin','🌀',()=>trySpin()],['Stiff arm','✋',()=>tryStiff()],['Truck','🐂',()=>tryTruck()],['Hurdle','🦘',()=>tryHurdle()],['Dive','🏊',()=>tryDive()]];
+// skill-move wheel: six slices around a center label (like a console radial menu). Tap a slice, or press and slide
+// onto one and let go. Each slice shows its controller button or key.
+const MW_IC={Juke:'M5 19 12 12 8 8 15 3M11 3h4v4',Spin:'M18.5 12a6.5 6.5 0 1 1-2.6-5.2M17 3v4h-4','Stiff arm':'M8 20v-6l-2.5-3M8 14V6a1.4 1.4 0 0 1 2.8 0v5M10.8 11V4.5a1.4 1.4 0 0 1 2.8 0V11M13.6 11V5.5a1.4 1.4 0 0 1 2.8 0V12M16.4 12V9a1.4 1.4 0 0 1 2.8 0v5c0 4-3 6.5-6.6 6.5',
+  Truck:'M5 6l6 6-6 6M12 6l6 6-6 6',Hurdle:'M3 20h18M8 20v-5M16 20v-5M7 15h10M4 12c3-8 13-8 16 0M17 9l3 3 1-4',Dive:'M4 5l12 10M11 16h6v-6M3 20h18'};
+const MW_KEY={Juke:[4,'jukeU'],Spin:[2,'spin'],'Stiff arm':[1,'stiff'],Truck:[5,'truck'],Hurdle:[3,'hurdle'],Dive:[7,'dive']};
 function gpMoveWheel(box){
-  const w=document.createElement('div');w.className='mwheel';const R=76;
-  w.innerHTML=`<div class="mw-ring">${MOVE_W.map(([l,ic],i)=>{const a=-Math.PI/2+i*Math.PI*2/MOVE_W.length;return`<button class="mw-i" data-i="${i}" style="left:calc(50% + ${Math.round(Math.cos(a)*R)}px);top:calc(50% + ${Math.round(Math.sin(a)*R)}px)" title="${l}"><span>${ic}<\/span><small>${l}<\/small><\/button>`;}).join('')}<\/div><button class="mw-hub btn">Moves<\/button>`;
-  box.appendChild(w);const hub=w.querySelector('.mw-hub');let sel=-1;
-  const pickAt=ev=>{const r=hub.getBoundingClientRect(),dx=ev.clientX-(r.left+r.width/2),dy=ev.clientY-(r.top+r.height/2);if(Math.hypot(dx,dy)<22)return-1;
-    let a=Math.atan2(dy,dx)+Math.PI/2;if(a<0)a+=Math.PI*2;return Math.round(a/(Math.PI*2/MOVE_W.length))%MOVE_W.length;};
-  const mark=i=>{sel=i;w.querySelectorAll('.mw-i').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));};
-  hub.onpointerdown=ev=>{ev.stopPropagation();ev.preventDefault();w.classList.add('open');mark(-1);try{hub.setPointerCapture(ev.pointerId);}catch(e){}};
-  hub.onpointermove=ev=>{if(w.classList.contains('open'))mark(pickAt(ev));};
-  hub.onpointerup=ev=>{ev.stopPropagation();const i=sel;mark(-1);if(i>=0){w.classList.remove('open');MOVE_W[i][2]();}};
-  w.querySelectorAll('.mw-i').forEach(b=>{b.onpointerdown=e=>e.stopPropagation();b.onclick=e=>{e.stopPropagation();w.classList.remove('open');MOVE_W[+b.dataset.i][2]();};});
+  const N=MOVE_W.length,C=100,R=97,r=50,gap=0.03,K=padKind(),P=K?PADG[K]:null;
+  const pt=(rad,a)=>(C+rad*Math.cos(a)).toFixed(1)+','+(C+rad*Math.sin(a)).toFixed(1);
+  const segs=MOVE_W.map(([l],i)=>{const a0=-Math.PI/2+(i-0.5)*2*Math.PI/N+gap,a1=-Math.PI/2+(i+0.5)*2*Math.PI/N-gap,am=-Math.PI/2+i*2*Math.PI/N,mr=(R+r)/2;
+    const[ix,iy]=pt(mr-3,am).split(','),[kx,ky]=pt(R-9,am).split(','),mk=MW_KEY[l];
+    const key=P&&mk?P.l[mk[0]]:(GPC&&mk?(mk[1]==='jukeU'?kb('jukeU')+'/'+kb('jukeD'):kb(mk[1])).toUpperCase():'');
+    return`<path class="mw-s" data-i="${i}" d="M${pt(R,a0)}A${R},${R} 0 0 1 ${pt(R,a1)}L${pt(r,a1)}A${r},${r} 0 0 0 ${pt(r,a0)}Z"/>`+
+      `<path class="mw-ic" data-c="${i}" transform="translate(${(+ix-13.2).toFixed(1)},${(+iy-15).toFixed(1)}) scale(1.1)" d="${MW_IC[l]||''}"/>`+
+      (key?`<text class="mw-k" x="${kx}" y="${(+ky+(Math.sin(am)>0.5?-2:2)).toFixed(1)}" ${P&&mk?`style="fill:${P.c[mk[0]]}"`:''}>${key}<\/text>`:'');}).join('');
+  const w=document.createElement('div');w.className='mwheel';
+  w.innerHTML=`<svg viewBox="0 0 200 200" aria-label="Skill moves">${segs}<circle class="mw-c" cx="${C}" cy="${C}" r="${r-6}"/><\/svg><div class="mw-lbl">Moves<\/div>`;
+  box.appendChild(w);const lbl=w.querySelector('.mw-lbl');let sel=-1,down=false;
+  const pickAt=ev=>{const b=w.getBoundingClientRect(),sc=b.width/200,dx=ev.clientX-(b.left+b.width/2),dy=ev.clientY-(b.top+b.height/2),d=Math.hypot(dx,dy)/sc;if(d<r*0.55||d>R+30)return-1;
+    let a=Math.atan2(dy,dx)+Math.PI/2;if(a<0)a+=Math.PI*2;return Math.round(a/(Math.PI*2/N))%N;};
+  const mark=i=>{sel=i;w.querySelectorAll('.mw-s').forEach(p=>p.classList.toggle('on',+p.dataset.i===i));
+    const lt=document.documentElement.classList.contains('g27l');w.querySelectorAll('.mw-ic').forEach(p=>{p.style.stroke=+p.dataset.c===i?'var(--tOn,#fff)':'';});lbl.textContent=i>=0?MOVE_W[i][0]:'Moves';};
+  const fire=i=>{if(i<0)return;MOVE_W[i][2]();mark(i);setTimeout(()=>{if(!down)mark(-1);},260);};
+  w.onpointerdown=ev=>{ev.stopPropagation();ev.preventDefault();down=true;try{w.setPointerCapture(ev.pointerId);}catch(e){}mark(pickAt(ev));};
+  w.onpointermove=ev=>{if(down||ev.pointerType==='mouse')mark(pickAt(ev));};
+  w.onpointerup=ev=>{ev.stopPropagation();down=false;fire(pickAt(ev));};
+  w.onpointercancel=()=>{down=false;mark(-1);};w.onpointerleave=ev=>{if(!down&&ev.pointerType==='mouse')mark(-1);};
+  G.mwMark=i=>{try{if(w.isConnected){mark(i);setTimeout(()=>{if(!down)mark(-1);},260);}}catch(e){}};
 }
 function gpAutoJuke(){const c=G.carrier;if(!c)return;let best=null,bd=1e9;for(const d of foesOf(c)){const dd=dist(d,c);if(dd<bd&&!d.down){bd=dd;best=d;}}
   tryJuke(best?(best.x>c.x?-1:1):(c.x<CX?1:-1));}
@@ -21249,7 +21371,7 @@ function setCtl(){
     if(GDS.moveUI==='wheel')gpMoveWheel(box);
     else{btn(box,'Dive','alt',tryDive,kb('dive'));btn(box,'Hurdle','alt',tryHurdle,kb('hurdle'));btn(box,'Truck','alt',tryTruck,kb('truck'));btn(box,'Stiff arm','alt',tryStiff,kb('stiff'));btn(box,'Spin','',trySpin,kb('spin'));btn(box,'Juke','',gpAutoJuke,kb('jukeU')+'/'+kb('jukeD'));}
     G.hint='Swipe up or down to juke, forward to dive, back to slow down. Hurdle beats low tackles, Truck runs through them.';
-    padLegend(box,[[4,'Juke (or flick right stick)'],[2,'Spin'],[1,'Stiff arm'],[5,'Truck'],[3,'Hurdle'],[7,'Dive'],[6,'Slow']]);
+    if(GDS.moveUI==='wheel')padLegend(box,[[6,'Slow']]);else padLegend(box,[[4,'Juke (or flick right stick)'],[2,'Spin'],[1,'Stiff arm'],[5,'Truck'],[3,'Hurdle'],[7,'Dive'],[6,'Slow']]);
     if(P&&P.kind==='kickoff'&&(G.client?OL.kneelOK:c.y<10&&G.kneelOK>0))btn(box,'Take a knee','go',()=>olKneel(),'k');
   }else if(G.phase==='live'&&gpDefending(G.me)&&!isAI(G.me)&&!G.test){
     if(G.uctl&&G.uctl.team===G.me&&!G.uctl.down)btn(box,'Tackle','go',userTackle,kb('tackle'));
@@ -21261,8 +21383,8 @@ function setCtl(){
   }else if(G.phase==='live'&&G.ballState==='air'&&G.cm&&G.cm.target&&G.cm.target.team===G.me){
     G.hint=G.cm.diff>0.66?'Hard catch: deep, covered or off target. Tap right in the small green zone.':G.cm.need?'Tough catch: tap the screen when the marker hits green.':'Easy catch: tap in the green for a sure grab.';
   }else if(G.phase==='live'&&G.ballState==='qb'&&!isAI(G.offTeam)&&G.offTeam===G.me&&P.kind==='scrimmage'&&P.off.kind==='pass'){
-    G.hint='Pull back to aim, release to throw. Drag from the QB to step around the pocket. Second finger, Space or the Pass button: touch / bullet / lob. Pull toward the QB to run.';
-    btn(box,'Pass: '+PT_N[G.ptype||'touch'],G.ptype==='bullet'?'go':'alt',gpCyclePT,'Space');
+    G.hint='Pull back to aim, release to throw. Tap the screen (or Space) to switch between a bullet and a lob; every play starts with a bullet. Drag from the QB to step around the pocket.';
+    btn(box,'Pass: '+PT_N[G.lob?'lob':'bullet'],G.lob?'alt':'go',gpCyclePT,'Space');btn(box,'QB run','alt',scramble,kb('scramble'));
     {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[6,'Scramble'],[7,'Pass type']]));}
   }
   if(G.phase==='presnap'&&P&&pcOn()&&!G.meter){if(pcAIQB()&&G.offTeam===G.me)padLegend(box,[[3,'Call for ball']]);}
@@ -22518,7 +22640,7 @@ function gpControlsHtml(){
     <div>${K('T')} timeout<\/div><div>${K('P')} or ${K('Esc')} pause<\/div>
     <div class="ctlh">Passing<\/div>
     <div>${K('1')}–${K('5')} throw to that receiver (numbers float over them)<\/div><div>Mouse / finger: pull back like a slingshot, let go to throw<\/div>
-    <div>${K('Space')} pass type: touch / bullet / lob<\/div><div>${B('scramble')} tuck it and run with the QB<\/div>
+    <div>${K('Space')} pass type: bullet / lob<\/div><div>${B('scramble')} tuck it and run with the QB<\/div>
     <div class="ctlh">Ball carrier<\/div>
     <div>${K('↑')}${K('↓')}${K('←')}${K('→')} steer your runner (full speed every way)<\/div><div>${B('jukeU')}/${B('jukeD')} juke · ${B('dive')} dive · ${B('slow')} slow down<\/div>
     <div>${B('spin')} spin · ${B('stiff')} stiff arm<\/div><div>${B('truck')} truck · ${B('hurdle')} hurdle · ${K('K')} take a knee (kickoff)<\/div>
@@ -22603,7 +22725,7 @@ function padGameStep(){
       if(G.ballState==='air'&&pr(0)&&(G.cm||G.im)){if(G.cm&&G.cm.target&&G.cm.target.team===G.me)catchMeterTap();else intMeterTap();}
       else if(pcAIQB()&&G.ballState==='qb'){if(pr(3))pcCallBall();}
       else if(passingUser()){[0,1,2,3,5].forEach((k,i)=>{if(pr(k))gpKeyThrow(i);});if(pr(6))scramble();if(pr(7))gpCyclePT();}
-      else if(userCarrier()){if(pr(2))trySpin();if(pr(1))tryStiff();if(pr(3))tryHurdle();if(pr(5))tryTruck();if(pr(7))tryDive();if(pr(4))gpAutoJuke();if(pr(6))trySlow();if(pr(0)&&G.kneelOK>0)olKneel();
+      else if(userCarrier()){{const mi=[[2,1],[1,2],[3,4],[5,3],[7,5],[4,0]].find(([b])=>pr(b));if(mi&&G.mwMark)G.mwMark(mi[1]);}if(pr(2))trySpin();if(pr(1))tryStiff();if(pr(3))tryHurdle();if(pr(5))tryTruck();if(pr(7))tryDive();if(pr(4))gpAutoJuke();if(pr(6))trySlow();if(pr(0)&&G.kneelOK>0)olKneel();
         const ry=g.axes[3]||0,fl=ry<-0.75?-1:ry>0.75?1:0;if(fl&&fl!==PADN.flick)tryJuke(fl*(G.flip?-1:1));PADN.flick=fl;}
       else if(G.uctl&&G.uctl.team===G.me&&gpDefending(G.me)){if(pr(0))userTackle();if(pr(6)||pr(8))switchUser();}
       if(G.play&&G.play.kind==='punt'&&G.offTeam===G.me&&pr(0)&&!G.carrier)olFair();
@@ -22686,7 +22808,8 @@ cv.addEventListener('pointerup',ev=>{
   if(!passingUser()){G.aim=null;return;}
   const dur=performance.now()-P.t0;
   if(G.aim&&!G.aim.run)userThrow();
-  else if((G.aim&&G.aim.run&&P.moved>6)||(P.moved<8&&dur<350))scramble();
+  else if(G.aim&&G.aim.run&&P.moved>6)scramble();
+  else if(P.moved<8&&dur<350)gpCyclePT(); // a quick tap switches bullet / lob
   G.aim=null;
 });
 cv.addEventListener('pointercancel',ev=>{if(G.ptr&&ev.pointerId===G.ptr.id){G.ptr=null;G.aim=null;G.joy=null;G.pjoy=null;}});
