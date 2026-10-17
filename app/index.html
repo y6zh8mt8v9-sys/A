@@ -20814,7 +20814,7 @@ function updateLive(dt){
     if(!c&&P.kind==='scrimmage'&&!(b.role==='OL'||b.block))continue;
     if(!c&&(P.kind==='kickoff'))continue;
     for(const d of G.ents){if(d.side===b.side||d.eng>0||d.engCD>0||d.down||d.lunge>0||d===G.uctl&&G.joyV)continue;
-      if(dist(b,d)<1.1){d.eng=d.engDur*(c?clamp((b.role==='OL'?0.66:b.fb?0.6:0.48)*gpBlockRatio(b,d)*(gpOutside()&&(d.x-CX)*gpOutside()>2?1.55:1),0.25,1.2):(P.kind==='scrimmage'&&!P.special&&P.off&&P.off.kind==='pass'?gpPassPro(b,d):(b.fb?0.75:1)));b.engWith=d;d.blockedBy=b;dust((b.x+d.x)/2,(b.y+d.y)/2,3);injuryCheck(d,0.0008);gpPancake(b,d,c);break;}}
+      if(dist(b,d)<1.1){d.eng=d.engDur*(c?clamp((b.role==='OL'?0.74:b.fb?0.64:0.5)*gpBlockRatio(b,d)*(gpOutside()&&(d.x-CX)*gpOutside()>2?1.55:1),0.25,1.2):(P.kind==='scrimmage'&&!P.special&&P.off&&P.off.kind==='pass'?gpPassPro(b,d):(b.fb?0.75:1)));b.engWith=d;d.blockedBy=b;dust((b.x+d.x)/2,(b.y+d.y)/2,3);injuryCheck(d,0.0008);gpPancake(b,d,c);break;}}
   }
   // sacks & roughing
   if(P.kind==='scrimmage'&&(G.ballState==='qb'||G.ballState==='snap')){
