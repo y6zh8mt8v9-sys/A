@@ -1123,7 +1123,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
     <div style="padding:16px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div>
         <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;text-transform:uppercase;color:var(--b2);margin:0;"> Team Builder</h2>
-        <div style="font-size:11px;color:var(--mu);margin-top:2px;">Add, edit, and manage teams across all divisions. Export your league for future saves.</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:2px;">Add, edit and manage teams in every state and division. Your changes are saved as you go, so you can stop and continue later.</div>
       </div>
       <button onclick="closeTeamBuilder()" style="background:none;border:none;color:var(--mu);font-size:22px;cursor:pointer;padding:4px 8px;">✕</button>
     </div>
@@ -3606,7 +3606,7 @@ function initGame(coach,divs,dIdx,sIdx,chosenRivals){
   // Also stamp cls on player's own division teams
   for(const div of G.divisions)for(const t of div.teams)t.cls=t.cls||G.cls;
   try{ensureStates(true);}catch(e){console.error('states',e);}
-  G._thr=null;for(const p of G.players)if(!p.grad)starsInit(p);
+  G._thr=null;for(const p of G.players)if(!p.grad)starsInit(p);try{starCap5();}catch(e){}
   for(const p of G.players)if(!p.grad&&p.yr>=11&&p.sg>=1){p.offers=p.offers||[];for(let k=0;k<1+p.sg;k++)genOffers(p,true,null);}
 
   // Player's team should always be low-to-mid of their classification.
@@ -5301,13 +5301,15 @@ function _recPools(){
     const byD={};
     for(const p of G.players){if(p.grad||p.yr<9||p.yr>12||!p.sId)continue;const v=recScore(p);(by[p.yr]=by[p.yr]||[]).push(v);if(!p.lt)(byD[p.yr]=byD[p.yr]||[]).push(v);}
     const virt=USA.on&&USA.virt?USA.virt:0;
-    const T={},N={};for(const y in by){const a=by[y].sort((x,z)=>z-x),n=a.length,D=(byD[y]||a).slice().sort((x,z)=>z-x),nd=D.length||1;T[y]=STAR_SHARE.map((f,i)=>i?D[Math.min(nd-1,Math.max(0,Math.ceil(nd*f)-1))]:-1e9);
+    const T={},N={},C={};for(const y in by){const a=by[y].sort((x,z)=>z-x),n=a.length,D=(byD[y]||a).slice().sort((x,z)=>z-x),nd=D.length||1;T[y]=STAR_SHARE.map((f,i)=>i?D[Math.min(nd-1,Math.max(0,Math.ceil(nd*f)-1))]:-1e9);
       const sc=Math.min(1,(virt?(byD[y]||[]).length+virt:n)/NAT_POOL_FULL)*(NAT_YR_F[y]||1);let cum=0;const t=[-1e9,Infinity,0,0,0,0];
       for(let s=5;s>=2;s--){cum+=NAT_STARS[s]*sc;const i=Math.round(cum)-1;t[s]=i<0?Infinity:a[Math.min(n-1,i)];}
-      N[y]=t;}
-    Object.defineProperty(G,'_thr',{value:{key,T,N},writable:true,configurable:true,enumerable:false});}
+      N[y]=t;C[y]=Math.round(NAT_STARS[5]*sc);}
+    Object.defineProperty(G,'_thr',{value:{key,T,N,C},writable:true,configurable:true,enumerable:false});}
   return G._thr;
 }
+function starCap5(){if(!G||!G.players)return;const R=_recPools(),by={};for(const p of G.players)if(!p.grad&&p.stars===5&&p.yr>=9&&p.yr<=12)(by[p.yr]=by[p.yr]||[]).push(p);
+  for(const y in by){const cap=R.C&&R.C[y]!=null?R.C[y]:32,L=by[y];if(L.length<=cap)continue;L.sort((a,b)=>recScore(b)-recScore(a));for(const p of L.slice(cap))p.stars=4;}}
 function starThr(yr){const R=_recPools();return R.T[yr]||R.T[12]||[ -1e9,80,84,87,89,91];}
 function natThr(yr){const R=_recPools();return R.N[yr]||R.N[12]||[-1e9,Infinity,Infinity,Infinity,Infinity,Infinity];}
 
@@ -8157,10 +8159,9 @@ function pgCust(){
       <div style="font-size:10px;color:var(--mu);margin-bottom:5px">Preset Combos</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">${LCOLS.slice(0,18).map(([c1,c2])=>`<div onclick="document.getElementById('cc1').value='${c1}';document.getElementById('cc2').value='${c2}'" style="width:26px;height:26px;border-radius:50%;background:${c1};border:2px solid ${c2};cursor:pointer;display:inline-block"></div>`).join('')}</div>
       <div style="margin-top:14px"><div style="font-size:11px;color:var(--mu);margin-bottom:7px;font-weight:700">EDIT ANY SCHOOL</div>
-        <select id="editSchSel" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:4px;font-size:12px;width:100%">
-          ${allSchools().map(s=>`<option value="${s.id}">${s.name} ${s.mascot} (${s.city})</option>`).join('')}
-        </select>
-        <button class="bgh bsm" onclick="openEditSch(parseInt(document.getElementById('editSchSel').value))" style="margin-top:6px">Edit Selected</button>
+        <input placeholder="Find any school in any state…" oninput="schFind(this.value)" style="width:100%;padding:5px 8px">
+        <div id="schFindL" style="margin-top:6px;max-height:240px;overflow-y:auto"></div>
+        <div style="font-size:10px;color:var(--mu);margin-top:4px">Or open any school (tap its name anywhere in the game) and press Edit team.</div>
       </div>
     </div>
   </div>`;
@@ -8254,12 +8255,15 @@ function clearCustomLogo(){
   updateTb();notify('Custom logo removed.');nav('cust');
 }
 function applyC(){const ms=myS();ms.name=document.getElementById('cn').value||ms.name;ms.mascot=document.getElementById('cm').value||ms.mascot;ms.city=document.getElementById('cc').value||ms.city;ms.abbr=(document.getElementById('ca').value||ms.abbr).toUpperCase().slice(0,2);ms.c1=document.getElementById('cc1').value;ms.c2=document.getElementById('cc2').value;if(ms._pendingLogo){ms.customLogo=ms._pendingLogo;ms._pendingLogo=null;}updateTb();notify('Team updated!');nav('cust');}
+window.schFind=function(q){const el=document.getElementById('schFindL');if(!el)return;q=String(q||'').trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}
+  const L=[];for(const s of allSchoolsAll()){if(L.length>=30)break;if((s.name+' '+s.mascot+' '+(s.city||'')).toLowerCase().includes(q))L.push(s);}
+  el.innerHTML=L.length?L.map(s=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--bd)">${sLogo(s,22)}<div style="flex:1;min-width:0;font-size:12px"><b>${s.name} ${s.mascot}</b> <span style="color:var(--mu)">${s.city||''} · ${clsName(s.cls)}</span></div><button class="bgh bxs" onclick="openEditSch(${s.id})">Edit</button></div>`).join(''):'<div style="font-size:12px;color:var(--mu)">No school found.</div>';};
 function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School</h2>
   <div class="g2" style="gap:10px;margin-top:8px">
     <div class="fg"><label>Team Name</label><input class="ei" id="en" value="${s.name}"></div>
     <div class="fg"><label>Mascot</label><input class="ei" id="em" value="${s.mascot}"></div>
     <div class="fg"><label>City</label><input class="ei" id="ec" value="${s.city}"></div>
-    <div class="fg"><label>Abbreviation</label><input class="ei" id="ea" value="${s.abbr}" maxlength="2"></div>
+    <div class="fg"><label>Abbreviation</label><input class="ei" id="ea" value="${s.abbr}" maxlength="3" style="text-transform:uppercase"></div>
     <div class="fg"><label>Primary Color</label><input type="color" id="ec1" value="${s.c1}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
     <div class="fg"><label>Secondary Color</label><input type="color" id="ec2" value="${s.c2}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
     <div class="fg"><label>Off Scheme</label><select class="ei" id="eos">${OFF_SCH.map(sc=>`<option ${sc===s.offS?'selected':''}>${sc}</option>`).join('')}</select></div>
@@ -8284,7 +8288,7 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
     <button class="bgh" onclick="clo()">Cancel</button>
   </div>`);}
 window.schLogoPrev=function(sid){const s=getS(sid),el=document.getElementById('elk-prev');if(!s||!el)return;const t=Object.assign({},s,{logoKey:document.getElementById('elk').value||null,mash:document.getElementById('emash').value||null,c1:document.getElementById('ec1').value,c2:document.getElementById('ec2').value,customLogo:null});el.innerHTML=sLogo(t,64);};
-window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=(document.getElementById('ea').value||s.abbr).toUpperCase().slice(0,2);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
+window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
 window.handleSchLogoUpload=function(inp,sid){
   const file=inp.files[0];if(!file)return;
   const reader=new FileReader();
@@ -10189,7 +10193,8 @@ function lgPlay(s,score,win,oppId){
   for(const p of sPlayers(s.id))if(p.seasStats.gp>0||p.pos==='OL'||p.pos==='K')checkStarsOffers(p,[],true);
   for(const p of sPlayers(s.id))if(p.yr>=11&&!p.committed&&p.offers&&p.offers.length)checkCommit(p);
 }
-function lgSimWeek(wk,myOppId,silent,oppScore,myScore,oppWon){
+function lgSimWeek(...a){const r=lgSimWeek0(...a);try{starCap5();}catch(e){}return r;}
+function lgSimWeek0(wk,myOppId,silent,oppScore,myScore,oppWon){
   const opp=getS(myOppId);
   if(opp){lgLog(opp,{wk,o:G.myId,h:(wk%2)?1:0,us:oppScore,them:myScore});lgPlay(opp,oppScore,oppWon,G.myId);}
   const S=lgBuildSchedule();S.locked=true;const played=new Set();
@@ -11349,30 +11354,37 @@ function _phiInv(p){p=clamp(p,1e-9,1-1e-9);const a=[-39.69683,220.9461,-275.9285
   if(p>1-0.02425)return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
   const r=p-0.5,t=r*r;return(((((a[0]*t+a[1])*t+a[2])*t+a[3])*t+a[4])*t+a[5])*r/(((((b[0]*t+b[1])*t+b[2])*t+b[3])*t+b[4])*t+1);}
 function liteAdj(s){return({'5A':0,'4A':3,'3A':6,'2A':9,'1A':12}[clsEq(s.cls)]||0)+(XCLS[s.cls]?1:0);}
-function liteMu(s,yr){const X=XCLS[s.cls],q=teamQ(s,s.id,0.5,s.tier==='good'?0.55:s.tier==='bad'?0.1:0.3);return(X?X.mean:56)+(q-0.5)*24+((yr||10.5)-10.5)*3;}
+function liteMu0(s){const X=XCLS[s.cls],q=teamQ(s,s.id,0.5,s.tier==='good'?0.55:s.tier==='bad'?0.1:0.3);return(X?X.mean:56)+(q-0.5)*24;}
+function liteMu(s,yr){const o=G.liteYr&&G.liteYr[yr];return liteMu0(s)+(o!=null?o:((yr||10.5)-10.5)*3);}
+function liteSd(yr){return(G.liteSd&&G.liteSd[yr])||LITE_SD;}
+// how the detailed states' players really sit above their school's base, class year by class year (growth included)
+function liteYrCalib(){const sum={},sq={},n={};
+  for(const p of G.players){if(p.lt||p.grad||!p.yr||p.yr<9||p.yr>12||p.sId===G.myId)continue;const s=getS(p.sId);if(!s||s.lite||s.intl||s.fp)continue;const r=p.rat-liteMu0(s);sum[p.yr]=(sum[p.yr]||0)+r;sq[p.yr]=(sq[p.yr]||0)+r*r;n[p.yr]=(n[p.yr]||0)+1;}
+  const o={},sd={};for(const y of[9,10,11,12]){if(!(n[y]>50))continue;const m=sum[y]/n[y];o[y]=+m.toFixed(2);sd[y]=+clamp(Math.sqrt(Math.max(1,sq[y]/n[y]-m*m)),3,12).toFixed(2);}
+  if(Object.keys(o).length===4){G.liteYr=o;G.liteSd=sd;}}
 function liteN(s){const r=clsSz(s.cls).r;return(r[0]+r[1])/8;}   // players a full roster would have in one class year
 function liteStates(){const by={};if(!G||!G.allLeagues)return by;for(const c in G.allLeagues){if(!isLiteCls(c))continue;const st=XCLS[c].st;for(const d of G.allLeagues[c].divisions)for(const t of d.teams){t.lite=1;(by[st]=by[st]||[]).push(t);}}return by;}
 // the line (rating + class adjustment) above which a full class year of this state would have `quota` players
-function liteThr(teams,yr,quota){let lo=10,hi=150;const P=teams.map(s=>[liteAdj(s)+liteMu(s,yr),liteN(s)]);
-  for(let it=0;it<36;it++){const T=(lo+hi)/2;let e=0;for(const[m,n]of P)e+=n*(1-_phi((T-m)/LITE_SD));if(e>quota)lo=T;else hi=T;}return(lo+hi)/2;}
-function liteMake(s,yr,T){const a=liteAdj(s),mu=liteMu(s,yr),u0=_phi((T-a-mu)/LITE_SD),r=mu+LITE_SD*_phiInv(u0+Math.random()*(1-u0));
+function liteThr(teams,yr,quota){let lo=10,hi=150;const P=teams.map(s=>[liteAdj(s)+liteMu(s,yr),liteN(s)]),SD=liteSd(yr);
+  for(let it=0;it<36;it++){const T=(lo+hi)/2;let e=0;for(const[m,n]of P)e+=n*(1-_phi((T-m)/SD));if(e>quota)lo=T;else hi=T;}return(lo+hi)/2;}
+function liteMake(s,yr,T){const a=liteAdj(s),mu=liteMu(s,yr),SD=liteSd(yr),u0=_phi((T-a-mu)/SD),r=mu+SD*_phiInv(u0+Math.random()*(1-u0));
   const p=genPlayer(s.id,yr,s.cls,null),R=clamp(Math.round(r),20,99);p.rat=R;p.potLo=clamp(R+rng(3,12),R,99);p.potHi=clamp(p.potLo+rng(8,20),p.potLo,99);p.pot=p.potLo;
   const tr=Math.random();p.dev=p.potHi>=94&&tr<.5?'Elite Dev':p.potHi>=85&&tr<.35?'Star':p.potHi>=75&&tr<.3?'Impact':'Normal';try{adjDev(p,s);}catch(e){}
   try{xStylePlayer(p,s);}catch(e){}p.lt=1;G.players.push(p);return p;}
 // add `k` prospects of class year `yr` to a state's schools, each school in proportion to how many it would have
-function liteAdd(teams,yr,T,k){if(k<=0||!teams.length)return[];const w=teams.map(s=>liteN(s)*(1-_phi((T-liteAdj(s)-liteMu(s,yr))/LITE_SD))),tot=w.reduce((a,b)=>a+b,0)||1,out=[];
+function liteAdd(teams,yr,T,k){if(k<=0||!teams.length)return[];const SD=liteSd(yr),w=teams.map(s=>liteN(s)*(1-_phi((T-liteAdj(s)-liteMu(s,yr))/SD))),tot=w.reduce((a,b)=>a+b,0)||1,out=[];
   for(let i=0;i<k;i++){let r=Math.random()*tot,j=0;for(;j<w.length-1;j++){r-=w[j];if(r<=0)break;}out.push(liteMake(teams[j],yr,T));}return out;}
 function liteStr(s){const o=G.liteOfs!=null?G.liteOfs:6;return clamp(Math.round(liteMu(s,11)+o+gaussR()*2.5),25,92);}
 function liteCalib(){if(G.liteOfs!=null)return;const L=[];for(const s of allSchoolsAll()){if(s.lite||s.intl||s.id===G.myId)continue;L.push(s);if(L.length>=500)break;}
   G.liteOfs=L.length?+(L.reduce((a,s)=>a+teamOvr(s.id)-liteMu(s,11),0)/L.length).toFixed(2):6;}
-function liteInit(){const by=liteStates(),fresh=[];if(!Object.keys(by).length)return fresh;liteCalib();
+function liteInit(){const by=liteStates(),fresh=[];if(!Object.keys(by).length)return fresh;if(!G.liteYr)liteYrCalib();liteCalib();
   for(const st in by){const T0=by[st];for(const s of T0)if(s.str==null)s.str=liteStr(s);
     if(sPlayersAny(T0))continue; // this state already has its prospects (a loaded career)
     const ab=USA.ab[st]||st;for(const yr of[9,10,11,12]){const q=liteQuota(ab,yr),T=liteThr(T0,yr,q);for(const p of liteAdd(T0,yr,T,q))fresh.push(p);}}
   return fresh;}
 function sPlayersAny(teams){for(const s of teams)if(sPlayers(s.id).length)return true;return false;}
 // the offseason: seniors leave, everyone grows, new freshmen, late bloomers join, the ones who fell away are dropped, strengths move
-function liteOffseason(){const by=liteStates();if(!Object.keys(by).length)return;liteCalib();
+function liteOffseason(){const by=liteStates();if(!Object.keys(by).length)return;liteYrCalib();G.liteOfs=null;liteCalib();
   const ids=new Set();for(const st in by)for(const s of by[st])ids.add(s.id);
   G.players=G.players.filter(p=>!(p.lt&&ids.has(p.sId)&&p.yr>=12));
   for(const p of G.players){if(!p.lt||!ids.has(p.sId))continue;p.yr++;try{bodyGrow(p);}catch(e){}const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
@@ -11383,7 +11395,7 @@ function liteOffseason(){const by=liteStates();if(!Object.keys(by).length)return
       for(const s of T0)for(const p of byS[s.id]||[]){if(p.yr!==yr)continue;const v=p.rat+liteAdj(s);if(v>=T)have++;else if(v<T-10&&!p.committed&&!(p.offers&&p.offers.length)&&p.id!==G.myPlayerId)drop.add(p.id);}
       for(const p of liteAdd(T0,yr,T,Math.max(0,Math.round(q-have))))fresh.push(p);}}
   if(drop.size)G.players=G.players.filter(p=>!drop.has(p.id));
-  G._thr=null;for(const p of fresh)starsInit(p);}
+  G._thr=null;for(const p of fresh)starsInit(p);try{starCap5();}catch(e){}}
 // stand-ins for a light school's untracked players, so its prospects get a normal share of the team's stats (never stored)
 const _LT_PH={};
 function litePH(s){const need={QB:1,RB:2,WR:3,TE:1,OL:5,K:1,DL:4,LB:3,CB:3,S:2},out=[];let k=0;
@@ -14094,6 +14106,36 @@ function initAllClsDivs(){
   _tbCls=curCls;
 }
 
+// ── Team Builder draft: every change is stored right away and re-applied whenever the setup map is rebuilt ──
+const TBD_KEY='gpgm_tbdraft';let _tbSt=null;
+function tbWorldKey(){try{return JSON.stringify(USA.on?{s:USA.cfg.states,h:USA.cfg.home,c:(USA.cfg.custom||[]).map(x=>x.ab)}:'classic');}catch(e){return'classic';}}
+function tbDraft(){let d=null;try{d=JSON.parse(localStorage.getItem(TBD_KEY)||'null');}catch(e){}if(!d||d.k!==tbWorldKey())d={k:tbWorldKey(),ed:{},del:[],add:[]};return d;}
+function tbDraftPut(d){try{localStorage.setItem(TBD_KEY,JSON.stringify(d));return true;}catch(e){tbStatus('Could not save your changes on this device (storage full: try smaller logo images).','var(--rd)');return false;}}
+function tbOk(t){return t._ok||(t._ok=(t.cls||'')+'|'+t.name);}
+function tbFields(t){return{name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};}
+function tbRecord(t,op){const d=tbDraft();
+  if(op==='add'){t._ok='add|'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);d.add.push(Object.assign({ok:t._ok},tbFields(t)));}
+  else if(op==='del'){const ok=tbOk(t);const i=d.add.findIndex(a=>a.ok===ok);if(i>=0)d.add.splice(i,1);else{delete d.ed[ok];if(!d.del.includes(ok))d.del.push(ok);}}
+  else{const ok=tbOk(t);const a=d.add.find(x=>x.ok===ok);if(a)Object.assign(a,tbFields(t));else d.ed[ok]=tbFields(t);}
+  if(tbDraftPut(d))tbStatus('Saved on this device. Your changes stay for every new career until you discard them, so you can continue any time.');}
+function tbDraftCount(){const d=tbDraft();return Object.keys(d.ed).length+d.del.length+d.add.length;}
+function tbApplyDraft(){
+  if(!_allClsDivs)return 0;const d=tbDraft(),n=Object.keys(d.ed).length+d.del.length+d.add.length;if(!n)return 0;
+  const byOk={};for(const[c,dv]of Object.entries(_allClsDivs))for(const dd of dv)for(const t of dd.teams){byOk[(t._ok)||(c+'|'+t.name)]=t;t.cls=t.cls||c;}
+  const moveTo=(t,to)=>{if(!to)return;const[c,di]=to.split('|'),D=_allClsDivs[c],k=+di;if(!D||!D[k]||(t.cls===c&&t.dIdx===k))return;
+    for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}t.cls=c;t.dIdx=k;D[k].teams.push(t);};
+  for(const ok of d.del){const t=byOk[ok];if(!t)continue;for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}}
+  for(const ok in d.ed){const t=byOk[ok];if(!t)continue;const f=d.ed[ok];t._ok=ok;Object.assign(t,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,customLogo:f.customLogo||null});moveTo(t,f.to);}
+  for(const a of d.add){const[c,di]=String(a.to||'').split('|'),D=_allClsDivs[c];if(!D)continue;const k=clamp(+di||0,0,D.length-1);
+    D[k].teams.push({id:_sId++,_ok:a.ok,name:a.name,mascot:a.mascot,city:a.city,cls:c,dIdx:k,abbr:a.abbr,c1:a.c1,c2:a.c2,prestige:a.prestige||3,wins:0,losses:0,isP:false,offS:pick(OFF_SCH),defS:pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:a.customLogo||null});}
+  return n;}
+window.tbDraftClear=function(){if(!confirm('Undo every Team Builder change and go back to the original schools?'))return;try{localStorage.removeItem(TBD_KEY);}catch(e){}
+  _allClsDivs=null;try{_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);}catch(e){}initCountyMap();tbTab('browse');tbStatus('Team Builder changes cleared.','var(--gd)');};
+function tbStCur(){return _tbSt||clsSt(_tbCls)||'CF';}
+window.tbSetSt=function(st){_tbSt=st;_tbCls=clsOfSt(st)[0];tbTab('browse');};
+window.tbSearch=function(q){const el=document.getElementById('tb-find');if(!el)return;q=String(q||'').trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}const out=[];
+  for(const[c,dv]of Object.entries(_allClsDivs||{}))dv.forEach((dd,di)=>dd.teams.forEach((t,ti)=>{if(out.length<40&&(t.name+' '+t.mascot+' '+t.city).toLowerCase().includes(q))out.push([c,di,ti,t]);}));
+  el.innerHTML=out.length?out.map(([c,di,ti,t])=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bd)">${sLogo(t,24)}<div style="flex:1;min-width:0;font-size:12px"><b>${t.name} ${t.mascot}</b> <span style="color:var(--mu)">${t.city} · ${clsName(c)}</span></div><button class="bgh bxs" onclick="_tbSt=clsSt('${c}');_tbCls='${c}';tbEditTeam(${di},${ti})">Edit</button></div>`).join(''):'<div style="font-size:12px;color:var(--mu)">No school found.</div>';};
 function tbGetDivs(cls){
   if(!_allClsDivs)initAllClsDivs();
   return _allClsDivs[cls||_tbCls]||[];
@@ -14155,15 +14197,20 @@ function tbRenderBrowse(){
   const divs=tbGetDivs(_tbCls);
   const curGameCls=document.getElementById('s-cls').value;
   return`<div style="margin-bottom:12px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <label style="font-size:11px;font-weight:700;color:var(--mu)">State <select onchange="tbSetSt(this.value)" style="padding:4px 8px;border-radius:4px">${ST_ORDER.map(k=>`<option value="${k}"${k===tbStCur()?' selected':''}>${stName(k)}${XST[k]&&XST[k].lite?' (light)':''}</option>`).join('')}</select></label>
+      <input placeholder="Find any school…" oninput="tbSearch(this.value)" style="flex:1 1 180px;padding:5px 8px">
+      ${tbDraftCount()?`<span style="font-size:11px;color:var(--gn)">${tbDraftCount()} saved change${tbDraftCount()===1?'':'s'}</span><button class="bgh bxs" onclick="tbDraftClear()">Discard my changes</button>`:''}</div>
+    <div id="tb-find" style="margin-bottom:8px"></div>
     <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);font-weight:700;margin-bottom:6px;">View Classification:</div>
     <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
-      ${['1A','2A','3A','4A','5A'].map(cls=>`
+      ${clsOfSt(tbStCur()).map(cls=>`
         <button onclick="tbSetCls('${cls}')" style="background:${_tbCls===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_tbCls===cls?'var(--ac)':'var(--bd)'};color:${_tbCls===cls?'#fff':'var(--tx)'};padding:4px 12px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;">
-          ${cls}${cls===curGameCls?' ★':''}
+          ${(clsName(cls)||cls).replace(stName(tbStCur())+' ','')}${cls===curGameCls?' ★':''}
         </button>`).join('')}
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;margin-bottom:10px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--b2)">League: ${_tbCls}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--b2)">League: ${clsName(_tbCls)}</div>
       ${_tbCls===curGameCls?`<span style="font-size:10px;background:var(--ac);color:#fff;padding:2px 7px;border-radius:3px;font-weight:700;">YOUR CLASS ★</span>`:''}
       <span style="font-size:11px;color:var(--mu)">${divs.reduce((s,d)=>s+d.teams.length,0)} teams · ${divs.length} divisions</span>
     </div>
@@ -14209,9 +14256,9 @@ function tbRenderAdd(dIdx){
     <div class="fg" style="margin-bottom:10px;">
       <label>Classification</label>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">
-        ${['1A','2A','3A','4A','5A'].map(cls=>`
+        ${clsOfSt(tbStCur()).map(cls=>`
           <button onclick="tbSwitchAddCls('${cls}')" id="tb-add-cls-${cls}" style="background:${_tbCls===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_tbCls===cls?'var(--ac)':'var(--bd)'};color:${_tbCls===cls?'#fff':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;">
-            ${cls}
+            ${(clsName(cls)||cls).replace(stName(tbStCur())+' ','')}
           </button>`).join('')}
       </div>
     </div>
@@ -14299,6 +14346,7 @@ function tbClearLogo(mode){
   tbPreviewLogo(mode);
 }
 
+function tbAbbrUsed(cls){const st=clsSt(cls),u=new Set();for(const[c,dv]of Object.entries(_allClsDivs||{}))if(clsSt(c)===st)for(const d of dv)for(const t of d.teams)if(t.abbr)u.add(t.abbr);return u;}
 function tbSwitchAddCls(cls){
   _tbCls=cls;
   tbTab('add');
@@ -14316,7 +14364,7 @@ function tbConfirmAdd(){
   if(!mascot){tbStatus('Enter a mascot.','var(--rd)');return;}
   if(!city){tbStatus('Enter a city.','var(--rd)');return;}
   const cls=_tbCls||document.getElementById('s-cls').value;
-  const abbr=name.replace(/High|School|Academy|Prep/g,'').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'HS';
+  const abbr=abbr3(name,tbAbbrUsed(cls));
   const newTeam={
     id:_sId++,name,mascot,city,cls,dIdx,abbr,c1,c2,
     prestige,wins:0,losses:0,isP:false,
@@ -14326,7 +14374,7 @@ function tbConfirmAdd(){
     customLogo:_tbAddLogoData||null
   };
   const divs=tbGetDivs(cls);
-  divs[dIdx].teams.push(newTeam);
+  divs[dIdx].teams.push(newTeam);tbRecord(newTeam,'add');
   // If this is the player's own game classification, keep _setupDivs in sync
   const curGameCls=document.getElementById('s-cls').value;
   if(cls===curGameCls)_setupDivs=divs;
@@ -14345,7 +14393,7 @@ function tbEditTeam(dIdx,tIdx){
   _tbEditLogoData=t.customLogo||null;
   const body=document.getElementById('tb-body');
   // Gather all divisions across all classes for cross-class move
-  const allClsOptions=['1A','2A','3A','4A','5A'].map(cls=>`<optgroup label="${cls}">${(tbGetDivs(cls)||[]).map((d,i)=>`<option value="${cls}|${i}"${cls===_tbCls&&i===dIdx?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</optgroup>`).join('');
+  tbOk(t);const allClsOptions=clsOfSt(clsSt(_tbCls)).map(cls=>`<optgroup label="${clsName(cls)}">${(tbGetDivs(cls)||[]).map((d,i)=>`<option value="${cls}|${i}"${cls===_tbCls&&i===dIdx?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</optgroup>`).join('');
   // Set active tab to browse context but show edit form inline
   body.innerHTML=`<div style="max-width:520px;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;text-transform:uppercase;"> Edit Team — ${t.name} ${t.mascot} <span style="color:var(--b2)">[${_tbCls}]</span></div>
@@ -14353,6 +14401,7 @@ function tbEditTeam(dIdx,tIdx){
       <div class="fg"><label>School Name</label><input class="ei" id="tb-edit-name" value="${t.name}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-edit-mascot" value="${t.mascot}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>City</label><input class="ei" id="tb-edit-city" value="${t.city}"></div>
+      <div class="fg"><label>Abbreviation (3 letters)</label><input class="ei" id="tb-edit-abbr" value="${t.abbr||''}" maxlength="3" style="text-transform:uppercase"></div>
       <div class="fg"><label>Move to Division (any classification)</label>
         <select class="ei" id="tb-edit-div">
           ${allClsOptions}
@@ -14412,7 +14461,7 @@ function tbSaveEdit(){
   const newPrestige=parseInt(document.getElementById('tb-edit-prestige')?.value||'3');
   t.name=newName;t.mascot=newMascot;t.city=newCity;t.c1=newC1;t.c2=newC2;
   t.prestige=newPrestige;
-  t.abbr=newName.replace(/High|School|Academy|Prep/g,'').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'HS';
+  {const ab=String(document.getElementById('tb-edit-abbr')?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3);const u=tbAbbrUsed(editCls);u.delete(t.abbr);t.abbr=ab.length===3&&!u.has(ab)?ab:(newName!==t._ok.split('|').slice(1).join('|')||ab.length!==3?abbr3(newName,u):t.abbr);}
   t.customLogo=_tbEditLogoData||null;
   // Move to different division/classification if requested
   if(newCls!==editCls||newDIdx!==dIdx){
@@ -14424,7 +14473,7 @@ function tbSaveEdit(){
     _tbCls=newCls; // switch view to where the team landed
   }
   _tbEditId=null;
-  tbStatus(`✓ Saved "${newName} ${newMascot}" → ${newCls}`);
+  tbRecord(t,'edit');
   // Refresh school dropdown
   const curGameCls=document.getElementById('s-cls').value;
   const gameDivs=_allClsDivs?.[curGameCls]||_setupDivs;
@@ -14458,8 +14507,7 @@ function tbConfirmDelete(dIdx,tIdx){
   const divs=tbGetDivs(_tbCls);
   const t=divs[dIdx]?.teams[tIdx];if(!t)return;
   const name=`${t.name} ${t.mascot}`;
-  divs[dIdx].teams.splice(tIdx,1);
-  tbStatus(`Removed "${name}"`,'var(--gd)');
+  divs[dIdx].teams.splice(tIdx,1);tbRecord(t,'del');
   const curGameCls=document.getElementById('s-cls').value;
   const gameDivs=_allClsDivs?.[curGameCls]||_setupDivs;
   const dsel=document.getElementById('s-div');
@@ -15861,9 +15909,15 @@ function worldFrMult(){return clamp(+(WORLD&&WORLD.frMult)||1,0.5,2);}
 const WS={tab:'states',st:'CF',lvl:'FBS',draft:null};
 function wsClean(t){return String(t||'').replace(/[<>&"'`\\]/g,'').replace(/\s+/g,' ').trim().slice(0,40);}
 function wsList(txt,max){const out=[],seen=new Set();for(const l of String(txt||'').split(/\n/)){const n=wsClean(l);if(n&&!seen.has(n.toLowerCase())){seen.add(n.toLowerCase());out.push(n);}if(out.length>=max)break;}return out;}
-function openWorldSetup(){WS.draft=JSON.parse(JSON.stringify(worldLoad()));wsRender();}
+// League Setup keeps an unsaved draft on this device, so a big setup can be done over several sessions
+const WSD_KEY='gpgm_wsdraft';
+function wsDraftStore(){try{localStorage.setItem(WSD_KEY,JSON.stringify(WS.draft||{}));return true;}catch(e){notify('Could not keep your League Setup progress on this device (storage is full).','e');return false;}}
+function wsDraftDrop(){try{localStorage.removeItem(WSD_KEY);}catch(e){}}
+function openWorldSetup(){let d=null;try{d=JSON.parse(localStorage.getItem(WSD_KEY)||'null');}catch(e){}
+  WS.draft=d&&typeof d==='object'?d:JSON.parse(JSON.stringify(worldLoad()));wsRender();if(d)setTimeout(()=>notify('Continuing your unsaved League Setup changes.'),60);}
+window.wsDiscard=function(){if(!confirm('Throw away the League Setup changes you have not saved yet?'))return;wsDraftDrop();WS.draft=JSON.parse(JSON.stringify(worldLoad()));wsRender();notify('Unsaved changes discarded.');};
 function wsCur(){const O=worldOrig(),D=WS.draft;return{O,D};}
-function wsTab(t){wsGrab();WS.tab=t;wsRender();}
+function wsTab(t){wsGrab();wsDraftStore();WS.tab=t;wsRender();}
 // read the inputs of the tab on screen into the draft
 function wsGrab(){
   const D=WS.draft,O=worldOrig(),v=id=>{const e=document.getElementById(id);return e?e.value:null;};
@@ -15921,12 +15975,13 @@ function wsRender(){
     <div>${body}</div>
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px">
       <button class="bgh" onclick="if(confirm('Reset every League Setup change back to the default world?')){WS.draft={};wsSave();}">Reset all</button>
-      <button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="wsGrab();wsSave()">Save League Setup</button></div>`);
+      <button class="bgh" onclick="wsDiscard()">Discard changes</button><button class="bgh" onclick="wsGrab();if(wsDraftStore())notify('Progress saved. Close and continue any time: it is used for new careers once you press Save League Setup.');">Save progress</button><button class="bgh" onclick="wsGrab();wsDraftStore();clo()">Close</button><button class="btn bgn" onclick="wsGrab();wsSave()">Save League Setup</button></div>`);
 }
 function wsSave(){
   const D=WS.draft||{};D.custFor=USA.on?'usa':'classic';
   // new custom states join the world right away
   if(D.geo&&D.geo.mode!=='classic'&&Array.isArray(D.geo.custom)){D.geo.mode='usa';D.geo.states=Array.isArray(D.geo.states)?D.geo.states:Object.keys(USST);for(const c of D.geo.custom)if(c.counties&&c.counties.length&&!D.geo.states.includes(c.ab))D.geo.states.push(c.ab);}worldStore(D);worldApply(D);
+  wsDraftDrop();
   try{_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();}catch(e){console.error('league setup',e);}
   clo();notify('League Setup saved. New careers use it.');
 }
@@ -15962,6 +16017,7 @@ function initCountyMap(){
     _sId=uid;
   }else{for(const c of XCLS_ORDER)if(!_allClsDivs[c]){_allClsDivs[c]=makeStateDivisions(c);for(const div of _allClsDivs[c])for(const t of div.teams)t.cls=c;}}
 
+  try{tbApplyDraft();}catch(e){console.error('team builder draft',e);}
   // Use current class setup divs
   _setupDivs=_allClsDivs[curCls];
   document.getElementById('s-div').innerHTML=_setupDivs.map((d,i)=>`<option value="${i}">${d.name}</option>`).join('');
