@@ -11346,7 +11346,7 @@ function xStylePlayer(p,s){
 // roster would have, so stars, offers, camps and commitments work there exactly like in a detailed state.
 const LITE_SD=6.5;
 function isLiteCls(c){const X=XCLS[c];return!!(X&&X.lite);}
-function liteQuota(ab,yr){const X=USA.X,m=X&&X.st[ab]?X.st[ab].meta[0]:(USST[ab]||[100])[0];return Math.ceil((2462*m/USST_PROG_ALL*1.2+2)*({9:0.45,10:0.75}[yr]||1));}
+function liteQuota(ab,yr){const X=USA.X,m=X&&X.st[ab]?X.st[ab].meta[0]:(USST[ab]||[100])[0];return Math.ceil((2462*m/USST_PROG_ALL*1.6+2)*({9:0.45,10:0.75}[yr]||1));}
 function _phi(x){const t=1/(1+0.2316419*Math.abs(x)),d=0.3989423*Math.exp(-x*x/2),p=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-p:p;}
 function _phiInv(p){p=clamp(p,1e-9,1-1e-9);const a=[-39.69683,220.9461,-275.9285,138.3578,-30.66480,2.506628],b=[-54.47610,161.5858,-155.6990,66.80131,-13.28068],c=[-0.007784894,-0.3223964,-2.400758,-2.549732,4.374664,2.938164],d=[0.007784696,0.3224671,2.445134,3.754409];
   const q=p<0.02425?Math.sqrt(-2*Math.log(p)):p>1-0.02425?Math.sqrt(-2*Math.log(1-p)):0;
@@ -11354,25 +11354,34 @@ function _phiInv(p){p=clamp(p,1e-9,1-1e-9);const a=[-39.69683,220.9461,-275.9285
   if(p>1-0.02425)return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
   const r=p-0.5,t=r*r;return(((((a[0]*t+a[1])*t+a[2])*t+a[3])*t+a[4])*t+a[5])*r/(((((b[0]*t+b[1])*t+b[2])*t+b[3])*t+b[4])*t+1);}
 function liteAdj(s){return({'5A':0,'4A':3,'3A':6,'2A':9,'1A':12}[clsEq(s.cls)]||0)+(XCLS[s.cls]?1:0);}
-function liteMu0(s){const X=XCLS[s.cls],q=teamQ(s,s.id,0.5,s.tier==='good'?0.55:s.tier==='bad'?0.1:0.3);return(X?X.mean:56)+(q-0.5)*24;}
+function liteMu0(s){const X=XCLS[s.cls],q=teamQ(s,s.id,0.5,s.tier==='good'?0.55:s.tier==='bad'?0.1:0.3);return(X?X.mean:({'5A':64,'4A':60,'3A':56,'2A':52,'1A':48}[s.cls]||56))+(q-0.5)*24;} // the same class average genPlayer uses
 function liteMu(s,yr){const o=G.liteYr&&G.liteYr[yr];return liteMu0(s)+(o!=null?o:((yr||10.5)-10.5)*3);}
 function liteSd(yr){return(G.liteSd&&G.liteSd[yr])||LITE_SD;}
 // how the detailed states' players really sit above their school's base, class year by class year (growth included)
 function liteYrCalib(){const sum={},sq={},n={};
   for(const p of G.players){if(p.lt||p.grad||!p.yr||p.yr<9||p.yr>12||p.sId===G.myId)continue;const s=getS(p.sId);if(!s||s.lite||s.intl||s.fp)continue;const r=p.rat-liteMu0(s);sum[p.yr]=(sum[p.yr]||0)+r;sq[p.yr]=(sq[p.yr]||0)+r*r;n[p.yr]=(n[p.yr]||0)+1;}
   const o={},sd={};for(const y of[9,10,11,12]){if(!(n[y]>50))continue;const m=sum[y]/n[y];o[y]=+m.toFixed(2);sd[y]=+clamp(Math.sqrt(Math.max(1,sq[y]/n[y]-m*m)),3,12).toFixed(2);}
-  if(Object.keys(o).length===4){G.liteYr=o;G.liteSd=sd;}}
+  if(Object.keys(o).length===4){G.liteYr=o;G.liteSd=sd;}
+  // the real spread, tails included: light prospects are drawn from it, so a light state's best players look like a detailed state's
+  const R={9:[],10:[],11:[],12:[]};for(const p of G.players){if(p.lt||p.grad||!R[p.yr]||p.sId===G.myId)continue;const s=getS(p.sId);if(!s||s.lite||s.intl||s.fp)continue;R[p.yr].push(p.rat-liteMu0(s));}
+  for(const y in R)R[y].sort((a,b)=>a-b);Object.defineProperty(G,'_lr',{value:R,writable:true,configurable:true,enumerable:false});}
+function liteRes(yr){if(!G._lr)liteYrCalib();const A=G._lr&&G._lr[yr];return A&&A.length>200?A:null;}
+function _lrIdx(A,x){let lo=0,hi=A.length;while(lo<hi){const m=(lo+hi)>>1;if(A[m]<x)lo=m+1;else hi=m;}return lo;}
+// share of a class year above x (relative to the school's base), and one draw from above it
+function liteTail(yr,x){const A=liteRes(yr);if(!A)return 1-_phi((x-((G.liteYr&&G.liteYr[yr])||0))/liteSd(yr));return(A.length-_lrIdx(A,x))/A.length;}
+function liteDraw(yr,x){const A=liteRes(yr);if(!A){const o=(G.liteYr&&G.liteYr[yr])||0,SD=liteSd(yr),u0=_phi((x-o)/SD);return o+SD*_phiInv(u0+Math.random()*(1-u0));}
+  const i=_lrIdx(A,x);if(i>=A.length)return x+Math.random()*1.5;return A[i+Math.floor(Math.random()*(A.length-i))];}
 function liteN(s){const r=clsSz(s.cls).r;return(r[0]+r[1])/8;}   // players a full roster would have in one class year
 function liteStates(){const by={};if(!G||!G.allLeagues)return by;for(const c in G.allLeagues){if(!isLiteCls(c))continue;const st=XCLS[c].st;for(const d of G.allLeagues[c].divisions)for(const t of d.teams){t.lite=1;(by[st]=by[st]||[]).push(t);}}return by;}
 // the line (rating + class adjustment) above which a full class year of this state would have `quota` players
-function liteThr(teams,yr,quota){let lo=10,hi=150;const P=teams.map(s=>[liteAdj(s)+liteMu(s,yr),liteN(s)]),SD=liteSd(yr);
-  for(let it=0;it<36;it++){const T=(lo+hi)/2;let e=0;for(const[m,n]of P)e+=n*(1-_phi((T-m)/SD));if(e>quota)lo=T;else hi=T;}return(lo+hi)/2;}
-function liteMake(s,yr,T){const a=liteAdj(s),mu=liteMu(s,yr),SD=liteSd(yr),u0=_phi((T-a-mu)/SD),r=mu+SD*_phiInv(u0+Math.random()*(1-u0));
+function liteThr(teams,yr,quota){let lo=10,hi=150;const P=teams.map(s=>[liteAdj(s)+liteMu0(s),liteN(s)]);
+  for(let it=0;it<36;it++){const T=(lo+hi)/2;let e=0;for(const[m,n]of P)e+=n*liteTail(yr,T-m);if(e>quota)lo=T;else hi=T;}return(lo+hi)/2;}
+function liteMake(s,yr,T){const a=liteAdj(s),mu=liteMu0(s),r=mu+liteDraw(yr,T-a-mu);
   const p=genPlayer(s.id,yr,s.cls,null),R=clamp(Math.round(r),20,99);p.rat=R;p.potLo=clamp(R+rng(3,12),R,99);p.potHi=clamp(p.potLo+rng(8,20),p.potLo,99);p.pot=p.potLo;
   const tr=Math.random();p.dev=p.potHi>=94&&tr<.5?'Elite Dev':p.potHi>=85&&tr<.35?'Star':p.potHi>=75&&tr<.3?'Impact':'Normal';try{adjDev(p,s);}catch(e){}
   try{xStylePlayer(p,s);}catch(e){}p.lt=1;G.players.push(p);return p;}
 // add `k` prospects of class year `yr` to a state's schools, each school in proportion to how many it would have
-function liteAdd(teams,yr,T,k){if(k<=0||!teams.length)return[];const SD=liteSd(yr),w=teams.map(s=>liteN(s)*(1-_phi((T-liteAdj(s)-liteMu(s,yr))/SD))),tot=w.reduce((a,b)=>a+b,0)||1,out=[];
+function liteAdd(teams,yr,T,k){if(k<=0||!teams.length)return[];const w=teams.map(s=>liteN(s)*liteTail(yr,T-liteAdj(s)-liteMu0(s))),tot=w.reduce((a,b)=>a+b,0)||1,out=[];
   for(let i=0;i<k;i++){let r=Math.random()*tot,j=0;for(;j<w.length-1;j++){r-=w[j];if(r<=0)break;}out.push(liteMake(teams[j],yr,T));}return out;}
 function liteStr(s){const o=G.liteOfs!=null?G.liteOfs:6;return clamp(Math.round(liteMu(s,11)+o+gaussR()*2.5),25,92);}
 function liteCalib(){if(G.liteOfs!=null)return;const L=[];for(const s of allSchoolsAll()){if(s.lite||s.intl||s.id===G.myId)continue;L.push(s);if(L.length>=500)break;}
