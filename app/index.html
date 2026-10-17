@@ -13725,6 +13725,8 @@ function initAllClsDivs(){
   for(const cls of ['1A','2A','3A','4A','5A']){
     if(cls!==curCls)_allClsDivs[cls]=makeDivisions(cls);
   }
+  // every other state too, so a job anywhere on the map can be accepted
+  for(const c of XCLS_ORDER)if(!_allClsDivs[c]){_allClsDivs[c]=makeStateDivisions(c);for(const d of _allClsDivs[c])for(const t of d.teams)t.cls=c;}
   _tbCls=curCls;
 }
 
@@ -13743,7 +13745,7 @@ function tbSetCls(cls){
 function openTeamBuilder(){
   // Ensure _setupDivs is initialized
   if(!_setupDivs){onCls();}
-  _allClsDivs=null; // reset so it picks up fresh _setupDivs
+  // keep the league the setup map already built (every state); only build one if there is none yet
   initAllClsDivs();
   _tbCls=document.getElementById('s-cls').value;
   _tbTab='browse';
@@ -15410,8 +15412,14 @@ function showLoading(label,team,steps,cb){
 function startGame(){
   if(!_selectedOfferTeam){alert('Please click a highlighted county on the map and select a school to accept their offer.');return;}
   const coach=document.getElementById('s-coach').value||'Coach';
-  const cls=_selectedOfferTeam.cls;
-  const divs=_allClsDivs[cls];
+  let cls=_selectedOfferTeam.cls;
+  let divs=_allClsDivs&&_allClsDivs[cls];
+  // v2.16: the offer may point at a league that was rebuilt since the map was drawn: find the school again, or rebuild the map
+  if(!divs||!divs.some(d=>d.teams.some(t=>t.id===_selectedOfferTeam.id))){
+    const hit=_allClsDivs&&Object.entries(_allClsDivs).find(([c,dv])=>(dv||[]).some(d=>d.teams.some(t=>t.id===_selectedOfferTeam.id&&t.name===_selectedOfferTeam.name)));
+    if(hit){cls=hit[0];divs=hit[1];}
+    else{try{_allClsDivs=null;initCountyMap();}catch(e){}_selectedOfferTeam=null;alert('The job offers were refreshed. Please pick a school on the map again.');return;}
+  }
   let foundDIdx=0,foundSIdx=0;
   for(let d=0;d<divs.length;d++){
     const ti=divs[d].teams.findIndex(t=>t.id===_selectedOfferTeam.id);
