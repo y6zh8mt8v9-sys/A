@@ -11382,6 +11382,20 @@ function liteInit(){const by=liteStates(),fresh=[];if(!Object.keys(by).length)re
     if(sPlayersAny(T0))continue; // this state already has its prospects (a loaded career)
     const ab=USA.ab[st]||st;for(const yr of[9,10,11,12]){const q=liteQuota(ab,yr),T=liteThr(T0,yr,q);for(const p of liteAdd(T0,yr,T,q))fresh.push(p);}}
   return fresh;}
+// a big save from before light states: offer to keep full detail only near home (the rest becomes light states)
+function saveSlimOffer(){if(!G||!USA.on||!USA.cfg||USA.cfg.v!==1||USA.cfg.detail||G.players.length<90000)return;
+  openMo(`<h2>Make this save lighter?</h2><div style="font-size:13px;color:var(--mu);line-height:1.5;margin-bottom:12px">This career tracks <b>${G.players.length.toLocaleString()}</b> players in every state, which can make phones slow down or crash. Gridiron 27 can keep your home state and its neighbors in full detail and turn the other states into light states: their schools keep playing, keep their strength and state playoffs, and their stars, recruits with offers and commits stay. Your team, records and history do not change.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="bgh" onclick="clo()">Keep everything</button><button class="btn bgn" onclick="saveSlim()">Make it lighter</button></div>`);}
+window.saveSlim=function(){clo();showLoading('Making your save lighter…',myS(),10,()=>{try{
+  const cfg=Object.assign({},USA.cfg),det=usaAutoDetail(cfg.states,cfg.home,USA.X),homeAb=cfg.home;cfg.detail=det;
+  const str={};for(const s of allSchoolsAll()){if(s.intl||s.id===G.myId)continue;const ab=USA.ab[clsSt(s.cls)]||(clsSt(s.cls)==='CF'?homeAb:null);if(ab&&!det.includes(ab))str[s.id]=teamOvr(s.id);}
+  G.world=G.world||{};G.world.geo=cfg;worldApply(G.world,true);
+  for(const s of allSchoolsAll())if(str[s.id]!=null){s.lite=1;s.str=str[s.id];}
+  const before=G.players.length;
+  G.players=G.players.filter(p=>{const s=getS(p.sId);if(!s||!s.lite)return true;if(p.id===G.myPlayerId)return true;const keep=(p.stars>=2)||(p.sg>=2)||p.committed||(p.offers&&p.offers.length);if(keep)p.lt=1;return keep;});
+  _spVer++;G._thr=null;G.lsch=null;if(typeof _RK!=='undefined')_RK=null;G.liteYr=null;liteYrCalib();G.liteOfs=null;liteCalib();try{starCap5();}catch(e){}
+  updateRats();saveGame(true);nav('dash');notify(`Done: ${(before-G.players.length).toLocaleString()} untracked players removed. Full detail: ${det.map(a=>USA.X.st[a].name).join(', ')}.`);
+}catch(e){console.error('slim',e);notify('Could not make the save lighter: '+e.message,'e');}});};
 function sPlayersAny(teams){for(const s of teams)if(sPlayers(s.id).length)return true;return false;}
 // the offseason: seniors leave, everyone grows, new freshmen, late bloomers join, the ones who fell away are dropped, strengths move
 function liteOffseason(){const by=liteStates();if(!Object.keys(by).length)return;liteYrCalib();G.liteOfs=null;liteCalib();
@@ -14016,7 +14030,7 @@ function applySaveText(txt){
         }
         _spVer++;buildSeasonDates(2026+(G.yr-1));
         document.getElementById('setup').classList.add('hid');document.getElementById('app').classList.remove('hid');if(typeof hideTitle==='function')hideTitle();const _cc2=document.getElementById('coachc');if(_cc2)_cc2.classList.add('hid');
-        updateRats();checkAndFillRosters();nav('dash');notify('Save loaded!');
+        updateRats();checkAndFillRosters();nav('dash');notify('Save loaded!');setTimeout(()=>{try{saveSlimOffer();}catch(e){}},1200);
           _autoKey='';if(typeof _RK!=='undefined')_RK=null;
     return true;
   }catch(err){notify('Invalid save: '+err.message,'e');return false;}
@@ -15126,7 +15140,7 @@ function usaAutoDetail(sel,home,X){const c=ab=>_ugCen(X.st[ab].rings[0]),h=c(hom
   return usaDetailFix(sel.filter(a=>a!==home&&a!=='AK'&&a!=='HI').sort((a,b)=>{const p=c(a),q=c(b);return Math.hypot(p[0]-h[0],p[1]-h[1])-Math.hypot(q[0]-h[0],q[1]-h[1]);}),home,sel,X);}
 function usaNorm(cfg){const X=usaWorld(cfg&&cfg.custom),all=Object.keys(X.st);let s=(cfg&&Array.isArray(cfg.states)?cfg.states:all).filter(a=>X.st[a]);if(!s.length)s=[X.st.TX?'TX':all[0]];
   s=[...new Set(s)].sort();let h=cfg&&X.st[cfg.home]&&s.includes(cfg.home)?cfg.home:s.slice().sort((a,b)=>X.st[b].meta[0]-X.st[a].meta[0])[0];const o={mode:'usa',states:s,home:h};if(X.custom.length)o.custom=X.custom;
-  if(cfg&&cfg.v===1){o.v=1;return o;} // a career saved before light states: every chosen state keeps full detail at the scaled size
+  if(cfg&&cfg.v===1){o.v=1;if(Array.isArray(cfg.detail))o.detail=[h,...cfg.detail.filter(a=>a!==h&&s.includes(a))].slice(0,USA_DETAIL_MAX);return o;} // a career saved before light states: every chosen state keeps full detail at the scaled size
   o.v=2;o.detail=cfg&&Array.isArray(cfg.detail)?usaDetailFix(cfg.detail,h,s,X):usaAutoDetail(s,h,X);return o;}
 // class labels in each state's style, smallest class first
 function usaLbls(style,n){const R=['I','II','III','IV','V','VI','VII','VIII'];
@@ -15159,7 +15173,7 @@ function geoBuild(cfg){
     _setArr(AI_NGL,C.NGL);_setArr(NAT_VENUES,C.VEN);_repl(COL_HS_Q,cp(C.HSQ));NAT_POOL_FULL=22000;
     XNAMES.CF=C.XNAMES_CF;XMASC.CF=C.XMASC_CF;XOFF.CF=C.XOFF_CF;for(const k of['XNAMES','XMASC','XOFF']){const o={XNAMES,XMASC,XOFF}[k];for(const s in o)if(s.length===2&&USST[s]&&!C.XST[s]&&s!=='CO')delete o[s];}
     buildColleges();return true;}
-  const G0=usaGeo(),X=usaWorld(want.custom),sel=want.states;USA.X=X;USA.on=true;USA_SCALE=want.v===1?usaScaleFor(sel,X):1;USA.detail=want.v===1?sel.slice():want.detail.slice();USA.virt=0;USA.cur={};USA.cfg=want;USA.home=want.home;USA.code={};USA.ab={};
+  const G0=usaGeo(),X=usaWorld(want.custom),sel=want.states;USA.X=X;USA.on=true;USA_SCALE=want.v===1?usaScaleFor(sel,X):1;USA.detail=want.v===1?(want.detail||sel).slice():want.detail.slice();USA.virt=0;USA.cur={};USA.cfg=want;USA.home=want.home;USA.code={};USA.ab={};
   for(const ab of sel){const c=usaCode(ab);USA.code[ab]=c;USA.ab[c]=ab;}
   const rnd=_colRand('usa|'+key);const pick=a=>a[Math.floor(rnd()*a.length)];
   // classes and divisions for every state; the home state uses the 1A-5A slots
