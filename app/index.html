@@ -21866,14 +21866,22 @@ function aiOffCall(){
   if(G.conv)return Math.random()<0.5?{kind:'run',data:pick(RUNS.slice(0,4))}:{kind:'pass',data:pick(PASSES)};
   if(!G.ot&&(G.q===2||G.q===4)&&diff>0&&G.clock<35&&G.clockRun)return{kind:'kneel'};
   if(d===4&&!G.ot){
-    const fgD=100-ly+17,late=G.q===4&&diff<0&&G.clock<90;
-    if(fgD<=52&&!(late&&diff<-3))return tg<=3&&Math.random()<0.04?{kind:'fakefg'}:{kind:'fg'};
-    if(!(late||(tg<=2&&ly>=45)))return tg<=4&&ly>=30&&ly<=60&&Math.random()<0.05?{kind:'fakepunt'}:{kind:'punt'};
+    // fourth down like a real coach: short yardage past midfield goes for it, inches go for it almost anywhere but deep in his own end,
+    // trailing late goes for it, a field goal only when it's the right call
+    const fgD=100-ly+17,late=G.q===4&&diff<0&&G.clock<90,lateish=G.q===4&&diff<0&&G.clock<240;
+    const goP=tg<=1?(ly>=60?0.85:ly>=35?0.75:ly>=20?0.35:0.08):tg<=2?(ly>=60?0.6:ly>=45?0.45:ly>=35?0.2:0.04):tg<=4?(ly>=60&&fgD>52?0.35:ly>=50?0.12:0.03):(ly>=65&&fgD>52?0.12:0);
+    const go=late&&!(fgD<=52&&diff>=-3)||lateish&&diff<=-9||G.q===4&&diff<=-17&&G.clock<480||Math.random()<goP;
+    if(!go&&fgD<=52)return tg<=3&&Math.random()<0.04?{kind:'fakefg'}:{kind:'fg'};
+    if(late&&fgD<=52&&diff>=-3)return{kind:'fg'};
+    if(!go)return tg<=4&&ly>=30&&ly<=60&&Math.random()<0.05?{kind:'fakepunt'}:{kind:'punt'};
   }
   if(d===4&&G.ot&&100-ly+17<=48&&!(tg<=2))return{kind:'fg'};
-  if(tg<=1&&Math.random()<0.4)return{kind:'run',data:RUNS[5]};
-  {const pc=gpPBCall(t,d,tg);if(pc)return pc;}
-  const passP=d===3&&tg>5?0.82:d===1?0.5:0.58;
+  // the score and the clock decide too: behind late they throw, ahead late they run it and keep the clock moving
+  const behindLate=(G.q>=4&&diff<0)||(G.q===2&&G.clock<60&&diff<=0),aheadLate=G.q>=4&&diff>0&&G.clock<300;
+  if(tg<=1&&Math.random()<(behindLate&&diff<=-9?0.15:0.4))return{kind:'run',data:RUNS[5]};
+  {const pc=behindLate&&Math.random()<0.6?null:gpPBCall(t,d,tg);if(pc)return pc;}
+  let passP=d===3&&tg>5?0.82:d===1?0.5:0.58;
+  if(behindLate)passP=Math.max(passP,diff<=-9?0.88:G.clock<120?0.85:0.72);else if(aheadLate)passP=Math.min(passP,d===3&&tg>5?0.6:0.25);
   if(Math.random()<passP){
     const r=Math.random(),spread=d===3&&tg>5?0.45:0.28;
     if(r<spread*0.55){const f=pick(['trips','tripsTE']);return{kind:'pass',data:{...pick(TRIPS_PLAYS),f}};}
