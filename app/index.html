@@ -4296,7 +4296,7 @@ function renderScheduleBuilder(){
       <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
       ${s?sLogo(s,32):''}
       <span style="font-size:12px;flex:1">${s?s.name+' '+s.mascot:'?'}</span>
-      <span style="font-size:10px;font-weight:700;color:var(--te)">${cls}</span>
+      <span style="font-size:10px;font-weight:700;color:var(--te)">${clsL(cls)}</span>
       ${s?`<span style="font-size:11px">${rb(teamOvr(s.id))}</span>`:''}
       <button onclick="removeCustomGame(${g.wk})" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:12px;padding:0 2px" title="Remove">✕</button>
     </div>`;
@@ -4322,7 +4322,7 @@ function renderScheduleBuilder(){
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--ac)">Pick Opponents</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <select onchange="_sbSetCls(this.value)" style="background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:3px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">${[...ST_ORDER,...(G.allLeagues&&G.allLeagues.INTL?['INTL']:[])].map(k=>{const v=k==='INTL'?'INTL':'ST:'+k,on=_sbSt()===k;return`<option value="${v}"${on?' selected':''}>${k==='INTL'?'International':stName(k)}</option>`;}).join('')}</select>
-        ${clsList.filter(c=>_sbSt()!=='INTL'&&clsSt(c)===_sbSt()).map(c=>`<button title="${clsName(c)}" onclick="_sbSetCls('${c}')" style="background:${_sbCls===c?'var(--ac)':'var(--s2)'};border:1px solid ${_sbCls===c?'var(--ac)':'var(--bd)'};color:${_sbCls===c?'#fff':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">${XCLS[c]?XCLS[c].lbl:c}${c===G.cls?' ★':''}</button>`).join('')}
+        ${clsList.filter(c=>_sbSt()!=='INTL'&&clsSt(c)===_sbSt()).map(c=>`<button title="${clsName(c)}" onclick="_sbSetCls('${c}')" style="background:${_sbCls===c?'var(--ac)':'var(--s2)'};border:1px solid ${_sbCls===c?'var(--ac)':'var(--bd)'};color:${_sbCls===c?'#fff':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">${clsL(c)}${c===G.cls?' ★':''}</button>`).join('')}
         <button onclick="_sbSetCls('ALL')" style="background:${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--s2)'};border:1px solid ${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--bd)'};color:${!_sbCls||_sbCls==='ALL'?'#fff':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">ALL</button>
       </div>
       <div>
@@ -4338,7 +4338,7 @@ function renderScheduleBuilder(){
             const cls=s.cls||G.cls;
             const isHigher=clsNum(cls)>clsNum(G.cls)&&cls!=='INTL';
             const isLower=clsNum(cls)<clsNum(G.cls)&&cls!=='INTL';
-            const diffLabel=isHigher?`<span style="font-size:9px;color:var(--rd);font-weight:800">▲ ${cls}</span>`:isLower?`<span style="font-size:9px;color:var(--gn);font-weight:800">▼ ${cls}</span>`:`<span style="font-size:9px;color:var(--te);font-weight:800">${cls}</span>`;
+            const diffLabel=isHigher?`<span style="font-size:9px;color:var(--rd);font-weight:800">▲ ${clsL(cls)}</span>`:isLower?`<span style="font-size:9px;color:var(--gn);font-weight:800">▼ ${clsL(cls)}</span>`:`<span style="font-size:9px;color:var(--te);font-weight:800">${clsL(cls)}</span>`;
             const myOvr=Math.round((G.offR+G.defR)/2);
             const diff=ovr-myOvr;
             const diffStr=diff>0?`<span style="color:var(--rd);font-size:10px">+${diff}</span>`:diff<0?`<span style="color:var(--gn);font-size:10px">${diff}</span>`:`<span style="color:var(--mu);font-size:10px">EVEN</span>`;
@@ -5007,7 +5007,7 @@ function pgTrophy(){
   const kinds=[['National','National Champions','#d9a520',true],['State','State Champions','#e3b341',true],['Division','Division Champions','#a9b4c2',false]];
   const shelf=kinds.map(([k,l,c,big])=>{const L=T.filter(t=>t.type===k).sort((a,b)=>a.yr-b.yr);if(!L.length)return'';
     return`<div class="pnl" style="margin-bottom:14px"><div class="ph">${l} <span style="font-size:12px;color:var(--mu)">${L.length}</span></div><div class="pb" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;background:linear-gradient(180deg,transparent 78%,rgba(120,80,40,.18) 78%)">
-      ${L.map(t=>`<div style="text-align:center;min-width:70px">${trophySvg(c,big)}<div style="font-weight:800;font-size:13px">${(G.baseYear||2026)+t.yr-1}</div><div style="font-size:11px;color:var(--mu)">${t.rec||''}${t.cls?' · '+t.cls:''}</div></div>`).join('')}</div></div>`;}).join('');
+      ${L.map(t=>`<div style="text-align:center;min-width:70px">${trophySvg(c,big)}<div style="font-weight:800;font-size:13px">${(G.baseYear||2026)+t.yr-1}</div><div style="font-size:11px;color:var(--mu)">${t.rec||''}${t.cls?' · '+clsL(t.cls):''}</div></div>`).join('')}</div></div>`;}).join('');
   const ind=[];for(const h of H){for(const[k,l]of[['mrFootball','Mr. Football'],['freshmanOTY','Freshman of the Year']]){const a=h[k];if(a&&a.sId===G.myId)ind.push({yr:h.yr,l,a});}}
   const best=H.slice().sort((a,b)=>(b.wins-b.losses)-(a.wins-a.losses))[0],tw=H.reduce((n,h)=>n+(h.wins||0),0),tl=H.reduce((n,h)=>n+(h.losses||0),0);
   const hof=(G.hofArchive||[]).filter(p=>p.sId===G.myId||p.hsId===G.myId).length;
@@ -5101,7 +5101,7 @@ function s7Finish(champ){const S=G.s7;S.done=true;S.champ=champ;
 function s7Panel(){if(!G||G.phase!=='postseason')return'';const S=G.s7&&G.s7.yr===G.yr?G.s7:null;
   if(S&&S.done)return'';
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph">7-on-7 Summer League</div><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:13px;color:var(--mu)">${S&&S.paid?'Your passing league team is in the bracket.':'Optional: pick 7 on offense and 7 on defense and play the best programs of your class. Best-of-five final; standouts get college looks. Entry $'+S7_FEE.toLocaleString()+'.'}</div><button class="btn" onclick="s7Open()">${S&&S.paid?'Open bracket':'Enter the league'}</button></div></div>`;}
-const _pgDash0=pgDash;pgDash=function(){let x='';try{x=s7Panel();}catch(e){}try{x=pcPanel()+x;}catch(e){}return x+_pgDash0();};
+const _pgDash0=pgDash;pgDash=function(){let x='';try{x=jobPanel()+s7Panel();}catch(e){}try{x=pcPanel()+x;}catch(e){}return x+_pgDash0();};
 // ═══════════ v2.16 PROGRAM MONEY: boosters, merchandise, broadcasts, sponsors, fundraisers, summer camps ═══════════
 function finYr(){if(!G.fin||G.fin.yr!==G.yr)G.fin={yr:G.yr,boost:0,merch:0,tv:0,spons:0,fund:0,camp:0,sign:0,fundDone:false,sponsDone:false,campDone:false};return G.fin;}
 function finAdd(k,v,msg){v=Math.round(v);if(!(v>0))return;G.budget+=v;const F=finYr();F[k]=(F[k]||0)+v;if(msg)addLog(`<span style="color:var(--gn)">${msg} +$${v.toLocaleString()}</span>`);}
@@ -6555,7 +6555,7 @@ function finalizeOffseason(){
   if(_mrWinner){
     const isMyPlayer=_mrWinner.sId===G.myId;
     pops.push(bAwardPop('mr',_mrWinner,_mrRunnerUp,G.cls,isMyPlayer,_aiSeasStatsSnap.get(_mrWinner.id),_mrRunnerUp?_aiSeasStatsSnap.get(_mrRunnerUp.id):null));
-    if(isMyPlayer)addLog(`<span style="color:var(--gd)"> ${_mrWinner.fn} ${_mrWinner.ln} won Mr. Football — ${G.cls}!</span>`);
+    if(isMyPlayer)addLog(`<span style="color:var(--gd)"> ${_mrWinner.fn} ${_mrWinner.ln} won Mr. Football — ${clsL(G.cls)}!</span>`);
     // Store award on player object for history
     if(!_mrWinner.awards)_mrWinner.awards=[];
     _mrWinner.awards.push({type:'Mr. Football',cls:G.cls,yr:G.yr});
@@ -6563,7 +6563,7 @@ function finalizeOffseason(){
   if(_frAwardWinner){
     const isMyPlayer=_frAwardWinner.sId===G.myId;
     pops.push(bAwardPop('fr',_frAwardWinner,_frAwardRunnerUp,G.cls,isMyPlayer,_aiSeasStatsSnap.get(_frAwardWinner.id),_frAwardRunnerUp?_aiSeasStatsSnap.get(_frAwardRunnerUp.id):null));
-    if(isMyPlayer)addLog(`<span style="color:var(--te)"> ${_frAwardWinner.fn} ${_frAwardWinner.ln} won Freshman of the Year — ${G.cls}!</span>`);
+    if(isMyPlayer)addLog(`<span style="color:var(--te)"> ${_frAwardWinner.fn} ${_frAwardWinner.ln} won Freshman of the Year — ${clsL(G.cls)}!</span>`);
     if(!_frAwardWinner.awards)_frAwardWinner.awards=[];
     _frAwardWinner.awards.push({type:'Freshman of the Year',cls:G.cls,yr:G.yr});
   }
@@ -6625,7 +6625,7 @@ function finalizeOffseason(){
   });
   // ── Other-classification championship news ──
   for(const [cls,champData] of Object.entries(_otherLeagueChamps)){
-    addNews('othercls',` ${cls} State Champion: ${champData.name}`.replace(cls+' State',(XCLS[cls]?clsName(cls):cls)+' State'),`${champData.name} finish ${champData.rec} to claim the ${2026+(G.yr-1)} ${XCLS[cls]?clsName(cls):cls} title.`);
+    addNews('othercls',` ${cls} State Champion: ${champData.name}`.replace(cls+' State',clsName(cls)+' State'),`${champData.name} finish ${champData.rec} to claim the ${2026+(G.yr-1)} ${XCLS[cls]?clsName(cls):cls} title.`);
   }
   addLog(`<span style="color:var(--mu)">━━ ${2026+(G.yr-1)}: ${G.wins}-${G.losses} ━━</span>`);
   const ratio=G.wins/(G.wins+G.losses||1);
@@ -6642,6 +6642,7 @@ function finalizeOffseason(){
   G.budget+=baseBudget+divBonus;
   // ── Snapshot record BEFORE resetting wins/losses for the new year ──
   const _endWins=G.wins, _endLosses=G.losses;
+  try{jobOffersGen(_endWins,_endLosses,!!(G.playoff&&(G.playoff.stateChamp||G.playoff.stateChampId===G.myId)),divWon);}catch(e){console.error('jobs',e);}
   G.yr++;G.wins=0;G.losses=0;(()=>{try{progOffseason();}catch(e){}})(),G.phase='offseason';G.osPhase=0;G.playoff=null;G.seasonRivalId=null;
 
   // ── End-of-season for other leagues: determine champ, reset, regenerate ──
@@ -6678,9 +6679,9 @@ function finalizeOffseason(){
   // Open schedule builder for the new season
   const _demResult=checkClassification(_snapDivWinners,_endWins,_endLosses);
   if(_demResult.demoted){
-    const reason=_demResult.reason==='roster'?`Your roster fell below the minimum for <strong>${G.cls}</strong>.`
+    const reason=_demResult.reason==='roster'?`Your roster fell below the minimum for <strong>${clsL(G.cls)}</strong>.`
       :`Sustained poor performance drove demotion pressure to <strong>100%</strong>.`;
-    pops.push(bEvPop(' Reclassified Down',`${reason}<br><br>You have been moved down to <strong style="color:var(--ac)">${_demResult.cls}</strong>. Win more games to rebuild pressure resistance.`,null,'var(--ac)'));
+    pops.push(bEvPop(' Reclassified Down',`${reason}<br><br>You have been moved down to <strong style="color:var(--ac)">${clsL(_demResult.cls)}</strong>. Win more games to rebuild pressure resistance.`,null,'var(--ac)'));
   } else if(G.reclsLog&&G.reclsLog.length){
     // Show pressure update if pressure changed meaningfully
     const lastEntry=G.reclsLog[G.reclsLog.length-1];
@@ -6785,7 +6786,7 @@ function checkClassification(snapDivWinners,endWins,endLosses){
     if(yearsAtNewCls<=3){
       // Still in grace period — cap pressure at 99 and inform player
       G.reclsPressure=99;
-      addLog(`<span style="color:var(--gd)"> Demotion immunity — ${3-yearsAtNewCls+1} year(s) of protection remaining after moving up to ${G.cls}. Keep building!</span>`);
+      addLog(`<span style="color:var(--gd)"> Demotion immunity — ${3-yearsAtNewCls+1} year(s) of protection remaining after moving up to ${clsL(G.cls)}. Keep building!</span>`);
       return {demoted:false};
     }
     const newCls=myClsOrder()[clsIdx-1];
@@ -7210,7 +7211,7 @@ function pgRecls(){
     <span style="font-size:20px"></span>
     <div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gn);text-transform:uppercase">Demotion Immunity Active</div>
-      <div style="font-size:11px;color:var(--mu);margin-top:2px">You moved up to <strong style="color:var(--tx)">${G.cls}</strong> — you cannot be relegated for <strong style="color:var(--gn)">${immunityYearsLeft} more season${immunityYearsLeft!==1?'s':''}</strong>. Use this time to build your program.</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:2px">You moved up to <strong style="color:var(--tx)">${clsL(G.cls)}</strong> — you cannot be relegated for <strong style="color:var(--gn)">${immunityYearsLeft} more season${immunityYearsLeft!==1?'s':''}</strong>. Use this time to build your program.</div>
     </div>
   </div>`:''}
   <div class="g2" style="margin-bottom:14px;align-items:start">
@@ -7221,7 +7222,7 @@ function pgRecls(){
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
             <div style="flex:1">
               <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:4px">Current Classification</div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--ac)">${G.cls}</div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--ac)">${clsL(G.cls)}</div>
             </div>
             ${canGoDown?`<div style="text-align:center">
               <div style="font-size:10px;color:var(--mu);margin-bottom:3px">If demoted</div>
@@ -7252,11 +7253,11 @@ function pgRecls(){
         <div class="pb">
           ${canGoUp?`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">
             Voluntarily move up to <strong style="color:var(--gn)">${nextUp}</strong> classification.
-            Requires one State Championship at ${G.cls} and $${(moveUpCost/1000).toFixed(0)}k budget.
+            Requires one State Championship at ${clsL(G.cls)} and $${(moveUpCost/1000).toFixed(0)}k budget.
             <strong style="color:var(--gn)">Grants 3-year demotion immunity.</strong>
           </div>
           <div style="margin-bottom:10px">
-            <div class="dr"><span class="a">State Champ at ${G.cls}</span><span style="color:${champAtCurrent?'var(--gn)':'var(--rd)'};font-weight:700">${champAtCurrent?'✓ Earned':' Not yet'}</span></div>
+            <div class="dr"><span class="a">State Champ at ${clsL(G.cls)}</span><span style="color:${champAtCurrent?'var(--gn)':'var(--rd)'};font-weight:700">${champAtCurrent?'✓ Earned':' Not yet'}</span></div>
             <div class="dr"><span class="a">Budget needed</span><span style="color:${canAffordUp?'var(--gn)':'var(--rd)'};font-weight:700">$${(moveUpCost/1000).toFixed(0)}k (have $${(G.budget/1000).toFixed(0)}k)</span></div>
           </div>
           <button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%"> Move Up to ${nextUp}</button>`
@@ -7301,9 +7302,9 @@ function buildMoveUpPop(){
     return `<div class="pc" style="border-top-color:var(--mu)">
       <h3 style="color:var(--mu)"> Reclassification</h3>
       <div style="font-size:13px;line-height:1.7;margin-top:10px">
-        <div style="margin-bottom:10px">You are currently in <strong style="color:var(--te)">${G.cls}</strong>.</div>
+        <div style="margin-bottom:10px">You are currently in <strong style="color:var(--te)">${clsL(G.cls)}</strong>.</div>
         <div style="margin-bottom:10px">To move up to <strong>${nextCls}</strong> you need:</div>
-        <div style="margin-bottom:6px"> <strong>1 State Championship</strong> at ${G.cls} <span style="color:var(--ac)">— not yet achieved</span></div>
+        <div style="margin-bottom:6px"> <strong>1 State Championship</strong> at ${clsL(G.cls)} <span style="color:var(--ac)">— not yet achieved</span></div>
         <div> <strong>$${(cost/1000).toFixed(0)}k budget</strong> to reclassify</div>
       </div>
       <div style="margin-top:12px;font-size:11px;color:var(--mu)">Win a State title to unlock the move-up option.</div>
@@ -7314,14 +7315,14 @@ function buildMoveUpPop(){
   return `<div class="pc" style="border-top-color:var(--gd)">
     <h3 style="color:var(--gd)"> Move Up to ${nextCls}?</h3>
     <div style="font-size:13px;line-height:1.7;margin-top:10px">
-      <div style="margin-bottom:10px">You've won a State Championship at <strong style="color:var(--gd)">${G.cls}</strong>! You're eligible to move up.</div>
+      <div style="margin-bottom:10px">You've won a State Championship at <strong style="color:var(--gd)">${clsL(G.cls)}</strong>! You're eligible to move up.</div>
       <div style="margin-bottom:6px"> <strong>Next class:</strong> ${nextCls}</div>
       <div style="margin-bottom:6px"> <strong>Cost:</strong> $${(cost/1000).toFixed(0)}k ${canAfford?'<span style="color:var(--gd)">✓</span>':'<span style="color:var(--ac)">(insufficient funds)</span>'}</div>
       <div style="margin-bottom:12px;font-size:11px;color:var(--mu)">Moving up means tougher competition, larger rosters, and bigger recruiting classes.</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px">
       <button class="btn" style="flex:1;font-size:13px" onclick="confirmMoveUp()" ${canAfford?'':'disabled'}> Move Up</button>
-      <button class="bgh" style="flex:1;font-size:13px" onclick="declineMoveUp()">Stay in ${G.cls}</button>
+      <button class="bgh" style="flex:1;font-size:13px" onclick="declineMoveUp()">Stay in ${clsL(G.cls)}</button>
     </div>
   </div>`;
 }
@@ -7491,7 +7492,7 @@ function commitPlayer(p){
 function bAwardPop(award, winner, runnerUp, cls, isMyPlayer, winnerSnap, ruSnap){
   const DEV_C2={'Elite Dev':'dev-e','Star':'dev-s','Impact':'dev-i','Normal':'dev-n'};
   const isMr=award==='mr';
-  const awardName=isMr?`Mr. Football — ${cls}`:`Freshman of the Year — ${cls}`;
+  const awardName=isMr?`Mr. Football — ${clsL(cls)}`:`Freshman of the Year — ${clsL(cls)}`;
   const awardIcon=isMr?'':'';
   const borderColor=isMr?'var(--gd)':'var(--b2)';
   const accentColor=isMr?'var(--gd)':'var(--b2)';
@@ -7613,7 +7614,7 @@ function updateSbCard(){
   const rec=document.getElementById('sb-record');
   const logo=document.getElementById('sb-logo-sm');
   if(nm)nm.textContent=`${ms.name} ${ms.mascot}`;
-  if(sub)sub.textContent=`${G.cls} • Yr ${G.yr}`;
+  if(sub)sub.textContent=`${clsL(G.cls)} • Yr ${G.yr}`;
   if(rec)rec.textContent=`${G.wins}-${G.losses}`;
   if(logo)logo.innerHTML=sLogo(ms,38);
 }
@@ -7733,7 +7734,7 @@ function pgDash(){
         <div class="dash-hero-name"><span style="color:var(--ac)">${ms.name}</span> ${ms.mascot}</div>
         <div class="dash-hero-meta">
           <span class="dash-hero-badge">${curYear}</span>
-          <span class="dash-hero-badge">${G.cls}</span>
+          <span class="dash-hero-badge">${clsL(G.cls)}</span>
           <span class="dash-hero-badge">${G.offS} / ${G.defS}</span>
           <span class="dash-hero-badge">${presStars} Prestige</span>
           <span class="dash-hero-badge" style="color:var(--gn)">$${(G.budget/1000).toFixed(0)}k</span>
@@ -8468,7 +8469,7 @@ function clsFilterBar(activeCls,onclickFn,label,noIntl){
   let h=states.length>6?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">${lab('State')}<select onchange="${onclickFn}(this.value)" style="padding:5px 8px;border-radius:4px;max-width:100%">${states.map(([x,l,k])=>`<option value="${x}"${stK===k?' selected':''}>${l}${k==='CF'?' (home)':XST[k]&&XST[k].lite?' (light)':''}</option>`).join('')}<option value="NAT"${v==='NAT'?' selected':''}>National (every state)</option>${!noIntl&&G.allLeagues&&G.allLeagues.INTL?`<option value="INTL"${v==='INTL'?' selected':''}>International</option>`:''}</select></div>`
     :`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;align-items:center;">${lab('State')}${states.map(([x,l,k])=>b(x,l,stK===k)).join('')}${b('NAT','National',v==='NAT')}${!noIntl&&G.allLeagues&&G.allLeagues.INTL?b('INTL','International',v==='INTL'):''}</div>`;
   if(stK){const cl=clsOfSt(stK),all=stK==='CF'?'ALL':'ST:'+stK;
-    h+=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">${lab(label||'Class')}${b(all,'ALL',v===all)}${cl.map(c=>b(c,(XCLS[c]?XCLS[c].lbl:c)+(c===G.cls?' ★':''),v===c)).join('')}</div>`;}
+    h+=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">${lab(label||'Class')}${b(all,'ALL',v===all)}${cl.map(c=>b(c,(clsL(c))+(c===G.cls?' ★':''),v===c)).join('')}</div>`;}
   else h+='<div style="margin-bottom:10px"></div>';
   return h;
 }
@@ -8518,7 +8519,7 @@ function pgPlayoff(){
   if(!pl)return`<div class="pnl"><div class="ph"> State Playoffs — ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. Top 16 teams by win% qualify. Complete your schedule first.</div></div></div>`;
   const field=pl.field||[];
   return`<div class="pnl"><div class="ph"> State Playoffs — ${curYear} ${pl.stateChamp?'<span style="color:var(--gd)"> STATE CHAMPS!</span>':''}</div><div class="pb">
-    <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Top 16 qualifiers from ${G.cls} classification:</div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Top 16 qualifiers from ${clsL(G.cls)} classification:</div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">${field.map((sid,i)=>{const s=getS(sid);if(!s)return'';const isMe=sid===G.myId;const elim=pl.rounds&&pl.rounds.some(r=>r.results&&r.results.find(res=>res.loser===sid));return`<div style="background:${isMe?'rgba(204,34,34,.1)':'var(--s2)'};border:1px solid ${isMe?'var(--ac)':elim?'var(--bd)':'var(--bd)'};border-radius:5px;padding:5px 10px;display:flex;align-items:center;gap:5px;opacity:${elim&&!isMe?.5:1}"><span style="color:var(--mu);font-size:10px">#${i+1}</span>${sLogo(s,29)}<span style="font-size:12px;font-weight:${isMe?700:400}">${s.name}</span></div>`;}).join('')}
     </div>
     ${pl.rounds&&pl.rounds.length?pl.rounds.map(r=>{
@@ -10960,7 +10961,7 @@ function gdPreviewHtml(me,opp,homeIdx){
   try{const w=window.__GP&&window.__GP.weather;if(w)facts.push(`Forecast: ${wxLine(w).toLowerCase()}. ${wxEffects(w).replace(/^./,c=>c.toUpperCase())}.`);}catch(e){}
   const logo=s=>{const L=sLogoStandalone(s,64);return L;};
   const col=(s,i)=>`<div style="flex:1;min-width:0;text-align:center">${logo(s)}<div style="font-weight:900;font-size:17px;margin-top:2px">${s.name.replace(/\s+High.*$/,'')} ${s.mascot}</div>
-    <div style="font-size:12px;opacity:.85">${rec(s)}${rk[i].n&&rk[i].n<=25?` · <b style="color:#8fc4ff">#${rk[i].n} National</b>`:rk[i].a&&rk[i].a<=25?` · <b style="color:#ffcf4a">#${rk[i].a} ${stName(stOf(s))}</b>`:rk[i].c&&rk[i].c<=25?` · <b style="color:#ff7a7a">#${rk[i].c} ${s.cls}</b>`:''}</div></div>`;
+    <div style="font-size:12px;opacity:.85">${rec(s)}${rk[i].n&&rk[i].n<=25?` · <b style="color:#8fc4ff">#${rk[i].n} National</b>`:rk[i].a&&rk[i].a<=25?` · <b style="color:#ffcf4a">#${rk[i].a} ${stName(stOf(s))}</b>`:rk[i].c&&rk[i].c<=25?` · <b style="color:#ff7a7a">#${rk[i].c} ${clsL(s.cls)}</b>`:''}</div></div>`;
   const row=(l,a,b)=>`<tr><td style="text-align:right;padding:3px 8px;font-weight:800">${a}</td><td style="text-align:center;opacity:.7;font-size:11px;padding:3px 8px">${l}</td><td style="text-align:left;padding:3px 8px;font-weight:800">${b}</td></tr>`;
   const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:12px;background:rgba(255,255,255,.08);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
   const stars=T.map(s=>_gdStars(s).map(p=>star(p,s)).join(''));
@@ -11208,6 +11209,7 @@ function clsSt(c){return XCLS[c]?XCLS[c].st:c==='INTL'?'INTL':c==='OOS'?'OOS':'C
 function stOf(s){return s?clsSt(s.cls||G.cls):'CF';}
 let CF_NAME='Crestfield';const CF_LBL={};let _abbrUsed=new Set();
 function stName(st){return st==='CF'?CF_NAME:XST[st]?XST[st].name:st==='INTL'?'International':'Out of State';}
+function clsL(c){return XCLS[c]?XCLS[c].lbl:CF_LBL[c]||c;} // the short class label players see: the state's own name for it
 function clsName(c){return XCLS[c]?`${XST[XCLS[c].st].name} ${XCLS[c].lbl}`:c==='INTL'?'International':c==='OOS'?'Out of State':`${CF_NAME} ${CF_LBL[c]||c}`;}
 function clsOfSt(st){return st==='CF'?CLS_ORDER.slice():XST[st]?XST[st].cls.slice():[];}
 function myClsOrder(){return clsOfSt(clsSt(G.cls));}
@@ -13092,7 +13094,7 @@ function pgHist(){
   window._setHistCls=function(cls){window._histClsFilter=cls;nav('hist');};
   const histClsBar=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
     <span style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
-    ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'#fff':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':cls}${cls===G.cls?' ★':''}</button>`).join('')}
+    ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'#fff':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
   </div>`;
   function _awardCell(aw,icon,color){
     if(!aw)return`<td style="color:var(--mu)">—</td>`;
@@ -13109,7 +13111,7 @@ function pgHist(){
       const champName=lg.champName||'TBD';
       return`<tr>
         <td style="font-weight:700;color:var(--gd)">${2026+(G.yr-1)} (Current)</td>
-        <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${cls}</span></td>
+        <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${clsL(cls)}</span></td>
         <td style="color:var(--mu);font-style:italic">In Progress</td>
         <td colspan="3" style="font-size:11px;color:var(--mu)">Current leader: ${leader?`${leader.name} ${leader.mascot} (${leader.wins}-${leader.losses})`:'—'} · Last champ: ${champName}</td>
         <td colspan="2" style="color:var(--mu)">—</td>
@@ -13142,7 +13144,7 @@ function pgHist(){
             return`<td style="font-weight:${isMe?700:400};color:${isMe?'var(--gd)':'var(--tx)'}">${isMe?' ':''}${dw.name} <span style="color:var(--mu);font-size:10px">${dw.rec}</span></td>`;
           }).join('')
         :G.divisions.map(()=>`<td style="color:var(--mu)">—</td>`).join('');
-      const clsCell=`<td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${champCls}</span></td>`;
+      const clsCell=`<td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${clsL(champCls)}</span></td>`;
       return`<tr><td style="font-weight:700;color:var(--gd)">${yr}</td>${clsCell}${champCell}${divCells}${_awardCell(h.mrFootball,'','var(--gd)')}${_awardCell(h.freshmanOTY,'','var(--b2)')}</tr>`;
     }).join('')}${!histToShow.length&&!otherLeagueLiveRows?`<tr><td colspan="20" style="color:var(--mu);text-align:center;padding:14px">No history for this classification yet.</td></tr>`:''}</tbody></table></div>
 
@@ -13150,7 +13152,7 @@ function pgHist(){
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--ac);text-transform:uppercase;margin-bottom:8px;"> All Classification Champions by Season</div>
       <div style="overflow-x:auto"><table><thead><tr>
-        <th>Season</th>${['1A','2A','3A','4A','5A'].map(cls=>`<th${cls===G.cls?` style="color:var(--ac)"`:''}>${cls}${cls===G.cls?' ★':''}</th>`).join('')}
+        <th>Season</th>${['1A','2A','3A','4A','5A'].map(cls=>`<th${cls===G.cls?` style="color:var(--ac)"`:''}>${clsL(cls)}${cls===G.cls?' ★':''}</th>`).join('')}
       </tr></thead><tbody>
       ${[...G.hist].reverse().map(h=>{
         const yr=2026+(h.yr-1);
@@ -13200,7 +13202,7 @@ function pgHist(){
           }
           const isMyCls=cls===G.cls;
           return`<div style="background:var(--s2);border:1px solid ${isMyCls?'var(--ac)':'var(--bd)'};border-radius:6px;padding:8px 12px;min-width:130px;text-align:center;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:${isMyCls?'var(--ac)':'var(--b2)'};">${cls}${isMyCls?' ★':''}</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:${isMyCls?'var(--ac)':'var(--b2)'};">${clsL(cls)}${isMyCls?' ★':''}</div>
             <div style="font-size:11px;font-weight:700;color:var(--tx);margin-top:3px">${champName}</div>
             <div style="font-size:10px;color:var(--mu)">Last State Champ</div>
           </div>`;
@@ -13221,7 +13223,7 @@ function pgHist(){
     `<table style="margin-bottom:16px"><thead><tr><th>Season</th><th>Record</th><th>Class</th><th>Prestige</th><th>Achievements</th></tr></thead>
     <tbody>${G.hist.map(h=>`<tr>
       <td>${2026+(h.yr-1)}</td><td>${recStr(h.wins,h.losses)}</td>
-      <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${h.cls||G.cls}</span></td>
+      <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${clsL(h.cls||G.cls)}</span></td>
       <td>${''.repeat(Math.round(h.prestige))}</td>
       <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?' State Champion':h.champ?' Division Champ':'—'}</td>
     </tr>`).join('')}</tbody></table>`}
@@ -13233,7 +13235,7 @@ function pgHist(){
       if(!G.hist.length)return'<div style="color:var(--mu)">No seasons completed yet.</div>';
       const awClsBar=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
         <span style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
-        ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'#fff':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':cls}${cls===G.cls?' ★':''}</button>`).join('')}
+        ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'#fff':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
       </div>`;
       const awHistToShow=_histClsFilter==='ALL'?G.hist:G.hist.filter(h=>(h.cls||G.cls)===_histClsFilter);
       function awardDetailRow(aw, icon, color, label){
@@ -13261,9 +13263,9 @@ function pgHist(){
         const yr=2026+(h.yr-1);
         const mrIsMe=h.mrFootball&&h.mrFootball.sId===G.myId;
         const frIsMe=h.freshmanOTY&&h.freshmanOTY.sId===G.myId;
-        const cls=`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${h.cls||'—'}</span>`;
+        const cls=`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${h.cls?clsL(h.cls):'—'}</span>`;
         function aRow(aw,icon,color,label){
-          if(!aw)return`<tr><td style="font-weight:700;color:var(--mu)">${icon} ${label}</td><td>${yr}</td><td>${cls}</td><td colspan="4" style="color:var(--mu)">—</td></tr>`;
+          if(!aw)return`<tr><td style="font-weight:700;color:var(--mu)">${icon} ${label}</td><td>${yr}</td><td>${clsL(cls)}</td><td colspan="4" style="color:var(--mu)">—</td></tr>`;
           const isMe=aw.sId===G.myId;
           const s=aw.stats||{};
           let statStr='';
@@ -13275,7 +13277,7 @@ function pgHist(){
           return`<tr style="${isMe?'background:rgba(245,192,48,.06)':''}">
             <td style="font-weight:700;color:${color}">${icon} ${label}</td>
             <td style="font-weight:700;color:var(--gd)">${yr}</td>
-            <td>${cls}</td>
+            <td>${clsL(cls)}</td>
             <td><span class="cl" style="cursor:pointer;color:${isMe?color:'var(--b2)'};font-weight:${isMe?700:400}" onclick="showPlayer(${aw.pid})">${isMe?'★ ':''}${aw.name}</span><br><span style="font-size:10px;color:var(--mu)">${aw.schName}</span></td>
             <td><span class="pb2">${aw.pos}</span></td>
             <td style="font-size:11px;color:var(--mu)">${rb(aw.rat||0)} ${devB(aw.dev||'Normal')}</td>
@@ -13467,7 +13469,7 @@ function showPlayer(id){
         ${p.pos==='OL'?'<span style="font-size:10px;color:var(--mu)">harder ★ gain</span>':''}
         ${injBadgePopup(p)}
         ${p.committed?`<span style="color:var(--gn);font-size:11px"> ${p.committed.school} (${p.committed.lvl})</span>`:''}
-        ${(p.awards||[]).map(a=>a.type==='Mr. Football'?`<span style="background:#3a2800;border:1px solid var(--gd);color:var(--gd);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${a.cls} '${String(2026+(a.yr-1)).slice(2)}</span>`:`<span style="background:#111a26;border:1px solid var(--b2);color:var(--te);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${a.cls} '${String(2026+(a.yr-1)).slice(2)}</span>`).join(' ')}
+        ${(p.awards||[]).map(a=>a.type==='Mr. Football'?`<span style="background:#3a2800;border:1px solid var(--gd);color:var(--gd);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${clsL(a.cls)} '${String(2026+(a.yr-1)).slice(2)}</span>`:`<span style="background:#111a26;border:1px solid var(--b2);color:var(--te);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type} — ${clsL(a.cls)} '${String(2026+(a.yr-1)).slice(2)}</span>`).join(' ')}
       </div>
     </div>
   </div>
@@ -13883,6 +13885,32 @@ function bulkApply(){
   for(const p of L){ovrSync(p,true);const f=v=>clamp(Math.round(how==='add'?v+n:how==='set'?n:Math.max(v,n)),1,99);for(const k of ks){if(k==='sta')p.at.sta=f(p.at.sta);else if(k==='skills'){for(const a in(OVR_W[p.pos]||{}))if(!ATOP.has(a)&&a!=='sta')p.at[a]=f(p.at[a]);}else{const v=p[k]||0;p[k]=f(v);}}if(ks.includes('rat')&&!ks.includes('skills')){}else if(!ks.includes('rat'))p._rc=p.rat;ovrSync(p);
     if(p.pot<p.rat)p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}
   try{updateRats();}catch(e){}clo();nav(G._page,G._arg);notify(`${L.length} player${L.length===1?'':'s'} updated`);}
+// job offers: a good season gets your name around. Other schools in your league call after the season;
+// the offers stand through the offseason, until the first game of the new season.
+function jobOffersGen(w,l,champ,divWon){
+  G.jobOffers=null;if(pcActive()||G.pcLock)return;const me=myS();if(!me)return;
+  const ratio=w/Math.max(1,w+l),sc=ratio*2+(champ?1.5:0)+(divWon?0.5:0)+(G.prestige||1)*0.2;
+  const n=sc>=2.6?3:sc>=1.8?2:sc>=1.1?1:Math.random()<0.2?1:0;if(!n)return;
+  const pool=[];for(const d of G.divisions||[])for(const t of d.teams)if(t.id!==G.myId&&!t.intl&&!t.lite)pool.push(t);if(!pool.length)return;
+  const myO=teamOvr(G.myId),pr=t=>t.prestige||1,used=new Set(),list=[];
+  // better jobs first (more prestige or a stronger roster), then a rebuild with a bigger budget
+  const up=pool.filter(t=>pr(t)>=(G.prestige||1)-0.25||teamOvr(t.id)>myO+1).sort(()=>Math.random()-0.5);
+  const down=pool.filter(t=>pr(t)<(G.prestige||1)).sort(()=>Math.random()-0.5);
+  for(const t of up){if(list.length>=n-(n>=2?1:0))break;used.add(t.id);list.push({sid:t.id,kind:'up'});}
+  for(const t of down.concat(up)){if(list.length>=n)break;if(used.has(t.id))continue;used.add(t.id);list.push({sid:t.id,kind:pr(t)<(G.prestige||1)?'rebuild':'up'});}
+  if(!list.length)return;G.jobOffers={yr:G.yr+1,list};
+  try{addNews('myteam',`${list.length} school${list.length>1?'s':''} want${list.length>1?'':'s'} to talk to you`,`After a ${w}-${l} season, ${list.map(o=>getS(o.sid)&&getS(o.sid).name).filter(Boolean).join(', ')} called about their head coaching job.`);}catch(e){}
+  try{addLog(`<span style="color:var(--gd)">Job offers: ${list.length} school${list.length>1?'s':''} called about their head coaching job. See the dashboard.</span>`);}catch(e){}}
+function jobOffersLive(){const J=G.jobOffers;if(!J||J.yr!==G.yr||!J.list.length||pcActive())return null;
+  if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result))return null;return J;}
+function jobPanel(){const J=jobOffersLive();if(!J)return'';
+  const rows=J.list.map(o=>{const t=getS(o.sid);if(!t)return'';return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:160px"><b style="cursor:pointer" onclick="viewSchool(${t.id})">${t.name} ${t.mascot}</b><div style="font-size:11px;color:var(--mu)">${clsL(t.cls)} · OVR ${teamOvr(t.id)} · ${stars(Math.round(t.prestige||1))}${o.kind==='rebuild'?' · rebuild job, bigger budget':' · step up'}</div></span><span style="display:flex;gap:6px"><button class="btn bgn" style="font-size:12px" onclick="jobAccept(${t.id})">Accept</button><button class="bgh" style="font-size:12px" onclick="jobDecline(${t.id})">Decline</button></span></div>`;}).join('');
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Job Offers</div><div class="pb"><div style="font-size:12px;color:var(--mu);margin-bottom:6px">Other programs want you as their head coach. Offers stand until your first game of the season. Your record, trophies and history come with you.</div>${rows}</div></div>`;}
+window.jobAccept=function(sid){const t=getS(sid),os=myS();if(!t||!jobOffersLive())return;
+  if(!confirm(`Leave ${os.name} and take the head coaching job at ${t.name} ${t.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
+  const rb=(G.jobOffers.list.find(o=>o.sid===sid)||{}).kind==='rebuild';G.jobOffers=null;coachTakeOver(sid,true);if(rb){G.budget+=25000;notify('Rebuild bonus: +$25,000 budget');}
+  addLog(`<span style="color:var(--gd)">New job: you accepted the head coaching job at ${t.name} ${t.mascot}.</span>`);};
+window.jobDecline=function(sid){const J=jobOffersLive();if(!J)return;J.list=J.list.filter(o=>o.sid!==sid);const t=getS(sid);if(t)addLog(`<span style="color:var(--mu)">You turned down ${t.name}.</span>`);nav(G._page||'dash',G._arg);};
 // v2.16 coach any school: take over another program in the offseason, before its first game
 function coachTakeOver(sid,quiet){
   const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;
@@ -14800,7 +14828,7 @@ function tbRenderExport(){
   const clsSummary=['1A','2A','3A','4A','5A'].map(cls=>{
     const divs=_allClsDivs[cls]||[];
     const tc=divs.reduce((s,d)=>s+d.teams.length,0);
-    return`<div class="dr"><span class="a">${cls}${cls===curCls?' ★':''}</span><span style="font-weight:700">${tc} teams · ${divs.length} divisions</span></div>`;
+    return`<div class="dr"><span class="a">${clsL(cls)}${cls===curCls?' ★':''}</span><span style="font-weight:700">${tc} teams · ${divs.length} divisions</span></div>`;
   }).join('');
   return`<div style="max-width:560px;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase;"> Export Team Pack</div>
@@ -15440,7 +15468,10 @@ function geoBuild(cfg){
     const M=X.st[ab].meta,N=usaTeams(ab),code=usaCode(ab),nm=X.st[ab].name;
     if(code==='CF'){const sz={},RL=usaClsList(ab,X);
       // the home state plays in the five 1A-5A slots, named after its own classes
-      for(const k in CF_LBL)delete CF_LBL[k];if(RL.length>=5)CLS_ORDER.forEach((c,i)=>{CF_LBL[c]=RL[RL.length-5+i];});
+      for(const k in CF_LBL)delete CF_LBL[k];
+      {let lab=RL.slice(-5);if(RL.length<5){const o=[0,1,2,3,4].map(i=>RL[Math.floor(i*RL.length/5)]),cnt={},seen={};o.forEach(x=>cnt[x]=(cnt[x]||0)+1);
+        lab=o.map(x=>{if(cnt[x]<2)return x;seen[x]=(seen[x]||0)+1;return x+' '+['I','II','III'][cnt[x]-seen[x]];});} // fewer than five real classes: split the small ones (Class S II, Class S I)
+       CLS_ORDER.forEach((c,i)=>{CF_LBL[c]=lab[i];});}
       CLS_ORDER.forEach((c,i)=>{const t=Math.max(8,Math.round(N/5)),d=Math.max(1,Math.round(t/8));sz[c]={r:rEq[c].map(v=>v+M[4]),t,d};});
       _repl(CLS_SZ,sz);const all=divNames(ab,CLS_ORDER.reduce((s,c)=>s+sz[c].d,0));let k=0;const dv={};for(const c of CLS_ORDER){dv[c]=all.slice(k,k+sz[c].d);k+=sz[c].d;}_repl(DIV_NAMES,dv);
       CF_NAME=nm;continue;}
@@ -15939,7 +15970,7 @@ window.onCountyHover=function(e,id){
     html+=`<div style="font-size:10px;color:var(--mu);margin-top:2px">${offers.length} job offer${offers.length>1?'s':''}</div>`;
     offers.forEach(o=>{
       const clsCol=offCol(o.team.cls);
-      html+=`<div style="font-size:11px;color:${clsCol};margin-top:2px">• ${o.team.name} ${o.team.mascot} <span style="color:var(--mu)">(${XCLS[o.team.cls]?XCLS[o.team.cls].lbl:o.team.cls})</span></div>`;
+      html+=`<div style="font-size:11px;color:${clsCol};margin-top:2px">• ${o.team.name} ${o.team.mascot} <span style="color:var(--mu)">(${clsL(o.team.cls)})</span></div>`;
     });
   } else {
     html+=`<div style="font-size:10px;color:var(--mu);margin-top:2px">${county.teams.length} team${county.teams.length!==1?'s':''} — no job offers</div>`;
@@ -16032,7 +16063,7 @@ function renderOfferPopup(){
   document.getElementById('opp-body').innerHTML=`
     <div class="offer-popup-stat-grid">
       <div class="offer-popup-stat">
-        <div class="offer-popup-stat-v" style="color:${clsCol}">${XCLS[t.cls]?XCLS[t.cls].lbl.replace('Division ','Div '):t.cls}</div>
+        <div class="offer-popup-stat-v" style="color:${clsCol}">${clsL(t.cls).replace('Division ','Div ')}</div>
         <div class="offer-popup-stat-l">Class</div>
       </div>
       <div class="offer-popup-stat">
@@ -16141,7 +16172,7 @@ function renderOfferList(){
         <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${logoSvg}</div>
         <div style="flex:1;min-width:0">
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name} ${t.mascot}</div>
-          <div style="font-size:10px;color:var(--mu)">${cntyLbl(county)} · <span style="color:${clsCol}">${XCLS[t.cls]?XCLS[t.cls].lbl:t.cls}</span></div>
+          <div style="font-size:10px;color:var(--mu)">${cntyLbl(county)} · <span style="color:${clsCol}">${clsL(t.cls)}</span></div>
         </div>
         ${isSelected?`<div style="font-size:11px;color:var(--gn);font-weight:700"></div>`:''}
       </div>
@@ -16354,7 +16385,7 @@ function showLoading(label,team,steps,cb){
   // Set team identity
   logoW.innerHTML=team?sLogo(team,110):'';
   nameEl.textContent=team?`${team.name} ${team.mascot}`:'';
-  subEl.textContent=team?`${team.city||''} · ${team.cls||''} · ${team.conf||''}`:'';
+  subEl.textContent=team?`${team.city||''} · ${team.cls?clsL(team.cls):''} · ${team.conf||''}`:'';
   lblEl.textContent=label||'Loading…';
   fill.style.width='0%';
   fill.style.transition='none';
