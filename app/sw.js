@@ -1,4 +1,4 @@
-/* Gridiron Prep GM: offline support for the home-screen app.
+/* Gridiron 27: offline support for the home-screen app.
    The game page is fetched fresh when there is a connection (so uploads reach players on their next launch)
    and served from the cache when there is none. Fonts and the online-play library are cached the first time
    they load; online-play traffic itself is never cached. */

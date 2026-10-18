@@ -329,7 +329,7 @@ tr:last-child td{border-bottom:none;}tr.cl:hover td{background:var(--s2);cursor:
 #loading-bar-track{width:260px;height:7px;background:var(--s3);border-radius:99px;overflow:hidden;border:1px solid var(--bd);}
 #loading-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--b2),var(--ac));border-radius:99px;transition:width .18s ease;}
 #loading-pct{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--mu);margin-top:8px;letter-spacing:.5px;}
-/* ════════ Gridiron Prep GM — "Aero" design layer: glossy, airy, rounded ════════ */
+/* ════════ Gridiron 27 — older "Aero" design layer (the console layers below override it): glossy, airy, rounded ════════ */
 :root{--bg:#06182a;--s1:rgba(255,255,255,.07);--s2:rgba(255,255,255,.1);--s3:rgba(255,255,255,.14);--bd:rgba(190,230,255,.16);--tx:#eef7ff;--mu:#9fb7cc;--ac:#1fa4ef;--b2:#0b7fd0;--te:#7fd3ff;--gn:#4fd06a;--gd:#ffc93c;--rd:#ff6262;
   --glass:linear-gradient(180deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.05) 38%,rgba(255,255,255,.03) 100%);--shadow:0 10px 30px rgba(0,12,30,.38),inset 0 1px 0 rgba(255,255,255,.22);--rad:16px;
   --font:'Nunito Sans','Segoe UI',system-ui,-apple-system,sans-serif;--head:'Nunito','Segoe UI',system-ui,sans-serif;}
@@ -741,6 +741,10 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
 :root:not(.light) #setup h1 .r{background:none!important;color:#fff!important;-webkit-text-fill-color:#fff}
 :root:not(.light) #setup h1 .b{color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a)}
 :root:not(.light) #setup h1+p{color:#b9c0cc!important}
+:root:not(.light) #loading-screen{background:radial-gradient(900px 700px at 0% 0%,rgba(var(--tRGB,216,68,58),.34),transparent 62%),linear-gradient(180deg,#0b1626,#050c16)!important}
+:root #loading-bar-track{border-radius:2px!important;height:6px}
+:root #loading-bar-fill{background:var(--tA,#d8443a)!important;border-radius:2px!important}
+:root #loading-logo-wrap{filter:drop-shadow(0 8px 22px rgba(0,0,0,.45))!important}
 :root:not(.light) .logo .b{color:var(--tA,#d8443a)!important;}
 :root:not(.light) .pnl,:root:not(.light) .dash-hero,:root:not(.light) .dash-stat,:root:not(.light) .win-panel,:root:not(.light) .dash-next-game,:root:not(.light) .sbox{background:var(--s1)!important;border:1px solid var(--bd)!important;border-radius:4px!important;box-shadow:var(--shadow)!important;}
 :root:not(.light) #mb,:root:not(.light) #pui{background:#15171b!important;border:1px solid rgba(255,255,255,.1)!important;border-top:4px solid var(--tA,#d8443a)!important;border-radius:4px!important;box-shadow:0 18px 50px rgba(0,0,0,.6)!important;}
@@ -793,6 +797,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
 :root.light #setup h1 .r{background:none!important;color:#15181d!important;-webkit-text-fill-color:#15181d}
 :root.light #setup h1 .b{color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a)}
 :root.light #setup h1+p{color:#4a525e!important}
+:root.light #loading-screen{background:radial-gradient(900px 700px at 0% 0%,rgba(var(--tRGB,216,68,58),.16),transparent 62%),linear-gradient(180deg,#f3f5f8,#e4e8ee)!important}
 :root.light .logo .b{color:var(--tA,#d8443a)!important;-webkit-text-fill-color:var(--tA,#d8443a);}
 :root.light .pnl,:root.light .dash-hero,:root.light .dash-stat,:root.light .win-panel,:root.light .dash-next-game,:root.light .sbox{background:#fff!important;border:1px solid rgba(0,0,0,.08)!important;border-radius:4px!important;box-shadow:var(--shadow)!important;}
 :root.light #mb,:root.light #pui{background:#fff!important;border:1px solid rgba(0,0,0,.1)!important;border-top:4px solid var(--tA,#d8443a)!important;border-radius:4px!important;box-shadow:0 18px 50px rgba(0,0,0,.25)!important;}
