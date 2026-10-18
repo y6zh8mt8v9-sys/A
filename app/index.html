@@ -482,6 +482,23 @@ body{height:100%;}
 #nav-prim .np.on{color:#fff;background:linear-gradient(180deg,#7fd6ff 0%,#22a8f0 48%,#0f8ad6 52%,#36b4f5 100%);box-shadow:0 -2px 10px rgba(15,138,214,.35),inset 0 1px 0 rgba(255,255,255,.7)}
 #nav-prim .np i{position:absolute;top:5px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:var(--gd);box-shadow:0 0 0 2px var(--s1);display:none}
 #nav-prim .np.dot i{display:block}
+/* compact hub: the dashboard lists every section and its pages; a page shows on its own with a Home button */
+body.cnav #nav-prim{display:none!important}
+body.cnav.cnav-dash #nav-bar .nav-group:not([data-g="util"]){display:none!important}
+#nav-bar .nb-home{display:none}
+body.cnav:not(.cnav-dash) #nav-bar .nb-home{display:inline-flex!important;font-weight:900}
+#nav-bar .nb.todo,.cnav-sub button.todo{position:relative}
+#nav-bar .nb.todo::after,.cnav-sub button.todo::after{content:'';position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--gd);box-shadow:0 0 0 2px var(--s1)}
+.cnav-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0 0 14px}
+.cnav-card{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:12px 14px}
+.cnav-h{display:flex;align-items:center;gap:8px;font:900 16px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em}
+.cnav-h svg{width:20px;height:20px;fill:none;stroke:var(--ac);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cnav-h small{margin-left:auto;font:700 11px/1 Nunito,system-ui,sans-serif;text-transform:none;letter-spacing:0;color:var(--gd)}
+.cnav-sub{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:10px}
+.cnav-sub button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:7px 11px;color:var(--tx);font:800 13px/1.15 Nunito,system-ui,sans-serif;cursor:pointer;min-height:36px}
+.cnav-sub button:hover{border-color:var(--ac)}
+.cnav-sub button span{font-weight:600;font-size:11px;color:var(--gd)}
+@media(max-width:700px){body.cnav.cnav-dash #nav-bar{display:none!important}}
 body[data-navg] #nav-bar .nav-group{display:none}
 body[data-navg="home"] #nav-bar .nav-group[data-g="home"],body[data-navg="team"] #nav-bar .nav-group[data-g="team"],body[data-navg="season"] #nav-bar .nav-group[data-g="season"],body[data-navg="league"] #nav-bar .nav-group[data-g="league"],body[data-navg="program"] #nav-bar .nav-group[data-g="program"],body[data-navg] #nav-bar .nav-group[data-g="util"]{display:flex}
 body[data-navg] #nav-bar .nav-group+.nav-group::before{display:none}
@@ -1322,7 +1339,7 @@ setTimeout(()=>{if(padAny())padStart(padMainStep);},800);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
 // ── SETTINGS MODAL ──
 // v2.14 Game Day settings shared with the game (stored on this device)
-const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true};
+const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true,cnav:true};
 const SL_KEYS_M=[['spd','Speed'],['acc','Acceleration'],['str','Strength'],['iq','Awareness (IQ)'],['thr','Throwing accuracy'],['bsp','Ball speed'],['cat','Catching'],['int','Interceptions'],['man','Man coverage'],['zone','Zone coverage'],['fum','Fumbles'],['juk','Juke ability']];
 function slOpen(){try{closeSettings();}catch(e){}const o=gdsMain(),S=o.sl||{u:{},c:{}},v=(w,k)=>{const x=S[w]&&S[w][k];return x==null?50:x;};
   openMo(`<h2>Difficulty sliders</h2><p style="font-size:13px;color:var(--mu);margin:4px 0 10px">How your team and the CPU play in Game Day. 50 is normal; higher means better at it (for Fumbles, higher means more fumbles). Online games always use 50.</p>
@@ -1338,14 +1355,14 @@ function slPreset(n){const o=gdsMain(),u={},c={},lv={easy:[65,35],normal:[50,50]
   for(const[k]of SL_KEYS_M){u[k]=k==='fum'?100-lv[0]:lv[0];c[k]=k==='fum'?100-lv[1]:lv[1];}
   o.sl={u,c};try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}slOpen();}
 function gdsMain(){let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}return Object.assign({},GDS_MAIN_DEF,o);}
-function gdsMainSet(k,v){const o=gdsMain();o[k]=v;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}renderGdSettings();}
+function gdsMainSet(k,v){const o=gdsMain();o[k]=v;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}renderGdSettings();if(k==='cnav')try{if(typeof G!=='undefined'&&G&&G.myId)nav(G._page||'dash',G._arg);}catch(e){}}
 function renderGdSettings(){const el=document.getElementById('set-gd');if(!el)return;const S=gdsMain();
   const seg=(k,opts)=>`<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${opts.map(([v,l])=>`<button class="${S[k]===v?'btn':'bgh'} bxs" style="min-height:30px;padding:4px 10px" onclick='gdsMainSet(${JSON.stringify(k)},${JSON.stringify(v)})'>${l}</button>`).join('')}</div>`;
   const row=(l,h)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700">${l}</span>${h}</div>`;
   el.innerHTML=row('Sound effects',seg('sound',[[true,'On'],[false,'Off']]))+row('Volume',`<input type="range" min="0" max="1" step="0.05" value="${S.vol}" oninput="gdsMainSet('vol',+this.value)" style="width:140px">`)
     +row('Crowd noise',seg('crowd',[[true,'On'],[false,'Off']]))+row('Marching band',seg('band',[[true,'On'],[false,'Off']]))+row('Gameplay tips',seg('tips',[[false,'Hidden'],[true,'Shown']]))
     +row('Ball size',seg('ball',[[0.85,'S'],[1,'M'],[1.25,'L'],[1.5,'XL']]))+row('Your offense drives',seg('dir',[['right','Right'],['left','Left'],['real','Switch each quarter']]))
-    +row('Vibration',seg('haptics',[[true,'On'],[false,'Off']]))+row('Kick returns',seg('kr',[[true,'Play them'],[false,'Skip']]))+row('Auto-save',seg('autosave',[[true,'On'],[false,'Off']]))+row('Difficulty',`<button class="bgh bxs" onclick="slOpen()">Sliders…</button>`)+row('Scorebug',seg('bug',[['tv','TV'],['slab','Slab'],['tower','Tower'],['mini','Mini'],['classic','Classic']]))+row('Camera',seg('cam',[['wide','Wide'],['broadcast','Broadcast'],['tight','Tight']]))+row('Crowd noise meter',seg('noiseM',[[true,'On'],[false,'Off']]))+row('Move buttons',seg('moveUI',[['row','Row'],['wheel','Wheel']]))+row('Career camera',seg('pcCam',[['close','Close'],['mid','Normal'],['wide','Wide']]))+row('Landing marker',seg('land',[['pc','Player Career'],['all','Always'],['off','Off']]))+row('Mouse: click to tackle',seg('clickTk',[[true,'On'],[false,'Off']]))
+    +row('Vibration',seg('haptics',[[true,'On'],[false,'Off']]))+row('Kick returns',seg('kr',[[true,'Play them'],[false,'Skip']]))+row('Auto-save',seg('autosave',[[true,'On'],[false,'Off']]))+row('Menu layout',seg('cnav',[[true,'Compact hub'],[false,'Classic tabs']]))+row('Difficulty',`<button class="bgh bxs" onclick="slOpen()">Sliders…</button>`)+row('Scorebug',seg('bug',[['tv','TV'],['slab','Slab'],['tower','Tower'],['mini','Mini'],['classic','Classic']]))+row('Camera',seg('cam',[['wide','Wide'],['broadcast','Broadcast'],['tight','Tight']]))+row('Crowd noise meter',seg('noiseM',[[true,'On'],[false,'Off']]))+row('Move buttons',seg('moveUI',[['row','Row'],['wheel','Wheel']]))+row('Career camera',seg('pcCam',[['close','Close'],['mid','Normal'],['wide','Wide']]))+row('Landing marker',seg('land',[['pc','Player Career'],['all','Always'],['off','Off']]))+row('Mouse: click to tackle',seg('clickTk',[[true,'On'],[false,'Off']]))
     +row('Graphics',seg('gfx',[['auto','Auto'],['fast','Fast (slow phones)']]))+row('Fans in the stands',seg('crowdV',[['full','Full'],['light','Light'],['off','Off']]))
     +`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="bgh bxs" onclick="closeSettings();showTutorial();setTimeout(()=>{const i=TUT_PAGES.findIndex(p=>p.tab==='PC controls');if(i>=0)goTutTab(i);},50)">Keyboard controls</button><button class="bgh bxs" onclick="privacyOpen()">Privacy policy</button><button class="bgh bxs" onclick="termsOpen()">Terms of use</button></div>${SUPPORT_EMAIL?`<div style="font-size:12px;margin-top:8px;opacity:.8">Support: ${supportHtml()}</div>`:''}`;}
 function renderLeagueRules(){const el=document.getElementById('set-league');if(!el)return;
@@ -7569,6 +7586,7 @@ function navGroupOf(pg){for(const g of NAV_GROUPS)if(g[3].includes(pg))return g[
 function navInit(){
   const bar=document.getElementById('nav-bar'),pr=document.getElementById('nav-prim');if(!bar||!pr||pr.dataset.ok)return;pr.dataset.ok='1';
   bar.querySelectorAll('.nav-group').forEach(gr=>{const b=gr.querySelector('.nb[id^="nb-"]');const pg=b?b.id.slice(3):null;gr.dataset.g=pg?navGroupOf(pg):'util';});
+  if(!bar.querySelector('.nb-home')){const hb=document.createElement('button');hb.className='nb nb-home';hb.textContent='\u2039 Home';hb.title='Dashboard';hb.onclick=()=>nav('dash');const st=document.getElementById('nav-team-strip');bar.insertBefore(hb,st?st.nextSibling:bar.firstChild);}
   pr.innerHTML=NAV_GROUPS.map(([k,l,ic])=>`<button class="np" id="np-${k}" role="tab" onclick="navGo('${k}')"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg><span>${l}</span><i></i></button>`).join('');
 }
 function navGo(k){const g=NAV_GROUPS.find(x=>x[0]===k);if(!g)return;const last=(G.navLast||{})[k];nav(last&&g[3].includes(last)&&(last!=='mine'||G.myPlayerId!=null)?last:g[3][0]);}
@@ -7577,8 +7595,25 @@ function navSync(page){
     for(const[k]of NAV_GROUPS){const b=document.getElementById('np-'+k);if(b)b.classList.toggle('on',k===g);}
     const vis=id=>{const e=document.getElementById(id);return!!(e&&e.style.display!=='none');};
     const h=document.getElementById('np-home');if(h)h.classList.toggle('dot',vis('news-badge'));const pg=document.getElementById('np-program');if(pg)pg.classList.toggle('dot',vis('adv-badge'));
+    {const c=gdsMain().cnav!==false;document.body.classList.toggle('cnav',c);document.body.classList.toggle('cnav-dash',c&&page==='dash');
+     const T=cnavTodo();document.querySelectorAll('#nav-bar .nb[id^="nb-"]').forEach(b=>{const k=b.id.slice(3);b.classList.toggle('todo',!!T[k]&&k!=='news');});}
     const on=document.querySelector('#nav-bar .nb.on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'});}catch(e){}
 }
+// what needs you right now: a dot on the page in the hub and in the tab bar
+function cnavTodo(){const t={},vis=id=>{const e=document.getElementById(id);return!!(e&&e.style.display!=='none');};
+  try{if(vis('news-badge'))t.news='New';}catch(e){}
+  try{if(vis('adv-badge'))t.advisor='Advice';}catch(e){}
+  try{const p=pcActive();if(p&&p.pcSP>0)t.mine=p.pcSP+' SP';}catch(e){}
+  try{if(G.phase==='offseason'&&G.sched.some(g=>g._empty))t.sched='Build it';}catch(e){}
+  try{if(pracAvailable())t.training='Practice';}catch(e){}
+  try{if(G.phase==='postseason'&&G.playoff&&!G.playoff.stateChampId&&!G.playoff.stateChamp)t.playoff='Live';}catch(e){}
+  return t;}
+function cnavLbl(pg){if(NL[pg])return NL[pg];const b=document.getElementById('nb-'+pg);return b?b.textContent.trim():pg;}
+function cnavHub(){if(gdsMain().cnav===false)return'';const T=cnavTodo();
+  const cards=NAV_GROUPS.map(([k,l,ic,pages])=>{const ps=pages.filter(pg=>pg!=='dash'&&(pg!=='mine'||G.myPlayerId!=null)&&(pg!=='recls'||(document.getElementById('nb-recls')||{style:{}}).style.display!=='none'));if(!ps.length)return'';
+    const n=ps.filter(pg=>T[pg]).length;
+    return`<div class="cnav-card"><div class="cnav-h"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg>${l}${n?`<small>${n} to do</small>`:''}</div><div class="cnav-sub">${ps.map(pg=>`<button class="${T[pg]?'todo':''}" onclick="nav('${pg}')">${cnavLbl(pg)}${T[pg]?`<span>${T[pg]}</span>`:''}</button>`).join('')}</div></div>`;}).join('');
+  return`<div class="cnav-hub">${cards}</div>`;}
 function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e){}
   const _prevPg=G._page;
   G._page=page;G._arg=arg;
@@ -7760,6 +7795,8 @@ function pgDash(){
   </div>
 
   ${nextGameBlock}
+
+  ${cnavHub()}
 
   <div class="g2" style="align-items:start">
     <div>
