@@ -10,20 +10,52 @@ High school football career game with a playable Game Day engine.
 | `Gridiron27_web_beta.zip` | The same folder zipped, ready to upload to your host. |
 | `Gridiron27_code.txt` | `index.html` as plain text. |
 | `sw.js` | The offline service worker (same as `app/sw.js`). |
-| `supabase setup.sql` | The Online Play database script, now with Community Creations. |
+| `supabase setup.sql` | The Online Play database script, now with Community Creations leagues. |
+| `Gridiron27_online_setup_sql.txt` | The same script as text. |
 | Older `Gridiron_*` zips, code files and `sw213.js` / `sw215.js` | Earlier builds, unchanged. |
 
 ## Deploying
 
 1. Upload the contents of `Gridiron27_web_beta.zip` to your host, in the same place as before.
 2. **Online Play database:** open Supabase → SQL Editor → paste the whole `supabase setup.sql` → Run.
-   You can run it again safely; it keeps all data. It adds the `community_worlds` table for shared worlds.
-   Until you run it, the Community Creations screen asks for the update; everything else keeps working.
-3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-4`).
+   You can run it again safely; it keeps all data. This update adds section 9: the `community_leagues` table and the private
+   `community` storage bucket for shared careers. Until you run it, Community Creations → Leagues asks for the update;
+   everything else keeps working.
+3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-5`).
+   The home-screen app also has new Gridiron 27 icons and splash screens; iPhones may keep the old splash until the app
+   is removed from the home screen and added again.
 
 ## What's new
 
 ### Latest update
+- **New look on the home screen:** Gridiron 27 splash screens, app icons and loading screen (the old ones still said Gridiron Prep GM).
+- **Player Career:**
+  - A ring shows where every pass and kick will come down.
+  - The camera follows your player closer (Settings: Close, Normal or Wide; landing marker for Career, Always or Off).
+- **Controls:**
+  - Holding the stick before the snap now runs from the first step.
+  - On defense, tap another player with a second finger to switch while you keep steering; after a switch he keeps running your way.
+- **Laptop freezes:** a stuck or virtual controller (common on gaming laptops) no longer pauses the game or steers your player. The keyboard always wins over an idle stick. The title screen highlights run in small slices.
+- **Helmets off:** the player shows his own hair (color and style from his portrait), face and ears instead of a brown helmet.
+- **Skin tones:** players on the field have the exact skin tone of their portrait.
+- **7v7:** no helmets or pads (slimmer shoulders, shorts), everyone shows his hair, and it's real two-hand touch: no dives, trucks or stiff arms.
+- **Onside kicks:** the receiving team reacts at the kick. The kicking team now recovers about 8–21% (was 58–86%).
+- **Broadcast:**
+  - Scorebug styles TV, Slab, Tower, Mini and Classic.
+  - Camera Wide, Broadcast or Tight.
+  - A crowd noise meter: the home crowd gets loud on the visitors' downs and can cause false starts, missed audibles and a little less focus on catches.
+- **Program** (top of the Depth Chart): team morale, quarterback–receiver chemistry, up to three captains, weekly position battles; position coaches on the Staff page; Senior Night before the offseason.
+- **League rules** (Settings, per career): 4, 8, 16 or 32 playoff teams, best records or division winners first, proper 1-vs-N seeding, and earned progression (ratings can't be typed in).
+- **Equipment:** ski mask, guardian cap, a second mouthpiece; arm bands, arm sleeves and leg sleeves on the near or far side.
+- **Community Creations:**
+  - New Leagues tab: share a whole career (every team, player and record) from Load Game; others add it to their saves.
+  - World files and shared worlds now carry every school you changed in Team Builder.
+- **Fixes:**
+  - Customize no longer cuts abbreviations to two letters.
+  - Text in team colors stays readable.
+  - Recruiting tabs and Game Day buttons match the new look.
+
+### Earlier update
 - **Real number of high schools in every state** (about 15,100 for the whole country).
   - Pick up to **5 states in full detail** (League Setup → Choose your states). Every player on every team is simulated there.
   - Every other state is a **light state**. Its schools play every game, keep their strength and records, and crown a champion in a **state playoff**. The game tracks their top prospects, so stars, offers, camps and commitments work everywhere.
