@@ -6376,6 +6376,7 @@ function finalizeOffseason(){
   G.players=G.players.filter(p=>!(p.sId===G.myId&&p.yr===12));
   // FIX: Increment only user players here (not global — AI teams do it per-team after senior removal)
   {const ms=myS();for(const p of G.players.filter(p=>p.sId===G.myId))if(p.yr<12){p.yr++;bodyGrow(p,ms);}}
+  try{xferProcess();}catch(e){console.error('transfers',e);}
   const needs=cNeeds(G.myId);
   // Freshman class = seniors lost + win-based bonus
   // >= .500: 6-4→+1, 7-3→+2, 8-2→+3, 9-1→+4, undefeated→+5
@@ -7655,8 +7656,9 @@ function dashTiles(o){
   const tTeam=dtTile('Team management',`nav('depth')`,`<div class="dt-bar"><i style="width:${clamp(mo,0,100)}%;background:${mo>=60?'var(--gn)':mo>=40?'var(--gd)':'#e5534b'}"></i></div><div class="dt-sub">${G.offS} / ${G.defS} · Morale: ${mo} (${moraleLbl(mo)})</div>${dtChips(mine)}<div class="dt-stars">${stars(Math.round(G.prestige||1))}</div><div class="dt-sub" style="margin-top:6px">${pl.length} players · QB chemistry ${Math.round(chemAvg())}</div>`,'dt-tall');
   // recruiting (offers coming in) and seniors (leaving)
   const offers=pl.reduce((a,p)=>a+((p.offers||[]).length),0),commits=pl.filter(p=>p.committed).length,srs=pl.filter(p=>p.yr===12).length;
-  const tRec=dtTile('Recruiting',`nav('recr')`,`<div class="dt-row"><b>Offers</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${offers}</span></div>`,'dt-half');
-  const tSr=dtTile('Seniors',`nav('roster')`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${srs}${commits?` · ${commits} committed`:''}</span></div>`,'dt-half');
+  const xin=xferInList().length,xout=xferOutList().length;
+  const tRec=dtTile('Transfers',`nav('scout')`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
+  const tSr=dtTile('Transfers'+(xout?'<i class="dt-dot"></i>':''),`xferLeaveOpen()`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${xout+srs}${xout?` · ${xout} transfer${xout>1?'s':''}`:''}</span></div>`,'dt-half');
   const n0=(newsItems||[])[0];
   const tNews=dtTile('News'+dot('news'),`nav('news')`,n0?`<div class="dt-news">${n0.headline}</div><div class="dt-mu">${n0.sub||''}</div>`:`<div class="dt-mu">No news yet.</div>`);
   // training and scouting
@@ -7686,6 +7688,7 @@ function cnavTodo(){const t={},vis=id=>{const e=document.getElementById(id);retu
   try{const p=pcActive();if(p&&p.pcSP>0)t.mine=p.pcSP+' SP';}catch(e){}
   try{if(G.phase==='offseason'&&G.sched.some(g=>g._empty))t.sched='Build it';}catch(e){}
   try{if(pracAvailable())t.training='Practice';}catch(e){}
+  try{const n=xferOutList().length;if(n)t.roster=n+' leaving';}catch(e){}
   try{if(G.phase==='postseason'&&G.playoff&&!G.playoff.stateChampId&&!G.playoff.stateChamp)t.playoff='Live';}catch(e){}
   return t;}
 function cnavLbl(pg){if(NL[pg])return NL[pg];const b=document.getElementById('nb-'+pg);return b?b.textContent.trim():pg;}
@@ -7700,6 +7703,7 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
   if(['dash','depth','roster','jv'].includes(page)){try{autoJVCallup(true);}catch(e){console.error('autoJVCallup',e);}}
   try{intlEnsure();}catch(e){console.error('intl',e);}
   try{autoSaveTick();}catch(e){}
+  try{xferTick();}catch(e){console.error('xfer',e);}
   if(_prevPg!==page){const _c=document.getElementById('ct');if(_c)_c.scrollTop=0;}
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   // Highlight by ID mapping
@@ -13738,7 +13742,7 @@ window.talkPitch=function(k){
 const MEET_MAX=4,MEET_COST=1500;
 function transferWindow(){return G.phase==='offseason'&&!G.sched.some(g=>g.type==='regular'&&g.result);}
 // you scout a player the season before you recruit him (in your first season, scouting in the same preseason counts)
-function meetEligible(p){return plScouted(p)&&(p.scout.yr<G.yr||(G.yr===1&&transferWindow()));}
+function meetEligible(p){if(!plScouted(p)||p.xferPledge)return false;if(transferWindow())return p.scout.yr<G.yr||G.yr===1;return(p.yr||9)<12;}
 function scoutMax(){return Math.max(2,2*Math.round(G.prestige||1));}
 function scoutLeft(){if(!G.scoutN||G.scoutN.yr!==G.yr)G.scoutN={yr:G.yr,n:0};return Math.max(0,scoutMax()-G.scoutN.n);}
 function scoutPlayer(pid){const p=getP(pid);if(!p||p.sId===G.myId)return;if(plScouted(p)){notify('Already scouted.','w');return;}
@@ -13750,15 +13754,16 @@ function pgScout(){
   const pool=G.players.filter(p=>!p.grad&&p.sId!==G.myId&&getS(p.sId)&&!getS(p.sId).fp&&(f.pos==='ALL'||p.pos===f.pos)&&p.rat>=f.min&&(!f.q||(p.fn+' '+p.ln).toLowerCase().includes(f.q.toLowerCase())));
   const mine=G.players.filter(p=>plScouted(p)&&!p.grad&&p.sId!==G.myId).sort((a,b)=>b.rat-a.rat);
   const top=pool.filter(p=>!plScouted(p)).sort((a,b)=>b.rat-a.rat).slice(0,60);
-  const row=p=>{const s=getS(p.sId),sc=plScouted(p),el=meetEligible(p)&&transferWindow(),oos=schState(s)!==schState(ms);
+  const row=p=>{const s=getS(p.sId),sc=plScouted(p),el=meetEligible(p),oos=schState(s)!==schState(ms);
     return`<tr class="cl" onclick="showPlayer(${p.id})"><td style="white-space:nowrap">${face(p.fs,24)} ${p.fn} ${p.ln}</td><td>${p.pos}</td><td>${yrL(p.yr)}</td><td>${sLogo(s,20)} ${s.name}${oos?' <span title="Out of state" style="color:var(--rd);font-size:10px;font-weight:800">OUT OF STATE</span>':''}</td><td><b>${p.rat}</b></td>
       <td>${sc?`<span style="color:var(--gn)">${p.pot}</span>`:'?'}</td><td>${sc?PRIO_TXT[plPriority(p)]:'?'}</td>
-      <td>${sc?(el?`<button class="btn bxs" onclick="event.stopPropagation();meetOpen(${p.id})">Meet</button>`:`<span style="font-size:11px;color:var(--mu)">${p.scout.yr<G.yr||G.yr===1?'Meet in the offseason':'Meet next offseason'}</span>`):`<button class="bgh bxs" onclick="event.stopPropagation();scoutPlayer(${p.id})">Scout</button>`}</td></tr>`;};
+      <td>${sc?(p.xferPledge?`<span style="font-size:11px;color:var(--gn);font-weight:700">Joins next season</span>`:el?`<button class="btn bxs" onclick="event.stopPropagation();meetOpen(${p.id})">Meet</button>`:`<span style="font-size:11px;color:var(--mu)">${(p.yr||9)>=12&&!transferWindow()?'Senior: graduates':'Meet next offseason'}</span>`):`<button class="bgh bxs" onclick="event.stopPropagation();scoutPlayer(${p.id})">Scout</button>`}</td></tr>`;};
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Scouting <span style="font-size:12px;color:var(--mu)">${scoutLeft()} of ${scoutMax()} reports left this season</span></div><div class="pb">
-    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">Scout other schools' players to learn their true potential and what they care about. You can hold a transfer meeting with a scouted player the season after you scout him, in the offseason before your first game. You get 2 reports per prestige star each season. Bringing in players from out of state can draw an investigation.</div>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">Scout other schools' players to learn their true potential and what they care about. Meet a scouted player during the season and, if he says yes, he joins you next season; in the offseason before your first game (the season after you scout him) he joins right away. You get 2 reports per prestige star each season. Bringing in players from out of state can draw an investigation.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select onchange="window._scF.pos=this.value;nav('scout')">${['ALL',...POS].map(x=>`<option ${x===f.pos?'selected':''}>${x}</option>`).join('')}</select>
       <label style="font-size:12px;color:var(--mu)">Min OVR <input type="number" value="${f.min}" style="width:70px" onchange="window._scF.min=+this.value||0;nav('scout')"></label>
       <input placeholder="Search name" value="${f.q.replace(/"/g,'&quot;')}" onchange="window._scF.q=this.value;nav('scout')" style="flex:1 1 140px"></div></div></div>
+    ${(()=>{const L=xferInList();return L.length?`<div class="pnl" style="margin-bottom:14px"><div class="ph">Transfers coming in next season</div><div class="pb">${L.map(o=>`<div class="dr"><span class="a"><b>${o.p.fn} ${o.p.ln}</b> <span class="pb2">${o.p.pos}</span> ${rb(o.p.rat)}</span><span style="font-size:12px;color:var(--mu)">${yrL(o.p.yr)} · from ${o.from?o.from.name:'?'}</span></div>`).join('')}</div></div>`:'';})()}
     ${mine.length?`<div class="pnl" style="margin-bottom:14px"><div class="ph">Your scouting reports</div><div style="overflow-x:auto"><table><thead><tr><th>Player</th><th>Pos</th><th>Yr</th><th>School</th><th>OVR</th><th>Pot</th><th>Cares about</th><th></th></tr></thead><tbody>${mine.map(row).join('')}</tbody></table></div></div>`:''}
     <div class="pnl"><div class="ph">Players to scout</div><div style="overflow-x:auto"><table><thead><tr><th>Player</th><th>Pos</th><th>Yr</th><th>School</th><th>OVR</th><th>Pot</th><th>Cares about</th><th></th></tr></thead><tbody>${top.map(row).join('')||'<tr><td colspan="8" style="color:var(--mu)">No players match.</td></tr>'}</tbody></table></div></div>`;
 }
@@ -13767,11 +13772,12 @@ window.meetOpen=function(pid){
   const p=getP(pid),from=p&&getS(p.sId);if(!p||!from||p.sId===G.myId)return;
   if(meetLeft()<=0){notify('No meetings left this season.','w');return;}
   if(p.meetYr===G.yr){notify(`You already met with ${p.fn} this season.`,'w');return;}
-  if(!transferWindow()){notify('Transfers only happen in the offseason, before your first game of the season.','w');return;}
-  if(!meetEligible(p)){notify(plScouted(p)?`You scouted ${p.fn} this season: you can meet with him before next season.`:`Scout ${p.fn} first (Team → Scouting), then meet with him before next season.`,'w');return;}
+  if(p.xferPledge){notify(`${p.fn} already committed to transfer.`,'w');return;}
+  if(!transferWindow()&&(p.yr||9)>=12){notify(`${p.fn} is a senior: he graduates before he could transfer.`,'w');return;}
+  if(!meetEligible(p)){notify(plScouted(p)?`You scouted ${p.fn} this season: you can meet with him during the season (he would join next year) or before next season.`:`Scout ${p.fn} first (Team → Scouting).`,'w');return;}
   if(!hasFunds(MEET_COST)){notify(`A meeting costs $${MEET_COST.toLocaleString()} (travel and dinner).`,'e');return;}
   window._meetPid=pid;const rk=myDepthRank(p);
-  openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:4px">Meeting with ${p.fn} ${p.ln}</div>
+  openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:4px">Meeting with ${p.fn} ${p.ln}</div>${transferWindow()?'':`<div style="font-size:12px;color:var(--gd);font-weight:700;margin-bottom:6px">Mid-season: if he says yes he finishes this season at ${from.name} and joins you next season.</div>`}
     <div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.pos} · ${yrL(p.yr)} · OVR ${p.rat} at ${from.name} ${from.mascot}. On your team he would be <b>${rk===0?'a starter':rk===1?'first off the bench':'a backup'}</b>. Scouting report: he cares most about <b>${PRIO_TXT[plPriority(p)]}</b>. The meeting costs $${MEET_COST.toLocaleString()}.</div>
     <div style="display:flex;flex-direction:column;gap:6px">${pitchHtml('meetPitch')}</div>
     <div style="text-align:right;margin-top:10px"><button class="bgh" onclick="clo()">Cancel</button></div>`);
@@ -13786,10 +13792,80 @@ window.meetPitch=function(k){
   if(k==='time'&&rank>0)ch-=0.15;if(k==='win'&&wp(me)<wp(from))ch-=0.12;
   ch=clamp(ch,0.03,0.6);
   try{updateTb();}catch(e){}
-  if(Math.random()<ch){transferIn(p,from);
+  const _ok=Math.random()<ch;
+  if(_ok&&!transferWindow()){xferPledge(p,from);
+    openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:6px">${p.fn} ${p.ln} commits to transfer!</div><div style="font-size:13px;color:var(--mu);margin-bottom:12px">Your pitch ("${PITCH[k]}") worked. He finishes this season at ${from.name} and joins your program next season.</div><div style="text-align:right"><button class="btn" onclick="clo();nav('dash')">OK</button></div>`);return;}
+  if(_ok){transferIn(p,from);
     openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:6px">${p.fn} ${p.ln} is transferring to ${me.name}!</div><div style="font-size:13px;color:var(--mu);margin-bottom:12px">Your pitch ("${PITCH[k]}") worked. He joins your ${p.onJV?'JV':'varsity'} roster right away.</div><div style="text-align:right"><button class="btn" onclick="clo();showPlayer(${p.id})">See his card</button></div>`);return;}
   openMo(`<div style="font-weight:900;font-size:18px;margin-bottom:6px">${p.fn} is staying at ${from.name}</div><div style="font-size:13px;color:var(--mu);margin-bottom:12px">${k===plPriority(p)?'He liked what he heard, but it was not enough to leave.':'Your pitch did not hit what matters to him.'} ${meetLeft()} meeting${meetLeft()===1?'':'s'} left this season.</div><div style="text-align:right"><button class="btn" onclick="clo()">OK</button></div>`);
 };
+// ── transfers across seasons: players who commit mid-season, and your own players who want out ──
+function xferPledge(p,from){G.xferIn=G.xferIn||[];G.xferIn.push({pid:p.id,from:from.id,yr:G.yr});p.xferPledge=G.myId;
+  addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} (${p.pos}, OVR ${p.rat}) commits to transfer from ${from.name} ${from.mascot}. He joins next season.</span>`);
+  try{addNews('myteam',`${p.fn} ${p.ln} commits to transfer`,`The ${p.pos} from ${from.name} joins the program next season.`);}catch(e){}}
+function xferInList(){return(G.xferIn||[]).map(x=>({x,p:getP(x.pid),from:getS(x.from)})).filter(o=>o.p&&!o.p.grad&&o.p.sId!==G.myId);}
+function xferOutList(){return myP().filter(p=>p.xferOut&&!p.grad);}
+function xferCap(){return Math.floor(myP().length*0.15);}
+// how much a player wants out, from what he cares about, his traits and how things are going
+function xferRisk(p){
+  if(p.id===G.myPlayerId||(p.yr||9)>=12||p.stay===G.yr||p.xferOut)return 0;
+  const pr=plPriority(p),t=p.traits||[],n=PC_STARTERS[p.pos]||1,rk=myDepthRank(p),starter=p.onJV?false:rk<n;
+  const g=(G.wins||0)+(G.losses||0),wp=g?(G.wins||0)/g:0.5;
+  let r=0.015;
+  if(pr==='time'&&!starter)r+=(rk>=n+1?0.2:0.12)+(p.rat>=50?0.05:0)+(p.onJV&&(p.yr||9)>=11?0.08:0);
+  if(pr==='exposure'&&(G.prestige||1)<3&&((p.stars||0)>=2||p.rat>=60))r+=0.13;
+  if(pr==='win'&&wp<0.45)r+=0.15+(wp<0.25?0.07:0);
+  if(pr==='coach'&&getTrainLevel()<6)r+=0.08;
+  if(pr==='team'&&moraleOf()<45)r+=0.12;
+  r+=((60-(p.morale==null?65:p.morale))*0.004);
+  if(t.includes('hothead'))r+=0.06;if(t.includes('showboat'))r+=0.04;if(t.includes('humble'))r-=0.08;if(t.includes('leader'))r-=0.06;if(t.includes('coachable'))r-=0.03;
+  if((captains()||[]).includes(p.id))r-=0.2;if((p.yr||9)===9)r-=0.03;
+  return clamp(r,0,0.45);}
+// where he would go: a school in your league where he fits what he wants
+function xferDest(p){const pr=plPriority(p),pool=[];for(const d of G.divisions||[])for(const t of d.teams)if(t.id!==G.myId&&!t.lite&&!t.intl)pool.push(t);if(!pool.length)return null;
+  const wp=t=>{const g=(t.wins||0)+(t.losses||0);return g?(t.wins||0)/g:0.5;};
+  let best=null,bs=-1e9;for(let i=0;i<24;i++){const t=pool[Math.floor(Math.random()*pool.length)],ahead=sPlayers(t.id).filter(q=>q.pos===p.pos&&!q.onJV&&q.rat>p.rat).length;
+    const sc=(pr==='time'?-ahead*2:-ahead*0.5)+(pr==='exposure'?(t.prestige||1)*1.5:(t.prestige||1)*0.4)+(pr==='win'?wp(t)*5:wp(t))+Math.random();if(sc>bs){bs=sc;best=t;}}
+  return best;}
+function xferEval(tag){
+  const key=G.yr+tag;if(G.xferEv&&G.xferEv.includes(key))return;G.xferEv=(G.xferEv||[]).filter(k=>String(k).startsWith(G.yr+'')).concat(key);
+  let room=xferCap()-xferOutList().length;if(room<=0)return;
+  const C=myP().map(p=>({p,r:xferRisk(p)})).filter(o=>o.r>0).sort((a,b)=>b.r-a.r),out=[];
+  for(const o of C){if(room<=0)break;if(Math.random()<o.r*0.6){const d=xferDest(o.p);if(!d)continue;o.p.xferOut={to:d.id,yr:G.yr,why:plPriority(o.p)};out.push(o.p);room--;}}
+  if(!out.length)return;
+  addLog(`<span style="color:var(--rd)">Transfer talk: ${out.map(p=>`${p.fn} ${p.ln} (${p.pos})`).join(', ')} ${out.length>1?'plan':'plans'} to transfer after the season. Talk to them on the Dashboard (Players leaving).</span>`);
+  try{addNews('bad',`${out.length} player${out.length>1?'s':''} looking to transfer`,`${out.map(p=>p.fn+' '+p.ln).join(', ')} told the staff they plan to leave after the season.`);}catch(e){}
+  try{notify(`${out.length} player${out.length>1?'s want':' wants'} to transfer after the season`,'w');}catch(e){}}
+function xferTick(){if(!G||!G.myId||pcActive())return;
+  if(G.phase==='regular'&&(G.week||0)>=5)xferEval('a');
+  if((G.phase==='playoffs'||G.phase==='postseason'||(G.phase==='regular'&&allRegDone())))xferEval('b');}
+// the offseason move: committed players arrive, the ones who wanted out leave
+function xferProcess(){
+  for(const o of xferInList()){o.p.xferPledge=null;try{transferIn(o.p,o.from||{name:'another school',mascot:''});}catch(e){console.error('xfer in',e);}}
+  G.xferIn=[];for(const q of G.players)if(q.xferPledge&&q.sId!==G.myId)q.xferPledge=null;
+  for(const p of xferOutList()){const d=getS(p.xferOut.to)||xferDest(p);p.xferOut=null;if(!d)continue;
+    p.sId=d.id;p.onJV=false;p.depth={};p.wl=p.wl||false;if(G.jvRoster)G.jvRoster=G.jvRoster.filter(id=>id!==p.id);G.captains=(G.captains||[]).filter(id=>id!==p.id);_spVer++;
+    addLog(`<span style="color:var(--rd)">Transfer: ${p.fn} ${p.ln} (${p.pos}, OVR ${p.rat}) leaves for ${d.name} ${d.mascot}.</span>`);
+    try{addNews('bad',`${p.fn} ${p.ln} transfers out`,`The ${p.pos} leaves for ${d.name} ${d.mascot}, looking for ${PRIO_TXT[plPriority(p)]||'a fresh start'}.`);}catch(e){}}
+  try{checkAndFillRosters();}catch(e){}}
+window.xferLeaveOpen=function(){const L=xferOutList(),srs=myP().filter(p=>p.yr===12&&!p.xferOut);
+  const row=p=>{const d=getS(p.xferOut.to);return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:170px"><b style="cursor:pointer" onclick="clo();showPlayer(${p.id})">${p.fn} ${p.ln}</b> <span class="pb2">${p.pos}</span> ${rb(p.rat)}<div style="font-size:11px;color:var(--mu)">${yrL(p.yr)} · wants ${PRIO_TXT[p.xferOut.why]||'a change'}${d?' · likely '+d.name:''}</div></span>${p.talkKey===talkKey()?'<span style="font-size:11px;color:var(--mu)">Talked this week</span>':`<button class="btn bxs" onclick="keepOpen(${p.id})">Talk</button>`}</div>`;};
+  openMo(`<h2>Players leaving</h2>
+   <div style="font-size:13px;color:var(--mu);margin-bottom:8px">Transfers leave when the offseason training ends. Talk to them: hit what they care about and they may stay. At most 15% of your roster (${xferCap()} players) can leave in a year.</div>
+   <div style="font-weight:800;margin:8px 0 4px">Transferring out (${L.length})</div>${L.map(row).join('')||'<div style="color:var(--mu);font-size:13px">Nobody wants to leave right now.</div>'}
+   <div style="font-weight:800;margin:12px 0 4px">Graduating seniors (${srs.length})</div><div style="font-size:12px;color:var(--mu)">${srs.map(p=>`${p.fn} ${p.ln} (${p.pos})`).join(', ')||'None'}</div>
+   <div style="text-align:right;margin-top:12px"><button class="bgh" onclick="clo()">Close</button></div>`);};
+window.keepOpen=function(pid){const p=getP(pid);if(!p||!p.xferOut)return;window._keepPid=pid;
+  openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:4px">Talk with ${p.fn} ${p.ln}</div><div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.pos} · ${yrL(p.yr)} · OVR ${p.rat}. ${plHintOwn(p)} One talk per week.</div>
+   <div style="display:flex;flex-direction:column;gap:6px">${pitchHtml('keepPitch')}</div><div style="text-align:right;margin-top:10px"><button class="bgh" onclick="xferLeaveOpen()">Back</button></div>`);};
+window.keepPitch=function(k){const p=getP(window._keepPid);if(!p||!p.xferOut)return;p.talkKey=talkKey();
+  const t=p.traits||[],rk=myDepthRank(p),n=PC_STARTERS[p.pos]||1;
+  let ch=0.18+(k===plPriority(p)?0.35:0)+((p.morale==null?65:p.morale)-60)*0.005+(t.includes('coachable')?0.08:0)+(t.includes('humble')?0.06:0)-(t.includes('hothead')?0.08:0);
+  if(k==='time'&&rk>=n)ch-=0.15;ch=clamp(ch,0.05,0.8);
+  if(Math.random()<ch){p.xferOut=null;p.stay=G.yr;p.morale=clamp((p.morale||65)+5,0,100);addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} decided to stay.</span>`);
+    openMo(`<div style="font-weight:900;font-size:18px;margin-bottom:6px">${p.fn} is staying!</div><div style="font-size:13px;color:var(--mu);margin-bottom:12px">"${PITCH[k]}" was what he needed to hear.</div><div style="text-align:right"><button class="btn" onclick="xferLeaveOpen()">OK</button></div>`);return;}
+  p.morale=clamp((p.morale||65)-2,0,100);
+  openMo(`<div style="font-weight:900;font-size:18px;margin-bottom:6px">${p.fn} still wants to leave</div><div style="font-size:13px;color:var(--mu);margin-bottom:12px">${k===plPriority(p)?'He listened, but he is not convinced yet.':'That is not what matters to him.'} Try again next week.</div><div style="text-align:right"><button class="btn" onclick="xferLeaveOpen()">OK</button></div>`);};
 function transferIn(p,from){
   const side=x=>POS_OFFENSE.has(x.pos)?'o':POS_DEFENSE.has(x.pos)?'d':'s';
   const used=new Set(myP().filter(q=>side(q)===side(p)).map(q=>q.num));
@@ -16891,6 +16967,7 @@ const TUT_PAGES=[
       <li><strong>Player Career</strong>: pick a school on the map, then build your player: name, position, archetype, height and weight, up to 3 interests and 2 character traits, his look and his gear. Attribute points build a freshman between 40 and 55 overall. In Player Career mode the school already has a head coach, so you don't create one.</li>
       <li><strong>Levels and skill points</strong>: every game earns your player XP (more for big games, wins and the playoffs). Each level gives 3 skill points to spend on any attribute on the My Player page. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 above 90.</li>
       <li><strong>Catch meter</strong>: in Player Career only your own player gets one.</li>
+      <li><strong>Transfers</strong>: meet a scouted player any time. During the season a yes means he joins you next season (seniors can't, they graduate). Your own players may want to transfer out, depending on what they care about, their traits and morale; never more than 15% of your roster in a year. Talk to them from the Players leaving tile; they leave when offseason training ends.</li>
     </ul>
     <div class="tip"> Tip: Spend skill points on the attributes marked ● first: those count toward your overall at your position.</div>
   `},
