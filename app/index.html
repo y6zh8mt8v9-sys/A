@@ -10158,7 +10158,7 @@ function ttRefresh(){
     const box=_ttEl('tt-list');if(!box)return;
     let h=list.map(m=>`<div class="tt-row"><div class="tt-row-logo">${sLogo({name:m.name,mascot:m.mascot,c1:m.c1,c2:m.c2},46)}</div>
       <div class="tt-row-info"><div class="tt-row-t">${m.name} ${m.mascot}</div><div class="tt-row-s">${m.coach?m.coach+' · ':''}${m.cls||''} · ${m.season} season · ${m.rec}${m.phase?' · '+m.phase:''}</div><div class="tt-row-s">Saved ${ttFmtDate(m.savedAt)}</div></div>
-      <div class="tt-row-b"><button class="btn bsm" onclick="ttLoadSlot('${m.id}')">Load</button>${OLS.user&&OLS.backend&&OLS.backend.cloudPut?`<button class="bgh bsm" onclick="cloudUpload('${m.id}',this)">Upload</button>`:''}<button class="bgh bsm" onclick="exportSave('${m.id}')">Export</button><button class="bgh bsm tt-del" onclick="ttDelete('${m.id}')">Delete</button></div></div>`).join('');
+      <div class="tt-row-b"><button class="btn bsm" onclick="ttLoadSlot('${m.id}')">Load</button>${OLS.user&&OLS.backend&&OLS.backend.cloudPut?`<button class="bgh bsm" onclick="cloudUpload('${m.id}',this)">Upload</button>`:''}${OLS.user&&OLS.backend&&OLS.backend.leaguePublish?`<button class="bgh bsm" onclick="lgPublish('${m.id}',this)" title="Share this whole career in Community Creations">Share</button>`:''}<button class="bgh bsm" onclick="exportSave('${m.id}')">Export</button><button class="bgh bsm tt-del" onclick="ttDelete('${m.id}')">Delete</button></div></div>`).join('');
     if(legacy&&!list.length)h+=`<div class="tt-row"><div class="tt-row-info"><div class="tt-row-t">Browser backup from an older version</div><div class="tt-row-s">Your last save before save slots existed.</div></div><div class="tt-row-b"><button class="btn bsm" onclick="ttLoadLegacy()">Load</button></div></div>`;
     if(!h)h=`<div class="tt-empty">No saves on this device yet. Start a new game, or import a save file you exported earlier.</div>`;
     box.innerHTML=h;
@@ -12065,7 +12065,7 @@ async function commPublish(){const t=fpT(FP.edit);if(!t)return;
   catch(e){notify(e.message||String(e),'e');}}
 async function commOpen(sort){
   sort=sort||window._commSort||'new';window._commSort=sort;
-  openMo(`<h2>Community teams</h2><div id="comm-b" style="color:var(--mu)">Loading…</div>`);
+  openMo(`<h2>Community Creations</h2>${ccTabs('teams')}<div id="comm-b" style="color:var(--mu)">Loading…</div>`);
   try{const B=await commB();const blocked=B.blocks?await B.blocks(OLS.user.id).catch(()=>[]):[];const L=(await B.commList(sort)).filter(r=>!blocked.includes(r.owner));window._comm=L;
     const el=document.getElementById('comm-b');if(!el)return;
     el.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:10px"><button class="${sort==='new'?'btn bbl':'bgh'} bsm" onclick="commOpen('new')">Newest</button><button class="${sort==='top'?'btn bbl':'bgh'} bsm" onclick="commOpen('top')">Most downloaded</button></div>
@@ -12677,9 +12677,21 @@ function cloudSupabaseExt(B,cfg,getSb,err){
   B.worldGet=async id=>{const sb=getSb();const{data,error}=await sb.from('community_worlds').select('data').eq('id',id).maybeSingle();err(error);if(!data)throw new Error('That world was removed.');try{await sb.rpc('community_world_download',{wid:id});}catch(e){}return data.data;};
   B.worldPublish=async(uid,username,name,info,data)=>{const{error}=await getSb().from('community_worlds').insert({owner:uid,username,name,info,data});if(error&&miss16(error))throw new Error(NEED16);if(error&&/row-level|security/i.test(error.message||''))throw new Error('You can publish up to 10 worlds. Remove one first.');err(error);};
   B.worldDel=async id=>{const{error}=await getSb().from('community_worlds').delete().eq('id',id);err(error);};
+  // community leagues: whole career saves (every team, player and record), stored like saves sent to friends
+  const NEED17='Your online database needs the latest update for community leagues: run the new supabase_setup.sql in the Supabase SQL Editor (it keeps all your data).',
+    miss17=e=>e&&/does not exist|42P01|42883|PGRST20[0-9]|schema cache|community_leagues|bucket not found/i.test((e.message||'')+' '+(e.code||''));
+  B.leagueList=async sort=>{const{data,error}=await getSb().from('community_leagues').select('id,owner,username,name,info,path,enc,size,downloads,created_at').order(sort==='top'?'downloads':'created_at',{ascending:false}).limit(60);if(error&&miss17(error))throw new Error(NEED17);err(error);return data||[];};
+  B.leagueGet=async row=>{const sb=getSb(),{data,error}=await sb.storage.from('community').download(row.path);if(error)throw new Error(error.message||'Could not download the league');try{await sb.rpc('community_league_download',{lid:row.id});}catch(e){}return await cgUnzip(data,row.enc);};
+  B.leaguePublish=async(uid,username,name,info,str)=>{const z=await cgZip(str),sb=getSb(),path=`${uid}/${Date.now().toString(36)}.save`;
+    const up=await sb.storage.from('community').upload(path,z.blob,{upsert:false,contentType:'application/octet-stream',cacheControl:'0'});
+    if(up.error){if(/too large|exceeded|maximum/i.test(up.error.message||''))throw new Error('This league is too big to publish.');if(miss17(up.error)||/row-level|security/i.test(up.error.message||''))throw new Error(NEED17);err(up.error);}
+    const{error}=await sb.from('community_leagues').insert({owner:uid,username,name,info,path,enc:z.enc,size:z.blob.size});
+    if(error){try{await sb.storage.from('community').remove([path]);}catch(e){}if(miss17(error))throw new Error(NEED17);if(/row-level|security/i.test(error.message||''))throw new Error('You can publish up to 5 leagues. Remove one first.');err(error);}};
+  B.leagueDel=async row=>{const sb=getSb();try{await sb.storage.from('community').remove([row.path]);}catch(e){}const{error}=await sb.from('community_leagues').delete().eq('id',row.id);err(error);};
   B.deleteAccount=async uid=>{const sb=getSb();
     try{const L=await B.cloudList(uid);if(L.length)await sb.storage.from('saves').remove(L.map(r=>`${uid}/${r.id}.save`));}catch(e){}
     try{const S=await B.sharedList(uid);if(S.length)await sb.storage.from('shared').remove(S.map(r=>r.path));}catch(e){}
+    try{const{data}=await sb.from('community_leagues').select('path').eq('owner',uid);if(data&&data.length)await sb.storage.from('community').remove(data.map(r=>r.path));}catch(e){}
     const{error}=await sb.rpc('delete_my_account');if(error&&miss14(error))throw new Error(NEED14);err(error);try{await sb.auth.signOut();}catch(e){}};
   return B;}
 // test mode: profiles live with the test accounts, "account" saves live in a separate store in this browser
@@ -12700,6 +12712,11 @@ function cloudLocalExt(B){
   B.sharedList=async uid=>((await tx('readonly',s=>s.getAll()))||[]).filter(r=>r.share&&(r.recipient===uid||r.sender===uid)).map(r=>({id:r.k,sender:r.sender,recipient:r.recipient,meta:r.meta,path:r.k,enc:r.enc,size:r.size,created_at:r.created_at})).sort((a,b)=>a.created_at<b.created_at?1:-1);
   B.sharedGet=async row=>{const r=await tx('readonly',s=>s.get(row.path));if(!r)throw new Error('Save not found');return await cgUnzip(r.blob,r.enc);};
   B.sharedDel=async row=>{await tx('readwrite',s=>s.delete(row.path));};
+  B.leagueList=async sort=>((await tx('readonly',s=>s.getAll()))||[]).filter(r=>r.league).map(r=>({id:r.k,owner:r.owner,username:r.username,name:r.name,info:r.info,size:r.size,downloads:r.downloads||0,created_at:r.created_at,path:r.k,enc:r.enc})).sort((a,b)=>sort==='top'?b.downloads-a.downloads:(a.created_at<b.created_at?1:-1));
+  B.leagueGet=async row=>{const r=await tx('readonly',s=>s.get(row.path));if(!r)throw new Error('That league was removed.');r.downloads=(r.downloads||0)+1;await tx('readwrite',s=>s.put(r));return await cgUnzip(r.blob,r.enc);};
+  B.leaguePublish=async(uid,username,name,info,str)=>{const all=(await tx('readonly',s=>s.getAll()))||[];if(all.filter(r=>r.league&&r.owner===uid).length>=5)throw new Error('You can publish up to 5 leagues. Remove one first.');
+    const z=await cgZip(str),k='league|'+uid+'|'+Date.now().toString(36);await tx('readwrite',s=>s.put({k,league:1,owner:uid,username,name,info,size:z.blob.size,enc:z.enc,blob:z.blob,downloads:0,created_at:new Date().toISOString()}));};
+  B.leagueDel=async row=>{await tx('readwrite',s=>s.delete(row.path));};
   B.shareSave=async(uid,to,meta,str)=>{const z=await cgZip(str),k='share|'+to+'|'+uid+'|'+Date.now().toString(36);await tx('readwrite',s=>s.put({k,share:1,sender:uid,recipient:to,meta,size:z.blob.size,enc:z.enc,blob:z.blob,created_at:new Date().toISOString()}));};
   B.blocks=async uid=>(ld().blocks||[]).filter(b=>b[0]===uid).map(b=>b[1]);
   B.block=async(uid,o)=>{const d=ld();d.blocks=(d.blocks||[]).filter(b=>!(b[0]===uid&&b[1]===o));d.blocks.push([uid,o]);sv(d);};
@@ -13659,13 +13676,13 @@ function commitNow(pid){const p=getP(pid);if(!p)return;const sel=document.getEle
 
 // ═══════════ PLAYER EQUIPMENT (towel, gloves, cleats, mouthpiece, sleeves, bands, undershirts) ═══════════
 const EQ_COLORS=[['c1','Team primary'],['c2','Team secondary'],['#ffffff','White'],['#16181d','Black'],['#8d939b','Gray'],['#c8102e','Red'],['#1d4fb8','Blue'],['#3fd0ff','Light blue'],['#f2b632','Gold'],['#ff7a1a','Orange'],['#39e639','Neon green'],['#ff5fa8','Pink'],['#6b2fb8','Purple']];
-const EQ_SLEEVE=[['none','None'],['one','One arm'],['both','Both arms']];
-const EQ_BAND=[['none','None'],['wrist1','One wrist'],['wrist2','Both wrists'],['bicep','Biceps']];
+const EQ_SLEEVE=[['none','None'],['one','One arm (near side)'],['onefar','One arm (far side)'],['both','Both arms']];
+const EQ_BAND=[['none','None'],['wrist1','One wrist (near side)'],['wrist1f','One wrist (far side)'],['wrist2','Both wrists'],['bicep1','One bicep (near side)'],['bicep1f','One bicep (far side)'],['bicep','Both biceps']];
 const EQ_UNDER=[['none','None'],['long','Long sleeve'],['quarter','Quarter sleeve'],['jamo','Baggy (untucked)']];
 function eqDefault(p){
   const id=p.id!=null?p.id:(p.fs||0),h=n=>((id*2654435761+n*40503)>>>0)%1000/1000,pos=p.pos||'WR',skill=['QB','RB','WR','TE','CB','S'].includes(pos),line=pos==='OL'||pos==='DL';
   const pick=(a,r)=>a[Math.floor(r*a.length)%a.length];
-  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:''};
+  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:''};
   if(h(21)<(['WR','CB','S','RB','LB'].includes(pos)?0.22:pos==='QB'?0.12:0.08))e.visor=pick(['smoke','smoke','black','clear','gold','blue'],h(22));
   if(h(23)<(skill?0.14:0.05)){e.legS=h(24)<0.55?'one':'both';e.legSC=pick(['#16181d','#ffffff','c1'],h(25));}
   if(['WR','RB','CB','S','LB'].includes(pos)&&h(26)<0.14)e.crop=true;
@@ -13673,7 +13690,8 @@ function eqDefault(p){
   if(h(1)<(pos==='QB'?0.45:pos==='RB'||pos==='WR'?0.32:line?0.12:0.15)){e.towel=true;e.towelC=h(2)<0.8?'#ffffff':'c1';}
   if(pos!=='QB'&&pos!=='K'&&h(3)<(skill?0.62:0.45))e.glove=pick(['c1','c2','#ffffff','#16181d'],h(4));
   if(h(5)<0.5)e.cleat=pick(['#ffffff','#16181d','c1','#ffffff'],h(6));
-  if(pos!=='QB'&&h(7)<0.28)e.mouth=pick(['c1','#ffffff','#16181d','#ff5fa8','#39e639','#f2b632'],h(8));
+  if(pos!=='QB'&&h(7)<0.28){e.mouth=pick(['c1','#ffffff','#16181d','#ff5fa8','#39e639','#f2b632'],h(8));if(h(27)<0.12)e.mouth2=pick(['c1','#ffffff','#16181d','#ff5fa8'],h(28));}
+  if(h(29)<0.025)e.ski=pick(['#16181d','#16181d','c1','#ffffff'],h(30));
   if(h(9)<(skill?0.24:0.06)){e.sleeve=h(10)<0.6?'one':'both';e.sleeveC=pick(['#16181d','#ffffff','c1'],h(11));}
   if(h(12)<0.3){e.band=pick(['wrist2','wrist2','wrist1','bicep'],h(13));e.bandC=pick(['#ffffff','c1','#16181d'],h(14));}
   {const r=h(15);if(r<(line?0.16:0.1))e.under='long';else if(r<(line?0.36:0.24))e.under='quarter';else if(r<0.32&&['WR','CB','S','RB'].includes(pos))e.under='jamo';
@@ -13684,10 +13702,10 @@ function eqOf(p){return Object.assign(eqDefault(p),(p&&p.eq)||{});}
 const EQ_VISOR={clear:'#a9bccd',smoke:'#3a414c',black:'#14171c',gold:'#d9a520',blue:'#2f7fe0',red:'#d8452f',purple:'#7b45d8'};
 function eqCol(c,s){return c==='c1'?(s&&s.c1)||'#1d3557':c==='c2'?(s&&s.c2)||'#ffffff':c;}
 function eqResolve(e,s){if(!e)return null;const C=c=>eqCol(c,s);
-  return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,
+  return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,mouth2:e.mouth2?C(e.mouth2):null,ski:e.ski?C(e.ski):null,gcap:e.gcap?C(e.gcap):null,
     helm:{shell:'gloss',stripe:'team',mask:''}, // the helmet is the team's (Customize → Uniforms)
     pants:e.pants||'knee',socks:e.socks||'high',visor:e.visor?EQ_VISOR[e.visor]||null:null,legS:{mode:e.legS||'none',c:C(e.legSC||'#16181d')},crop:!!e.crop,sleeve:{mode:e.sleeve||'none',c:C(e.sleeveC||'#16181d')},band:{mode:e.band||'none',c:C(e.bandC||'#ffffff')},under:{mode:e.under||'none',c:C(e.underC||'#8d939b')}};}
-function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push('mouthpiece');if(e.sleeve!=='none')o.push(e.sleeve==='one'?'arm sleeve':'arm sleeves');
+function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push(e.mouth2?'two mouthpieces':'mouthpiece');if(e.ski)o.push('ski mask');if(e.gcap)o.push('guardian cap');if(e.sleeve!=='none')o.push(e.sleeve==='both'?'arm sleeves':'arm sleeve');
   if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Baggy'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
 // colour picker: presets plus any custom colour
 function eqColHtml(id,val,none){const pre=EQ_COLORS.some(c=>c[0]===val)||(none&&!val);const hex=/^#/.test(val||'')?val:'#ffffff';
@@ -13726,12 +13744,15 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         ${row('Gloves',eqColHtml('eq-gl',e.glove,'Uniform default'))}
         ${row('Cleats',eqColHtml('eq-cl',e.cleat,'Uniform default'))}
         ${row('Mouthpiece',eqColHtml('eq-mo',e.mouth,'None'))}
+        ${row('2nd mouthpiece',eqColHtml('eq-mo2',e.mouth2||'','None'))}
+        ${row('Ski mask',eqColHtml('eq-sk',e.ski||'','None'))}
+        ${row('Guardian cap',eqColHtml('eq-gc',e.gcap||'','None'))}
         ${row('Arm sleeves',eqSel('eq-sl',EQ_SLEEVE,e.sleeve)+eqColHtml('eq-slc',e.sleeveC))}
         ${row('Arm bands',eqSel('eq-bd',EQ_BAND,e.band)+eqColHtml('eq-bdc',e.bandC))}
         ${row('Undershirt',eqSel('eq-un',EQ_UNDER,e.under)+eqColHtml('eq-unc',e.underC))}
         ${row('Pants',eqSel('eq-pa',[['knee','At the knee'],['short','Above the knee']],e.pants||'knee'))}
         ${row('Socks',eqSel('eq-so',[['high','High'],['low','Low'],['none','No socks']],e.socks||'high'))}
-        ${row('Leg sleeves',eqSel('eq-ls',[['none','None'],['one','One leg'],['both','Both legs']],e.legS||'none')+eqColHtml('eq-lsc',e.legSC||'#16181d'))}
+        ${row('Leg sleeves',eqSel('eq-ls',[['none','None'],['one','One leg (near side)'],['onefar','One leg (far side)'],['both','Both legs']],e.legS||'none')+eqColHtml('eq-lsc',e.legSC||'#16181d'))}
         ${row('Visor',eqSel('eq-vi',[['','None'],['clear','Clear'],['smoke','Smoke'],['black','Black'],['gold','Gold mirror'],['blue','Blue mirror'],['red','Red mirror'],['purple','Purple mirror']],e.visor||''))}
         ${row('Jersey',eqSel('eq-cr',[['0','Regular'],['1','Cropped (undershirt / back plate shows)']],e.crop?'1':'0'))}
         <div style="font-size:11px;color:var(--mu);margin:2px 0 6px 100px">Helmet and facemask are the same for the whole team: Team → Customize → Uniforms.</div>
@@ -13741,11 +13762,11 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         <div style="font-size:11px;color:var(--mu)">Shows on the field in Game Day</div></div></div></div>`;}
 function eqRead(){const g=id=>document.getElementById(id);if(!g('eq-tw'))return null;
   return{towel:g('eq-tw').value==='1',towelC:eqColRead('eq-twc')||'#ffffff',glove:eqColRead('eq-gl'),cleat:eqColRead('eq-cl'),mouth:eqColRead('eq-mo'),
-    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||''};}
+    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||'',mouth2:g('eq-mo2')?eqColRead('eq-mo2'):'',ski:g('eq-sk')?eqColRead('eq-sk'):'',gcap:g('eq-gc')?eqColRead('eq-gc'):''};}
 function eqSetForm(e){const g=id=>document.getElementById(id),sc=(id,v)=>{const s=g(id);if(!s)return;if([...s.options].some(o=>o.value===v))s.value=v;else{s.value='custom';g(id+'-x').value=v;}};
-  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');eqPrev();}
+  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');sc('eq-mo2',e.mouth2||'');sc('eq-sk',e.ski||'');sc('eq-gc',e.gcap||'');eqPrev();}
 function eqRandom(pid){const p=getP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
-function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:''});}
+function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:''});}
 // the same pixel sprites as Game Day, loaded once from the embedded game for the preview
 let _eqLibP=null;
 function eqLib(){
@@ -14237,9 +14258,21 @@ function tbRecord(t,op){const d=tbDraft();
   else if(op==='del'){const ok=tbOk(t);const i=d.add.findIndex(a=>a.ok===ok);if(i>=0)d.add.splice(i,1);else{delete d.ed[ok];if(!d.del.includes(ok))d.del.push(ok);}}
   else{const ok=tbOk(t);const a=d.add.find(x=>x.ok===ok);if(a)Object.assign(a,tbFields(t));else d.ed[ok]=tbFields(t);}
   if(tbDraftPut(d))tbStatus('Saved on this device. Your changes stay for every new career until you discard them, so you can continue any time.');}
+// a world file or community world can carry a Team Builder pack (every school someone changed); it is taken over the next time
+// the setup map is built for that world, so it is keyed to the world it belongs to
+function tbPackOut(){const d=tbDraft(),n=Object.keys(d.ed).length+d.del.length+d.add.length;return n?{ed:d.ed,del:d.del,add:d.add}:null;}
+function tbPackClean(t){if(!t||typeof t!=='object')return undefined;
+  const col=c=>/^#[0-9a-f]{6}$/i.test(c||'')?c:'#444444',lg=v=>typeof v==='string'&&v.length<120000&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(v)?v:null;
+  const F=f=>f&&typeof f==='object'?{name:wsClean(f.name),mascot:wsClean(f.mascot),city:wsClean(f.city),abbr:String(f.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:col(f.c1),c2:col(f.c2),prestige:clamp(Math.round(+f.prestige)||3,1,5),customLogo:lg(f.customLogo),to:String(f.to||'').slice(0,40)}:null;
+  const ed={};if(t.ed&&typeof t.ed==='object'&&!Array.isArray(t.ed))for(const k of Object.keys(t.ed).slice(0,4000)){const v=F(t.ed[k]);if(v&&v.name)ed[String(k).slice(0,120)]=v;}
+  const del=Array.isArray(t.del)?t.del.slice(0,4000).map(x=>String(x).slice(0,120)):[];
+  const add=Array.isArray(t.add)?t.add.slice(0,400).map(a=>{const v=F(a);return v&&v.name?Object.assign(v,{ok:String((a&&a.ok)||('add|'+Math.random().toString(36).slice(2,8))).slice(0,60)}):null;}).filter(Boolean):[];
+  return Object.keys(ed).length+del.length+add.length?{ed,del,add}:undefined;}
+function tbPackPending(tb){try{if(tb)localStorage.setItem(TBD_KEY+'_in',JSON.stringify(tb));}catch(e){notify('The teams in that file are too big to keep on this device','w');}}
+function tbAdoptPending(){try{const P=localStorage.getItem(TBD_KEY+'_in');if(!P)return;localStorage.removeItem(TBD_KEY+'_in');const p=JSON.parse(P);tbDraftPut({k:tbWorldKey(),ed:p.ed||{},del:p.del||[],add:p.add||[]});}catch(e){}}
 function tbDraftCount(){const d=tbDraft();return Object.keys(d.ed).length+d.del.length+d.add.length;}
 function tbApplyDraft(){
-  if(!_allClsDivs)return 0;const d=tbDraft(),n=Object.keys(d.ed).length+d.del.length+d.add.length;if(!n)return 0;
+  if(!_allClsDivs)return 0;tbAdoptPending();const d=tbDraft(),n=Object.keys(d.ed).length+d.del.length+d.add.length;if(!n)return 0;
   const byOk={};for(const[c,dv]of Object.entries(_allClsDivs))for(const dd of dv)for(const t of dd.teams){byOk[(t._ok)||(c+'|'+t.name)]=t;t.cls=t.cls||c;}
   const moveTo=(t,to)=>{if(!to)return;const[c,di]=to.split('|'),D=_allClsDivs[c],k=+di;if(!D||!D[k]||(t.cls===c&&t.dIdx===k))return;
     for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}t.cls=c;t.dIdx=k;D[k].teams.push(t);};
@@ -15506,19 +15539,22 @@ function worldSanitize(W){
   o.size=map(W.size,z=>z&&typeof z==='object'?{t:clamp(Math.round(+z.t)||8,8,160),d:clamp(Math.round(+z.d)||1,1,16)}:null);
   if(W.stars&&typeof W.stars==='object'){o.stars={};for(const k of[5,4,3,2])if(W.stars[k]!=null)o.stars[k]=clamp(Math.round(+W.stars[k])||0,0,5000);}
   for(const k of['frMult','colMult'])if(W[k]!=null)o[k]=clamp(+W[k]||1,0.5,2);
+  {const tb=tbPackClean(W.tb);if(tb)o.tb=tb;}
   o.custFor=W.custFor==='usa'?'usa':W.custFor==='classic'?'classic':(o.geo&&o.geo.mode==='usa'?'usa':'classic');
   if(W.meta&&typeof W.meta==='object')o.meta={name:str(W.meta.name),desc:String(W.meta.desc||'').replace(/[<>&"'`\\]/g,'').slice(0,200)};
   return o;
 }
 function worldSummary(W){const g=W&&W.geo;if(!g||g.mode==='classic')return'Classic country';const n=(g.states||Object.keys(USST)).length,c=(g.custom||[]).length;return`Real USA · ${n} state${n===1?'':'s'}${c?` · ${c} custom`:''}`;}
-function worldExport(){try{wsGrab();}catch(e){}const W=worldSanitize(WS.draft||{}),nm=(W.meta&&W.meta.name)||'My world';
+function worldExport(){try{wsGrab();}catch(e){}const W=worldSanitize(WS.draft||{}),nm=(W.meta&&W.meta.name)||'My world';{const tb=tbPackOut();if(tb)W.tb=tb;}
   const blob=new Blob([JSON.stringify({app:'Gridiron 27',type:'world',v:1,name:nm,world:W},null,1)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nm.replace(/[^A-Za-z0-9]+/g,'_').slice(0,40)+'.gpworld.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);notify('World file saved');}
 function worldImportFile(inp){const f=inp&&inp.files&&inp.files[0];if(!f)return;if(f.size>3e6){notify('That file is too big for a world file','e');return;}
-  const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j||j.type!=='world')throw new Error('That is not a world file.');WS.draft=worldSanitize(j.world);if(!WS.draft.meta)WS.draft.meta={name:wsClean(j.name)};WS.tab='share';wsRender();notify('World loaded. Press Save League Setup to use it.');}
+  const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j||j.type!=='world')throw new Error('That is not a world file.');WS.draft=worldSanitize(j.world);if(!WS.draft.meta)WS.draft.meta={name:wsClean(j.name)};
+      const tb=WS.draft.tb;delete WS.draft.tb;if(tb)tbPackPending(tb);WS.tab='share';wsRender();notify('World loaded'+(tb?` with ${Object.keys(tb.ed).length+tb.add.length} edited teams`:'')+'. Press Save League Setup to use it.');}
     catch(e){notify(e.message&&/world file/.test(e.message)?e.message:'That file could not be read','e');}};r.readAsText(f);}
 function shareBody(){const D=WS.draft,m=D.meta||{};
-  return`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Save your whole League Setup (states, custom states, names, colleges, pro teams, sizes and stars) as a file, load one from a friend, or share it with every player in Community Creations.</div>
+  const _tbn=(()=>{try{return tbDraftCount();}catch(e){return 0;}})();
+  return`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Save your whole League Setup (states, custom states, names, colleges, pro teams, sizes and stars) as a file, load one from a friend, or share it with every player in Community Creations.${_tbn?` Every school you changed in Team Builder (${_tbn}) goes with it.`:''} To share a whole career (every team and player), use Share under Load Game.</div>
     <div class="g2" style="gap:8px;margin-bottom:10px"><div class="fg"><label>World name</label><input id="ws-mn" value="${m.name||''}" maxlength="40" placeholder="My world"></div>
       <div class="fg"><label>Description</label><input id="ws-md" value="${m.desc||''}" maxlength="200" placeholder="What makes it special"></div></div>
     <div style="font-size:12px;margin-bottom:10px"><b>${worldSummary(D.geo?D:Object.assign({},D,{geo:usaDefault()}))}</b></div>
@@ -15529,15 +15565,54 @@ function shareBody(){const D=WS.draft,m=D.meta||{};
 async function ccB(){const B=await olBackend().catch(e=>{throw e;});if(!B)throw new Error('Online Play is not set up in this copy of the game.');
   if(!OLS.user)throw new Error('Sign in under Online Play to use Community Creations.');if(!B.worldList)throw new Error('Community Creations are not available on this server.');return B;}
 async function ccPublishWorld(){try{wsGrab();}catch(e){}
-  try{const B=await ccB(),W=worldSanitize(WS.draft||{}),nm=(W.meta&&W.meta.name)||'';if(!nm){notify('Give your world a name first (File & sharing)','w');return;}
+  try{const B=await ccB(),W=worldSanitize(WS.draft||{}),nm=(W.meta&&W.meta.name)||'';
+    {const tb=tbPackOut();if(tb){W.tb=JSON.parse(JSON.stringify(tb));if(JSON.stringify(W).length>380000){for(const v of Object.values(W.tb.ed))v.customLogo=null;for(const v of W.tb.add)v.customLogo=null;notify('Custom team logos are left out: the world would be too big to publish.','w');}
+      if(JSON.stringify(W).length>380000){notify('Too many edited teams to publish: share the world file instead.','e');return;}}}if(!nm){notify('Give your world a name first (File & sharing)','w');return;}
     if(pfBad(nm+' '+((W.meta&&W.meta.desc)||'')+' '+JSON.stringify(W.states||{})+' '+JSON.stringify((W.geo&&W.geo.custom)||[]))){notify('Please change the names first: they break the community rules.','e');return;}
     if(!confirm(`Publish "${nm}" for every player to download? Your username is shown with it.`))return;
     await B.worldPublish(OLS.user.id,olName(),nm.slice(0,80),(worldSummary(W)+(W.meta&&W.meta.desc?' · '+W.meta.desc:'')).slice(0,200),W);notify('Published to Community Creations');}
   catch(e){notify(e.message||String(e),'e');}}
+function ccTabs(on){const b=(k,l)=>`<button class="tab${on===k?' on':''}" onclick="ccOpen('${k}')">${l}</button>`;return`<div class="tabs" style="margin-bottom:10px">${b('worlds','Worlds')}${b('teams','Teams')}${b('leagues','Leagues')}</div>`;}
+// ── community leagues: a whole career (every team, player and record) others can start from ──
+async function lgPublish(id,btn){
+  try{const B=await ccB();if(!B.leaguePublish)throw new Error('Community leagues are not available on this server.');
+    const m=(await svList()).find(x=>x.id===id);if(!m)return;
+    const nm=prompt('Name for this league in Community Creations:',`${m.name} ${m.mascot} · ${m.season}`.slice(0,80));if(nm==null)return;
+    const name=wsClean(nm).slice(0,80);if(!name){notify('Give the league a name','w');return;}
+    const desc=(prompt('Short description (optional):','')||'').replace(/[<>&"'`\\]/g,'').slice(0,120);
+    if(pfBad(name+' '+desc)){notify('Please change the name: it breaks the community rules.','e');return;}
+    if(!confirm(`Publish "${name}" for every player to download? Everyone gets a copy of this career: every team, player and record. Your username is shown with it.`))return;
+    if(btn){btn.disabled=true;btn.textContent='Publishing…';}
+    const str=await svGetData(id);if(!str)throw new Error('Save not found');
+    await B.leaguePublish(OLS.user.id,olName(),name,(`${m.cls||''} · ${m.season} season · ${m.rec}`+(desc?' · '+desc:'')).slice(0,200),str);
+    notify('Published to Community Creations → Leagues');}
+  catch(e){notify(e.message||String(e),'e');}finally{if(btn){btn.disabled=false;btn.textContent='Share';}}}
+async function lgOpen(){const sort=window._lgSort||'new';
+  openMo(`<h2>Community Creations</h2>${ccTabs('leagues')}<div id="lg-b" style="color:var(--mu)">Loading…</div>`);
+  try{const B=await ccB();if(!B.leagueList)throw new Error('Community leagues are not available on this server.');
+    const blocked=B.blocks?await B.blocks(OLS.user.id).catch(()=>[]):[],L=(await B.leagueList(sort)).filter(r=>!blocked.includes(r.owner));window._lg=L;
+    const el=document.getElementById('lg-b');if(!el)return;
+    el.innerHTML=`<div style="font-size:12px;margin-bottom:8px">Whole careers other players shared: every team, player and record. Using one adds it to your saves under Load Game. Share your own with the Share button under Load Game.</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px"><button class="${sort==='new'?'btn bbl':'bgh'} bsm" onclick="window._lgSort='new';lgOpen()">Newest</button><button class="${sort==='top'?'btn bbl':'bgh'} bsm" onclick="window._lgSort='top';lgOpen()">Most downloaded</button></div>
+      ${L.length?`<div style="display:grid;gap:8px;max-height:60vh;overflow-y:auto">${L.map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;color:var(--tx)">
+        <div style="flex:1;min-width:0"><div style="font-weight:800">${olEsc(r.name)}</div><div style="font-size:12px;color:var(--mu)">${olEsc(r.info||'')} · by ${olEsc(r.username||'player')} · ${(Math.max(0.1,(r.size||0)/1e6)).toFixed(1)} MB · ${r.downloads||0} downloads</div></div>
+        <button class="btn bsm" onclick="lgTake(${i},this)">Use</button>${r.owner===OLS.user.id?`<button class="bgh bsm" onclick="lgDel(${i})">Remove</button>`:`<button class="bgh bsm" onclick="lgReport(${i})">Report</button>`}</div>`).join('')}</div>`:'<p>No leagues yet. Share one of your careers from Load Game.</p>'}`;}
+  catch(e){const el=document.getElementById('lg-b');if(el)el.innerHTML=`<p>${olEsc(e.message||String(e))}</p>`;}}
+async function lgTake(i,btn){const r=(window._lg||[])[i];if(!r)return;
+  try{if(btn){btn.disabled=true;btn.textContent='Adding…';}const B=await ccB();let json=await B.leagueGet(r);const nid='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    let meta={id:nid,name:r.name,mascot:'',cls:'',season:'',rec:'',savedAt:Date.now()};
+    try{const d=JSON.parse(json);if(!d||!d.G)throw 0;d.G.saveId=nid;
+      try{const ms=(d.G.divisions||[]).flatMap(x=>(x&&x.teams)||[]).find(x=>x&&x.id===d.G.myId)||{};meta=Object.assign(meta,{name:ms.name||r.name,mascot:ms.mascot||'',c1:ms.c1,c2:ms.c2,cls:d.G.cls||'',season:(d.G.baseYear||2026)+((d.G.yr||1)-1),rec:(d.G.wins||0)+'-'+(d.G.losses||0),phase:d.G.phase,week:d.G.week||0,coach:(d.G.coach&&d.G.coach.name)||''});}catch(e){}
+      json=JSON.stringify(d);}catch(e){throw new Error('That league could not be read');}
+    meta.size=json.length;await svSave(meta,json);try{ttRefresh();}catch(e){}notify(`${r.name} is in your saves now. Find it under Load Game.`);if(btn)btn.textContent='Added';}
+  catch(e){notify('Could not add the league: '+(e.message||e),'e');if(btn){btn.disabled=false;btn.textContent='Use';}}}
+async function lgDel(i){const r=(window._lg||[])[i];if(!r||!confirm('Remove this league from Community Creations?'))return;try{const B=await ccB();await B.leagueDel(r);lgOpen();}catch(e){notify(e.message||String(e),'e');}}
+async function lgReport(i){const r=(window._lg||[])[i];if(!r)return;const why=prompt('What is wrong with this league? (offensive names, etc.)');if(why==null)return;
+  try{const B=await ccB();await B.reportUser(OLS.user.id,r.owner,('community league "'+r.name+'": '+why).slice(0,500));if(confirm('Thanks, the report was sent. Also block this player (hides their creations)?'))await B.block(OLS.user.id,r.owner);lgOpen();}catch(e){notify(e.message||String(e),'e');}}
 async function ccOpen(tab){
-  tab=tab||window._ccTab||'worlds';window._ccTab=tab;if(tab==='teams'){commOpen();return;}
+  tab=tab||window._ccTab||'worlds';window._ccTab=tab;if(tab==='teams'){commOpen();return;}if(tab==='leagues'){lgOpen();return;}
   const sort=window._ccSort||'new';
-  openMo(`<h2>Community Creations</h2><div class="tabs" style="margin-bottom:10px"><button class="tab on">Worlds</button><button class="tab" onclick="ccOpen('teams')">Teams</button></div><div id="cc-b" style="color:var(--mu)">Loading…</div>`);
+  openMo(`<h2>Community Creations</h2>${ccTabs('worlds')}<div id="cc-b" style="color:var(--mu)">Loading…</div>`);
   try{const B=await ccB(),blocked=B.blocks?await B.blocks(OLS.user.id).catch(()=>[]):[],L=(await B.worldList(sort)).filter(r=>!blocked.includes(r.owner));window._cc=L;
     const el=document.getElementById('cc-b');if(!el)return;
     el.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:10px"><button class="${sort==='new'?'btn bbl':'bgh'} bsm" onclick="window._ccSort='new';ccOpen('worlds')">Newest</button><button class="${sort==='top'?'btn bbl':'bgh'} bsm" onclick="window._ccSort='top';ccOpen('worlds')">Most downloaded</button></div>
@@ -15546,8 +15621,9 @@ async function ccOpen(tab){
         <button class="btn bsm" onclick="ccTake(${i})">Use</button>${r.owner===OLS.user.id?`<button class="bgh bsm" onclick="ccDel(${i})">Remove</button>`:`<button class="bgh bsm" onclick="ccReport(${i})">Report</button>`}</div>`).join('')}</div>`:'<p>No worlds yet. Make one in League Setup and publish it.</p>'}`;}
   catch(e){const el=document.getElementById('cc-b');if(el)el.innerHTML=`<p>${olEsc(e.message||String(e))}</p>`;}}
 async function ccTake(i){const r=(window._cc||[])[i];if(!r)return;try{const B=await ccB(),d=await B.worldGet(r.id),W=worldSanitize(typeof d==='string'?JSON.parse(d):d);
-  if(!confirm(`Use "${r.name}" for your new careers? It replaces your League Setup on this device (saves keep their own world).`))return;
-  worldStore(W);clo();try{if(!document.getElementById('setup').classList.contains('hid')){_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();}}catch(e){}
+  const tb=W.tb;delete W.tb;
+  if(!confirm(`Use "${r.name}" for your new careers? It replaces your League Setup on this device (saves keep their own world)`+(tb?` and your Team Builder changes (it has ${Object.keys(tb.ed).length+tb.add.length} edited teams).`:'.')))return;
+  if(tb)tbPackPending(tb);worldStore(W);clo();try{if(!document.getElementById('setup').classList.contains('hid')){_allClsDivs=null;_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);initCountyMap();}}catch(e){}
   notify(`${r.name} is your world now. Start a new game to play it.`);}catch(e){notify(e.message||String(e),'e');}}
 async function ccDel(i){const r=(window._cc||[])[i];if(!r||!confirm('Remove this world from Community Creations?'))return;try{const B=await ccB();await B.worldDel(r.id);ccOpen('worlds');}catch(e){notify(e.message||String(e),'e');}}
 async function ccReport(i){const r=(window._cc||[])[i];if(!r)return;const why=prompt('What is wrong with this world? (offensive names, etc.)');if(why==null)return;
@@ -17322,7 +17398,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       out.visor = [];
       if (fn && hn && !backRowAll) { let hy0 = 99, hx0 = 99, hx1 = -1; for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const m = mat[y * fw + x]; if (HELM.includes(m) || m === FM) { hy0 = Math.min(hy0, y); hx0 = Math.min(hx0, x); hx1 = Math.max(hx1, x); } }
         const F = []; for (let y = hy0; y <= Math.max(hyMax, fyMax); y++) for (let x = hx0; x <= hx1; x++) { const m = mat[y * fw + x]; if (m === SK || m === MI.faceDark) F.push([x, y]); }
-        if (F.length) { const y0 = Math.min(...F.map(f => f[1])); for (const [x, y] of F) if (y <= y0 + 1) out.visor.push([x, y, y === y0 ? 1 : 0]); } }
+        if (F.length) { const y0 = Math.min(...F.map(f => f[1])); for (const [x, y] of F) if (y <= y0 + 1) out.visor.push([x, y, y === y0 ? 1 : 0]); out.faceSk = F; out.faceY0 = y0; } }
       // arm pixels: distance (through the arm) from the jersey sleeve and from the glove, split into the two arms
       const dJ = new Int16Array(fw * fh).fill(99), dG = new Int16Array(fw * fh).fill(99), comp = new Int16Array(fw * fh).fill(-1), N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
       const bfs = (dist, seed) => { const q = []; for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) if (mat[y * fw + x] === ARM && N4.some(([a, b]) => seed(at(x + a, y + b)))) { dist[y * fw + x] = 0; q.push(y * fw + x); }
@@ -17382,7 +17458,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         if (backRow) out.towel = null; else { const ok = new Set([-2, MI.pants, MI.pantsStripe, MI.belt, MI.socks, MI.sockStripe]); out.towelPx = (x, y) => ok.has(at(x, y)); } }
       if (fn) { let bx = -1; for (let x = 0; x < fw; x++) if (at(x, fyMax) === FM && (bx < 0 || (face >= 0 ? x > bx : x < bx))) bx = x; if (face === 0) { let s = 0, c = 0; for (let x = 0; x < fw; x++) if (at(x, fyMax) === FM) { s += x; c++; } bx = Math.round(s / c); }
         out.mouth = [bx - (face > 0 ? 1 : 0), fyMax + 1]; }
-      M.set(cell, out); return out;
+      out.face = face; M.set(cell, out); return out;
     }
     // follow one physical leg through an animation (legs swap front and back while running), so a single
     // leg sleeve stays on the same leg instead of jumping to whichever leg is in front
@@ -17414,7 +17490,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       if (skin && eq.pants === 'short') for (const [x, y, l] of E.knee) R(x, y, skin[l]);
       if (skin && (eq.socks === 'low' || eq.socks === 'none')) for (const [x, y, l, bottom] of E.sock) if (eq.socks === 'none' || !bottom) R(x, y, skin[l]);
       // leg sleeves: from the knee to the ankle, on one leg or both
-      if (eq.legS && eq.legS.mode && eq.legS.mode !== 'none') { const r = eqRamp(eq.legS.c), one = eq.legS.mode === 'one', leg = one ? legSleeveFor(sheet, cell, E) : 0, ok = g => !one || (E.legs || 1) < 2 || g === leg;
+      if (eq.legS && eq.legS.mode && eq.legS.mode !== 'none') { const r = eqRamp(eq.legS.c), one = eq.legS.mode === 'one' || eq.legS.mode === 'onefar', l0 = one ? legSleeveFor(sheet, cell, E) : 0, leg = eq.legS.mode === 'onefar' ? 1 - l0 : l0, ok = g => !one || (E.legs || 1) < 2 || g === leg;
         if (eq.pants === 'short') for (const [x, y, l, g] of E.knee) if (ok(g)) R(x, y, r[Math.max(1, l)]);
         for (const [x, y, l, bottom, g] of E.sock) if (!bottom && ok(g)) R(x, y, r[Math.max(1, l)]); }
       // cropped jersey: undershirt at the midriff from the front and sides, back plate from behind (faintly at the side)
@@ -17429,15 +17505,23 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         for (const [x, y, l, dj] of E.arm) if (dj <= lim) R(x, y, r[Math.max(1, l)]);
         if (U.mode === 'jamo') { for (const [x, y] of E.baggy) R(x, y, r[0]); for (const [x, y, l] of E.hem) R(x, y, r[l]); }
         for (const [x, y, l] of E.neck) R(x, y, r[Math.max(1, l)]); }
-      if (S && S.mode !== 'none') { const r = eqRamp(S.c); for (const [x, y, l, dj, dg, c] of E.arm) if (dj >= 1 && (S.mode === 'both' || c === 0)) R(x, y, r[Math.max(1, l)]); }
-      if (B && B.mode !== 'none') { const r = eqRamp(B.c); for (const [x, y, l, dj, dg, c] of E.arm) { const hit = B.mode === 'bicep' ? (dj >= 2 && dj <= 3) : dg <= 1; if (hit && (B.mode !== 'wrist1' || c === 0)) R(x, y, r[Math.min(3, Math.max(2, l + 1))]); } }
+      if (S && S.mode !== 'none') { const r = eqRamp(S.c), side = S.mode === 'onefar' ? 1 : 0; for (const [x, y, l, dj, dg, c] of E.arm) if (dj >= 1 && (S.mode === 'both' || c === side)) R(x, y, r[Math.max(1, l)]); }
+      if (B && B.mode !== 'none') { const r = eqRamp(B.c), bic = /^bicep/.test(B.mode), one = /1/.test(B.mode), side = /f$/.test(B.mode) ? 1 : 0; for (const [x, y, l, dj, dg, c] of E.arm) { const hit = bic ? (dj >= 2 && dj <= 3) : dg <= 1; if (hit && (!one || c === side)) R(x, y, r[Math.min(3, Math.max(2, l + 1))]); } }
       if (eq.glove) { const r = eqRamp(eq.glove); for (const [x, y, l] of E.glove) R(x, y, r[l]); }
       if (eq.cleat) { const r = eqRamp(eq.cleat); for (const [x, y, l] of E.cleat) R(x, y, r[l]); }
       if (eq.noGlove && skin) for (const [x, y, l] of E.glove) R(x, y, skin[l]); // quarterbacks throw bare-handed
       if (eq.visor && E.visor && E.visor.length) { const r = eqRamp(eq.visor), xs = E.visor.map(v => v[0]), gx = Math.min(...xs) + 1; for (const [x, y, top] of E.visor) R(x, y, top ? r[2] : (x === gx ? r[3] : r[1])); }
       if (eq.towel && E.towel) { const r = eqRamp(eq.towel), [tx, ty, f] = E.towel, ok = E.towelPx || (() => true), T = (x, y, c) => { if (ok(x, y)) R(x, y, c); };
         for (let k = 0; k < 6; k++) { T(tx - 1, ty + k, r[0]); T(tx + 3, ty + k, r[0]); for (let j = 0; j < 3; j++) if (!(k === 5 && j === 1)) T(tx + j, ty + k, r[j === 1 ? 3 : 2 - (j === 2 && f > 0 ? 1 : 0)]); } T(tx, ty + 6, r[0]); T(tx + 2, ty + 6, r[0]); }
+      // ski mask: the face and neck under the helmet in the mask colour, an eye slit left open
+      if (eq.ski) { const r = eqRamp(eq.ski); if (E.faceSk) for (const [x, y] of E.faceSk) if (y !== E.faceY0) R(x, y, r[y === E.faceY0 + 1 ? 1 : 2]); for (const [x, y, l] of E.neck) R(x, y, r[Math.max(1, l)]); }
       if (eq.mouth && E.mouth) { const r = eqRamp(eq.mouth), [mx, my] = E.mouth; R(mx, my, r[3]); R(mx + 1, my, r[2]); R(mx, my + 1, r[2]); R(mx + 1, my + 1, r[1]); R(mx, my + 2, r[1]); }
+      if (eq.mouth2 && E.mouth) { const r = eqRamp(eq.mouth2), [m0, my] = E.mouth, mx = m0 + (E.face < 0 ? 3 : -3); R(mx, my, r[3]); R(mx + 1, my, r[2]); R(mx, my + 1, r[2]); R(mx + 1, my + 1, r[1]); R(mx, my + 2, r[1]); }
+      // guardian cap: a padded, ribbed soft shell over the helmet, a little taller than the shell
+      if (eq.gcap && E.helm && E.helm.length) { const r = eqRamp(eq.gcap), H = new Set(E.helm.map(h => h[0] + ',' + h[1])), top = {};
+        for (const [x, y] of E.helm) { if (top[x] == null || y < top[x]) top[x] = y; }
+        for (const [x, y] of E.helm) { const edge = !H.has((x + 1) + ',' + y) || !H.has((x - 1) + ',' + y) || !H.has(x + ',' + (y - 1)); R(x, y, edge ? r[0] : r[(x >> 1) % 2 ? 2 : 3]); }
+        for (const x in top) R(+x, top[x] - 1, r[0]); }
     }
     const gridCache = new Map();
     function gridFor(n) { if (!gridCache.has(n)) gridCache.set(n, numberGrid(n)); return gridCache.get(n); }

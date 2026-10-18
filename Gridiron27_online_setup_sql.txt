@@ -340,3 +340,58 @@ language sql security definer set search_path = '' as $$
 $$;
 revoke all on function public.community_world_download(uuid) from public, anon;
 grant execute on function public.community_world_download(uuid) to authenticated;
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 9. Community Creations: leagues (whole career saves) that players share
+--    The save file sits in the private bucket "community" in the owner's folder; every signed-in player can read it.
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.community_leagues (
+  id uuid primary key default gen_random_uuid(),
+  owner uuid not null references auth.users(id) on delete cascade,
+  username text not null default '',
+  name text not null check (char_length(name) between 1 and 80),
+  info text not null default '' check (char_length(info) <= 200),
+  path text not null,
+  enc text not null default 'gzip' check (enc in ('gzip', 'raw')),
+  size bigint not null default 0,
+  downloads int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists community_leagues_created on public.community_leagues (created_at desc);
+create index if not exists community_leagues_owner on public.community_leagues (owner);
+alter table public.community_leagues enable row level security;
+drop policy if exists "Read community leagues" on public.community_leagues;
+create policy "Read community leagues" on public.community_leagues
+  for select to authenticated using (true);
+drop policy if exists "Publish your own leagues" on public.community_leagues;
+create policy "Publish your own leagues" on public.community_leagues
+  for insert to authenticated with check ((select auth.uid()) = owner
+    and path like owner::text || '/%'
+    and (select count(*) from public.community_leagues l where l.owner = (select auth.uid())) < 5);
+drop policy if exists "Remove your own leagues" on public.community_leagues;
+create policy "Remove your own leagues" on public.community_leagues
+  for delete to authenticated using ((select auth.uid()) = owner);
+revoke all on public.community_leagues from anon, authenticated;
+grant select, insert, delete on public.community_leagues to authenticated;
+
+-- counts a download without letting anyone edit other players' leagues
+create or replace function public.community_league_download(lid uuid) returns void
+language sql security definer set search_path = '' as $$
+  update public.community_leagues set downloads = downloads + 1 where id = lid;
+$$;
+revoke all on function public.community_league_download(uuid) from public, anon;
+grant execute on function public.community_league_download(uuid) to authenticated;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('community', 'community', false, 52428800)
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit;
+
+drop policy if exists "Community leagues: publish" on storage.objects;
+create policy "Community leagues: publish" on storage.objects
+  for insert to authenticated with check (bucket_id = 'community' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "Community leagues: read" on storage.objects;
+create policy "Community leagues: read" on storage.objects
+  for select to authenticated using (bucket_id = 'community');
+drop policy if exists "Community leagues: delete" on storage.objects;
+create policy "Community leagues: delete" on storage.objects
+  for delete to authenticated using (bucket_id = 'community' and (storage.foldername(name))[1] = (select auth.uid())::text);
