@@ -39,6 +39,7 @@ High school football career game with a playable Game Day engine.
   - No coach to create in Player Career mode.
   - New player creator: archetype, height and weight, interests (3), character traits (2), look, accessories and attribute points for a 40 to 55 overall.
   - Levels and skill points: games earn XP, every level brings 3 skill points to spend on attributes (My Player).
+- **New dashboard:** a club bar with your crest, name and a big Continue button, a Year/Week strip, then tiles (Next game, Team management, Training, Standings, Schedule, Recruiting, Seniors, News, Scouting, Top players, Program, League) that open their page. ☰ opens the full menu.
 - **Compact menu:** the Dashboard lists every section with its pages and gold dots for things to do; pages open on their own with a Home button. Settings → Menu layout switches back to the classic tabs.
 
 ### Previous update
