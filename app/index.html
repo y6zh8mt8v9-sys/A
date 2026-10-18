@@ -1321,7 +1321,7 @@ setTimeout(()=>{if(padAny())padStart(padMainStep);},800);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
 // ── SETTINGS MODAL ──
 // v2.14 Game Day settings shared with the game (stored on this device)
-const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc'};
+const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true};
 const SL_KEYS_M=[['spd','Speed'],['acc','Acceleration'],['str','Strength'],['iq','Awareness (IQ)'],['thr','Throwing accuracy'],['bsp','Ball speed'],['cat','Catching'],['int','Interceptions'],['man','Man coverage'],['zone','Zone coverage'],['fum','Fumbles'],['juk','Juke ability']];
 function slOpen(){try{closeSettings();}catch(e){}const o=gdsMain(),S=o.sl||{u:{},c:{}},v=(w,k)=>{const x=S[w]&&S[w][k];return x==null?50:x;};
   openMo(`<h2>Difficulty sliders</h2><p style="font-size:13px;color:var(--mu);margin:4px 0 10px">How your team and the CPU play in Game Day. 50 is normal; higher means better at it (for Fumbles, higher means more fumbles). Online games always use 50.</p>
@@ -1344,7 +1344,7 @@ function renderGdSettings(){const el=document.getElementById('set-gd');if(!el)re
   el.innerHTML=row('Sound effects',seg('sound',[[true,'On'],[false,'Off']]))+row('Volume',`<input type="range" min="0" max="1" step="0.05" value="${S.vol}" oninput="gdsMainSet('vol',+this.value)" style="width:140px">`)
     +row('Crowd noise',seg('crowd',[[true,'On'],[false,'Off']]))+row('Marching band',seg('band',[[true,'On'],[false,'Off']]))+row('Gameplay tips',seg('tips',[[false,'Hidden'],[true,'Shown']]))
     +row('Ball size',seg('ball',[[0.85,'S'],[1,'M'],[1.25,'L'],[1.5,'XL']]))+row('Your offense drives',seg('dir',[['right','Right'],['left','Left'],['real','Switch each quarter']]))
-    +row('Vibration',seg('haptics',[[true,'On'],[false,'Off']]))+row('Kick returns',seg('kr',[[true,'Play them'],[false,'Skip']]))+row('Auto-save',seg('autosave',[[true,'On'],[false,'Off']]))+row('Difficulty',`<button class="bgh bxs" onclick="slOpen()">Sliders…</button>`)+row('Scorebug',seg('bug',[['tv','TV'],['classic','Classic']]))+row('Move buttons',seg('moveUI',[['row','Row'],['wheel','Wheel']]))+row('Career camera',seg('pcCam',[['close','Close'],['mid','Normal'],['wide','Wide']]))+row('Landing marker',seg('land',[['pc','Player Career'],['all','Always'],['off','Off']]))+row('Mouse: click to tackle',seg('clickTk',[[true,'On'],[false,'Off']]))
+    +row('Vibration',seg('haptics',[[true,'On'],[false,'Off']]))+row('Kick returns',seg('kr',[[true,'Play them'],[false,'Skip']]))+row('Auto-save',seg('autosave',[[true,'On'],[false,'Off']]))+row('Difficulty',`<button class="bgh bxs" onclick="slOpen()">Sliders…</button>`)+row('Scorebug',seg('bug',[['tv','TV'],['slab','Slab'],['tower','Tower'],['mini','Mini'],['classic','Classic']]))+row('Camera',seg('cam',[['wide','Wide'],['broadcast','Broadcast'],['tight','Tight']]))+row('Crowd noise meter',seg('noiseM',[[true,'On'],[false,'Off']]))+row('Move buttons',seg('moveUI',[['row','Row'],['wheel','Wheel']]))+row('Career camera',seg('pcCam',[['close','Close'],['mid','Normal'],['wide','Wide']]))+row('Landing marker',seg('land',[['pc','Player Career'],['all','Always'],['off','Off']]))+row('Mouse: click to tackle',seg('clickTk',[[true,'On'],[false,'Off']]))
     +row('Graphics',seg('gfx',[['auto','Auto'],['fast','Fast (slow phones)']]))+row('Fans in the stands',seg('crowdV',[['full','Full'],['light','Light'],['off','Off']]))
     +`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="bgh bxs" onclick="closeSettings();showTutorial();setTimeout(()=>{const i=TUT_PAGES.findIndex(p=>p.tab==='PC controls');if(i>=0)goTutTab(i);},50)">Keyboard controls</button><button class="bgh bxs" onclick="privacyOpen()">Privacy policy</button><button class="bgh bxs" onclick="termsOpen()">Terms of use</button></div>${SUPPORT_EMAIL?`<div style="font-size:12px;margin-top:8px;opacity:.8">Support: ${supportHtml()}</div>`:''}`;}
 function openSettings(){
@@ -16898,6 +16898,26 @@ body.bugtv #bug .dd{color:#d6dde6}
 body.bugtv #bug .dd b{color:#0d1117;background:#ffd23f;border-radius:2px;padding:0 .3em}
 body.bugtv #bug .wxl{color:#8fb6d6}
 body.bugtv #bug .tos i{border-radius:1px;width:max(8px,calc(var(--s)*6px));height:max(3px,calc(var(--s)*2px))}
+#noiseM{position:absolute;top:40px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:6px;padding:2px 7px;background:rgba(13,17,23,.85);border-radius:3px;font:800 max(9px,calc(var(--s)*5.5px)) 'Barlow Condensed',Nunito,sans-serif;letter-spacing:.08em;color:#cfd6de;pointer-events:none;white-space:nowrap}
+#noiseM i{display:block;width:max(70px,calc(var(--s)*50px));height:max(5px,calc(var(--s)*3px));background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
+#noiseM b{display:block;height:100%;width:0;transition:width .25s linear}
+#noiseM.loud span{color:#ff6b5a;animation:nzPulse .5s ease-in-out infinite alternate}
+@keyframes nzPulse{from{opacity:.55}to{opacity:1}}
+/* scorebug styles (Settings): slab, tower, mini, on top of the TV look */
+body.bug-slab #bug{border-radius:0;border-top:3px solid #ffd23f;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+body.bug-slab #bug .tm{border-bottom:0!important}
+body.bug-slab #bug .sc{background:#f4f4f4!important;color:#0d1117!important;font-weight:900}
+body.bug-slab #bug .mid{background:#0d1117!important}
+body.bug-tower #bug,body.bug-mini #bug{left:max(52px,calc(var(--s)*40px));transform:none;transform-origin:0 0}
+body.bug-tower #bug{flex-direction:column;align-items:stretch;min-width:max(180px,calc(var(--s)*124px))}
+body.bug-tower #bug .tm{justify-content:flex-start;border-bottom:1px solid rgba(255,255,255,.2)!important;padding:2px 0 2px max(8px,calc(var(--s)*6px))!important}
+body.bug-tower #bug .tm>svg:not(.posb){order:0}body.bug-tower #bug .tm .nm{order:1;text-align:left}body.bug-tower #bug .tm .posb{order:8;margin-left:auto}
+body.bug-tower #bug .tm .sc{order:9;margin-left:6px;background:rgba(0,0,0,.4)!important;min-width:2em}
+body.bug-tower #bug .tm.away .posb{margin-left:auto}body.bug-tower #bug .tm.home .posb{margin-left:auto}
+body.bug-tower #bug .mid{min-width:0!important;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center;justify-content:space-between;padding:3px 8px}
+body.bug-mini #bug{transform:scale(.8)}
+body.bug-mini #bug .tm>svg:not(.posb),body.bug-mini #bug .wxl{display:none}
+body.bug-mini #bug .mid{min-width:0!important;padding:1px 6px}
 body:not(.bugtv) #bug .nm .rec{display:none}
 .sls .prow input[type=range]{flex:1;min-width:0;width:auto}
 .pm{max-height:92vh;overflow-y:auto}
@@ -17866,11 +17886,14 @@ try{const u=GP&&GP.ui,R=document.documentElement;if(u){R.classList.add('g27');if
 /* ===================== core ===================== */
 let W=640;const H=360,FW=58,CX=FW/2,SPD=0.76,GRAV=20,QLEN=180;
 // projection keeps the near sideline at y=345 and the far sideline at y=95 for any field width
-const D0=91.4,HC=35.7,SS=250/(HC*(1/D0-1/(D0+FW))),HOR=345-HC*SS/D0,KFAR=SS/(D0+FW),KNEAR=SS/D0;
+let D0=91.4,HC=35.7,SS=250/(HC*(1/D0-1/(D0+FW))),HOR=345-HC*SS/D0,KFAR=SS/(D0+FW),KNEAR=SS/D0;
+// camera angle (Settings): the sidelines stay where the stadium art expects them; the distance changes the perspective and how much field you see
+const CAMS={wide:64,broadcast:91.4,tight:150};
+function camSet(k){D0=CAMS[k]||CAMS.broadcast;SS=250/(HC*(1/D0-1/(D0+FW)));HOR=345-HC*SS/D0;KFAR=SS/(D0+FW);KNEAR=SS/D0;}
 const $=id=>document.getElementById(id);
 const cv=$('c'),MAINCTX=cv.getContext('2d');let ctx=MAINCTX;
 /* v2.14 Game Day settings (shared with the main menu's Settings): sound, crowd, tips, ball size, drive direction, controls */
-const GDS_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,keys:{},gfx:'auto',crowdV:'full',bug:'tv',moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc'};
+const GDS_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,keys:{},gfx:'auto',crowdV:'full',bug:'tv',moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true};
 // v2.15 rebindable keys: [action, label, default key]. W A S D and the arrows always move your defender.
 const KB_ACT=[['jukeU','Juke up','w'],['jukeD','Juke down','s'],['dive','Dive','d'],['slow','Slow down','a'],['spin','Spin','e'],['stiff','Stiff arm','q'],['truck','Truck','r'],['hurdle','Hurdle','h'],
   ['tackle','Tackle','j'],['switch','Switch player','tab'],['play','Play the ball','k'],['scramble','QB tuck and run','c'],['fair','Fair catch','f']];
@@ -17883,6 +17906,7 @@ function gspd(){if(ON||G.test||G.demo||DEMO)return 1;const v=+GDS.gspd;return v>
 function kb(a){const d=KB_ACT.find(x=>x[0]===a);return((GDS.keys&&GDS.keys[a])||(d?d[2]:'')).toLowerCase();}
 function kbLabel(k){return{tab:'Tab',' ':'Space',enter:'Enter',arrowup:'↑',arrowdown:'↓',arrowleft:'←',arrowright:'→',escape:'Esc'}[k]||k.toUpperCase();}
 const GDS=(()=>{let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}if(!o.mw2){o.moveUI='wheel';o.mw2=true;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}}return Object.assign({},GDS_DEF,o);})();
+try{camSet(GDS.cam);}catch(e){}
 function gdsSave(){try{localStorage.setItem('gpgm_gd',JSON.stringify(GDS));}catch(e){}}
 // which way the offense attacks on screen: always right (default), always left, or real (teams switch ends every quarter)
 function gpFlipFor(off){
@@ -18419,6 +18443,7 @@ function gpCatchMod(r,type){
   if(A==='Sure Hands')m+=0.04;if(A==='Jump Ball'&&(type==='high'||type==='moss'||type==='obj'))m+=0.05;if(A==='Big Play'&&type==='shoulder')m+=0.03;
   if(gpTr(r.pl,'showboat'))m+=(Math.random()-0.5)*0.08;
   m-=Math.max(0,gpFat(r)-0.25)*0.12; // heavy legs, heavy hands
+  m-=gpNoiseFor(r.team)*0.04; // a loud road crowd
   return m+gpClutch(r.pl);
 }
 
@@ -18447,7 +18472,7 @@ function gpRunList(PB){if(PB.runPlays&&PB.runPlays.length)return PB.runPlays;ret
 }
 function gpDefWeights(w){const D=gpDPB(1-G.offTeam);if(!D||!D.w)return w;const o=w.map(([id,v])=>[id,v*(D.w[id]!=null?D.w[id]:1)]).filter(x=>x[1]>0);return o.length?o:w;}
 // ═══ audibles ═══
-function gpAudOK(e){const q=G.qb&&G.qb.pl,r=e.pl;if(!q||!r)return 0.8;return clamp(0.55+((r.ovr||60)-60)*0.004+((r.awr||70)-70)*0.004+((q.ovr||60)-60)*0.003+((q.awr||70)-70)*0.005,0.3,0.97);}
+function gpAudOK(e){const q=G.qb&&G.qb.pl,r=e.pl;if(!q||!r)return 0.8;return(1-gpNoiseFor(e.team)*0.45)*clamp(0.55+((r.ovr||60)-60)*0.004+((r.awr||70)-70)*0.004+((q.ovr||60)-60)*0.003+((q.awr||70)-70)*0.005,0.3,0.97);}
 function gpAudOpen(e){
   let el=document.getElementById('gpAud');if(el)el.remove();
   el=document.createElement('div');el.id='gpAud';
@@ -18601,7 +18626,9 @@ function gpPauseRender(view){
       <div class="prow"><span>Your offense drives<\/span>${seg('dir',[['right','Right'],['left','Left'],['real','Switch each quarter']])}<\/div>
       <div class="prow"><span>Vibration<\/span>${seg('haptics',[[true,'On'],[false,'Off']])}<\/div>
       <div class="prow"><span>Kick returns<\/span>${seg('kr',[[true,'Play them'],[false,'Skip']])}<\/div>
-      <div class="prow"><span>Scorebug<\/span>${seg('bug',[['tv','TV'],['classic','Classic']])}<\/div>
+      <div class="prow"><span>Scorebug<\/span>${seg('bug',[['tv','TV'],['slab','Slab'],['tower','Tower'],['mini','Mini'],['classic','Classic']])}<\/div>
+      <div class="prow"><span>Camera<\/span>${seg('cam',[['wide','Wide'],['broadcast','Broadcast'],['tight','Tight']])}<\/div>
+      <div class="prow"><span>Crowd noise meter<\/span>${seg('noiseM',[[true,'On'],[false,'Off']])}<\/div>
       <div class="prow"><span>Move buttons<\/span>${seg('moveUI',[['row','Row'],['wheel','Wheel']])}<\/div>
       <div class="prow"><span>Career camera<\/span>${seg('pcCam',[['close','Close'],['mid','Normal'],['wide','Wide']])}<\/div>
       <div class="prow"><span>Landing marker<\/span>${seg('land',[['pc','Career'],['all','Always'],['off','Off']])}<\/div>
@@ -18611,7 +18638,7 @@ function gpPauseRender(view){
       <p style="margin:2px 0 0;font-size:12px;opacity:.8">Graphics and fans change from the next game.<\/p>
     <\/div><div class="pmb">${B('psControls','alt','Controls (touch, keyboard, controller)')}${B('psKeys','alt','Change keys')}${ON?'':B('psSl','alt','Difficulty sliders')}${B('psBack','go','Back')}<\/div>`;
     box.querySelectorAll('.pseg button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;let v=b.dataset.v;v=v==='true'?true:v==='false'?false:isNaN(+v)?v:+v;GDS[k]=v;gdsSave();
-      if(k==='dir'&&G.play&&G.phase!=='live'&&!ON)G.flip=gpFlipFor(G.offTeam);if(k==='bug')gpBugStyle();if(k==='sound'&&v)sndUnlock();gpPauseRender('settings');});
+      if(k==='dir'&&G.play&&G.phase!=='live'&&!ON)G.flip=gpFlipFor(G.offTeam);if(k==='bug')gpBugStyle();if(k==='cam'){camSet(v);try{fit();}catch(e){}}if(k==='sound'&&v)sndUnlock();gpPauseRender('settings');});
     $('psVol').oninput=e=>{GDS.vol=+e.target.value;gdsSave();};
     $('psControls').onclick=()=>gpPauseRender('controls');$('psKeys').onclick=()=>gpPauseRender('keys');if($('psSl'))$('psSl').onclick=()=>gpPauseRender('sliders');$('psBack').onclick=()=>gpPauseRender('main');return;
   }
@@ -21798,6 +21825,7 @@ function toPresnap(){
 }
 function doSnap(){
   if(G.client){if(G.phase==='presnap')olCmd('snap');return;}
+  if(G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&!(isAI(G.offTeam)||G.test||pcAIQB())&&gpNoiseFS())return; // a loud road crowd
   for(const e of G.ents)if(e.subIn){e.x=e.hx;e.y=e.hy;e.subIn=false;e.vx=e.vy=0;}
   if(G.phase!=='presnap')return;
   if(G.motion)return;if(G.play.kind==='scrimmage'&&!G.meter&&gpMotionStart())return;
@@ -22992,6 +23020,28 @@ function bandStep(){
 }
 // which side the crowd is on: the home team (GP.home); with no host info the player's team is home
 function gpHomeTeam(){return GP&&GP.home!=null?GP.home:0;}
+/* crowd noise: the home crowd gets loud when the visitors have the ball (bigger stadium, tense moments, rivalry, big plays).
+   It drives the crowd sound and the meter under the scorebug, and it gets to the visitors: false starts, missed audibles,
+   a little less focus on catches */
+function gpNoiseStep(dt){
+  if(!GP||GP.practice||SEVENS()||G.demo||G.test){G.noise=0;gpNoiseHud();return;}
+  const home=gpHomeTeam(),stad=GP.stadium&&GP.stadium.tier?clamp(GP.stadium.tier/20,0.3,1):0.6;let t=0.08;
+  if(G.play&&G.play.kind==='scrimmage'&&G.offTeam!==home&&['presnap','live','call'].includes(G.phase)){
+    t=stad*(0.38+gpNerves(home)*0.4+(G.down>=3?0.14:0)+(GP.rival?0.12:0)+Math.min(0.15,(G.cheer||0)*0.06));if(G.phase==='live')t*=0.75;}
+  G.noise=(G.noise||0)+(clamp(t,0,1)-(G.noise||0))*Math.min(1,dt*1.6);gpNoiseHud();
+}
+function gpNoiseFor(t){return t!=null&&t!==gpHomeTeam()?(G.noise||0):0;}
+function gpNoiseFS(){const n=gpNoiseFor(G.offTeam);if(n<0.55)return false;
+  if(Math.random()<(n-0.55)*(isAI(G.offTeam)?0.16:0.08)){flash('False start! The crowd got to them');try{setTray('none');}catch(e){}preSnapFoul(G.offTeam,'False start',5);return true;}return false;}
+function gpNoiseHud(){const b=$('bug');if(!b)return;let el=$('noiseM');const show=GDS.noiseM!==false&&GP&&!GP.practice&&!SEVENS()&&!G.noDraw&&!G.demo;
+  if(!show){if(el)el.hidden=true;return;}
+  if(!el){el=document.createElement('div');el.id='noiseM';el.innerHTML='<span>CROWD<\/span><i><b><\/b><\/i>';b.parentNode.appendChild(el);}
+  el.hidden=false;
+  // sits just under the scorebug, whichever scorebug style is on
+  {const pr=b.parentNode.getBoundingClientRect(),br=b.getBoundingClientRect(),k=pr.width?b.parentNode.offsetWidth/pr.width:1,L=((br.left-pr.left+br.width/2)*k).toFixed(0)+'px',T=((br.bottom-pr.top+4)*k).toFixed(0)+'px';
+    if(el.style.left!==L)el.style.left=L;if(el.style.top!==T)el.style.top=T;}
+  const n=clamp(G.noise||0,0,1);if(Math.abs((el._n||0)-n)<0.01)return;el._n=n;
+  const f=el.querySelector('b');f.style.width=(n*100).toFixed(1)+'%';f.style.background=`hsl(${Math.round(120-120*n)},85%,50%)`;el.classList.toggle('loud',n>0.7);}
 function sndCrowdFor(team,good){if(!GDS.crowd)return;const home=team===gpHomeTeam();if(home===good)SFX.roar(good?1:0.8);else if(good)SFX.groan();else SFX.boo();}
 /* nerves: how tense this moment is for team t (0..1). Late and close, fourth down, a two-point try, overtime */
 function gpNerves(t){
@@ -23020,7 +23070,7 @@ function sndStep(dt){
   // the home crowd gets loud when its defense is on the field before the snap
   const homeD=G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.offTeam!==gpHomeTeam();
   const n=gpNerves(gpHomeTeam());
-  let bed=prac?0.01:(0.035+n*0.05)*stad,roar=prac?0:Math.max(0,Math.min(1,G.cheer/2.5))*0.3*stad+(homeD?0.05+n*0.07:0);
+  let bed=prac?0.01:(0.035+n*0.05)*stad,roar=prac?0:Math.max(0,Math.min(1,G.cheer/2.5))*0.3*stad+(homeD?0.03+n*0.04+(G.noise||0)*0.14:0);
   SND.murmur.gn.gain.setTargetAtTime(bed,c.currentTime,0.4);SND.crowd.gn.gain.setTargetAtTime(roar,c.currentTime,0.25);
   SND.crowd.bp.frequency.setTargetAtTime(800+roar*1400,c.currentTime,0.3);
   // v2.16 a livelier crowd: the bed breathes, and now and then someone yells or whistles
@@ -23455,6 +23505,7 @@ function step(dt){
   if(G.paused)return;
   G.time+=dt;
   try{gpSideStep(dt);}catch(e){}
+  try{gpNoiseStep(dt);}catch(e){}
   try{sndStep(dt);gpNervesFx(dt);}catch(e){}
   gpHideDefense();try{gpPassBtnTick();}catch(e){}try{gpSevensTick();}catch(e){}
   if(G.phase==='replay'){
@@ -23469,7 +23520,7 @@ function step(dt){
       G.playClock-=dt;
       const aiO=isAI(G.offTeam)||G.test||pcAIQB();
       if(G.motion){gpMotionStep(dt);if(G.phase!=='presnap')return;}
-      else if(aiO){G.snapIn-=dt;if(G.snapIn<=0)doSnap();}
+      else if(aiO){G.snapIn-=dt;if(G.snapIn<=0){if(gpNoiseFS())return;doSnap();}}
       else if(G.playClock<=0){setTray('none');preSnapFoul(G.offTeam,'Delay of game',5);}
     }else{
       const kicker=G.play.kind==='kickoff'?G.play.kickTeam:G.play.kind==='punt'?G.play.puntTeam:G.offTeam;
@@ -23879,7 +23930,7 @@ if(GP){try{
   document.title=GP.teams[0].name+' vs '+GP.teams[1].name;
 }catch(e){console.error(e);}}
 // v2.15 TV-style scorebug (Settings → Scorebug): abbreviations, records and a yellow down-and-distance tag
-function gpBugStyle(){const tv=GDS.bug!=='classic';document.body.classList.toggle('bugtv',tv);
+function gpBugStyle(){const tv=GDS.bug!=='classic';document.body.classList.toggle('bugtv',tv);for(const k of['slab','tower','mini'])document.body.classList.toggle('bug-'+k,GDS.bug===k);
   for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;
     let r=n.parentNode.querySelector('.rec');if(n.dataset.rec&&!r){r=document.createElement('span');r.className='rec';n.after(r);}if(r)r.textContent=n.dataset.rec||'';}}
 try{gpBugStyle();}catch(e){}
