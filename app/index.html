@@ -20280,7 +20280,7 @@ function looseBrain(e){const L=G.loose;if(L.kind==='inc')return desire(e,e.x,e.y
 /* ---- special teams brains ---- */
 function kickoffBrain(e){
   const P=G.play,K=G.kick;
-  if(G.loose&&G.loose.kind==='onside'&&e.role!=='K'){const L=G.loose;if(e.side==='o'&&L.t<0.87)return desire(e,e.hx,e.hy+1,2.5);return desire(e,L.x+L.vx*0.25,L.y+L.vy*0.25,e.spd*(e.side==='o'?0.86:1));}
+  if(G.loose&&G.loose.kind==='onside'&&e.role!=='K'){const L=G.loose;if(e.side==='o'&&L.t<(P.oform==='popup'?0.1:P.oform==='std'?0.72:0.6))return desire(e,e.hx,e.hy+1,2.5);return desire(e,L.x+L.vx*0.25,L.y+L.vy*0.25,e.spd*(e.side==='o'?0.93:1));} // the hands team reacts at the kick
   if(e.side==='d'){
     if(e.role==='K'){if(!K)return desire(e,CX,e.hy-3.5,4.5);return desire(e,CX,e.hy-14,3);}
     if(P.onside&&e.role==='COV'&&G.t>P.kickAt-0.35&&!G.loose)return desire(e,e.hx+(CX-e.hx)*0.2,e.hy-3,e.spd*0.9);
@@ -20404,7 +20404,7 @@ function launchKick(type,from,res){
 }
 function launchOnside(){
   const P=G.play,F=P.oform||'std',sd=F==='left'?-1:F==='right'?1:Math.random()<0.5?-1:1;
-  if(F==='popup')G.loose={x:CX+sd*0.6,y:P.ky,h:0.4,vx:sd*rnd(0.5,1.8),vy:-rnd(5.6,6.8),vh:rnd(10.5,12.5),kind:'onside',t:0};
+  if(F==='popup')G.loose={x:CX+sd*0.6,y:P.ky,h:0.4,vx:sd*rnd(0.5,1.8),vy:-rnd(5.5,6.6),vh:rnd(9.8,11.6),kind:'onside',t:0};
   else G.loose={x:CX+sd*0.6,y:P.ky,h:0.25,vx:sd*(F==='std'?rnd(2,4.5):rnd(3.5,5.5)),vy:-rnd(8.6,10.4),vh:rnd(4.5,7),kind:'onside',t:0};
   G.ballState='loose';G.clockRun=false;dust(CX,P.ky,6);flash('Onside kick!');
 }
@@ -20462,7 +20462,9 @@ function looseStep(dt){
   if(L.h<0.9&&L.t>0.15){
     let best=null,bd=0.95;
     for(const e of G.ents){if(e.down||e.hurt)continue;if(P.kind==='kickoff'&&e.side!=='o'&&!(L.kind==='onside'&&L.y<=P.ky-10))continue;const d=dist(e,L);if(d<bd){bd=d;best=e;}}
-    if(best&&L.kind==='onside'&&best.side==='o'&&(L.h>0.3||Math.hypot(L.vx,L.vy)>3.2||L.t<1.2)&&Math.random()<0.55){
+    // a pop-up is contested in the air: the cover man is hit as he catches it
+    if(best&&L.kind==='onside'&&best.side==='d'&&P.oform==='popup'&&L.h>0.45&&Math.random()<0.4){L.vx=rnd(-2.5,2.5);L.vy=rnd(-1.5,2);L.vh=rnd(2,3);L.h=Math.max(L.h,0.3);best.stun=0.45;flash('Bobbled!');best=null;}
+    if(best&&L.kind==='onside'&&best.side==='o'&&(L.h>0.45||Math.hypot(L.vx,L.vy)>4.2)&&Math.random()<0.4){
       // a hard, hopping onside kick is easy to bobble
       L.vx=rnd(-3,3);L.vy=rnd(-2,2.5);L.vh=rnd(2,3.5);L.h=Math.max(L.h,0.3);best.stun=0.45;flash('Bobbled!');best=null;
     }
