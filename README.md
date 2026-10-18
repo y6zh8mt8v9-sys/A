@@ -21,7 +21,7 @@ High school football career game with a playable Game Day engine.
    You can run it again safely; it keeps all data. This update adds section 9: the `community_leagues` table and the private
    `community` storage bucket for shared careers. Until you run it, Community Creations → Leagues asks for the update;
    everything else keeps working.
-3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-8`).
+3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-9`).
    The home-screen app also has new Gridiron 27 icons and splash screens; iPhones may keep the old splash until the app
    is removed from the home screen and added again.
 
@@ -39,6 +39,7 @@ High school football career game with a playable Game Day engine.
   - No coach to create in Player Career mode.
   - New player creator: archetype, height and weight, interests (3), character traits (2), look, accessories and attribute points for a 40 to 55 overall.
   - Levels and skill points: games earn XP, every level brings 3 skill points to spend on attributes (My Player).
+- **Cleaner screen and faster:** in the compact layout the top bars are gone (Save, Settings, Help and Menu sit in the club bar). The schedule builder shows 60 schools at a time with Show more (it could reload the page on phones), simulated weeks are faster, and Game Day caps its resolution on big or high-DPI PC screens and lowers quality sooner if frames run long.
 - **Transfers all year:** meet scouted players during the season; if they say yes they finish the season at their school and join you next season. Your own players can also want out, depending on what they care about (playing time, exposure, winning, coaching, teammates), their traits and morale: at most 15% of your roster per year. Talk to them from the dashboard's Players leaving tile to change their mind; they leave when offseason training ends. Dashboard tiles: Transfers coming in, Players leaving.
 - **New dashboard:** a club bar with your crest, name and a big Continue button, a Year/Week strip, then tiles (Next game, Team management, Training, Standings, Schedule, Recruiting, Seniors, News, Scouting, Top players, Program, League) that open their page. ☰ opens the full menu.
 - **Compact menu:** the Dashboard lists every section with its pages and gold dots for things to do; pages open on their own with a Home button. Settings → Menu layout switches back to the classic tabs.

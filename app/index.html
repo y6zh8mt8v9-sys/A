@@ -484,6 +484,11 @@ body{height:100%;}
 #nav-prim .np.dot i{display:block}
 /* compact hub: the dashboard lists every section and its pages; a page shows on its own with a Home button */
 body.cnav #nav-prim{display:none!important}
+body.cnav #tb{display:none!important}
+body.cnav.cnav-dash #nav-bar{display:none!important}
+#tb,#nav-bar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.dt-tools{display:flex;gap:6px}.dt-tools button{background:rgba(0,0,0,.28);color:inherit;border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:8px 12px;font:800 13px/1 Nunito,system-ui,sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px}
+.dt-tools button:hover{background:rgba(0,0,0,.42)}.dt-tools svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 body.cnav.cnav-dash #nav-bar .nav-group:not([data-g="util"]){display:none!important}
 #nav-bar .nb-home{display:none}
 body.cnav:not(.cnav-dash) #nav-bar .nb-home{display:inline-flex!important;font-weight:900}
@@ -503,7 +508,7 @@ body.cnav:not(.cnav-dash) #nav-bar .nb-home{display:inline-flex!important;font-w
 .dt-club{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:16px;margin-bottom:0;color:var(--tOn,#fff);background:linear-gradient(180deg,color-mix(in srgb,var(--ac) 88%,#fff 12%),color-mix(in srgb,var(--ac) 70%,#000 30%));box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .dt-menu{background:none;border:0;padding:6px;cursor:pointer;color:inherit}.dt-menu svg{width:30px;height:30px;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;fill:none}
 .dt-crest{width:70px;height:70px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-.dt-name{flex:1;min-width:0;font:900 30px/1.05 'Barlow Condensed',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dt-name small{display:block;font:700 13px/1.3 Nunito,system-ui,sans-serif;opacity:.85}
+.dt-name{flex:1;min-width:120px;font:900 30px/1.05 'Barlow Condensed',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dt-name small{display:block;font:700 13px/1.3 Nunito,system-ui,sans-serif;opacity:.85}
 html body .dt-club .dt-go button,html body .dt-club .dt-go button.btn,html body .dt-club .dt-go button.btn.bgd,html body .dt-club .dt-go button.btn.bgn{background:linear-gradient(180deg,#22c46a,#139a4f)!important;border:0!important;color:#fff!important;font:900 18px/1 'Barlow Condensed',sans-serif!important;text-transform:uppercase;letter-spacing:.04em;padding:14px 26px!important;border-radius:10px!important;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .dt-strip{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.55);color:#fff;padding:8px 14px;border-radius:0 0 12px 12px;margin:0 8px 16px;flex-wrap:wrap}
 .dt-strip b{flex:1;text-align:center;font:800 17px/1.2 Nunito,system-ui,sans-serif}
@@ -4180,7 +4185,7 @@ let _sbTargetWk=null; // which week slot is currently selected for filling
 function openScheduleBuilder(){
   G.customSchedPending=false;
   _sbCls=G.cls; // default to own classification
-  _sbSearch='';
+  _sbSearch='';window._sbShow=60;
   _sbStep=0; // always start at rivalry pick step
   _sbTargetWk=null;
   renderScheduleBuilder();
@@ -4316,7 +4321,10 @@ function renderScheduleBuilder(){
   }
 
   // Sort by OVR desc
-  candidates=candidates.sort((a,b)=>teamOvr(b.id)-teamOvr(a.id));
+  const _ov=new Map();for(const s of candidates)_ov.set(s.id,teamOvr(s.id));
+  candidates=candidates.sort((a,b)=>_ov.get(b.id)-_ov.get(a.id));
+  // draw a page at a time: thousands of logo cards at once ran phones out of memory (the page reloaded)
+  const _sbN=window._sbShow||60,_shown=candidates.slice(0,_sbN);
 
   const divGames=G.sched.filter(g=>g.isDivision&&g.oppId);
 
@@ -4375,15 +4383,15 @@ function renderScheduleBuilder(){
         <button onclick="_sbSetCls('ALL')" style="background:${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--s2)'};border:1px solid ${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--bd)'};color:${!_sbCls||_sbCls==='ALL'?'#fff':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">ALL</button>
       </div>
       <div>
-        <input id="sb-search" placeholder="Search team or mascot…" value="${_sbSearch}" oninput="_sbSearch=this.value;renderScheduleBuilder();const _e=document.getElementById('sb-search');if(_e){_e.focus();try{_e.setSelectionRange(_e.value.length,_e.value.length);}catch(x){}}" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:6px 10px;border-radius:4px;font-size:12px;width:100%;outline:none">
+        <input id="sb-search" placeholder="Search team or mascot…" value="${_sbSearch}" oninput="const _v=this.value;clearTimeout(window._sbQT);window._sbQT=setTimeout(()=>{_sbSearch=_v;window._sbShow=60;renderScheduleBuilder();const _e=document.getElementById('sb-search');if(_e){_e.focus();try{_e.setSelectionRange(_e.value.length,_e.value.length);}catch(x){}}},250)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:6px 10px;border-radius:4px;font-size:12px;width:100%;outline:none">
       </div>
       <div style="flex:1;overflow-y:auto">
         ${emptySlots.length===0?`<div style="padding:24px;text-align:center;color:var(--gn);font-weight:700">All slots filled! Lock in your schedule above.</div>`:''}
         ${candidates.length===0&&emptySlots.length>0?`<div style="padding:24px;text-align:center;color:var(--mu)">No available teams match your filter.</div>`:''}
         ${candidates.length>0?`<div style="font-size:10px;color:var(--mu);padding:2px 2px 6px">${candidates.length} team${candidates.length!==1?'s':''} available</div>`:''}
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;padding:2px">
-          ${candidates.map(s=>{
-            const ovr=teamOvr(s.id);
+          ${_shown.map(s=>{
+            const ovr=_ov.get(s.id);
             const cls=s.cls||G.cls;
             const isHigher=clsNum(cls)>clsNum(G.cls)&&cls!=='INTL';
             const isLower=clsNum(cls)<clsNum(G.cls)&&cls!=='INTL';
@@ -4411,6 +4419,7 @@ function renderScheduleBuilder(){
             </div>`;
           }).join('')}
         </div>
+        ${candidates.length>_shown.length?`<div style="text-align:center;padding:10px"><button class="bgh" onclick="window._sbShow=(window._sbShow||60)+60;renderScheduleBuilder()">Show more (${candidates.length-_shown.length} more)</button></div>`:''}
       </div>
     </div>
   </div>`;
@@ -4449,7 +4458,7 @@ function renderScheduleBuilder(){
   ${builderHtml}`);
 }
 
-window._sbSetCls=function(cls){_sbCls=cls==='ALL'?null:cls;renderScheduleBuilder();};
+window._sbSetCls=function(cls){_sbCls=cls==='ALL'?null:cls;window._sbShow=60;renderScheduleBuilder();};
 function _sbSt(){const v=_sbCls||G.cls;return v==='INTL'?'INTL':v.startsWith('ST:')?v.slice(3):clsSt(v);}
 
 window._sbSelectSlot=function(wk){
@@ -5599,9 +5608,12 @@ function smallOffers(p,pops){
     const c=smallPick(lv,p,sc);if(c)addOffer(p,c,pops,lv==='JUCO'?'JUCO interest':'');}
 }
 function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+let _colSort=null;
+function colSorted(){if(!_colSort||_colSort.src!==COLLEGES||_colSort.n!==COLLEGES.length){const a=COLLEGES.filter(c=>c.lvl!=='JUCO').sort((x,y)=>x.pr-y.pr);_colSort={src:COLLEGES,n:COLLEGES.length,a};}return _colSort.a;}
+function colRange(lo,hi){const A=colSorted();let i=0,j=A.length;while(i<j){const m=(i+j)>>1;if(A[m].pr<lo)i=m+1;else j=m;}const out=[];for(let k=i;k<A.length&&A[k].pr<=hi;k++)out.push(A[k]);return out;}
 function colPick(target,p,within,ignoreGpa){
   const have=new Set((p.offers||[]).map(o=>o.school+'|'+o.lvl));
-  const ok=COLLEGES.filter(c=>(within==null||Math.abs(c.pr-target)<=within)&&c.lvl!=='JUCO'&&!have.has(c.school+'|'+c.lvl)&&colRoom(c,p,true)&&(!c.acad||(p.gpa||0)>=c.acad)&&(ignoreGpa||!((p.gpa||0)<2.0&&c.lvl==='FBS'))&&(within==null||Math.abs(c.pr-target)<=within));
+  const ok=(within==null?COLLEGES:colRange(target-within,target+within)).filter(c=>(within==null||Math.abs(c.pr-target)<=within)&&c.lvl!=='JUCO'&&!have.has(c.school+'|'+c.lvl)&&colRoom(c,p,true)&&(!c.acad||(p.gpa||0)>=c.acad)&&(ignoreGpa||!((p.gpa||0)<2.0&&c.lvl==='FBS'))&&(within==null||Math.abs(c.pr-target)<=within));
   if(!ok.length)return null;ok.sort((a,b)=>Math.abs(a.pr-target)-Math.abs(b.pr-target));
   const L=colPreferIn(ok.slice(0,12),p,ok[0].lvl);return L[Math.floor(Math.random()*Math.min(3,L.length))];
 }
@@ -7677,7 +7689,7 @@ function dashTiles(o){
   const tLeague=dtTile('League',`nav('rank')`,`<div class="dt-list">${[['rank','Rankings'],['playoff','Playoffs'],['teams','Teams'],['leads','Leaders']].map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`);
   let alerts='';try{alerts=jobPanel()+pcPanel()+s7Panel();}catch(e){}
   const pills=`<span class="dt-pill" title="Record">${G.wins}-${G.losses}</span><span class="dt-pill" title="Prestige">★ ${Math.round(G.prestige||1)}</span><span class="dt-pill" style="color:var(--gn)" title="Budget">$${(G.budget/1000).toFixed(0)}k</span>`;
-  return`<div class="dt-club"><button class="dt-menu" onclick="dtMenu()" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="dt-crest">${sLogo(ms,58)}</div><div class="dt-name">${ms.name}<small>${ms.mascot} · ${clsL(G.cls)}</small></div><div class="dt-go">${actionBtn||''}</div></div>
+  return`<div class="dt-club"><button class="dt-menu" onclick="dtMenu()" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="dt-crest">${sLogo(ms,58)}</div><div class="dt-name">${ms.name}<small>${ms.mascot} · ${clsL(G.cls)}</small></div><div class="dt-tools"><button onclick="saveGame()" title="Save"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"/></svg>Save</button><button onclick="openSettings()" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h.1a2 2 0 1 1 0 4z"/></svg>Settings</button><button onclick="showTutorial()" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>Help</button><button onclick="confirmMainMenu()" title="Main menu"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Menu</button></div><div class="dt-go">${actionBtn||''}</div></div>
    <div class="dt-strip">${G.coach&&G.coach.name?`<span class="dt-pill" title="Head coach">${G.coach.name}</span>`:''}<b>Year ${G.yr} (${curYear}) - ${phaseLabel}</b><span class="dt-pills">${pills}</span></div>
    ${alerts?`<div class="dt-alerts">${alerts}</div>`:''}
    <div class="dt-grid">${tNext}${tSched}${tTeam}<div class="dt-stack"><div class="dt-pair">${tRec}${tSr}</div>${tNews}</div>${tTrain}${tScout}${tStand}${tTop}${tProg}${tLeague}</div>`;}
@@ -11816,9 +11828,10 @@ function lgBuildSchedule(){
   const W=lgWeeks(),R=_lsRng(G.yr*7919+(G.myId||1)*31),myOpp={};
   (G.sched||[]).filter(g=>g.type==='regular'&&g.oppId!=null).forEach(g=>{myOpp[g.wk]=g.oppId;});
   const games={},busy=new Set(),played=new Set(),cnt={};W.forEach(w=>games[w]=[]);
-  const K=(a,b)=>a<b?a+'-'+b:b+'-'+a,B=(id,w)=>busy.has(id+'@'+w);
-  const add=(w,a,b)=>{games[w].push([a,b]);busy.add(a+'@'+w);busy.add(b+'@'+w);played.add(K(a,b));cnt[a]=(cnt[a]||0)+1;cnt[b]=(cnt[b]||0)+1;};
-  for(const w of W)if(myOpp[w]!=null){busy.add(myOpp[w]+'@'+w);played.add(K(myOpp[w],G.myId));}
+  // numeric keys (pair = small*2^21+big, team-week = id*64+week): string keys made this the slowest part of a simulated week
+  const K=(a,b)=>a<b?a*2097152+b:b*2097152+a,B=(id,w)=>busy.has(id*64+w);
+  const add=(w,a,b)=>{games[w].push([a,b]);busy.add(a*64+w);busy.add(b*64+w);played.add(K(a,b));cnt[a]=(cnt[a]||0)+1;cnt[b]=(cnt[b]||0)+1;};
+  for(const w of W)if(myOpp[w]!=null){busy.add(myOpp[w]*64+w);played.add(K(myOpp[w],G.myId));}
   const divOf={},clsOf={};
   for(const d of lgDivs())for(const t of d.teams){divOf[t.id]=d;clsOf[t.id]=t.cls;}
   // 1) division games
@@ -11839,8 +11852,9 @@ function lgBuildSchedule(){
     const left=new Set(free),byStL={};for(const id of free)(byStL[stOfId[id]]=byStL[stOfId[id]]||new Set()).add(id);
     const del=id=>{left.delete(id);const S=byStL[stOfId[id]];if(S)S.delete(id);};
     for(const a of free){if(!left.has(a))continue;del(a);
-      let best=null,bs=-1e9;const sa=stOfId[a],cand=sa==='INTL'?(byStL.CF||[]):[...(byStL[sa]||[]),...(byStL.INTL||[])];
-      for(const b of cand){if(divOf[b]===divOf[a]||played.has(K(a,b)))continue;
+      let best=null,bs=-1e9,seen=0;const sa=stOfId[a],cands=sa==='INTL'?[byStL.CF||[]]:[byStL[sa]||[],byStL.INTL||[]];
+      // the remaining teams are in shuffled order: the best of the first 150 open opponents is as good a match and far cheaper
+      for(const cand of cands)for(const b of cand){if(seen>=150)break;if(divOf[b]===divOf[a]||played.has(K(a,b)))continue;seen++;
         const ca=clsOf[a],cb=clsOf[b],ia=ca==='INTL',ib=cb==='INTL';let sc=R()*1.5;
         if(ia||ib)sc+=ia&&ib?-2:(stOfId[ia?b:a]==='CF'?1.2:-1.5);else{const gap=Math.abs(clsNum(ca)-clsNum(cb));sc+=gap===0?0.6:gap===1?1.4:gap===2?0.2:-2;if(stOfId[a]!==stOfId[b])sc-=1.1;}
         sc-=Math.max(0,(cnt[b]||0)-(cnt[a]||0))*0.1;if(sc>bs){bs=sc;best=b;}}
@@ -24002,7 +24016,7 @@ let perfAvg=16,perfN=0;
 function frame(now){
   const raw=(now-last);const dt=Math.min(0.033,Math.max(0,raw/1000));last=now;
   if(raw>0&&raw<200&&!G.recVid){perfAvg=perfAvg*0.95+raw*0.05;perfN++;
-    if(perfN>90&&perfAvg>26){perfN=0;perfAvg=16;if(QHI)QHI=false;else if(DPRCAP>1){DPRCAP=Math.max(1,DPRCAP-0.5);fit();}}}
+    if(perfN>90&&perfAvg>21){perfN=0;perfAvg=16;if(QHI)QHI=false;else if(DPRCAP>1){DPRCAP=Math.max(1,DPRCAP-0.5);fit();}}}
   if(dt>0&&!(G.demo&&G.demo.state==='warm'))try{step(dt*gspd());}catch(err){console.error(err);}
   requestAnimationFrame(frame);
 }
@@ -24070,7 +24084,7 @@ function fit(){
   if(BGC.width!==W)BGC.width=W;
   const s=Math.min(cw/W,ch/H);
   document.body.classList.toggle('full',land);
-  SC=s;DPR=Math.min(DPRCAP,window.devicePixelRatio||1);
+  SC=s;DPR=Math.min(DPRCAP,window.devicePixelRatio||1,Math.max(0.75,2200/Math.max(1,W*s)));  // a 4K or high-DPI monitor no longer draws a 4,000-pixel-wide field
   wr.style.width=W*s+'px';wr.style.height=H*s+'px';wr.style.setProperty('--s',s.toFixed(3));
   cv.width=Math.round(W*s*DPR);cv.height=Math.round(H*s*DPR);
 }

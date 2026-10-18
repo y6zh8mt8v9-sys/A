@@ -2,7 +2,7 @@
    The game page is fetched fresh when there is a connection (so uploads reach players on their next launch)
    and served from the cache when there is none. Fonts and the online-play library are cached the first time
    they load; online-play traffic itself is never cached. */
-const VERSION = 'g27-beta-8';
+const VERSION = 'g27-beta-9';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
 const RUNTIME_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net'];
 
