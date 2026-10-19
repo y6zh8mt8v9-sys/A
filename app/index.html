@@ -4632,7 +4632,7 @@ function simGame(idx,silent=false,forced=null){
   if(iWin){G.wins++;myS().wins++;}else{G.losses++;myS().losses++;}
   if(iWin)opp.losses++;else opp.wins++;
   // Track rivalry history (years played against this opponent)
-  if(rivalGame){if(!G.rivalHistory)G.rivalHistory={};G.rivalHistory[opp.id]=(G.rivalHistory[opp.id]||0)+1;}
+  if(rivalGame){if(!G.rivalHistory)G.rivalHistory={};G.rivalHistory[opp.id]=(G.rivalHistory[opp.id]||0)+1;try{rivalryAfter(opp,iWin,myScore,oppScore,silent);}catch(e){console.error('rivalry',e);}}
 
   const pl=myP().filter(p=>p.inj===0);
   const weekPops=[];
@@ -4669,6 +4669,7 @@ function simGame(idx,silent=false,forced=null){
 
   lgSimWeek(game.wk,opp.id,silent,oppScore,myScore,!iWin);
   try{weeklyAwards(game.wk,silent?null:weekPops);}catch(e){console.error('weekly awards',e);}
+  try{gameInviteResolve(game.wk,silent?null:weekPops);}catch(e){console.error('game invites',e);}
   try{colNeedsWeek(silent?null:weekPops);}catch(e){console.error('college needs',e);}
 
   if(!silent){const ev=tryEvent(sm,iWin,myScore,oppScore);if(ev)weekPops.push(ev);}
@@ -7749,7 +7750,7 @@ function dashTiles(o){
   const opp=no||playoffOpp,ng=no?nextUnplayed:playoffOpp?playoffSlot:null;
   // next game
   let nb;if(opp){const r=dtOD(opp.id),lbl=no?(ng.isRivalry?'Rivalry week':'Week '+ng.wk)+(ng.date?' · '+ng.date:''):(poRoundName(ng.playoffRound)||ng.label||'Playoffs');
-    nb=`<div class="dt-ng"><div style="min-width:0"><div class="dt-sub">${lbl}</div><div class="dt-big">${opp.name} ${opp.mascot}</div><div class="dt-sub">${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}</div>${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div></div><div class="dt-logo">${sLogo(opp,96)}</div></div>`;}
+    nb=`<div class="dt-ng"><div style="min-width:0"><div class="dt-sub">${lbl}</div><div class="dt-big">${opp.name} ${opp.mascot}</div><div class="dt-sub">${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}</div>${no&&ng.isRivalry?rivalryWeekHtml(opp):''}${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div></div><div class="dt-logo">${sLogo(opp,96)}</div></div>`;}
   else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
   const tNext=dtTile('Next game',opp?`viewSchool(${opp.id})`:`nav('sched')`,nb,'dt-tall');
   // schedule
@@ -7781,7 +7782,7 @@ function dashTiles(o){
   const tLeague=dtTile('League',`nav('rank')`,`<div class="dt-list">${[['rank','Rankings'],['playoff','Playoffs'],['teams','Teams'],['leads','Leaders']].map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`);
   let alerts='';try{alerts=jobPanel()+pcPanel()+s7Panel();}catch(e){}
   const pills=`<span class="dt-pill" title="Record">${G.wins}-${G.losses}</span><span class="dt-pill" title="Prestige">★ ${Math.round(G.prestige||1)}</span><span class="dt-pill" style="color:var(--gn)" title="Budget">$${(G.budget/1000).toFixed(0)}k</span>`;
-  return`<div class="dt-club"><button class="dt-menu" onclick="dtMenu()" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="dt-crest">${sLogo(ms,58)}</div><div class="dt-name">${ms.name}<small>${ms.mascot} · ${clsL(G.cls)}</small></div><div class="dt-tools"><button onclick="saveGame()" title="Save"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"/></svg>Save</button><button onclick="openSettings()" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h.1a2 2 0 1 1 0 4z"/></svg>Settings</button><button onclick="showTutorial()" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>Help</button><button onclick="confirmMainMenu()" title="Main menu"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Menu</button></div><div class="dt-go">${actionBtn||''}</div></div>
+  return`<div class="dt-club"><button class="dt-menu" onclick="dtMenu()" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="dt-crest">${sLogo(ms,58)}</div><div class="dt-name">${ms.name}<small>${ms.mascot} · ${clsL(G.cls)}${G.role==='OC'?' · Offensive Coordinator':G.role==='DC'?' · Defensive Coordinator':''}</small></div><div class="dt-tools"><button onclick="saveGame()" title="Save"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"/></svg>Save</button><button onclick="openSettings()" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h.1a2 2 0 1 1 0 4z"/></svg>Settings</button><button onclick="showTutorial()" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>Help</button><button onclick="confirmMainMenu()" title="Main menu"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Menu</button></div><div class="dt-go">${actionBtn||''}</div></div>
    <div class="dt-strip">${G.coach&&G.coach.name?`<span class="dt-pill" title="Head coach">${G.coach.name}</span>`:''}<b>Year ${G.yr} (${curYear}) - ${phaseLabel}</b><span class="dt-pills">${pills}</span></div>
    ${alerts?`<div class="dt-alerts">${alerts}</div>`:''}
    <div class="dt-grid">${tNext}${tSched}${tTeam}<div class="dt-stack"><div class="dt-pair">${tRec}${tSr}</div>${tNews}</div>${tTrain}${tScout}${tStand}${tTop}${tProg}${tLeague}</div>`;}
@@ -8610,7 +8611,7 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
     <button class="bgh" onclick="clo()">Cancel</button>
   </div>`);}
 window.schLogoPrev=function(sid){const s=getS(sid),el=document.getElementById('elk-prev');if(!s||!el)return;const t=Object.assign({},s,{logoKey:document.getElementById('elk').value||null,mash:document.getElementById('emash').value||null,c1:document.getElementById('ec1').value,c2:document.getElementById('ec2').value,customLogo:null});el.innerHTML=sLogo(t,64);};
-window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
+window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
 window.handleSchLogoUpload=function(inp,sid){
   const file=inp.files[0];if(!file)return;
   logoShrink(file,function(d){
@@ -8859,7 +8860,10 @@ function _pgRecrMine(){
       <div style="font-size:12px"><span class="pb2">${p.pos}</span> ${p.fn} ${p.ln} ${stars(p.stars)} · ${p.rat} OVR</div>
       <div style="font-size:11px;color:var(--mu)">Watching: ${v.camp.schools.map(s=>s.school).join(', ')}</div></div>
       <button class="btn bsm bgn" ${used||p.committed?'disabled style="opacity:.45"':''} onclick="campAttend('${v.id}')">${used?'No camps left':'Attend'}</button><button class="bgh bsm" onclick="campDecline('${v.id}')">Decline</button></div>`;}).join(''):'<div style="font-size:13px;color:var(--mu)">No invites right now. Players earn invites with good games, stars, the right size for their position and steady performances. Bigger classifications and a more prestigious program get noticed more.</div>';
-  return ncampHtml()+`<div class="pnl" style="margin-bottom:14px"><div class="ph">Camp invites <span style="font-size:12px;color:var(--mu);font-weight:600">${cap} camp${cap>1?'s':''} per player this year (1 per star of program prestige)</span></div><div class="pb">
+  const hostHtml=`<div class="pnl" style="margin-bottom:14px"><div class="ph">Showcase your players</div><div class="pb" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <div style="flex:1 1 260px;font-size:13px;color:var(--mu)">Host your own combine and invite college staffs to test your players, or invite coaches to watch your next game. Big performances in front of them can earn offers.</div>
+    <button class="btn" ${combineAvail()?'':'disabled style="opacity:.5"'} onclick="combineOpen()">${combineAvail()?'Host a combine':'Combine hosted this year'}</button><button class="bgh" onclick="gameInviteOpen()">Invite coaches to a game${G.gameInv&&G.gameInv.yr===G.yr?` (Week ${G.gameInv.wk} set)`:''}</button></div></div>`;
+  return hostHtml+ncampHtml()+`<div class="pnl" style="margin-bottom:14px"><div class="ph">Camp invites <span style="font-size:12px;color:var(--mu);font-weight:600">${cap} camp${cap>1?'s':''} per player this year (1 per star of program prestige)</span></div><div class="pb">
     ${invHtml}
     <div style="font-size:11px;color:var(--mu);margin-top:8px">Each camp has several colleges watching. A strong showing can earn offers from any of them and raise his stars; a bad day can cost him. Stars are driven mostly by overall rating and development trait, with a little from stats, size and camps.</div></div></div>
   ${rg(seniors,' Seniors — Signing Class')}
@@ -10680,7 +10684,7 @@ function gdChoose(kind,info,simFn){
       <div style="text-align:center">${sLogo(me,64)}<div style="font-weight:800;margin-top:4px">${me.mascot}</div></div>
       <div style="font-weight:900;font-size:22px;color:var(--mu)">VS</div>
       <div style="text-align:center">${sLogo(opp,64)}<div style="font-weight:800;margin-top:4px">${opp.mascot}</div></div></div>
-    ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
+    ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;if(kind==='po'&&info.slot&&poRoundName(info.slot.playoffRound)==='State Final')return`<div style="font-size:12px;color:var(--gd);font-weight:800;margin:-6px 0 12px">State Final · neutral site · ${stateFinalVenue()}</div>`;if(kind==='reg'&&G.sched[info.idx]&&G.sched[info.idx].isRivalry)return rivalryWeekHtml(opp)+`<div style="height:8px"></div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
     ${(()=>{const w=gdWxFor(kind,info);return w?`<div class="gd-wx">${wxIcon(w,22)}<div><b>${wxLine(w)}</b><div>${wxEffects(w)}</div></div></div>`:'';})()}
     <div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">Your uniform</div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">${[['home','Home'],['away','Away'],['alt','Alternate']].map(([k,l])=>`<button class="gd-uni${(window._gdUni||'home')===k?' on':''}" data-k="${k}" onclick="gdPickUni('${k}')">${uniSvg(uniOf(me,k),(myP()[0]||{}).num,54)}<span>${l}</span></button>`).join('')}</div>
@@ -10702,8 +10706,11 @@ function gdStart(){
   // team strength on top of individual ratings: every player of the better team gets a bump, the weaker team a drop
   _gdTAdj=Math.round((_o1-_gdAnchor)*0.5+clamp(progEdge()*0.6,-3,3));const _t1=Object.assign(gdTeam(me,mk),{ovr:Math.round(_o1)});
   _gdTAdj=Math.round((_o2-_gdAnchor)*0.5);const _t2=Object.assign(gdTeam(opp,gdOppKind(opp,mk)),{ovr:Math.round(_o2)});_gdTAdj=0;
+  if(G.role==='OC')window._gdMode='off';else if(G.role==='DC')window._gdMode='def';
   window.__GP={mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
+  try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v});window.__GP.neutral=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
+  try{if(window.__GP.rival)window.__GP.previewHtml=(window.__GP.previewHtml||'')+rivalryWeekHtml(opp);}catch(e){}
   if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.s7q=G.s7.qn===1?1:2;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
   try{pcGP(ctx);}catch(e){console.error('player career',e);}
   gdLaunch();
@@ -14199,7 +14206,10 @@ function bulkApply(){
 function jobOffersGen(w,l,champ,divWon){
   G.jobOffers=null;if(pcActive()||G.pcLock)return;const me=myS();if(!me)return;
   const ratio=w/Math.max(1,w+l),sc=ratio*2+(champ?1.5:0)+(divWon?0.5:0)+(G.prestige||1)*0.2;
-  const n=sc>=2.6?3:sc>=1.8?2:sc>=1.1?1:Math.random()<0.2?1:0;if(!n)return;
+  // teams you created or edited always call; good seasons also bring head coach and coordinator offers
+  const cust=[];for(const d of G.divisions||[])for(const t of d.teams)if(t.id!==G.myId&&!t.intl&&teamIsCustom(t))cust.push({sid:t.id,kind:'custom'});
+  const n=sc>=2.6?3:sc>=1.8?2:sc>=1.1?1:Math.random()<0.2?1:0;if(!n&&!cust.length)return;
+  if(!n){G.jobOffers={yr:G.yr+1,list:cust.slice(0,3)};try{addNews('myteam','Your teams are calling',`${cust.length} of the programs you built want you as head coach.`);}catch(e){}return;}
   const pool=[];for(const d of G.divisions||[])for(const t of d.teams)if(t.id!==G.myId&&!t.intl&&!t.lite)pool.push(t);if(!pool.length)return;
   const myO=teamOvr(G.myId),pr=t=>t.prestige||1,used=new Set(),list=[];
   // better jobs first (more prestige or a stronger roster), then a rebuild with a bigger budget
@@ -14207,22 +14217,77 @@ function jobOffersGen(w,l,champ,divWon){
   const down=pool.filter(t=>pr(t)<(G.prestige||1)).sort(()=>Math.random()-0.5);
   for(const t of up){if(list.length>=n-(n>=2?1:0))break;used.add(t.id);list.push({sid:t.id,kind:'up'});}
   for(const t of down.concat(up)){if(list.length>=n)break;if(used.has(t.id))continue;used.add(t.id);list.push({sid:t.id,kind:pr(t)<(G.prestige||1)?'rebuild':'up'});}
+  // a coordinator job at a bigger program: run one side of the ball, then go for the top job
+  {const big=pool.filter(t=>!used.has(t.id)&&pr(t)>=(G.prestige||1)+1).sort((a,b)=>pr(b)-pr(a))[0];if(big&&G.role!=='OC'&&G.role!=='DC'&&Math.random()<0.7){used.add(big.id);list.push({sid:big.id,kind:Math.random()<0.5?'OC':'DC'});}}
+  for(const c of cust)if(!list.some(o=>o.sid===c.sid)&&list.length<6)list.unshift(c);
   if(!list.length)return;G.jobOffers={yr:G.yr+1,list};
   try{addNews('myteam',`${list.length} school${list.length>1?'s':''} want${list.length>1?'':'s'} to talk to you`,`After a ${w}-${l} season, ${list.map(o=>getS(o.sid)&&getS(o.sid).name).filter(Boolean).join(', ')} called about their head coaching job.`);}catch(e){}
   try{addLog(`<span style="color:var(--gd)">Job offers: ${list.length} school${list.length>1?'s':''} called about their head coaching job. See the dashboard.</span>`);}catch(e){}}
 function jobOffersLive(){const J=G.jobOffers;if(!J||J.yr!==G.yr||!J.list.length||pcActive())return null;
   if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result))return null;return J;}
 function jobPanel(){const J=jobOffersLive();if(!J)return'';
-  const rows=J.list.map(o=>{const t=getS(o.sid);if(!t)return'';return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:160px"><b style="cursor:pointer" onclick="viewSchool(${t.id})">${t.name} ${t.mascot}</b><div style="font-size:11px;color:var(--mu)">${clsL(t.cls)} · OVR ${teamOvr(t.id)} · ${stars(Math.round(t.prestige||1))}${o.kind==='rebuild'?' · rebuild job, bigger budget':' · step up'}</div></span><span style="display:flex;gap:6px"><button class="btn bgn" style="font-size:12px" onclick="jobAccept(${t.id})">Accept</button><button class="bgh" style="font-size:12px" onclick="jobDecline(${t.id})">Decline</button></span></div>`;}).join('');
+  const rows=J.list.map(o=>{const t=getS(o.sid);if(!t)return'';return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:160px"><b style="cursor:pointer" onclick="viewSchool(${t.id})">${t.name} ${t.mascot}</b><div style="font-size:11px;color:var(--mu)">${o.kind==='OC'?'<b style="color:var(--gd)">Offensive Coordinator</b> · ':o.kind==='DC'?'<b style="color:var(--gd)">Defensive Coordinator</b> · ':o.kind==='custom'?'<b style="color:var(--gd)">Your team</b> · ':''}${clsL(t.cls)} · OVR ${teamOvr(t.id)} · ${stars(Math.round(t.prestige||1))}${o.kind==='rebuild'?' · rebuild job, bigger budget':o.kind==='OC'?' · you run the offense':o.kind==='DC'?' · you run the defense':' · head coach'}</div></span><span style="display:flex;gap:6px"><button class="btn bgn" style="font-size:12px" onclick="jobAccept(${t.id})">Accept</button><button class="bgh" style="font-size:12px" onclick="jobDecline(${t.id})">Decline</button></span></div>`;}).join('');
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Job Offers</div><div class="pb"><div style="font-size:12px;color:var(--mu);margin-bottom:6px">Other programs want you as their head coach. Offers stand until your first game of the season. Your record, trophies and history come with you.</div>${rows}</div></div>`;}
 window.jobAccept=function(sid){const t=getS(sid),os=myS();if(!t||!jobOffersLive())return;
   if(!confirm(`Leave ${os.name} and take the head coaching job at ${t.name} ${t.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
-  const rb=(G.jobOffers.list.find(o=>o.sid===sid)||{}).kind==='rebuild';G.jobOffers=null;coachTakeOver(sid,true);if(rb){G.budget+=25000;notify('Rebuild bonus: +$25,000 budget');}
-  addLog(`<span style="color:var(--gd)">New job: you accepted the head coaching job at ${t.name} ${t.mascot}.</span>`);};
+  const kd=(G.jobOffers.list.find(o=>o.sid===sid)||{}).kind,rb=kd==='rebuild';G.jobOffers=null;coachTakeOver(sid,true);if(rb){G.budget+=25000;notify('Rebuild bonus: +$25,000 budget');}
+  G.role=kd==='OC'||kd==='DC'?kd:'HC';const job=G.role==='OC'?'offensive coordinator':G.role==='DC'?'defensive coordinator':'head coach';
+  addLog(`<span style="color:var(--gd)">New job: you are the ${job} at ${t.name} ${t.mascot}.${G.role!=='HC'?' On Game Day you run your side of the ball; head coaching offers follow a strong season.':''}</span>`);};
 window.jobDecline=function(sid){const J=jobOffersLive();if(!J)return;J.list=J.list.filter(o=>o.sid!==sid);const t=getS(sid);if(t)addLog(`<span style="color:var(--mu)">You turned down ${t.name}.</span>`);nav(G._page||'dash',G._arg);};
+function teamIsCustom(t){if(!t)return false;if(t.customLogo||t.userEdited)return true;try{const W=G.world&&G.world.tb;if(!W)return false;
+  if(!G._custNames){G._custNames=new Set([...Object.values(W.ed||{}).map(v=>v&&v.name),...(W.add||[]).map(v=>v&&v.name)].filter(Boolean));Object.defineProperty(G,'_custNames',{enumerable:false,writable:true,configurable:true,value:G._custNames});}
+  return G._custNames.has(t.name);}catch(e){return false;}}
+// ── rivalry week ──
+const RIV_TROPHY=['Old Bell','Iron Skillet','Golden Helmet','Victory Bell','County Cup','Bronze Boot','Little Brown Jug','Rail Spike','Old Oaken Bucket','Silver Saddle','Paint Bucket','Brass Lantern','Steel Spur','Hatchet','Old Anvil','Milk Can'];
+function rivTrophy(oppId){G.rivT=G.rivT||{};const k=Math.min(G.myId,oppId)+'-'+Math.max(G.myId,oppId);if(!G.rivT[k])G.rivT[k]={name:'The '+RIV_TROPHY[(G.myId*7+oppId*13)%RIV_TROPHY.length],w:0,l:0,holder:null};return G.rivT[k];}
+function rivalryAfter(opp,win,my,op,silent){const T=rivTrophy(opp.id);if(win)T.w++;else T.l++;const kept=T.holder===(win?G.myId:opp.id);T.holder=win?G.myId:opp.id;
+  G.morale=clamp((G.morale==null?60:G.morale)+(win?6:-6),0,100);G.prestige=clamp((G.prestige||1)+(win?0.05:-0.03),1,5);if(win)G.budget+=5000;
+  const h=win?`${kept?'Keeps':'Takes back'} ${T.name}!`:`${T.name} goes to ${opp.name}`;
+  try{addNews(win?'myteam':'bad',`Rivalry: ${h}`,`${myS().name} ${my}-${op} ${opp.name}. Series ${T.w}-${T.l}.${win?' +$5,000 from the rivalry crowd.':''} · via ${MEDIA.fni}`);}catch(e){}
+  try{addLog(`<span style="color:${win?'var(--gd)':'var(--rd)'}">Rivalry week: ${h} Series ${T.w}-${T.l}.</span>`);}catch(e){}}
+function rivalryWeekHtml(opp){if(!opp)return'';const T=rivTrophy(opp.id);return`<div style="font-size:12px;margin-top:6px;color:var(--gd);font-weight:800">Rivalry week: ${T.name} is on the line · series ${T.w}-${T.l}${T.holder?` · held by ${T.holder===G.myId?'you':opp.name}`:''}</div>`;}
+// ── host a combine: invite college staffs, your players test, standouts get offers ──
+const COMBINE_COST=2500,COMBINE_INV=600;
+function combineAvail(){return!(G.combineYr===G.yr);}
+function combineColleges(){const lv=['FBS','FCS','D2','D3','NAIA','JUCO'],out=[];try{_colStReady();}catch(e){}const st=clsSt(G.cls);
+  for(const l of lv){const L=COLLEGES.filter(c=>c.lvl===l).sort((a,b)=>(b.st===st)-(a.st===st)||b.pr-a.pr).slice(0,l==='FBS'?5:3);out.push(...L);}return out;}
+window.combineOpen=function(){if(!combineAvail()){notify('You already hosted a combine this year.','w');return;}const C=combineColleges();
+  openMo(`<h2>Host a Combine</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">Your sophomores, juniors and seniors run the 40, the shuttle, the vertical and the bench in front of the college staffs you invite. Standouts can pick up offers on the spot. Cost $${COMBINE_COST.toLocaleString()} plus $${COMBINE_INV} per staff you invite (up to 6).</div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;max-height:46vh;overflow-y:auto">${C.map((c,i)=>`<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px"><input type="checkbox" class="cb-c" value="${i}" style="width:auto;min-height:0"> <span><b>${c.school}</b><br><small style="color:var(--mu)">${c.lvl}${c.st===clsSt(G.cls)?' · in state':''}</small></span></label>`).join('')}</div>
+   <div style="text-align:right;margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="combineRun()">Run the combine</button></div>`);window._cbC=C;};
+window.combineRun=function(){const C=window._cbC||[],pick=[...document.querySelectorAll('.cb-c:checked')].map(x=>C[+x.value]).filter(Boolean).slice(0,6);
+  const cost=COMBINE_COST+pick.length*COMBINE_INV;if(!pick.length){notify('Invite at least one college staff.','w');return;}if(!hasFunds(cost)){notify(`The combine costs $${cost.toLocaleString()}.`,'e');return;}
+  if(!G.unlimitedMoney)G.budget-=cost;G.combineYr=G.yr;const pl=myP().concat(G.players.filter(p=>p.sId===G.myId&&p.onJV)).filter(p=>p.yr>=10&&!p.grad&&!(p.inj>0));
+  const res=pl.map(p=>{const sp=atv(p,'spd'),ag=atv(p,'agi'),jm=atv(p,'jmp'),st=atv(p,'str');
+    const forty=+(5.45-(sp-40)*0.016+(p.wt>230?(p.wt-230)*0.0025:0)+gaussR()*0.05).toFixed(2),shut=+(4.85-(ag-40)*0.012+gaussR()*0.06).toFixed(2),vert=Math.round(20+(jm-40)*0.33+gaussR()*1.5),bench=Math.max(0,Math.round(4+(st-40)*0.42+gaussR()*2));
+    const z=(5.0-forty)*4+(4.45-shut)*3+(vert-28)/4+(bench-14)/6+(p.rat-55)/10;return{p,forty,shut,vert,bench,z};}).sort((a,b)=>b.z-a.z);
+  const offers=[];for(const r of res.slice(0,10)){r.p.campStarB=(r.p.campStarB||0)+(r.z>2?0.5:r.z>0.5?0.25:0);if(r.p.committed||r.p.yr<10)continue;
+    for(const c of pick){const L=recLevel(r.p)+r.z*4;if(Math.abs(c.pr-L)<=22&&colRoom(c,r.p,true)&&!(r.p.offers||[]).some(o=>o.school===c.school&&o.lvl===c.lvl)&&Math.random()<clamp(0.18+r.z*0.1,0.05,0.6)){r.p.offers=r.p.offers||[];addOffer(r.p,c,null,'combine standout');offers.push(`${r.p.fn} ${r.p.ln} → ${c.school}`);break;}}}
+  addLog(`<span style="color:var(--gd)">You hosted a combine for ${pick.length} college staff${pick.length>1?'s':''} (-$${cost.toLocaleString()}). ${offers.length} offer${offers.length===1?'':'s'}.</span>`);
+  try{addNews('myteam',`${myS().name} hosts a combine`,`${pick.map(c=>c.school).join(', ')} in attendance. ${offers.length} offer${offers.length===1?'':'s'} on the spot. · via ${MEDIA.rank}`);}catch(e){}
+  openMo(`<h2>Combine results</h2><div style="font-size:13px;color:var(--mu);margin-bottom:8px">${offers.length?'<b style="color:var(--gn)">Offers: '+offers.join(' · ')+'</b>':'No offers on the spot, but the staffs saw your players: their recruiting got a boost.'}</div>
+   <div style="overflow-x:auto;max-height:50vh"><table><thead><tr><th>Player</th><th>Pos</th><th>Yr</th><th>40</th><th>Shuttle</th><th>Vertical</th><th>Bench (185)</th></tr></thead><tbody>${res.slice(0,30).map(r=>`<tr class="cl" onclick="clo();showPlayer(${r.p.id})"><td>${r.p.fn} ${r.p.ln}</td><td>${r.p.pos}</td><td>${yrL(r.p.yr)}</td><td><b>${r.forty.toFixed(2)}</b></td><td>${r.shut.toFixed(2)}</td><td>${r.vert}"</td><td>${r.bench}</td></tr>`).join('')}</tbody></table></div>
+   <div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo();nav('recr')">Done</button></div>`);};
+// ── invite college coaches to a game: big games in front of them can earn offers ──
+const GAMEINV_COST=1000;
+window.gameInviteOpen=function(){const g=G.sched.find(x=>!x.result&&x.type==='regular');if(!g){notify('No regular season game left to invite coaches to.','w');return;}
+  if(G.gameInv&&G.gameInv.yr===G.yr&&G.gameInv.wk===g.wk){notify('Coaches are already coming to this game.','w');return;}const C=combineColleges();
+  openMo(`<h2>Invite coaches to Week ${g.wk}</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">Pick up to 3 college staffs ($${GAMEINV_COST.toLocaleString()} each for their visit). Play well in front of them and offers can follow.</div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;max-height:46vh;overflow-y:auto">${C.map((c,i)=>`<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px"><input type="checkbox" class="gi-c" value="${i}" style="width:auto;min-height:0"> <span><b>${c.school}</b><br><small style="color:var(--mu)">${c.lvl}</small></span></label>`).join('')}</div>
+   <div style="text-align:right;margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="gameInviteSend(${g.wk})">Send invitations</button></div>`);window._giC=C;};
+window.gameInviteSend=function(wk){const C=window._giC||[],pick=[...document.querySelectorAll('.gi-c:checked')].map(x=>C[+x.value]).filter(Boolean).slice(0,3);if(!pick.length){notify('Pick at least one staff.','w');return;}
+  const cost=pick.length*GAMEINV_COST;if(!hasFunds(cost)){notify(`That costs $${cost.toLocaleString()}.`,'e');return;}if(!G.unlimitedMoney)G.budget-=cost;
+  G.gameInv={yr:G.yr,wk,list:pick.map(c=>c.school+'|'+c.lvl)};clo();notify(`${pick.length} staff${pick.length>1?'s':''} will be at Week ${wk}`);try{addLog(`<span style="color:var(--te)">College coaches invited to Week ${wk}: ${pick.map(c=>c.school).join(', ')}.</span>`);}catch(e){}nav(G._page||'dash',G._arg);};
+function gameInviteResolve(wk,pops){const I=G.gameInv;if(!I||I.yr!==G.yr||I.wk!==wk)return;G.gameInv=null;const C=I.list.map(k=>COL_BY[k]).filter(Boolean);if(!C.length)return;
+  const L=myP().filter(p=>p.yr>=10&&!p.committed).map(p=>{const g=(p.gameLog||[]).slice(-1)[0];const st=g&&g.w===wk?g.s:null;return{p,v:st?scorePerfEntry(st,p.pos)/((STREAK_BENCH[p.pos]||8)):0};}).filter(x=>x.v>0.9).sort((a,b)=>b.v-a.v).slice(0,6);
+  const got=[];for(const x of L)for(const c of C){if((x.p.offers||[]).some(o=>o.school===c.school&&o.lvl===c.lvl))continue;const Lv=recLevel(x.p)+x.v*6;
+    if(Math.abs(c.pr-Lv)<=25&&colRoom(c,x.p,true)&&Math.random()<clamp(0.15+x.v*0.12,0.1,0.55)){x.p.offers=x.p.offers||[];addOffer(x.p,c,pops,'saw him live');got.push(`${x.p.fn} ${x.p.ln} → ${c.school}`);break;}}
+  try{addLog(`<span style="color:var(--te)">The visiting staffs left Week ${wk} with ${got.length?got.join(', '):'no new offers'}.</span>`);}catch(e){}}
+// ── a neutral site for the state final: the flagship college stadium of your state ──
+function stateFinalVenue(){try{_colStReady();}catch(e){}const st=clsSt(G.cls),c=COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0];return c?`${c.school} Stadium`:`${stName(st)} Championship Stadium`;}
 // v2.16 coach any school: take over another program in the offseason, before its first game
 function coachTakeOver(sid,quiet){
-  const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;
+  const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;G.role='HC';
   if(ns.intl||!G.divisions.some(d=>d.teams.some(t=>t.id===ns.id))){notify('You can only take over a school in your league.','e');return;}
   if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result)){notify('Coaching changes happen in the offseason, before the first game of a season.','w');return;}
   if(!quiet&&!confirm(`Leave ${os.name} and become the head coach of ${ns.name} ${ns.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
