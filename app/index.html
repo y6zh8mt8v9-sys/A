@@ -10481,6 +10481,19 @@ function _fileSave(name,data){
   try{if(window.claude&&window.claude.use){return window.claude.use('downloads').then(d=>{if(!d){fall();return;}return d.save({filename:name,data}).catch(e=>{if(e&&e.code!=='declined')notify('Could not save the file ('+(e.code||'error')+')','e');});}).catch(fall);}}catch(e){}
   fall();
 }
+// teams only: every school of every classification (names, mascots, colors, logos, schemes) plus the colleges and pro teams,
+// as a team pack that Team Builder imports into a new career. No players, records or progress.
+function saveTeamsPack(GG,from){const T=t=>{const o={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,tier:t.tier,offS:t.offS,defS:t.defS};
+    for(const k of['c3','logoKey','mash','customLogo'])if(t[k])o[k]=t[k];return o;};
+  const L={};const add=(c,divs)=>{if(!divs||L[c])return;L[c]={divisions:divs.map(d=>({name:d.name,teams:(d.teams||[]).filter(t=>t&&!t.intl).map(T)}))};};
+  if(GG.cls&&GG.divisions)add(GG.cls,GG.divisions);for(const c in(GG.allLeagues||{}))add(c,GG.allLeagues[c]&&GG.allLeagues[c].divisions);
+  const W=GG.world||{};return{type:'gridiron_team_pack',v:3,app:'Gridiron 27',from:from||'',cls:GG.cls,exportDate:new Date().toISOString().slice(0,10),allClassifications:L,
+    colleges:W.colleges,colMeta:W.colMeta,pro:W.pro,geo:W.geo?{mode:W.geo.mode,home:W.geo.home}:undefined};}
+window.exportSaveTeams=function(id){svGetData(id).then(json=>{if(!json){notify('Save not found','e');return;}let d;try{d=JSON.parse(json);}catch(e){notify('Could not read that save','e');return;}
+  const GG=d&&(d.G||d);if(!GG||!GG.divisions){notify('Could not read that save','e');return;}const pk=saveTeamsPack(GG,(GG.divisions&&getSIn(GG,GG.myId))||'');
+  const n=Object.values(pk.allClassifications).reduce((a,c)=>a+c.divisions.reduce((b,x)=>b+x.teams.length,0),0);
+  _fileSave(`gridiron_teams_${id}.json`,JSON.stringify(pk));notify(`Exported ${n} teams (no players). Import them in Team Builder → Export / Import.`);});};
+function getSIn(GG,id){try{for(const d of GG.divisions)for(const t of d.teams)if(t.id===id)return t.name+' '+t.mascot;}catch(e){}return'';}
 function exportSave(id){
   const go=json=>{if(!json){notify('Save not found','e');return;}_fileSave(`gridiron_${id}.json`,json);};
   if(id)svGetData(id).then(go);else{try{go(saveJson());}catch(e){notify('Export failed','e');}}
@@ -10516,7 +10529,7 @@ function ttRefresh(){
     const box=_ttEl('tt-list');if(!box)return;
     let h=list.map(m=>`<div class="tt-row"><div class="tt-row-logo">${sLogo({name:m.name,mascot:m.mascot,c1:m.c1,c2:m.c2},46)}</div>
       <div class="tt-row-info"><div class="tt-row-t">${m.name} ${m.mascot}</div><div class="tt-row-s">${m.coach?m.coach+' · ':''}${m.cls||''} · ${m.season} season · ${m.rec}${m.phase?' · '+m.phase:''}</div><div class="tt-row-s">Saved ${ttFmtDate(m.savedAt)}</div></div>
-      <div class="tt-row-b"><button class="btn bsm" onclick="ttLoadSlot('${m.id}')">Load</button>${OLS.user&&OLS.backend&&OLS.backend.cloudPut?`<button class="bgh bsm" onclick="cloudUpload('${m.id}',this)">Upload</button>`:''}${OLS.user&&OLS.backend&&OLS.backend.leaguePublish?`<button class="bgh bsm" onclick="lgPublish('${m.id}',this)" title="Share this whole career in Community Creations">Share</button>`:''}<button class="bgh bsm" onclick="exportSave('${m.id}')">Export</button><button class="bgh bsm tt-del" onclick="ttDelete('${m.id}')">Delete</button></div></div>`).join('');
+      <div class="tt-row-b"><button class="btn bsm" onclick="ttLoadSlot('${m.id}')">Load</button>${OLS.user&&OLS.backend&&OLS.backend.cloudPut?`<button class="bgh bsm" onclick="cloudUpload('${m.id}',this)">Upload</button>`:''}${OLS.user&&OLS.backend&&OLS.backend.leaguePublish?`<button class="bgh bsm" onclick="lgPublish('${m.id}',this)" title="Share this whole career in Community Creations">Share</button>`:''}<button class="bgh bsm" onclick="exportSave('${m.id}')" title="The whole career as a file">Export</button><button class="bgh bsm" onclick="exportSaveTeams('${m.id}')" title="Only the teams: every school, college and pro team with names, colors and logos">Export teams</button><button class="bgh bsm tt-del" onclick="ttDelete('${m.id}')">Delete</button></div></div>`).join('');
     if(legacy&&!list.length)h+=`<div class="tt-row"><div class="tt-row-info"><div class="tt-row-t">Browser backup from an older version</div><div class="tt-row-s">Your last save before save slots existed.</div></div><div class="tt-row-b"><button class="btn bsm" onclick="ttLoadLegacy()">Load</button></div></div>`;
     if(!h)h=`<div class="tt-empty">No saves on this device yet. Start a new game, or import a save file you exported earlier.</div>`;
     box.innerHTML=h;
@@ -14865,7 +14878,7 @@ function tbWorldKey(){try{return JSON.stringify(USA.on?{s:USA.cfg.states,h:USA.c
 function tbDraft(){let d=null;try{d=JSON.parse(localStorage.getItem(TBD_KEY)||'null');}catch(e){}if(!d||d.k!==tbWorldKey())d={k:tbWorldKey(),ed:{},del:[],add:[]};return d;}
 function tbDraftPut(d){try{localStorage.setItem(TBD_KEY,JSON.stringify(d));return true;}catch(e){tbStatus('Could not save your changes on this device (storage full: try smaller logo images).','var(--rd)');return false;}}
 function tbOk(t){return t._ok||(t._ok=(t.cls||'')+'|'+t.name);}
-function tbFields(t){return{name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};}
+function tbFields(t){const f={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};for(const k of['c3','logoKey','mash','offS','defS'])if(t[k])f[k]=t[k];return f;}
 function tbRecord(t,op){const d=tbDraft();
   if(op==='add'){t._ok='add|'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);d.add.push(Object.assign({ok:t._ok},tbFields(t)));}
   else if(op==='del'){const ok=tbOk(t);const i=d.add.findIndex(a=>a.ok===ok);if(i>=0)d.add.splice(i,1);else{delete d.ed[ok];if(!d.del.includes(ok))d.del.push(ok);}}
@@ -14876,7 +14889,7 @@ function tbRecord(t,op){const d=tbDraft();
 function tbPackOut(){const d=tbDraft(),n=Object.keys(d.ed).length+d.del.length+d.add.length;return n?{ed:d.ed,del:d.del,add:d.add}:null;}
 function tbPackClean(t){if(!t||typeof t!=='object')return undefined;
   const col=c=>/^#[0-9a-f]{6}$/i.test(c||'')?c:'#444444',lg=v=>typeof v==='string'&&v.length<120000&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(v)?v:null;
-  const F=f=>f&&typeof f==='object'?{name:wsClean(f.name),mascot:wsClean(f.mascot),city:wsClean(f.city),abbr:String(f.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:col(f.c1),c2:col(f.c2),prestige:clamp(Math.round(+f.prestige)||3,1,5),customLogo:lg(f.customLogo),to:String(f.to||'').slice(0,40)}:null;
+  const lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;const F=f=>f&&typeof f==='object'?{name:wsClean(f.name),mascot:wsClean(f.mascot),city:wsClean(f.city),abbr:String(f.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:col(f.c1),c2:col(f.c2),prestige:clamp(Math.round(+f.prestige)||3,1,5),customLogo:lg(f.customLogo),to:String(f.to||'').slice(0,40),c3:/^#[0-9a-f]{6}$/i.test(f.c3||'')?f.c3:undefined,logoKey:lk(f.logoKey),mash:lk(f.mash),offS:OFF_SCH.includes(f.offS)?f.offS:undefined,defS:DEF_SCH.includes(f.defS)?f.defS:undefined}:null;
   const ed={};if(t.ed&&typeof t.ed==='object'&&!Array.isArray(t.ed))for(const k of Object.keys(t.ed).slice(0,4000)){const v=F(t.ed[k]);if(v&&v.name)ed[String(k).slice(0,120)]=v;}
   const del=Array.isArray(t.del)?t.del.slice(0,4000).map(x=>String(x).slice(0,120)):[];
   const add=Array.isArray(t.add)?t.add.slice(0,400).map(a=>{const v=F(a);return v&&v.name?Object.assign(v,{ok:String((a&&a.ok)||('add|'+Math.random().toString(36).slice(2,8))).slice(0,60)}):null;}).filter(Boolean):[];
@@ -14890,9 +14903,9 @@ function tbApplyDraft(){
   const moveTo=(t,to)=>{if(!to)return;const[c,di]=to.split('|'),D=_allClsDivs[c],k=+di;if(!D||!D[k]||(t.cls===c&&t.dIdx===k))return;
     for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}t.cls=c;t.dIdx=k;D[k].teams.push(t);};
   for(const ok of d.del){const t=byOk[ok];if(!t)continue;for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}}
-  for(const ok in d.ed){const t=byOk[ok];if(!t)continue;const f=d.ed[ok];t._ok=ok;Object.assign(t,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,customLogo:f.customLogo||null});moveTo(t,f.to);}
+  for(const ok in d.ed){const t=byOk[ok];if(!t)continue;const f=d.ed[ok];t._ok=ok;Object.assign(t,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,customLogo:f.customLogo||null});for(const k of['c3','logoKey','mash','offS','defS'])if(f[k])t[k]=f[k];moveTo(t,f.to);}
   for(const a of d.add){const[c,di]=String(a.to||'').split('|'),D=_allClsDivs[c];if(!D)continue;const k=clamp(+di||0,0,D.length-1);
-    D[k].teams.push({id:_sId++,_ok:a.ok,name:a.name,mascot:a.mascot,city:a.city,cls:c,dIdx:k,abbr:a.abbr,c1:a.c1,c2:a.c2,prestige:a.prestige||3,wins:0,losses:0,isP:false,offS:pick(OFF_SCH),defS:pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:a.customLogo||null});}
+    D[k].teams.push({id:_sId++,_ok:a.ok,name:a.name,mascot:a.mascot,city:a.city,cls:c,dIdx:k,abbr:a.abbr,c1:a.c1,c2:a.c2,c3:a.c3,logoKey:a.logoKey,mash:a.mash,prestige:a.prestige||3,wins:0,losses:0,isP:false,offS:a.offS||pick(OFF_SCH),defS:a.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:a.customLogo||null});}
   return n;}
 window.tbDraftClear=function(){if(!confirm('Undo every Team Builder change and go back to the original schools?'))return;try{localStorage.removeItem(TBD_KEY);}catch(e){}
   _allClsDivs=null;try{_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);}catch(e){}initCountyMap();tbTab('browse');tbStatus('Team Builder changes cleared.','var(--gd)');};
@@ -15318,7 +15331,7 @@ function tbRenderExport(){
       </p>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <button class="btn" onclick="tbImportFromTab()" style="flex:1;min-width:140px;"> Load Team Pack (.json)</button>
-        <span style="font-size:11px;color:var(--mu);">Restores all classifications from the imported pack.</span>
+        <span style="font-size:11px;color:var(--mu);">Restores all classifications from the imported pack. To take the teams out of a career, use <b>Export teams</b> on that save in Load Game, then load the file here.</span>
       </div>
     </div>
   </div>`;
@@ -15371,6 +15384,20 @@ function tbExportCSV(){
   tbStatus(`✓ CSV exported (${cls})`);
 }
 
+function tbImportV3(pack){if(!_allClsDivs)initAllClsDivs();const d=tbDraft();let ed=0,ad=0,dl=0,same=0;const miss=[];
+  const F=(t,c,di)=>{const f={name:wsClean(t.name),mascot:wsClean(t.mascot),city:wsClean(t.city),abbr:String(t.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:t.c1,c2:t.c2,prestige:clamp(Math.round(+t.prestige)||3,1,5),customLogo:t.customLogo||null,to:c+'|'+di};
+    for(const k of['c3','logoKey','mash','offS','defS'])if(t[k])f[k]=t[k];return f;};
+  for(const[c,cd]of Object.entries(pack.allClassifications||{})){const D=_allClsDivs[c];if(!D){miss.push(c);continue;}
+    (cd.divisions||[]).forEach((dv,di)=>{const T=D[di];if(!T)return;if(dv.name)T.name=dv.name;const cur=T.teams.slice(),tl=(dv.teams||[]).filter(t=>t&&t.name);
+      tl.forEach((t,ti)=>{const f=F(t,c,di);const x=cur[ti];if(x&&['name','mascot','city','c1','c2'].every(k=>(x[k]||'')===(f[k]||''))&&!f.customLogo&&!f.logoKey&&!f.mash&&!f.c3){same++;return;}if(x){const ok=tbOk(x);Object.assign(x,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr||x.abbr,c1:f.c1||x.c1,c2:f.c2||x.c2,prestige:f.prestige,customLogo:f.customLogo});for(const k of['c3','logoKey','mash','offS','defS'])if(f[k])x[k]=f[k];
+          const a=d.add.find(z=>z.ok===ok);if(a)Object.assign(a,f);else d.ed[ok]=f;ed++;}
+        else{const ok='add|'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);d.add.push(Object.assign({ok},f));T.teams.push({id:_sId++,_ok:ok,name:f.name,mascot:f.mascot,city:f.city,cls:c,dIdx:di,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,wins:0,losses:0,isP:false,offS:f.offS||pick(OFF_SCH),defS:f.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:f.customLogo,logoKey:f.logoKey,mash:f.mash,c3:f.c3});ad++;}});
+      for(let ti=tl.length;ti<cur.length;ti++){const x=cur[ti],ok=tbOk(x);const i=T.teams.indexOf(x);if(i>=0)T.teams.splice(i,1);const ai=d.add.findIndex(z=>z.ok===ok);if(ai>=0)d.add.splice(ai,1);else{delete d.ed[ok];if(!d.del.includes(ok))d.del.push(ok);}dl++;}});}
+  tbDraftPut(d);let col='';
+  if(pack.colleges||pack.colMeta||pack.pro){try{const W=Object.assign({},worldLoad());if(pack.colleges)W.colleges=pack.colleges;if(pack.colMeta)W.colMeta=pack.colMeta;if(pack.pro)W.pro=pack.pro;const S=worldSanitize(W);W.colleges=S.colleges;W.colMeta=S.colMeta;W.pro=S.pro;worldStore(W);worldApply(W);col=' Colleges and pro teams are in your League Setup too.';}catch(e){console.error('college import',e);}}
+  try{const dsel=document.getElementById('s-div');if(dsel&&_setupDivs)onDiv();}catch(e){}
+  tbStatus(`✓ ${ed} teams updated${same?` (${same} already matched)`:''}${ad?`, ${ad} added`:''}${dl?`, ${dl} removed`:''}.${miss.length?` ${miss.length} classification${miss.length>1?'s':''} from that save are not in this world (pick the same states to bring them in).`:''}${col} Your next career uses them.`);
+  try{tbTab('browse');}catch(e){}}
 function tbImportFromTab(){
   const inp=document.createElement('input');inp.type='file';inp.accept='.json';
   inp.onchange=function(e){
@@ -15389,6 +15416,7 @@ function tbApplyImport(pack){
   if(!pack||pack.type!=='gridiron_team_pack'){
     tbStatus('Not a valid team pack file.','var(--rd)');return;
   }
+  if(pack.v>=3){tbImportV3(pack);return;}
   // V2 pack: has allClassifications with all 5 classes
   if(pack.v>=2&&pack.allClassifications){
     if(!_allClsDivs)initAllClsDivs();
