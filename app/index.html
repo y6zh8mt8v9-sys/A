@@ -12123,8 +12123,8 @@ function fpRender(){
 const fpOpt=(list,sel)=>list.map(x=>`<option${x===sel?' selected':''}>${x}</option>`).join('');
 const fpTeamOpt=sel=>FP.store.teams.map(t=>`<option value="${t.id}"${t.id===+sel?' selected':''}>${t.name} ${t.mascot} (${t.ovr})</option>`).join('');
 function fpPlayHtml(){
-  const modes=[['exh','Exhibition game','Full game, your team vs another'],['off','Practice: Offense vs Defense','You run the offense, 12 reps'],['def','Practice: Defense vs Offense','You play defense, 12 reps'],['air','Practice: Offense on air','No defense, timing reps']];
-  const A=fpT(FP.a),B=fpT(FP.b),exh=FP.mode==='exh',gd=FP.store.god;
+  const modes=[['exh','Exhibition game','Full game, your team vs another'],['two','2 players, one device','Each player runs his own offense, the computer plays defense'],['off','Practice: Offense vs Defense','You run the offense, 12 reps'],['def','Practice: Defense vs Offense','You play defense, 12 reps'],['air','Practice: Offense on air','No defense, timing reps']];
+  const A=fpT(FP.a),B=fpT(FP.b),exh=FP.mode==='exh'||FP.mode==='two',gd=FP.store.god;
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Mode</div><div class="pb" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">
       ${modes.map(([k,l,d])=>`<button class="${FP.mode===k?'btn bbl':'bgh'}" style="min-height:58px;text-align:left;padding:8px 14px" onclick="FP.mode='${k}';fpRender()"><b>${l}</b><br><small style="font-weight:600;opacity:.85">${d}</small></button>`).join('')}</div></div>
     <div class="pnl" style="margin-bottom:14px"><div class="ph">${exh?'Matchup':'Team'}</div><div class="pb">
@@ -12144,7 +12144,7 @@ function fpPlayHtml(){
     <div class="pnl" style="margin-bottom:14px"><div class="ph">Venue <span style="font-size:12px;color:var(--mu);font-weight:600">test every stadium and practice field level</span></div><div class="pb" id="fp-venue">${fpVenueHtml()}</div></div>`;
 }
 function fpVenueHtml(){
-  const A=fpT(FP.a)||FP.store.teams[0],C=FP.store.stadC||{},pt=FP.ptier||FP.tier,si=stadInfo(FP.tier,C,A),pi=pracInfo(pt,C,A),exh=FP.mode==='exh';
+  const A=fpT(FP.a)||FP.store.teams[0],C=FP.store.stadC||{},pt=FP.ptier||FP.tier,si=stadInfo(FP.tier,C,A),pi=pracInfo(pt,C,A),exh=FP.mode==='exh'||FP.mode==='two';
   const card=(i,lab,k,v,on)=>`<div style="flex:1 1 280px;min-width:0;${on?'':'opacity:.6'}"><div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:4px">${lab}${on?' · used for this mode':''}</div>
     <div id="fpv-${k}">${fpVenueCard(i)}</div>
     <label style="display:block;font-size:12px;color:var(--mu);margin-top:6px">${k==='tier'?'Stadium tier':'Practice level (stadium tier)'} <b id="fpvl-${k}">${v}</b><input type="range" min="1" max="20" value="${v}" style="width:100%" oninput="fpVenue('${k}',+this.value,1)" onchange="fpVenue('${k}',+this.value)"></label></div>`;
@@ -12282,12 +12282,12 @@ function fpAdvHtml(){const g=FP.store.god;
 function fpGod(){const g=FP.store.god;return g.on?{on:true,picks:!!g.picks,cd:g.cd||0.25}:null;}
 function fpStart(){
   const A=fpT(FP.a),B=fpT(FP.b);if(!A)return;fpSave();
-  if(FP.mode!=='exh'){fpPracStart(A,FP.mode);return;}
+  if(FP.mode!=='exh'&&FP.mode!=='two'){fpPracStart(A,FP.mode);return;}
   if(!B){notify('Pick an opponent.','e');return;}
   const o1=_gdTop(A),o2=_gdTop(B);_gdAnchor=(o1+o2)/2;
   _gdTAdj=Math.round((o1-_gdAnchor)*0.5);const t1=Object.assign(gdTeam(A,FP.uni),{ovr:Math.round(o1)});
   _gdTAdj=Math.round((o2-_gdAnchor)*0.5);const t2=Object.assign(gdTeam(B,gdOppKind(B,FP.uni,A)),{ovr:Math.round(o2)});_gdTAdj=0;
-  window.__GP={teams:[t1,t2],home:0,free:true,god:fpGod(),weather:fpWx(),stadium:stadInfo(FP.tier,FP.store.stadC,A),ez:_gdDark(A.c1||'#1c3766',.25),ezText:_gdLum(A.c2||'#fff')>.35?(A.c2||'#ffffff'):'#ffffff'};
+  window.__GP={teams:[t1,t2],home:0,free:true,hotseat:FP.mode==='two',god:fpGod(),weather:fpWx(),stadium:stadInfo(FP.tier,FP.store.stadC,A),ez:_gdDark(A.c1||'#1c3766',.25),ezText:_gdLum(A.c2||'#fff')>.35?(A.c2||'#ffffff'):'#ffffff'};
   _gdCtx={kind:'free',mode:'exh',a:A.id,b:B.id};gdLaunch();
 }
 function fpPracStart(me,mode){
@@ -17390,7 +17390,8 @@ body.kbm .btn[data-k]::after{content:attr(data-k);display:inline-block;margin-le
 .mw-i{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:linear-gradient(180deg,#fff,#dbeefc);box-shadow:0 4px 10px rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 9px Nunito,sans-serif;color:#0d2a43;cursor:pointer;touch-action:none}
 .mw-i span{font-size:22px;line-height:1}.mw-i small{font-size:8px;font-weight:900;white-space:nowrap}
 .mw-i.on{background:linear-gradient(180deg,#6cc8ff,#1590e0);color:#fff;transform:scale(1.12)}
-body.bugtv #bug{border-radius:5px;background:#0d1117;border:0;box-shadow:0 3px 10px rgba(0,0,0,.45);backdrop-filter:none;-webkit-backdrop-filter:none;font-family:'Barlow Condensed',Nunito,system-ui,sans-serif}
+body.bugtv body.pcbug #bug{zoom:.6;left:8px!important;transform:none!important;opacity:.92} /* Player Career: a small scoreboard in the corner, out of the way of the catch meter */
+#bug{border-radius:5px;background:#0d1117;border:0;box-shadow:0 3px 10px rgba(0,0,0,.45);backdrop-filter:none;-webkit-backdrop-filter:none;font-family:'Barlow Condensed',Nunito,system-ui,sans-serif}
 body.bugtv #bug .tm{padding:0 0 0 max(8px,calc(var(--s)*6px));gap:max(5px,calc(var(--s)*4px));border-bottom:3px solid rgba(255,255,255,.85)}
 body.bugtv #bug .tm.away{padding:0 max(8px,calc(var(--s)*6px)) 0 0}
 body.bugtv #bug .tm::after{display:none}
@@ -18992,6 +18993,24 @@ function gpAudOpen(e){
   el.onclick=ev=>{ev.stopPropagation();const b=ev.target.closest('button');if(!b)return;el.remove();if(b.dataset.k)gpAudible(e,b.dataset.k);};
   document.body.appendChild(el);
 }
+// play audibles: change the whole call at the line (another pass, or check to a run). The QB's awareness and crowd noise decide
+// whether everyone gets it; a missed audible keeps the old play.
+const GP_PAUD=[['Quick pass','pass','Slant-Flat'],['Deep shot','pass','Four Verts'],['Play action','pass','PA Boot'],['Screen','pass','RB Screen'],['Inside run','run','Inside Zone'],['Outside run','run','Outside Zone'],['Toss','run','Toss'],['QB sneak','run','QB Sneak']];
+function gpPlayAudOpen(){if(G.phase!=='presnap'||!G.play||G.play.kind!=='scrimmage')return;
+  let el=document.getElementById('gpAud');if(el)el.remove();el=document.createElement('div');el.id='gpAud';
+  el.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(420px,92vw);max-height:80vh;overflow-y:auto;border-radius:18px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.06)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);color:#fff;font:600 13px Nunito,system-ui,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.5)';
+  const q=G.qb&&G.qb.pl,ok=Math.round(gpPlayAudOK()*100);
+  el.innerHTML=`<div style="font-weight:900;font-size:16px;margin-bottom:2px">Audible: change the play<\/div><div style="opacity:.75;margin-bottom:8px">Now: ${(G.pbp&&G.pbp.call)||'—'} · chance everyone gets it: ${ok}%<\/div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${GP_PAUD.map((x,i)=>`<button data-i="${i}" style="padding:10px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:${x[1]==='run'?'rgba(92,207,60,.25)':'rgba(63,169,245,.25)'};color:#fff;font:800 13px Nunito,system-ui,sans-serif;cursor:pointer">${x[0]}<div style="font-weight:600;font-size:11px;opacity:.8">${x[2]}<\/div><\/button>`).join('')}<\/div><div style="text-align:right;margin-top:8px"><button data-x="1" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:none;color:#fff;cursor:pointer">Keep the play<\/button><\/div>`;
+  el.onclick=ev=>{ev.stopPropagation();const b=ev.target.closest('button');if(!b)return;el.remove();if(b.dataset.i!=null)gpPlayAud(+b.dataset.i);};document.body.appendChild(el);}
+function gpPlayAudOK(){const q=G.qb&&G.qb.pl;return clamp((0.62+(((q&&q.awr)||70)-70)*0.007+(((q&&q.ovr)||60)-60)*0.004)*(1-gpNoiseFor(G.offTeam)*0.5),0.3,0.96);}
+function gpPlayAud(i){const A=GP_PAUD[i];if(!A||G.phase!=='presnap')return;const L=A[1]==='run'?RUNS:PASSES,pl=L.find(x=>x.n===A[2]);if(!pl)return;
+  G.qbAudT=G.time;flash('Audible!');try{SFX.whistle&&0;}catch(e){}
+  setTimeout(()=>{if(G.phase!=='presnap'||!G.play||G.play.kind!=='scrimmage')return;
+    if(Math.random()>gpPlayAudOK()){flash('Not everyone got it: same play');return;}
+    const d=G.play.defCall,cur=(G.pbp&&G.pbp.call)||'',f=G.play.off&&G.play.off.data&&G.play.off.data.f;
+    const o={kind:A[1],data:Object.assign({},pl,f&&A[1]==='pass'?{f}:{})};
+    setupScrimmage(o,d);G.play.defCall=d;if(G.pbp)G.pbp.call=((o.data.f&&FORMS[o.data.f]?FORMS[o.data.f].n+' ':'')+o.data.n)+' (audible)';
+    toPresnap();flash(`Audible: ${A[2]}`);},650);}
 function gpAudible(e,name){
   if(G.phase!=='presnap')return;if(G.client){olCmd('aud',{n:e.nk,name});return;}G.qbAudT=G.time;flash('Audible!');
   setTimeout(()=>{if(G.phase!=='presnap'||!G.ents.includes(e))return;
@@ -20628,7 +20647,7 @@ function resetBall(){
 }
 
 /* ===================== special teams setup ===================== */
-function setupKickoff(kickTeam,spot){
+function setupKickoff(kickTeam,spot){try{gpHotseat(kickTeam);}catch(e){}
   const K=G.teams[kickTeam],R=G.teams[1-kickTeam];autoSubs(K);autoSubs(R);
   G.offTeam=1-kickTeam;G.flip=gpFlipFor(G.offTeam);
   const ky=110-spot,L=[];
@@ -20976,10 +20995,10 @@ function snapScrimmage(){
     for(const d of G.ents)if(d.press&&d.cover&&d.cover.type==='man'&&dist(d,d.cover.man)<2.2){
       const r=d.cover.man;if(Math.random()<clamp(((r.pl?(r.pl.rte?(r.pl.agi+r.pl.rte)/2:r.pl.agi):75)-(d.pl.prs||d.pl.cov))*0.02+0.25,0.05,0.7)){d.slip=0.35;}else r.jam=rnd(0.15,0.4);}
     if(O.data&&O.data.screen)for(const d of G.ents)if(d.role==='DL')d.engDur=rnd(0.5,0.9);
-    if(Math.random()<0.03)G.pendingFoul={t:rnd(1.2,2.6),team:G.offTeam,kind:'Holding',yds:10};
-    else if(Math.random()<0.015)G.pendingFoul={t:rnd(1.0,2.2),team:1-G.offTeam,kind:'Defensive holding',yds:10,afd:true};
+    if(Math.random()<0.022)G.pendingFoul={t:rnd(1.2,2.6),team:G.offTeam,kind:'Holding',yds:10};
+    else if(Math.random()<0.01)G.pendingFoul={t:rnd(1.0,2.2),team:1-G.offTeam,kind:'Defensive holding',yds:10,afd:true};
   }else{
-    if(Math.random()<0.025)G.pendingFoul={t:rnd(0.6,1.6),team:G.offTeam,kind:'Holding',yds:10};
+    if(Math.random()<0.018)G.pendingFoul={t:rnd(0.6,1.6),team:G.offTeam,kind:'Holding',yds:10};
   }
   G.clockRun=true;
   setCtl();
@@ -21283,9 +21302,24 @@ function catchBall(r,type,b){
   setCtl();
   if(r.side==='o'&&r.y>=110)endPlay(r.x<0||r.x>FW?{type:'inc'}:{type:'td'});
 }
+// tip drill: a broken-up pass sometimes pops straight up off the hands, and anyone close enough can come down with it
+function gpTipUp(b,by){if(Math.random()>0.18)return false;
+  const ang=Math.random()*Math.PI*2,dd=rnd(1,3),T=rnd(0.75,1.0),dx=Math.cos(ang),dy=Math.sin(ang)*0.8,l=Math.hypot(dx,dy)||1;
+  G.air={sx:b.x,sy:b.y,dx:dx/l,dy:dy/l,D:dd,tx:b.x+dx/l*dd,ty:b.y+dy/l*dd,v:dd/T,T,vz:(GRAV*T*T/2-2)/T,t:0,bullet:false,lob:true,tried:new Set([by]),intended:null,cur:null,tip:true,spq:0.25};
+  G.cm=null;G.im=null;G.ballState='air';flash('Tipped! Up for grabs!');G.cheer=Math.max(G.cheer||0,0.7);try{SFX.hit(false);}catch(e){}return true;}
+function gpTipStep(a,b){
+  // players nearby go for it (the user steers his own man)
+  for(const e of G.ents){if(e.down||e===G.uctl&&!e.side||e.eng>0)continue;const k=Math.hypot(e.x-a.tx,e.y-a.ty);if(k<7&&e!==G.uctl){const s=(e.spd||6)*0.9;e.vx=(a.tx-e.x)/(k||1)*s;e.vy=(a.ty-e.y)/(k||1)*s;}}
+  if(b.h>2.7)return;
+  let best=null,bd=1.05;for(const e of G.ents){if(e.down||a.tried.has(e)||e.eng>0)continue;const k=Math.hypot(e.x-b.x,e.y-b.y);if(k<bd){bd=k;best=e;}}
+  if(!best)return;a.tried.add(best);
+  const pl=best.pl||{},p=best.side==='o'?0.48+((pl.hands||65)-70)*0.006:0.38+((pl.cov||pl.hands||60)-70)*0.005;
+  if(Math.random()<clamp(p,0.15,0.75)){if(best.side==='d')G.picker=best;catchBall(best,'high',b);if(best.side==='o')flash('Caught the tip!');}
+}
 function airStep(dt){
   intMeterUpdate();
   const a=G.air;a.t+=dt;const b=ballAt(a,a.t);a.cur=b;
+  if(a.tip){if(b.h<=0||b.x<-1||b.x>FW+1){G.loose={x:clamp(b.x,0,FW),y:b.y,h:0.2,vx:0,vy:0,vh:1.2,kind:'inc',t:0};endPlay({type:'inc',pbu:true});return;}if(a.t>0.08)gpTipStep(a,b);return;}
   if(b.x<-1||b.x>FW+1||b.y>121||b.y<-1){G.loose={x:clamp(b.x,0,FW),y:clamp(b.y,0,120),h:0.3,vx:0,vy:0,vh:0,kind:'inc',t:0};endPlay({type:'inc'});return;}
   if(b.h<=0){G.loose={x:b.x,y:b.y,h:0.2,vx:a.dx*2,vy:a.dy*2,vh:2,kind:'inc',t:0};endPlay({type:'inc'});return;}
   if(a.t<0.12)return;
@@ -21293,7 +21327,7 @@ function airStep(dt){
   // DPI judgement when the ball reaches the intended receiver
   if(!a.dpiChecked&&a.intended&&dB(a.intended)<2.2&&b.h<3){
     a.dpiChecked=true;
-    for(const d of G.ents)if(d.side==='d'&&!d.down&&dist(d,a.intended)<0.75&&d.y>a.intended.y-0.3&&Math.random()<0.1){
+    for(const d of G.ents)if(d.side==='d'&&!d.down&&dist(d,a.intended)<0.75&&d.y>a.intended.y-0.3&&Math.random()<0.045){
       G.fouls.push({team:1-G.offTeam,kind:'Pass interference',yds:15,afd:true,spotY:a.intended.y,dpi:true});throwFlag(nearestRef(d));break;}
   }
   // user-controlled defender playing the ball (timed with the interception meter)
@@ -21313,7 +21347,7 @@ function airStep(dt){
     if(Math.random()<pInt){G.picker=U;catchBall(U,b.h>2.3?'high':'poss',b);return;}
     {let rh=60;for(const r of G.recv)if(dist(r,b)<2.2)rh=Math.max(rh,r.pl.hands||60);
       const res=G.im?G.im.result:null,pB=clamp((res==='PERFECT'?0.42:res==='GOOD'?0.26:G.im?0.06:0.2)+((U.pl.cov||70)-72)*0.009+((U.pl.awr||70)-70)*0.002-(rh-70)*0.004-dB(U)*0.08-(rn<dB(U)?0.12:0),0.03,0.55);
-      if(Math.random()<pB+gpPbuForm(U)){U.swat=0.4;G.gpPbu=U;G.loose={x:b.x,y:b.y,h:b.h,vx:rnd(-3,3),vy:-2,vh:2,kind:'inc',t:0};flash('Pass broken up!');endPlay({type:'inc',pbu:true});return;}}
+      if(Math.random()<pB+gpPbuForm(U)){U.swat=0.4;G.gpPbu=U;if(gpTipUp(b,U))return;G.loose={x:b.x,y:b.y,h:b.h,vx:rnd(-3,3),vy:-2,vh:2,kind:'inc',t:0};flash('Pass broken up!');endPlay({type:'inc',pbu:true});return;}}
   }
   if(b.h<=(gpGod()&&gpGod().picks&&G.offTeam===1?3.8:3.0)){
     for(const d of G.ents){
@@ -21372,7 +21406,7 @@ function airStep(dt){
     r.ca={type,t:0,dur:CATCH_DUR[type],drop:true};
     // a defender draped on the receiver gets credit for breaking it up; an uncontested miss is a drop
     if(contested){let bd=null,bk=1.2;for(const d of G.ents)if(d.side==='d'&&!d.down){const k=Math.hypot(d.x-r.x,d.y-r.y);if(k<bk){bk=k;bd=d;}}
-      if(bd){bd.swat=0.4;G.gpPbu=bd;G.loose={x:b.x,y:b.y,h:b.h,vx:rnd(-2,2),vy:-1.5,vh:1.8,kind:'inc',t:0};flash('Broken up!');endPlay({type:'inc',pbu:true});return;}}
+      if(bd){bd.swat=0.4;G.gpPbu=bd;if(gpTipUp(b,bd))return;G.loose={x:b.x,y:b.y,h:b.h,vx:rnd(-2,2),vy:-1.5,vh:1.8,kind:'inc',t:0};flash('Broken up!');endPlay({type:'inc',pbu:true});return;}}
     G.gpDrop=r;if(r.pl)r.pl.gDrops=(r.pl.gDrops||0)+1;
     G.loose={x:b.x,y:b.y,h:b.h,vx:rnd(-1,1),vy:rnd(-1,1),vh:1.5,kind:'inc',t:0};flash('Dropped');endPlay({type:'inc',drop:true});return;
   }
@@ -21391,6 +21425,10 @@ function aiQB(dt){
     if(s>bs){bs=s;best=r;bp=[px,py,D0<14];}
   }
   G.qbLook=best;
+  // Player Career: with top chemistry the quarterback trusts you. Call for the ball and it comes out right away, unless you are blanketed
+  if(pcOn()&&G.pcWant){const me=G.recv.find(r=>pcMe(r)),ch=me&&me.pl&&me.pl.chem!=null?me.pl.chem:50;
+    if(me&&ch>=85){const D0=dist(q,me),f=flight(D0,D0<14),px=me.x+me.vx*f.T,py=me.y+me.vy*f.T;let m=99;for(const d of G.ents)if(d.side==='d'&&!d.down)m=Math.min(m,Math.hypot(d.x-px,d.y-py)-d.spd*f.T*0.45);
+      if(px>=1&&px<=FW-1&&py<=118&&m>(ch>=95?-0.2:0.3)){G.aiRecv=me;G.qbLook=me;throwTo(px,py,D0<14,1.25,userThrowMeter);return;}}}
   // v2.06 the AI quarterback works through his reads like a real one: quick game comes out fast, longer
   // concepts take time to develop. Before his read time he only throws hot, when he feels a rusher.
   if(G.aiReadP!==G.play){G.aiReadP=G.play;const rs=G.recv.map(r=>(r.route&&r.route.name)||'');const quick=rs.filter(n=>/slant|hitch|qout|stick|check|flat|screen|bubble|swing/.test(n)).length;
@@ -21846,7 +21884,7 @@ function updateLive(dt){
       G.carrier=G.qb;G.ballState='carrier';G.qb.tkType='sack';G.gpSackOL=d.blockedBy&&d.blockedBy.role==='OL'?d.blockedBy:(()=>{let b=null,bd=99;for(const o of G.ents)if(o.role==='OL'&&o.side!==d.side){const k=dist(o,d);if(k<bd){bd=k;b=o;}}return b;})();startSeq(G.qb,d,'wrap');flash('Sacked!');return;
     }
   }
-  if(G.ballState==='air'&&G.t-G.throwT<0.45&&!G.rtp){for(const d of G.ents)if(d.side==='d'&&!d.down&&dist(d,G.qb)<0.8){G.rtp=true;if(Math.random()<0.3){G.fouls.push({team:1-G.offTeam,kind:'Roughing the passer',yds:15,afd:true});throwFlag(G.refs[0]);G.qb.down=true;G.qb.downT=1;}break;}}
+  if(G.ballState==='air'&&G.t-G.throwT<0.45&&!G.rtp){for(const d of G.ents)if(d.side==='d'&&!d.down&&dist(d,G.qb)<0.8){G.rtp=true;if(G.t-G.throwT>0.25&&Math.random()<0.07){G.fouls.push({team:1-G.offTeam,kind:'Roughing the passer',yds:15,afd:true});throwFlag(G.refs[0]);G.qb.down=true;G.qb.downT=1;}break;}}
   if((P.kind==='punt'||P.kind==='fg'||P.kind==='xp')&&(G.ballState==='punter'||G.ballState==='held')){
     const tgt=P.kind==='punt'?P.punter:P.holder;
     if(foesOf(tgt).some(f=>dist(f,tgt)<0.7)&&Math.random()<0.3){flash('BLOCKED!');G.prevCarrierSide='o';G.loose={x:tgt.x,y:tgt.y+1,h:1,vx:rnd(-2,2),vy:P.kind==='punt'?-3:3,vh:3,kind:'fumble',t:0};G.ballState='loose';}
@@ -21858,7 +21896,7 @@ function updateLive(dt){
     if(c.x<0.2||c.x>FW-0.2){endPlay({type:'oob',spot:c.y});return;}
     if(c.kneel){endPlay({type:'touchback'});return;}
     if(c.slideT>0){for(const d of G.ents)if(d.side!==c.side&&!d.down&&dist(d,c)<0.8){c.slideT=0;c.down=true;c.slid=true;c.downAnim='qb_slide';c.guDur=0.3;c.downT=0.9;
-      if(d.lunge>0&&d.lt==='hit'&&Math.random()<0.35){G.fouls.push({team:1-G.offTeam,kind:'Unnecessary roughness',yds:15,afd:true});throwFlag(nearestRef(c));}
+      if(d.lunge>0&&d.lt==='hit'&&Math.random()<0.12){G.fouls.push({team:1-G.offTeam,kind:'Unnecessary roughness',yds:15,afd:true});throwFlag(nearestRef(c));}
       endPlay({type:'tackle',spot:c.slideSpot});return;}}
     const air=c.dive>0||(c.ca&&c.ca.type==='dive');
     if(gpStiffStep(c)&&(G.seq||G.phase!=='live'))return;
@@ -22086,7 +22124,7 @@ function commit(S,r){
   G.cball=null;G.celebPick=null;for(const e of G.ents)e.celeb=null;
   const celeb=celebrateAfter(S);
   try{gpMaybeFight(S,r);}catch(e){}
-  G.after={t:S.td!=null?(celeb?6.6:2.8):celeb==='sack'?3.3:celeb==='fd'?2.7:2.1,fn:proceed};
+  G.after={t:S.td!=null?(celeb?6.6:2.8):celeb==='sack'?3.3:celeb==='pbu'||celeb==='int'?2.9:celeb==='fd'?2.7:2.1,fn:proceed};
   if(S.td!=null||S.first||celeb==='sack')G.recStop=G.time+(S.td!=null?6.2:celeb==='sack'?3.0:2.0);
   setTray(G.celebPick&&G.celebPick.team===G.me?'celebrate':'dead');
 }
@@ -22288,8 +22326,10 @@ function aiDefCall(){
         :[['C0',4],['DAG',3],['NBZ',5],['C1',14],['C1R',9],['C2',11],['C2M',6],['T2',8],['C3',16],['CBZ',5],['C4',8],['C6',6],['FZ',6],['C3B',9],['C1S',5],['C2I',5],['SIM',5]];
   const id=pickW(gpDefWeights(w));return DCALLS.find(c=>c.id===id);
 }
+// 2 players on one device: whoever has the ball is in control; the computer plays defense for both
+function gpHotseat(t){if(!(GP&&GP.hotseat)||ON||G.simming||t==null)return;if(G.me!==t){G.me=t;G.act=t;G.uctl=null;try{flash(`${G.teams[t].name} ball: Player ${t+1}`);}catch(e){}}G.ai=[t!==0,t!==1];}
 function openCall(){
-  G.phase='call';setTray('none');$('ctl').innerHTML='';
+  G.phase='call';setTray('none');$('ctl').innerHTML='';gpHotseat(G.offTeam);
   const off=G.offTeam;
   if(pcOn()&&!G.simming){const o=off===G.me&&G.pcWant&&GP.pc.pos==='RB'&&!G.conv&&G.down<4?{kind:'run',data:pick(RUNS.filter(r=>!r.qb))}:aiOffCall();
     applyCall(o,['punt','fg','kneel','fakepunt','fakefg'].includes(o.kind)?DCALLS[3]:aiDefCall());return;}
@@ -22405,10 +22445,10 @@ function setTray(mode){
   if(mode==='presnap'){
     const P=G.play,uOff=G.offTeam===G.me;
     if(P.kind==='scrimmage'&&pcOn()){const me=G.ents.find(e=>pcMe(e));
-      if(uOff&&!pcAIQB())btn(box,'Snap','go',doSnap,'enter');else if(uOff&&me&&me.role!=='OL')btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');
+      if(uOff&&!pcAIQB()){btn(box,'Snap','go',doSnap,'enter');if(!G.conv)btn(box,'Audible','alt',gpPlayAudOpen);}else if(uOff&&me&&me.role!=='OL')btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');
       G.hint=me?`Coach's call: ${(G.pbp&&G.pbp.call)||'—'}. You are #${me.pl.num}, the ringed player${uOff&&!pcAIQB()?'. Snap when ready.':'. The ball is snapped for you.'}`:'Coach has you on the sideline for this play.';
     }else if(P.kind==='scrimmage'){
-      if(uOff){btn(box,'Snap','go',doSnap,'enter');G.hint='Routes and names show before the snap. Tap Snap when ready.';}
+      if(uOff){btn(box,'Snap','go',doSnap,'enter');if(!ON&&!G.conv)btn(box,'Audible','alt',gpPlayAudOpen);G.hint='Routes and names show before the snap. Tap Snap when ready, or Audible to change the play.';}
       else{btn(box,'Switch player','alt',switchUser);G.hint=ON?'Tap a linebacker or defensive back to control him. Your opponent snaps the ball.':'Tap a linebacker or defensive back to control him. The offense will snap soon.';}
       if(G.to[G.me]>0)btn(box,`Timeout (${G.to[G.me]})`,'alt',()=>{if(callTimeout(G.me))setTray('presnap');},'t');
     }else if(P.fake&&!isAI(G.me)&&(P.kind==='punt'?P.puntTeam:G.offTeam)===G.me){btn(box,'Snap','go',doSnap,'enter');G.hintS='Fake! Snap it: your '+(P.kind==='punt'?'punter':'holder')+' keeps the ball.';}
@@ -23710,7 +23750,14 @@ function celebFlip(e){const C=e.celeb;if(!C)return 0;
   return 0;}
 /* hooks into the play result: returns 'td', 'sack', 'fd' or false */
 function celebrateAfter(S){
+  // the corner (or whoever) who broke it up lets everybody know
+  if(!G.simming&&!G.noDraw&&G.play&&G.play.kind==='scrimmage'&&!G.conv&&G.gpPbu&&!G.carrier){const pb=G.gpPbu;
+    if(pb.pl&&!pb.hurt&&!pb.down){const t=pick(['sackwings','sackflex','fdpoint','fdchop']);setTimeout(()=>{if(G.phase==='dead'&&!pb.celeb)startCeleb(pb,t);},300);
+      setTimeout(()=>{try{flash(`#${pb.pl.num} ${nm(pb.pl)} breaks it up!`);}catch(e){}},500);return'pbu';}}
   const c=G.carrier;if(!c||!c.pl)return false;
+  // an interception (not returned for a score): the man who picked it celebrates
+  if(S.td==null&&c.side==='d'&&c===G.picker&&!c.hurt&&!G.simming&&!G.noDraw){const t=pick(['sackdance','fdhype','fdspin','sackwings']);
+    setTimeout(()=>{if(G.phase==='dead'&&!c.celeb)startCeleb(c,t);},350);setTimeout(()=>{try{flash(`Picked off by #${c.pl.num} ${nm(c.pl)}!`);}catch(e){}},600);return'int';}
   if(S.td!=null&&c.team===S.td&&!c.hurt){
     const land=c.tdLand?(c.dive||0)+1.2:0;
     if(!isAI(c.team)&&!G.test&&!pcAI(c)){G.celebPick=c;G.celebAuto=G.time+(ON?3.5:7)+land+(ON&&c.team!==G.me?1.5:0);if(c.team===G.me)setTray('celebrate');}
@@ -24468,7 +24515,7 @@ if(GP){try{
   document.title=GP.teams[0].name+' vs '+GP.teams[1].name;
 }catch(e){console.error(e);}}
 // v2.15 TV-style scorebug (Settings → Scorebug): abbreviations, records and a yellow down-and-distance tag
-function gpBugStyle(){const tv=GDS.bug!=='classic';document.body.classList.toggle('bugtv',tv);for(const k of['slab','tower','mini'])document.body.classList.toggle('bug-'+k,GDS.bug===k);
+function gpBugStyle(){const tv=GDS.bug!=='classic';document.body.classList.toggle('bugtv',tv);try{document.body.classList.toggle('pcbug',pcOn());}catch(e){}for(const k of['slab','tower','mini'])document.body.classList.toggle('bug-'+k,GDS.bug===k);
   for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;
     let r=n.parentNode.querySelector('.rec');if(n.dataset.rec&&!r){r=document.createElement('span');r.className='rec';n.after(r);}if(r)r.textContent=n.dataset.rec||'';}}
 try{gpBugStyle();}catch(e){}
