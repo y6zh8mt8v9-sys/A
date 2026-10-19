@@ -6389,6 +6389,7 @@ function finalizeOffseason(){
   // FIX: Increment only user players here (not global — AI teams do it per-team after senior removal)
   {const ms=myS();for(const p of G.players.filter(p=>p.sId===G.myId))if(p.yr<12){p.yr++;bodyGrow(p,ms);}}
   try{xferProcess();}catch(e){console.error('transfers',e);}
+  try{const q=myPlayer();if(q&&q._snap){if(!q.grad&&q.rat<q._snap.rat){q.at=Object.assign(q.at||{},q._snap.at);q.spd=q._snap.spd;q.str=q._snap.str;q.awr=q._snap.awr;q.rat=Math.max(ovrCalc(q),q._snap.rat);q._rc=q.rat;}delete q._snap;}}catch(e){}
   const needs=cNeeds(G.myId);
   // Freshman class = seniors lost + win-based bonus
   // >= .500: 6-4→+1, 7-3→+2, 8-2→+3, 9-1→+4, undefeated→+5
@@ -6705,6 +6706,7 @@ function finalizeOffseason(){
   G.budget+=baseBudget+divBonus;
   // ── Snapshot record BEFORE resetting wins/losses for the new year ──
   const _endWins=G.wins, _endLosses=G.losses;
+  try{const q=myPlayer();if(q&&!q.grad&&G.players.includes(q))q._snap={rat:q.rat,at:Object.assign({},q.at||{}),spd:q.spd,str:q.str,awr:q.awr};}catch(e){}
   try{jobOffersGen(_endWins,_endLosses,!!(G.playoff&&(G.playoff.stateChamp||G.playoff.stateChampId===G.myId)),divWon);}catch(e){console.error('jobs',e);}
   G.yr++;G.wins=0;G.losses=0;(()=>{try{progOffseason();}catch(e){}})(),G.phase='offseason';G.osPhase=0;G.playoff=null;G.seasonRivalId=null;
 
@@ -10616,7 +10618,7 @@ function gdStart(){
   gdLaunch();
 }
 // v2.16: closing Game Day frees the whole engine first (blank frame, no references), so a phone low on memory does not reload the page
-function gdTeardown(){try{const f=document.getElementById('gd-if');if(f&&f.contentWindow&&f.contentWindow.__gpSndStop)f.contentWindow.__gpSndStop();}catch(e){}const ov=document.getElementById('gd-ov');if(!ov)return;const f=ov.querySelector('iframe');
+function gdTeardown(){try{clearInterval(window._gdWatch);}catch(e){}try{const f=document.getElementById('gd-if');if(f&&f.contentWindow&&f.contentWindow.__gpSndStop)f.contentWindow.__gpSndStop();}catch(e){}const ov=document.getElementById('gd-ov');if(!ov)return;const f=ov.querySelector('iframe');
   try{if(f&&f.contentWindow){try{f.contentWindow.__G=null;}catch(e){}f.src='about:blank';}}catch(e){}try{if(f)f.remove();}catch(e){}ov.remove();window.__GP=null;}
 // v2.16 sound: the audio starts from the tap or click that opens Game Day, and iOS plays it through the speaker even with the
 // ringer switch on silent (media playback instead of the ambient category)
@@ -10649,14 +10651,17 @@ function gdLaunchFrame(){
   // write the game straight into the frame (more reliable on iOS/Safari than a huge srcdoc attribute)
   try{const w=f.contentWindow,d=f.contentDocument||w.document;d.open();try{w.onerror=function(m){window._gdErr=String(m);};}catch(e){}d.write(html);d.close();}
   catch(e){window._gdErr=e.message;try{f.srcdoc=html;}catch(_){}}
-  clearTimeout(window._gdWatch);
-  window._gdWatch=setTimeout(()=>{let ok=false;try{ok=!!(f.contentWindow&&f.contentWindow.__G);}catch(e){}
-    if(!ok&&document.getElementById('gd-ov'))gdFail(window._gdErr||'The game engine did not load.');},12000);
+  // slow laptops and Chromebooks can take well over 12 seconds to start the engine: keep waiting while the frame is still loading
+  clearInterval(window._gdWatch);const t0=Date.now();
+  window._gdWatch=setInterval(()=>{let ok=false,ready=false;try{ok=!!(f.contentWindow&&f.contentWindow.__G);ready=!!(f.contentDocument&&f.contentDocument.readyState==='complete');}catch(e){}
+    if(ok||!document.getElementById('gd-ov')||document.getElementById('gd-if')!==f){clearInterval(window._gdWatch);return;}
+    const el=Date.now()-t0;
+    if((ready&&el>30000)||el>75000){clearInterval(window._gdWatch);gdFail(window._gdErr||'The game engine did not load.');}},1000);
 }
 // ── v1.95 title screen: live touchdown clips from the real Game Day engine play behind the menu ──
 function ttDemoOn(){
   const T=document.getElementById('title');if(!T||document.getElementById('tt-demo'))return;
-  try{if(gdsMain().gfx==='fast'||(IS_LOWEND&&gdsMain().gfx!=='high'))return;}catch(e){}
+  try{if(gdsMain().gfx==='fast'||((IS_LOWEND||(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4)&&gdsMain().gfx!=='high'))return;}catch(e){}
   try{if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;}catch(e){}
   const src=document.getElementById('gd-src');if(!src)return;
   const f=document.createElement('iframe');f.id='tt-demo';f.setAttribute('data-demo','1');f.setAttribute('aria-hidden','true');f.tabIndex=-1;f.title='Touchdown highlights';
@@ -10670,9 +10675,9 @@ window.addEventListener('message',e=>{const m=e.data&&e.data.gdDemo;if(!m)return
 (function(){const T=document.getElementById('title');if(!T)return;const sync=()=>{if(T.classList.contains('hid'))ttDemoOff();else setTimeout(()=>{if(!T.classList.contains('hid'))ttDemoOn();},400);};
   new MutationObserver(sync).observe(T,{attributes:true,attributeFilter:['class']});if(document.readyState==='complete')sync();else window.addEventListener('load',sync);})();
 function gdFail(msg){
-  const ov=document.getElementById('gd-ov');if(ov)ov.remove();const ctx=_gdCtx;_gdCtx=null;
+  const ov=document.getElementById('gd-ov');if(ov)ov.remove();const ctx=_gdCtx;_gdCtx=null;window._gdRetryCtx=ctx;
   if(ctx&&ctx.kind==='online'){openMo(`<div style="text-align:center;padding:8px"><div style="font-weight:900;font-size:18px;margin-bottom:8px">The online game could not start</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">${String(msg).replace(/</g,'&lt;')}</div><button class="btn" onclick="clo();olAfterGame()">Back to Online Play</button></div>`);return;}
-  openMo(`<div style="text-align:center;padding:8px"><div style="font-weight:900;font-size:18px;margin-bottom:8px">Game Day could not start</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">${String(msg).replace(/</g,'&lt;')}</div><button class="btn bgn" onclick="clo();window._gdSim&&window._gdSim()">Simulate this game instead</button></div>`);
+  openMo(`<div style="text-align:center;padding:8px"><div style="font-weight:900;font-size:18px;margin-bottom:8px">Game Day could not start</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">${String(msg).replace(/</g,'&lt;')}</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" onclick="clo();if(window._gdRetryCtx&&window.__GP){_gdCtx=window._gdRetryCtx;gdLaunchFrame();}">Try again</button><button class="btn bgn" onclick="clo();window._gdSim&&window._gdSim()">Simulate this game instead</button></div><div style="font-size:11px;color:var(--mu);margin-top:10px">Tip: close other tabs, or set Settings → Graphics to Fast on older laptops and Chromebooks.</div></div>`);
 }
 window.gdSaveFile=function(name,data){_fileSave(name,data);};
 function gdSimRest(){const f=document.getElementById('gd-if');try{f.contentWindow.gpSimRest();}catch(e){notify('Could not simulate: '+e.message,'e');}}
@@ -11314,8 +11319,8 @@ function intlEnsure(){
   const all=[...lg.divisions.flatMap(d=>d.teams),...(oo?oo.divisions[0].teams:[])];
   for(const s of all){
     const t=(s.cls==='OOS'?OOS_DEF:INTL_TEAMS).find(x=>x.id===s.id);if(!t)continue;
-    let ps=G.players.filter(p=>p.sId===s.id);
-    if(ps.length<38){const need=44-ps.length;for(let i=0;i<need;i++){const p=genPlayer(s.id,[9,10,11,12][i%4],s.cls,null);G.players.push(p);}ps=G.players.filter(p=>p.sId===s.id);}
+    let ps=sPlayers(s.id); // the per-school index (scanning all 70,000+ players for each team made every page change slow)
+    if(ps.length<38){const need=44-ps.length;for(let i=0;i<need;i++){const p=genPlayer(s.id,[9,10,11,12][i%4],s.cls,null);G.players.push(p);}_spVer++;ps=sPlayers(s.id);}
     for(const p of ps)if(!p._intl)intlStyle(p,t);
     if(s.intlYr!==G.yr){s.intlYr=G.yr;s.intlTarget=intlTarget(t);intlFit(s,t);}
   }
@@ -11846,17 +11851,17 @@ function lgBuildSchedule(){
   }
   // 2) non-division games: other divisions and other classifications
   const pool=lgDivs().flatMap(d=>d.teams.map(t=>t.id)).filter(id=>id!==G.myId&&clsOf[id]!=='OOS');
-  const stOfId={};for(const id of pool)stOfId[id]=clsSt(clsOf[id]);
+  const stOfId={},cnOf={};for(const id of pool){stOfId[id]=clsSt(clsOf[id]);cnOf[id]=clsOf[id]==='INTL'?0:clsNum(clsOf[id]);}
   for(const w of W){
     const free=pool.filter(id=>!B(id,w));for(let i=free.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[free[i],free[j]]=[free[j],free[i]];}
     const left=new Set(free),byStL={};for(const id of free)(byStL[stOfId[id]]=byStL[stOfId[id]]||new Set()).add(id);
     const del=id=>{left.delete(id);const S=byStL[stOfId[id]];if(S)S.delete(id);};
     for(const a of free){if(!left.has(a))continue;del(a);
       let best=null,bs=-1e9,seen=0;const sa=stOfId[a],cands=sa==='INTL'?[byStL.CF||[]]:[byStL[sa]||[],byStL.INTL||[]];
-      // the remaining teams are in shuffled order: the best of the first 150 open opponents is as good a match and far cheaper
-      for(const cand of cands)for(const b of cand){if(seen>=150)break;if(divOf[b]===divOf[a]||played.has(K(a,b)))continue;seen++;
+      // the remaining teams are in shuffled order: the best of the first 40 open opponents is as good a match and far cheaper
+      for(const cand of cands)for(const b of cand){if(seen>=40)break;if(divOf[b]===divOf[a]||played.has(K(a,b)))continue;seen++;
         const ca=clsOf[a],cb=clsOf[b],ia=ca==='INTL',ib=cb==='INTL';let sc=R()*1.5;
-        if(ia||ib)sc+=ia&&ib?-2:(stOfId[ia?b:a]==='CF'?1.2:-1.5);else{const gap=Math.abs(clsNum(ca)-clsNum(cb));sc+=gap===0?0.6:gap===1?1.4:gap===2?0.2:-2;if(stOfId[a]!==stOfId[b])sc-=1.1;}
+        if(ia||ib)sc+=ia&&ib?-2:(stOfId[ia?b:a]==='CF'?1.2:-1.5);else{const gap=Math.abs(cnOf[a]-cnOf[b]);sc+=gap===0?0.6:gap===1?1.4:gap===2?0.2:-2;if(stOfId[a]!==stOfId[b])sc-=1.1;}
         sc-=Math.max(0,(cnt[b]||0)-(cnt[a]||0))*0.1;if(sc>bs){bs=sc;best=b;}}
       if(best!=null){del(best);add(w,a,best);}
       else{const c=pool.filter(x=>x!==a&&!B(x,w)&&!played.has(K(a,x))&&stOfId[x]!=='INTL'&&stOfId[x]!==stOfId[a]);if(c.length)add(w,a,c[Math.floor(R()*c.length)]);}
@@ -16787,11 +16792,11 @@ function pcRole(p){const rel=p.rel==null?50:p.rel,sc=q=>q.rat+((q.id===p.id?rel:
   return{start:rank<n,rank:rank+1,n,share:clamp(0.18+(rel-40)/140,0.12,0.6)};}
 function pcRelMsg(r){return r>=85?'Team leader: the coach builds the game plan around you':r>=70?'Trusted: the coach counts on you':r>=50?'Earning it: good games move you up':r>=35?'On thin ice: the coach wants to see more':'In the doghouse: practice hard and take your chances';}
 function pcGP(ctx){
-  if(!window.__GP||!G.pcLock||!['reg','playoff','nat','s7'].includes(ctx.kind))return;const p=pcActive();if(!p||p.inj>0)return;
+  if(!window.__GP||!G.pcLock||!['reg','po','playoff','nat','s7'].includes(ctx.kind))return;const p=pcActive();if(!p||p.inj>0)return;
   if(ctx.kind==='s7'&&!(G.s7&&G.s7.picks.includes(p.id)))return;
   const r=pcRole(p);window.__GP.pc={mid:p.id,pos:p.pos,start:ctx.kind==='s7'||r.start,share:r.share,two:false};window.__GP.mode='all';}
 function pcAfterGame(res,ctx){
-  if(!G||!G.pcLock||!ctx||!['reg','playoff','nat'].includes(ctx.kind))return;const p=pcActive();if(!p)return;
+  if(!G||!G.pcLock||!ctx||!['reg','po','playoff','nat'].includes(ctx.kind))return;const p=pcActive();if(!p)return;
   const st=gdConv(((res&&res.stats)||{})[p.id]||{}),win=res&&res.score&&res.score[0]>res.score[1];
   const perf=st.passYds/60+st.passTD*1.5-st.passInt*2+st.rushYds/25+st.rushTD*1.5+st.recYds/25+st.recTD*1.5+st.tackles*0.35+st.sacks*1.5+st.ints*3+(st.pancakes||0)*0.4+(st.fgm||0)*0.8-(st.drops||0)*1.2;
   const asks=(res&&res.pcAsks)||0;let d=Math.round(clamp(perf,-4,6)+(win?1.5:-1)-(asks>8?2:0));
@@ -18387,6 +18392,7 @@ try{const u=GP&&GP.ui,R=document.documentElement;if(u){R.classList.add('g27');if
 
 'use strict';
 /* ===================== core ===================== */
+if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.max(0,Math.min(typeof r==='number'?r:(Array.isArray(r)?r[0]||0:0),Math.abs(w)/2,Math.abs(h)/2));this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath();return this;}; // older Chrome (some Chromebooks)
 let W=640;const H=360,FW=58,CX=FW/2,SPD=0.76,GRAV=20,QLEN=180;
 // projection keeps the near sideline at y=345 and the far sideline at y=95 for any field width
 let D0=91.4,HC=35.7,SS=250/(HC*(1/D0-1/(D0+FW))),HOR=345-HC*SS/D0,KFAR=SS/(D0+FW),KNEAR=SS/D0;
@@ -20436,10 +20442,15 @@ function pcDrive(){const u=pcUnit(),mine=G.poss===G.me,on=GP.pc.two?true:u==='d'
   G.pcIn=on&&(u==='k'||GP.pc.start||Math.random()<(GP.pc.share||0.3));return G.pcIn;}
 function pcLineup(){if(!pcOn()||!G.pcIn)return;const T=G.teams[G.me],rp=T.roster.find(p=>p.mid===GP.pc.mid&&healthy(p));if(!rp)return;
   const all=OSLOTS.concat(DSLOTS);if(all.some(([x])=>T.lineup[x]===rp.id))return;const sl=all.find(([x,pos])=>pos===rp.pos);if(sl)T.lineup[sl[0]]=rp.id;}
+// a simulated series you are not part of: your player goes to the bench so the stats go to whoever really played
+function pcBenchOut(){const T=G.teams[G.me];if(!T||!T.lineup)return;const rp=T.roster.find(p=>p.mid===GP.pc.mid);if(!rp)return;
+  const used=new Set(Object.values(T.lineup));
+  for(const[x,pos]of OSLOTS.concat(DSLOTS)){if(T.lineup[x]!==rp.id)continue;
+    const sub=T.roster.filter(p=>p.id!==rp.id&&p.pos===pos&&healthy(p)&&!used.has(p.id)).sort((a,b)=>(b.ovr||0)-(a.ovr||0))[0];if(sub){T.lineup[x]=sub.id;used.add(sub.id);}}}
 function pcCallBall(){if(!pcOn()||G.offTeam!==G.me||pcMe(G.qb)||G.pcWant)return;G.pcWant=true;G.pcAsks=(G.pcAsks||0)+1;flash('Calling for the ball!');setCtl();if(G.phase==='presnap')setTray('presnap');}
 function coachOn(){return!!(G.coachMode&&!ON&&!(GP&&GP.practice))&&!pcOn();}
 function userDecides(t){return!G.test&&!pcOn()&&(!isAI(t)||(coachOn()&&t===G.me));}
-function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;if(pcOn())return!pcDrive();const m=G.playMode||'all';return m==='off'?G.poss!==G.me:m==='def'?G.poss===G.me:false;}
+function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;if(pcOn()){const sk=!pcDrive();if(sk)pcBenchOut();return sk;}const m=G.playMode||'all';return m==='off'?G.poss!==G.me:m==='def'?G.poss===G.me:false;}
 function gpSetCoach(on){
   if(ON||(GP&&GP.practice))return;G.coachMode=!!on;
   if(!G.simming)G.ai[G.me]=!!on;else if(G.simPrevAI)G.simPrevAI[G.me]=!!on;
@@ -22176,7 +22187,9 @@ function nextSnap(){
     const d=G.score[t]-G.score[1-t];go(G.q>=4&&[-2,-5,-10,1,-1].includes(d)&&Math.random()<0.8);return;
   }
   if(G.simming&&(G.poss!==G.simTeam||G.q!==G.simQ&&G.q===3)){endSim();return;}
-  if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&G.poss!==G.drivePoss){G.drivePoss=G.poss;if(!ON){if(gpAutoSimDrive()){startSim(true);return;}drivePrompt();return;}}
+  // Player Career: checked every snap, not only when the ball changes hands, so a series without your unit is always simulated
+  if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&pcOn()){if(G.poss!==G.drivePoss){G.drivePoss=G.poss;pcDrive();}if(!G.pcIn){pcBenchOut();startSim(true);return;}}
+  else if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&G.poss!==G.drivePoss){G.drivePoss=G.poss;if(!ON){if(gpAutoSimDrive()){startSim(true);return;}drivePrompt();return;}}
   G.offTeam=G.poss;openCall();
 }
 // v2.15 kick returns off (Settings): the kickoff resolves at once, with a spot that depends on the returner's speed
@@ -24017,6 +24030,9 @@ function frame(now){
   const raw=(now-last);const dt=Math.min(0.033,Math.max(0,raw/1000));last=now;
   if(raw>0&&raw<200&&!G.recVid){perfAvg=perfAvg*0.95+raw*0.05;perfN++;
     if(perfN>90&&perfAvg>21){perfN=0;perfAvg=16;if(QHI)QHI=false;else if(DPRCAP>1){DPRCAP=Math.max(1,DPRCAP-0.5);fit();}}}
+  // the title-screen demo runs at 30 fps and low resolution so the menus stay smooth on slower PCs and Chromebooks
+  if(G.demo){if(!G._dfit){G._dfit=1;fit();}G._dacc=(G._dacc||0)+dt;G._dfr=(G._dfr||0)+1;if(G._dfr%2){requestAnimationFrame(frame);return;}const d2=Math.min(0.066,G._dacc);G._dacc=0;
+    if(d2>0&&G.demo.state!=='warm')try{step(d2);}catch(err){console.error(err);}requestAnimationFrame(frame);return;}
   if(dt>0&&!(G.demo&&G.demo.state==='warm'))try{step(dt*gspd());}catch(err){console.error(err);}
   requestAnimationFrame(frame);
 }
@@ -24084,7 +24100,7 @@ function fit(){
   if(BGC.width!==W)BGC.width=W;
   const s=Math.min(cw/W,ch/H);
   document.body.classList.toggle('full',land);
-  SC=s;DPR=Math.min(DPRCAP,window.devicePixelRatio||1,Math.max(0.75,2200/Math.max(1,W*s)));  // a 4K or high-DPI monitor no longer draws a 4,000-pixel-wide field
+  SC=s;DPR=Math.min(DPRCAP,window.devicePixelRatio||1,Math.max(0.75,2200/Math.max(1,W*s)));if(G.demo)DPR=Math.min(DPR,1);  // a 4K or high-DPI monitor no longer draws a 4,000-pixel-wide field
   wr.style.width=W*s+'px';wr.style.height=H*s+'px';wr.style.setProperty('--s',s.toFixed(3));
   cv.width=Math.round(W*s*DPR);cv.height=Math.round(H*s*DPR);
 }
@@ -24473,8 +24489,8 @@ function gpDemoMsg(m){try{window.parent.postMessage({gdDemo:m},'*');}catch(e){}}
 function gpDemoPump(){const D=G.demo;if(!D||D.state!=='warm')return;const t0=performance.now();
   if(document.hidden){setTimeout(gpDemoPump,500);return;}
   D.warmT=(D.warmT||0)+1;if(D.warmT>2500&&!D.clips.length){G.demo=null;gpDemoMsg('off');return;}
-  try{while(performance.now()-t0<8){for(let i=0;i<24&&performance.now()-t0<8;i++){const m=$('modal');if(m&&!m.hidden){const b=$('mB').querySelector('button');if(b)b.click();}if(G.phase==='call')openCall();if(G.phase==='replay')break;step(1/30);}if(D.fresh>=D.need)break;}}catch(e){console.error(e);}
-  if(D.fresh>=D.need&&D.clips.length){D.fresh=0;D.warmT=0;gpDemoShow();return;}setTimeout(gpDemoPump,16);}
+  try{while(performance.now()-t0<5){for(let i=0;i<24&&performance.now()-t0<5;i++){const m=$('modal');if(m&&!m.hidden){const b=$('mB').querySelector('button');if(b)b.click();}if(G.phase==='call')openCall();if(G.phase==='replay')break;step(1/30);}if(D.fresh>=D.need)break;}}catch(e){console.error(e);}
+  if(D.fresh>=D.need&&D.clips.length){D.fresh=0;D.warmT=0;gpDemoShow();return;}setTimeout(gpDemoPump,40);}
 function gpDemoShow(){const D=G.demo;D.state='show';G.noDraw=false;const R=D.clips[D.ci%D.clips.length];D.ci++;
   G.replay={R,i:0,speed:0.9,playing:true,prev:'dead',onExit:null,demo:true};G.phase='replay';gpDemoMsg('clip');}
 function gpDemoNext(){const D=G.demo;G.replay=null;
