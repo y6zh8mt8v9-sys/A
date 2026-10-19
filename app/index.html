@@ -1905,7 +1905,7 @@ window.showDevTraitPopup=function(pid){
 };
 
 function trB(k){const t=TRAITS.find(x=>x.k===k);if(!t)return'';return`<span class="tb2" style="background:${t.c};color:${t.tc}">${t.l}</span>`;}
-function ofB(o){const m={FBS:'of',FCS:'oc',D2:'od',NAIA:'on',D3:'ot',JUCO:'oj'};return`<span class="ob ${m[o.lvl]||'od'}">${o.lvl==='JUCO'?'JUCO interest':o.lvl}: ${o.school}</span>`;}
+function ofB(o){const m={FBS:'of',FCS:'oc',D2:'od',NAIA:'on',D3:'ot',JUCO:'oj'};return`<span class="ob ${m[o.lvl]||'od'}" style="display:inline-flex;align-items:center;gap:3px">${colLogo(o.school+'|'+o.lvl,14)}${o.lvl==='JUCO'?'JUCO interest':o.lvl}: ${o.school}</span>`;}
 function posNums(pos){const ranges=POS_NUM[pos]||[[1,99]];const nums=[];for(const[a,b]of ranges)for(let n=a;n<=b;n++)nums.push(n);return nums;}
 function posN(pos,sId){
   const valid=posNums(pos);
@@ -5331,7 +5331,7 @@ function interviewMaybe(res,ctx){if(!ctx||!['reg','po','nat'].includes(ctx.kind)
 function pgMedia(){const st=clsSt(G.cls),mine=p=>p.sId===G.myId?'style="background:rgba(245,192,48,.12)"':'';
   const pool=G.players.filter(p=>!p.grad&&p.yr>=11&&getS(p.sId)&&!getS(p.sId).intl),srt=(a,b)=>(b.stars||0)-(a.stars||0)||(b.sg||0)-(a.sg||0)||b.rat-a.rat;
   const nat=pool.filter(p=>p.yr===12).sort(srt).slice(0,25),stl=pool.filter(p=>stOf(getS(p.sId))===st).sort(srt).slice(0,15);
-  const row=(p,i)=>{const s=getS(p.sId);return`<tr class="cl" ${mine(p)} onclick="showPlayer(${p.id})"><td>${i+1}</td><td style="white-space:nowrap">${p.fn} ${p.ln}</td><td><span class="pb2">${p.pos}</span></td><td>${yrL(p.yr)}</td><td>${stars(p.stars||0)}</td><td style="white-space:nowrap">${s?sLogo(s,18)+' '+s.name:''}</td><td>${p.committed?`<span style="color:var(--gn)">${p.committed.school}</span>`:'Open'}</td></tr>`;};
+  const row=(p,i)=>{const s=getS(p.sId);return`<tr class="cl" ${mine(p)} onclick="showPlayer(${p.id})"><td>${i+1}</td><td style="white-space:nowrap">${p.fn} ${p.ln}</td><td><span class="pb2">${p.pos}</span></td><td>${yrL(p.yr)}</td><td>${stars(p.stars||0)}</td><td style="white-space:nowrap">${s?sLogo(s,18)+' '+s.name:''}</td><td style="white-space:nowrap">${p.committed?`<span style="color:var(--gn);display:inline-flex;align-items:center;gap:4px">${colLogo(p.committed,18)}${p.committed.school}</span>`:'Open'}</td></tr>`;};
   const W=(G.wkAwards||[]).filter(x=>x.yr===G.yr).slice(-6).reverse(),H=(G.awardHist||[]).slice(-1)[0];
   const tbl=L=>`<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Player</th><th>Pos</th><th>Yr</th><th>Stars</th><th>School</th><th>Commit</th></tr></thead><tbody>${L.map(row).join('')||'<tr><td colspan="7" style="color:var(--mu)">No rankings yet.</td></tr>'}</tbody></table></div>`;
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph">${MEDIA.fni} <span style="font-size:12px;color:var(--mu);font-weight:600">Player and Play of the Week</span></div><div class="pb">${W.length?W.map(x=>`<div class="dr" style="flex-wrap:wrap;gap:6px"><span class="a"><b>Week ${x.wk}</b> · Player of the Week: <b ${x.potw.mine?'style="color:var(--gd)"':''}>${x.potw.n}</b> (${x.potw.pos}, ${x.potw.sch})<div style="font-size:11px;color:var(--mu)">${x.potw.line}</div></span>${x.play?`<span style="font-size:12px;color:var(--mu)">Play of the Week: <b style="color:var(--tx)">${x.play.n}</b>, ${x.play.what}</span>`:''}</div>`).join(''):'<div style="color:var(--mu);font-size:13px">The weekly honors start after week 1.</div>'}
@@ -5542,7 +5542,78 @@ function buildColleges(){const L=COLLEGES;L.length=0;const acad={'Franklin Luthe
   // program strength spreads evenly from the top of each level to its floor, however long the list is
   const add=(arr,lvl,hi,lo,ac)=>arr.forEach((n,i)=>L.push({school:n,lvl,pr:Math.round(hi-(hi-lo)*i/Math.max(1,arr.length-1)),acad:ac?(acad[n]||0):0}));
   add(D1FBS,'FBS',99,56,1);add(D1FCS,'FCS',55,30,1);add(D2,'D2',38,18);add(D3,'D3',24,5,1);add(NAIA,'NAIA',29,12);add(JUCO,'JUCO',20,3);
-  for(const c of L)c.pr=Math.max(1,c.pr);for(const k in COL_BY)delete COL_BY[k];for(const c of L)COL_BY[c.school+'|'+c.lvl]=c;return L;}
+  for(const c of L)c.pr=Math.max(1,c.pr);const _st={};for(const k in COL_BY){if(COL_BY[k].st)_st[k]=COL_BY[k].st;delete COL_BY[k];}for(const c of L){const k=c.school+'|'+c.lvl;COL_BY[k]=c;if(_st[k])c.st=_st[k];}
+  try{const M=colMetaSrc();for(const k in M){const c=COL_BY[k];if(!c)continue;if(M[k].pr)c.pr=clamp(Math.round(+M[k].pr)||c.pr,1,99);if(M[k].st)c.st=M[k].st;}}catch(e){}return L;}
+// ── college identity: every college has a mascot, colors, abbreviation and a real logo like the high schools.
+// Defaults come from the name (always the same), edits live in this save's world (G.world.colMeta) or in League Setup.
+const COL_MASC=['Tigers','Bulldogs','Eagles','Wildcats','Bears','Lions','Panthers','Huskies','Knights','Spartans','Trojans','Rams','Mustangs','Cougars','Falcons','Hawks','Owls','Pirates','Vikings','Cardinals','Bison','Longhorns','Hurricanes','Wolves','Broncos','Jaguars','Bobcats','Grizzlies','Wolverines','Badgers','Griffins','Raptors','Gladiators','Crusaders','Lancers','Cavaliers','Raiders','Mariners','Rattlers','Outlaws','Patriots','Rebels','Mavericks','Warriors','Chargers','Rockets','Comets','Redhawks','Seahawks','Stallions','Coyotes','Lynx','Sharks','Ospreys','Thunderbolts','Blazers','Minutemen','Centurions','Sentinels','Loggers'];
+const COL_PAL=[['#8c1d18','#ffffff'],['#002f6c','#f0b323'],['#00543c','#ffffff'],['#4b2e83','#e8d3a2'],['#bf5700','#ffffff'],['#9e1b32','#828a8f'],['#0021a5','#fa4616'],['#13294b','#e84a27'],['#782f40','#ceb888'],['#000000','#ffc72c'],['#cc0033','#000000'],['#154734','#c4a35a'],['#003087','#ffffff'],['#a6192e','#ffb81c'],['#006747','#ffcd00'],['#5d2a2c','#ffffff'],['#041e42','#a2aaad'],['#860038','#fdbb30'],['#2d68c4','#ffffff'],['#ff8200','#58595b'],['#ce1141','#002d72'],['#6a2c91','#ffffff'],['#00205b','#c8102e'],['#7a0019','#ffcc33'],['#1b365d','#7ba4db'],['#ba0c2f','#ffffff'],['#0c2340','#d1aa5b'],['#e00122','#ffffff']];
+function colMetaSrc(){try{if((window._wsRendering||(window._wsColEdit&&document.getElementById('ws-col')))&&WS.draft)return WS.draft.colMeta||(WS.draft.colMeta={});}catch(e){}
+  try{if(typeof G!=='undefined'&&G&&G.world)return G.world.colMeta||(G.world.colMeta={});}catch(e){}
+  try{if(WORLD&&typeof WORLD==='object')return WORLD.colMeta||(WORLD.colMeta={});}catch(e){}return{};}
+function colHash(t){let h=7;for(const ch of String(t||''))h=(h*31+ch.charCodeAt(0))>>>0;return h;}
+function colAbbr(n){const w=String(n||'').replace(/\b(University|College|of|the|CC)\b/g,' ').trim().split(/\s+/).filter(x=>/[A-Za-z]/.test(x));
+  if(!w.length)return'COL';if(w.length===1)return w[0].replace(/[^A-Za-z]/g,'').slice(0,4).toUpperCase();return w.map(x=>x.replace(/[^A-Za-z&]/g,'')[0]||'').join('').toUpperCase().slice(0,4);}
+const _colDefC={};
+function colDef(k){if(_colDefC[k])return _colDefC[k];const i=k.lastIndexOf('|'),n=k.slice(0,i),lv=k.slice(i+1),h=colHash(n);
+  let ms=COL_MASC.filter(m=>typeof _LK==='undefined'||_LK[m.toLowerCase()]);if(!ms.length)ms=COL_MASC;const pal=COL_PAL[(h>>>5)%COL_PAL.length];
+  return _colDefC[k]={k,name:n,lvl:lv,mascot:ms[h%ms.length],c1:pal[0],c2:pal[1],abbr:colAbbr(n)};}
+function colInfo(k){if(k&&typeof k==='object')k=k.school+'|'+k.lvl;const c=COL_BY[k],M=colMetaSrc()[k]||{},I=Object.assign({},colDef(k),M);
+  I.k=k;I.name=c?c.school:I.name;I.pr=c?c.pr:(M.pr||0);I.st=M.st||(c&&c.st)||'CF';I.lvl=c?c.lvl:I.lvl;try{I.conf=colConfOf(k);}catch(e){}return I;}
+function colLK(I){if(I.logoKey)return I.logoKey;const e=typeof _LK!=='undefined'&&_LK[String(I.mascot||'').toLowerCase()];return e&&_LGO[e[0]]?e[0]:undefined;}
+function colLogo(k,sz){try{const I=colInfo(k);return sLogo({name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,logoKey:colLK(I),mash:I.mash,customLogo:I.customLogo},sz||24);}catch(e){return'';}}
+function colTeamObj(k){const I=colInfo(k);return{name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,abbr:I.abbr,logoKey:colLK(I),mash:I.mash,customLogo:I.customLogo,col:k};}
+function colConfOf(k){try{const C=G&&G.cc&&G.cc.conf;if(C&&C.by&&C.by[k]!=null)return C.list[C.by[k]].name;}catch(e){}return'';}
+// renaming a college moves every reference: offers, commitments, dream schools, class books, signing lists, alumni, college career
+function colRename(oldK,newName){const i=oldK.lastIndexOf('|'),on=oldK.slice(0,i),lv=oldK.slice(i+1),nk=newName+'|'+lv;if(nk===oldK)return oldK;
+  const A={FBS:D1FBS,FCS:D1FCS,D2,D3,NAIA,JUCO}[lv];if(!A)return oldK;if(A.includes(newName))throw new Error('There is already a '+lv+' college called '+newName+'.');
+  const j=A.indexOf(on);if(j<0)return oldK;A[j]=newName;
+  const W=(typeof G!=='undefined'&&G&&G.world)?G.world:WORLD;if(W){W.colleges=W.colleges||{};W.colleges[lv]=A.slice();}
+  const M=colMetaSrc();if(M[oldK]){M[nk]=M[oldK];delete M[oldK];}delete _colDefC[oldK];
+  const oldSt=COL_BY[oldK]&&COL_BY[oldK].st;buildColleges();if(COL_BY[nk]&&oldSt&&!COL_BY[nk].st)COL_BY[nk].st=oldSt;try{aiConfRebuild();}catch(e){}
+  if(typeof G!=='undefined'&&G){const seen=new Set(),walk=(o,d)=>{if(!o||typeof o!=='object'||d>9||seen.has(o))return;seen.add(o);
+      if(Array.isArray(o)){for(let x=0;x<o.length;x++){const v=o[x];if(v===oldK)o[x]=nk;else if(v&&typeof v==='object')walk(v,d+1);}return;}
+      if(o.school===on&&(o.lvl===lv||o.lvl==null))o.school=newName;if(o.k===oldK)o.k=nk;
+      for(const key of Object.keys(o)){const v=o[key];if(key===oldK){o[nk]=v;delete o[oldK];}if(v===oldK)o[key]=nk;else if(v&&typeof v==='object')walk(v,d+1);}};
+    for(const key of Object.keys(G))if(key!=='world'&&key!=='divisions'&&key!=='allLeagues')walk(G[key],0);}
+  return nk;}
+// the editor: the same fields as Edit School for high schools
+function colFormHtml(I,ctx){const lg=Object.keys(_LGO||{}).sort(),opt=(v,l,c)=>`<option value="${v}"${v===c?' selected':''}>${l}</option>`;
+  const conf=(ctx==='save'&&G&&G.cc&&G.cc.conf)?G.cc.conf:null;
+  return`<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px"><div id="ce-prev">${colLogo(I.k,84)}</div><div style="font-size:12px;color:var(--mu)">${I.lvl} · prestige ${I.pr}${I.conf?' · '+I.conf:''}<br>Change anything below. The logo updates as you type.</div></div>
+   <div class="g2" style="gap:8px">
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Name<input id="ce-n" maxlength="40" value="${I.name}" oninput="colEditPrev()"></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Mascot<input id="ce-m" maxlength="24" value="${I.mascot}" list="ce-ml" oninput="colEditPrev()"><datalist id="ce-ml">${(typeof avMascots==='function'?avMascots():[]).map(m=>`<option value="${m}">`).join('')}</datalist></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Abbreviation<input id="ce-a" maxlength="5" value="${I.abbr||''}"></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">State<select id="ce-st">${ST_ORDER.map(x=>opt(x,stName(x),I.st)).join('')}</select></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Primary color<input type="color" id="ce-c1" value="${I.c1}" oninput="colEditPrev()"></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Secondary color<input type="color" id="ce-c2" value="${I.c2}" oninput="colEditPrev()"></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Logo icon<select id="ce-lk" onchange="colEditPrev()">${opt('','Automatic (from the mascot)',I.logoKey||'')}${lg.map(x=>opt(x,x,I.logoKey||'')).join('')}</select></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Badge (mascot mashup)<select id="ce-mash" onchange="colEditPrev()">${opt('','None',I.mash||'')}${lg.map(x=>opt(x,x,I.mash||'')).join('')}</select></label>
+    <label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Prestige (1-99)<input type="number" id="ce-pr" min="1" max="99" value="${I.pr||50}"></label>
+    ${conf?`<label style="font-size:12px;display:flex;flex-direction:column;gap:3px">Conference<select id="ce-cf">${conf.list.map((c,i)=>c.lvl===I.lvl?opt(String(i),c.name,String(conf.by[I.k])):'').join('')}</select></label>`:''}
+   </div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><label class="bgh bsm" style="cursor:pointer">Upload a logo<input type="file" accept="image/*" style="display:none" onchange="colEditUpload(this)"></label><button class="bgh bsm" onclick="colEditClearLogo()">Remove uploaded logo</button><button class="bgh bsm" onclick="colEditReset()">Back to default</button><span id="ce-up" style="font-size:12px;color:var(--mu)">${I.customLogo?'Custom logo in use':''}</span></div>`;}
+window._ceLogo=undefined;
+function colEditRead(){const v=id=>{const e=document.getElementById(id);return e?e.value:'';};return{name:wsClean(v('ce-n')),mascot:wsClean(v('ce-m')).slice(0,24),abbr:wsClean(v('ce-a')).toUpperCase().replace(/[^A-Z&]/g,'').slice(0,5),st:v('ce-st'),c1:v('ce-c1'),c2:v('ce-c2'),logoKey:v('ce-lk')||undefined,mash:v('ce-mash')||undefined,pr:clamp(Math.round(+v('ce-pr'))||50,1,99),cf:v('ce-cf')};}
+window.colEditPrev=function(){const r=colEditRead(),I=colInfo(window._ceK),lg=window._ceLogo!==undefined?window._ceLogo:I.customLogo,e=document.getElementById('ce-prev');
+  if(e)e.innerHTML=sLogo({name:r.name||I.name,mascot:r.mascot||I.mascot,c1:r.c1,c2:r.c2,logoKey:colLK({logoKey:r.logoKey,mascot:r.mascot||I.mascot}),mash:r.mash,customLogo:lg},84);};
+window.colEditUpload=function(inp){const f=inp.files&&inp.files[0];if(!f)return;logoShrink(f,d=>{window._ceLogo=d;const u=document.getElementById('ce-up');if(u)u.textContent='Custom logo in use';colEditPrev();});};
+window.colEditClearLogo=function(){window._ceLogo=null;const u=document.getElementById('ce-up');if(u)u.textContent='';colEditPrev();};
+window.colEditReset=function(){const M=colMetaSrc(),k=window._ceK;delete M[k];window._ceLogo=undefined;if(!window._wsColEdit)try{buildColleges();}catch(e){}colEditReopen(k);};
+function colEditApply(){let k=window._ceK;const r=colEditRead(),M=colMetaSrc();if(!r.name){notify('Give the college a name.','w');return null;}const _on=colInfo(k).name;if(r.name!==_on&&r.abbr===colAbbr(_on))r.abbr='';
+  if(r.name!==colInfo(k).name){if(window._wsColEdit){const lv=k.slice(k.lastIndexOf('|')+1),D=WS.draft,O=worldOrig(),list=(D.colleges&&D.colleges[lv]&&D.colleges[lv].length?D.colleges[lv]:O.colleges[lv]).slice(),j=list.indexOf(colInfo(k).name);
+      if(list.includes(r.name)){notify('There is already a '+lv+' college called '+r.name+'.','e');return null;}if(j>=0)list[j]=r.name;D.colleges=D.colleges||{};D.colleges[lv]=list;const nk=r.name+'|'+lv;if(M[k]){M[nk]=M[k];delete M[k];}k=nk;}
+    else{try{k=colRename(k,r.name);}catch(e){notify(e.message,'e');return null;}}}
+  const D=colDef(k),m=M[k]||{};m.mascot=r.mascot&&r.mascot!==D.mascot?r.mascot:undefined;m.abbr=r.abbr&&r.abbr!==D.abbr?r.abbr:undefined;m.c1=r.c1!==D.c1?r.c1:undefined;m.c2=r.c2!==D.c2?r.c2:undefined;
+  m.logoKey=r.logoKey;m.mash=r.mash;m.st=r.st;m.pr=r.pr;if(window._ceLogo!==undefined)m.customLogo=window._ceLogo||undefined;
+  for(const x in m)if(m[x]===undefined)delete m[x];M[k]=m;window._ceLogo=undefined;
+  if(r.cf!==''&&G&&G.cc&&G.cc.conf&&!window._wsColEdit){try{ccSetConf(k,+r.cf);}catch(e){}}
+  if(!window._wsColEdit){try{buildColleges();}catch(e){}if(COL_BY[k]){COL_BY[k].pr=r.pr;COL_BY[k].st=r.st;}}return k;}
+function colEditReopen(k){if(window._wsColEdit){WS.colEdit=k;wsRender();}else openColEdit(k);}
+window.openColEdit=function(k){window._wsColEdit=false;window._ceK=k;window._ceLogo=undefined;const I=colInfo(k);
+  openMo(`<h2>Edit college</h2>${colFormHtml(I,'save')}<div style="text-align:right;margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="colEditSave()">Save</button></div>`);};
+window.colEditSave=function(){const k=colEditApply();if(!k)return;clo();notify(colInfo(k).name+' saved');try{if(G&&G.page)nav(G.page);}catch(e){}};
 buildColleges();
 // v1.94: every college signs a class of 30-85 players, split across positional needs. Offers stop once a
 // position board is crowded (3x the open spots), commits stop once the spots are filled.
@@ -5989,7 +6060,7 @@ function pgColleges(){_colStReady();
   const list=COLLEGES.filter(c=>(_colF.lvl==='ALL'||c.lvl===_colF.lvl)&&(_colF.st==='ALL'||c.st===_colF.st)&&(!q||c.school.toLowerCase().includes(q))).sort((a,b)=>b.pr-a.pr);
   const sel=(k,opts,cur)=>`<select onchange="_colFilt('${k}',this.value)" style="background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:4px 6px">${opts.map(([v,l])=>`<option value="${v}"${v===cur?' selected':''}>${l}</option>`).join('')}</select>`;
   const rows=list.slice(0,120).map(c=>{const k=c.school+'|'+c.lvl,ps=m[k]||[],sr=ps.filter(p=>p.yr===12),jr=ps.filter(p=>p.yr<12),o=colCls(c,cy),inS=sr.filter(p=>plSt(p)===c.st).length,top=sr.reduce((a,p)=>Math.max(a,p.stars||0),0);
-    return`<tr class="cl" onclick="colShow('${k.replace(/'/g,"\\'")}')"><td style="font-weight:700">${c.school}</td><td>${c.lvl}</td><td>${stName(c.st)}</td><td>${c.pr}</td><td><b>${sr.length}</b> <span style="color:var(--mu)">/ ${o.hs}</span></td><td>${jr.length}</td><td>${sr.length?Math.round(inS/sr.length*100)+'%':'—'}</td><td>${top?stars(top):'—'}</td></tr>`;}).join('');
+    return`<tr class="cl" onclick="colShow('${k.replace(/'/g,"\\'")}')"><td style="font-weight:700;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:6px">${colLogo(k,24)}${c.school}</span></td><td>${c.lvl}</td><td>${stName(c.st)}</td><td>${c.pr}</td><td><b>${sr.length}</b> <span style="color:var(--mu)">/ ${o.hs}</span></td><td>${jr.length}</td><td>${sr.length?Math.round(inS/sr.length*100)+'%':'—'}</td><td>${top?stars(top):'—'}</td></tr>`;}).join('');
   return`<div class="pnl"><div class="ph">College recruiting classes</div><div class="pb">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">${sel('lvl',[['ALL','All levels'],...['FBS','FCS','D2','D3','NAIA','JUCO'].map(x=>[x,x])],_colF.lvl)}${sel('st',[['ALL','All states'],...ST_ORDER.map(s=>[s,stName(s)])],_colF.st)}
       <input placeholder="Search college…" value="${(_colF.q||'').replace(/"/g,'&quot;')}" onchange="_colFilt('q',this.value)" style="background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:4px 8px;min-width:160px"></div>
@@ -6004,7 +6075,7 @@ window.colShow=function(k){_colStReady();
   const sg=G.colSigned&&G.colSigned.by&&G.colSigned.by[k]||[];
   const signed=sg.length?`<div style="margin-top:12px;font-weight:900">Signed last year (${2026+(G.colSigned.yr-1)})</div><div style="font-size:12px;color:var(--mu);margin-bottom:4px">${sg.length} high school signees</div>
     <div style="overflow-x:auto"><table><tbody>${sg.slice().sort((a,b)=>b[2]-a[2]||b[3]-a[3]).map(x=>`<tr><td>${x[0]}${x[6]?' <span style="color:var(--gd);font-size:10px">YOURS</span>':''}</td><td><span class="pb2">${x[1]}</span></td><td>${stars(x[2])}</td><td>${x[3]}</td><td>${x[4]}</td><td>${stName(x[5])}</td></tr>`).join('')}</tbody></table></div>`:'';
-  openMo(`<div style="padding:4px 2px"><div style="font-weight:900;font-size:20px">${c.school}</div><div style="font-size:12px;color:var(--mu);margin-bottom:8px">${c.lvl} · ${stName(c.st)} · prestige ${c.pr} · signs a ${o.cap}-player class this year (${colHsLeft(o)} spots still open; about ${Math.round(colPIn(c.lvl,c.st)*100)}% from ${stName(c.st)})</div>
+  const CI=colInfo(k);openMo(`<div style="padding:4px 2px"><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${colLogo(k,64)}<div style="flex:1"><div style="font-weight:900;font-size:20px">${c.school} ${CI.mascot}</div><div style="font-size:12px;color:var(--mu)">${CI.abbr}${CI.conf?' · '+CI.conf:''}</div></div><button class="bgh bsm" onclick="openColEdit('${k.replace(/'/g,"\\'")}')">Edit</button></div><div style="font-size:12px;color:var(--mu);margin-bottom:8px">${c.lvl} · ${stName(c.st)} · prestige ${c.pr} · signs a ${o.cap}-player class this year (${colHsLeft(o)} spots still open; about ${Math.round(colPIn(c.lvl,c.st)*100)}% from ${stName(c.st)})</div>
     <div style="font-weight:800;margin-bottom:4px">Class of ${yr0+1} needs</div><div>${need}</div>
     <div style="margin-top:10px;font-weight:900">Committed seniors (${sr.length})</div>${sr.length?`<div style="overflow-x:auto"><table><tbody>${sr.map(row).join('')}</tbody></table></div>`:'<div style="color:var(--mu);font-size:12px">No senior commitments yet.</div>'}
     ${jr.length?`<div style="margin-top:10px;font-weight:900">Early commitments (${jr.length})</div><div style="overflow-x:auto"><table><tbody>${jr.map(row).join('')}</tbody></table></div>`:''}
@@ -14276,7 +14347,7 @@ function combineColleges(){const lv=['FBS','FCS','D2','D3','NAIA','JUCO'],out=[]
   for(const l of lv){const L=COLLEGES.filter(c=>c.lvl===l).sort((a,b)=>(b.st===st)-(a.st===st)||b.pr-a.pr).slice(0,l==='FBS'?5:3);out.push(...L);}return out;}
 window.combineOpen=function(){if(!combineAvail()){notify('You already hosted a combine this year.','w');return;}const C=combineColleges();
   openMo(`<h2>Host a Combine</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">Your sophomores, juniors and seniors run the 40, the shuttle, the vertical and the bench in front of the college staffs you invite. Standouts can pick up offers on the spot. Cost $${COMBINE_COST.toLocaleString()} plus $${COMBINE_INV} per staff you invite (up to 6).</div>
-   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;max-height:46vh;overflow-y:auto">${C.map((c,i)=>`<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px"><input type="checkbox" class="cb-c" value="${i}" style="width:auto;min-height:0"> <span><b>${c.school}</b><br><small style="color:var(--mu)">${c.lvl}${c.st===clsSt(G.cls)?' · in state':''}</small></span></label>`).join('')}</div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;max-height:46vh;overflow-y:auto">${C.map((c,i)=>`<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px"><input type="checkbox" class="cb-c" value="${i}" style="width:auto;min-height:0"> ${colLogo(c,30)}<span><b>${c.school}</b><br><small style="color:var(--mu)">${c.lvl}${c.st===clsSt(G.cls)?' · in state':''}</small></span></label>`).join('')}</div>
    <div style="text-align:right;margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="combineRun()">Run the combine</button></div>`);window._cbC=C;};
 window.combineRun=function(){const C=window._cbC||[],pick=[...document.querySelectorAll('.cb-c:checked')].map(x=>C[+x.value]).filter(Boolean).slice(0,6);
   const cost=COMBINE_COST+pick.length*COMBINE_INV;if(!pick.length){notify('Invite at least one college staff.','w');return;}if(!hasFunds(cost)){notify(`The combine costs $${cost.toLocaleString()}.`,'e');return;}
@@ -14296,7 +14367,7 @@ const GAMEINV_COST=1000;
 window.gameInviteOpen=function(){const g=G.sched.find(x=>!x.result&&x.type==='regular');if(!g){notify('No regular season game left to invite coaches to.','w');return;}
   if(G.gameInv&&G.gameInv.yr===G.yr&&G.gameInv.wk===g.wk){notify('Coaches are already coming to this game.','w');return;}const C=combineColleges();
   openMo(`<h2>Invite coaches to Week ${g.wk}</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">Pick up to 3 college staffs ($${GAMEINV_COST.toLocaleString()} each for their visit). Play well in front of them and offers can follow.</div>
-   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;max-height:46vh;overflow-y:auto">${C.map((c,i)=>`<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px"><input type="checkbox" class="gi-c" value="${i}" style="width:auto;min-height:0"> <span><b>${c.school}</b><br><small style="color:var(--mu)">${c.lvl}</small></span></label>`).join('')}</div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;max-height:46vh;overflow-y:auto">${C.map((c,i)=>`<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px"><input type="checkbox" class="gi-c" value="${i}" style="width:auto;min-height:0"> ${colLogo(c,30)}<span><b>${c.school}</b><br><small style="color:var(--mu)">${c.lvl}</small></span></label>`).join('')}</div>
    <div style="text-align:right;margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="bgh" onclick="clo()">Cancel</button><button class="btn bgn" onclick="gameInviteSend(${g.wk})">Send invitations</button></div>`);window._giC=C;};
 window.gameInviteSend=function(wk){const C=window._giC||[],pick=[...document.querySelectorAll('.gi-c:checked')].map(x=>C[+x.value]).filter(Boolean).slice(0,3);if(!pick.length){notify('Pick at least one staff.','w');return;}
   const cost=pick.length*GAMEINV_COST;if(!hasFunds(cost)){notify(`That costs $${cost.toLocaleString()}.`,'e');return;}if(!G.unlimitedMoney)G.budget-=cost;
@@ -16084,6 +16155,7 @@ function worldSanitize(W){
   o.states=map(W.states,str);o.counties=map(W.counties,str);
   const L=(a,n)=>Array.isArray(a)?a.slice(0,n).map(str).filter(Boolean):undefined;
   if(W.colleges&&typeof W.colleges==='object'){o.colleges={};for(const k of['FBS','FCS','D2','D3','NAIA','JUCO']){const v=L(W.colleges[k],400);if(v&&v.length)o.colleges[k]=v;}}
+  if(W.colMeta&&typeof W.colMeta==='object'){const hx=v=>/^#[0-9a-f]{6}$/i.test(v||'')?v:undefined,lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;o.colMeta=map(W.colMeta,m=>{if(!m||typeof m!=='object')return null;const r={mascot:m.mascot?str(m.mascot).slice(0,24):undefined,abbr:m.abbr?String(m.abbr).toUpperCase().replace(/[^A-Z&]/g,'').slice(0,5):undefined,c1:hx(m.c1),c2:hx(m.c2),logoKey:lk(m.logoKey),mash:lk(m.mash),st:m.st?String(m.st).slice(0,3):undefined,pr:m.pr?clamp(Math.round(+m.pr)||50,1,99):undefined,customLogo:typeof m.customLogo==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,/.test(m.customLogo)&&m.customLogo.length<160000?m.customLogo:undefined};for(const x in r)if(r[x]===undefined)delete r[x];return Object.keys(r).length?r:null;});}
   if(W.pro&&typeof W.pro==='object'){o.pro={};for(const k of['NGL','SFL','MGL']){const v=L(W.pro[k],64);if(v&&v.length)o.pro[k]=v;}}
   o.divs=map(W.divs,a=>L(a,64));o.xdivs=map(W.xdivs,a=>L(a,200));
   o.size=map(W.size,z=>z&&typeof z==='object'?{t:clamp(Math.round(+z.t)||8,8,160),d:clamp(Math.round(+z.d)||1,1,16)}:null);
@@ -16700,7 +16772,10 @@ function wsRender(){
     const list=(D.colleges&&D.colleges[WS.lvl]&&D.colleges[WS.lvl].length?D.colleges[WS.lvl]:O.colleges[WS.lvl]);
     body=`<div class="tabs" style="margin-bottom:8px">${lv.map(([k,l])=>`<button class="tab ${WS.lvl===k?'on':''}" onclick="wsGrab();WS.lvl='${k}';wsRender()">${l}</button>`).join('')}</div>
       <div style="font-size:12px;color:var(--mu);margin-bottom:4px">One college per line, strongest program first. Rename, add or remove lines (at least 3). ${list.length} colleges.</div>
-      <textarea id="ws-col" rows="14" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${list.join('\n')}</textarea>`;
+      <textarea id="ws-col" rows="8" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${list.join('\n')}</textarea>
+      ${WS.colEdit?(()=>{window._wsColEdit=true;window._ceK=WS.colEdit;window._wsRendering=true;const I=colInfo(WS.colEdit);const fh=colFormHtml(I,'setup');window._wsRendering=false;return`<div class="pnl" style="margin-top:10px"><div class="ph">Edit ${I.name}</div><div class="pb">${fh}<div style="text-align:right;margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button class="bgh" onclick="WS.colEdit=null;window._wsColEdit=false;wsRender()">Cancel</button><button class="btn bgn" onclick="wsColSave()">Save college</button></div></div></div>`;})():''}
+      <div style="font-size:12px;color:var(--mu);margin:10px 0 4px">Tap a college to change its name, mascot, colors, logo, state and prestige.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:40vh;overflow-y:auto">${(()=>{window._wsRendering=true;const h=list.map(n=>{const k=n+'|'+WS.lvl;return`<button class="bgh" style="display:flex;align-items:center;gap:8px;text-align:left;padding:6px 8px" onclick="wsGrab();WS.colEdit='${k.replace(/'/g,"\\'")}';wsRender()">${colLogo(k,30)}<span style="font-size:12px;line-height:1.2"><b>${n}</b><br><small style="color:var(--mu)">${colInfo(k).mascot}</small></span></button>`;}).join('');window._wsRendering=false;return h;})()}</div>`;
   }else if(WS.tab==='pro'){
     const P=k=>(D.pro&&D.pro[k]&&D.pro[k].length?D.pro[k]:O.pro[k]);
     body=`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">The pro teams your former players can be drafted by or sign with. One team per line, add as many as you like.</div>
@@ -16721,8 +16796,9 @@ function wsRender(){
       <button class="bgh" onclick="if(confirm('Reset every League Setup change back to the default world?')){WS.draft={};wsSave();}">Reset all</button>
       <button class="bgh" onclick="wsDiscard()">Discard changes</button><button class="bgh" onclick="wsGrab();if(wsDraftStore())notify('Progress saved. Close and continue any time: it is used for new careers once you press Save League Setup.');">Save progress</button><button class="bgh" onclick="wsGrab();wsDraftStore();clo()">Close</button><button class="btn bgn" onclick="wsGrab();wsSave()">Save League Setup</button></div>`);
 }
+window.wsColSave=function(){wsGrab();window._wsColEdit=true;const k=colEditApply();window._wsColEdit=false;if(!k)return;WS.colEdit=null;wsDraftStore();wsRender();notify('College saved in your League Setup draft');};
 function wsSave(){
-  const D=WS.draft||{};D.custFor=USA.on?'usa':'classic';
+  window._wsColEdit=false;WS.colEdit=null;const D=WS.draft||{};D.custFor=USA.on?'usa':'classic';
   // new custom states join the world right away
   if(D.geo&&D.geo.mode!=='classic'&&Array.isArray(D.geo.custom)){D.geo.mode='usa';D.geo.states=Array.isArray(D.geo.states)?D.geo.states:Object.keys(USST);for(const c of D.geo.custom)if(c.counties&&c.counties.length&&!D.geo.states.includes(c.ab))D.geo.states.push(c.ab);}worldStore(D);worldApply(D);
   wsDraftDrop();
