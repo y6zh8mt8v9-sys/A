@@ -28,6 +28,32 @@ High school football career game with a playable Game Day engine.
 ## What's new
 
 ### Latest update
+- **Six-man, eight-man and nine-man football:** those classes play that many a side on Game Day and only schedule teams of their own format. Moving up switches to the next class's format (8-man or 11-man) and opens the rest of the class again. The home state now keeps all of its real classes (for example Texas 1A Six-Man), not only five.
+- **Awards:** Player and Play of the Week, state and national Player and Freshman of the Year (every position can win), and postgame interviews.
+- **Media page** with made-up outlets: PrepWire 365, The Rival Board and Friday Night Insider.
+- **Careers:**
+  - Host your own combine and invite college staffs, or invite coaches to a game.
+  - Offensive and defensive coordinator jobs.
+  - Automatic offers from the teams you created or edited.
+  - Rivalry trophies with a series record and real stakes.
+  - The state final is played at a neutral college stadium.
+- **Game Day:**
+  - Tip drill (catch tipped passes).
+  - Fewer penalties on the opponent.
+  - Real audibles before the snap.
+  - Max chemistry: your QB throws as soon as you call for it.
+  - Corners celebrate a breakup or a pick.
+  - A small scorebug in Player Career, so it no longer covers the meter.
+  - 2 players on one device in Free Practice.
+- **Fixes:**
+  - Game Day loads on Chromebooks, with a Try again button.
+  - Career playoffs keep you as your player.
+  - Simulated drives no longer give you stats you didn't earn.
+  - Overall can't drop between seasons.
+  - Smoother startup and menus on PC.
+- **One look everywhere:** every page now uses the dashboard's club bar and tile headers.
+
+### Previous update
 - **AI coaches:** go for it on 4th and short (no more punting at 4th and inches), kick field goals in range, and pass when they trail late instead of running.
 - **Game Day:**
   - A stiff arm or juke on a jet sweep no longer sends your runner back to the old sweep path.
@@ -44,7 +70,7 @@ High school football career game with a playable Game Day engine.
 - **New dashboard:** a club bar with your crest, name and a big Continue button, a Year/Week strip, then tiles (Next game, Team management, Training, Standings, Schedule, Recruiting, Seniors, News, Scouting, Top players, Program, League) that open their page. ☰ opens the full menu.
 - **Compact menu:** the Dashboard lists every section with its pages and gold dots for things to do; pages open on their own with a Home button. Settings → Menu layout switches back to the classic tabs.
 
-### Previous update
+### Earlier update
 - **New look on the home screen:** Gridiron 27 splash screens, app icons and loading screen (the old ones still said Gridiron Prep GM).
 - **Player Career:**
   - A ring shows where every pass and kick will come down.
@@ -72,7 +98,7 @@ High school football career game with a playable Game Day engine.
   - Text in team colors stays readable.
   - Recruiting tabs and Game Day buttons match the new look.
 
-### Earlier update
+### Older update
 - **Real number of high schools in every state** (about 15,100 for the whole country).
   - Pick up to **5 states in full detail** (League Setup → Choose your states). Every player on every team is simulated there.
   - Every other state is a **light state**. Its schools play every game, keep their strength and records, and crown a champion in a **state playoff**. The game tracks their top prospects, so stars, offers, camps and commitments work everywhere.
