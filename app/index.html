@@ -4315,6 +4315,7 @@ function renderScheduleBuilder(){
     candidates=[...own,...other].filter(s=>!scheduled.has(s.id));
   }
 
+  {const f=clsFmt(G.cls);candidates=candidates.filter(x=>clsFmt(x.cls||G.cls)===f);} // six/eight-man teams only play their own format
   // Search filter
   if(_sbSearch){
     const q=_sbSearch.toLowerCase();
@@ -4492,8 +4493,8 @@ window.addCustomGame=function(schId){
 window.sbAutoFill=function(){
   const empty=G.sched.filter(g=>g.custom&&g._empty);if(!empty.length)return;
   const myO=Math.round((G.offR+G.defR)/2),taken=new Set(G.sched.filter(g=>g.oppId).map(g=>g.oppId));taken.add(G.myId);
-  let pool=allSchools().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)===G.cls);
-  if(pool.length<empty.length)pool=pool.concat(allSchoolsAll().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)!==G.cls));
+  const _f=clsFmt(G.cls);let pool=allSchools().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)===G.cls);
+  if(pool.length<empty.length)pool=pool.concat(allSchoolsAll().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)!==G.cls&&clsFmt(x.cls)===_f));
   pool=pool.map(x=>({x,d:Math.abs(teamOvr(x.id)-myO)+Math.random()*6})).sort((a,b)=>a.d-b.d);
   for(const g of empty){const c=pool.shift();if(!c)break;g.oppId=c.x.id;g._empty=false;g.isRivalry=!!(G.chosenRivals&&G.chosenRivals.includes(c.x.id));g.date=fmtDate(g.wk-1);}
   _sbTargetWk=null;renderScheduleBuilder();
@@ -10707,8 +10708,10 @@ function gdStart(){
   _gdTAdj=Math.round((_o1-_gdAnchor)*0.5+clamp(progEdge()*0.6,-3,3));const _t1=Object.assign(gdTeam(me,mk),{ovr:Math.round(_o1)});
   _gdTAdj=Math.round((_o2-_gdAnchor)*0.5);const _t2=Object.assign(gdTeam(opp,gdOppKind(opp,mk)),{ovr:Math.round(_o2)});_gdTAdj=0;
   if(G.role==='OC')window._gdMode='off';else if(G.role==='DC')window._gdMode='def';
+  const _fmt=ctx.kind==='s7'?11:clsFmt(me.cls||G.cls);
   window.__GP={mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
+  if(_fmt<11){window.__GP.fmt=_fmt;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">${fmtName(_fmt)[0].toUpperCase()+fmtName(_fmt).slice(1)} football: ${_fmt} players a side</div>`;}
   try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v});window.__GP.neutral=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
   try{if(window.__GP.rival)window.__GP.previewHtml=(window.__GP.previewHtml||'')+rivalryWeekHtml(opp);}catch(e){}
   if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.s7q=G.s7.qn===1?1:2;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
@@ -11451,8 +11454,12 @@ function stOf(s){return s?clsSt(s.cls||G.cls):'CF';}
 let CF_NAME='Crestfield';const CF_LBL={};let _abbrUsed=new Set();
 function stName(st){return st==='CF'?CF_NAME:XST[st]?XST[st].name:st==='INTL'?'International':'Out of State';}
 function clsL(c){return XCLS[c]?XCLS[c].lbl:CF_LBL[c]||c;} // the short class label players see: the state's own name for it
-function clsName(c){return XCLS[c]?`${XST[XCLS[c].st].name} ${XCLS[c].lbl}`:c==='INTL'?'International':c==='OOS'?'Out of State':`${CF_NAME} ${CF_LBL[c]||c}`;}
-function clsOfSt(st){return st==='CF'?CLS_ORDER.slice():XST[st]?XST[st].cls.slice():[];}
+function clsName(c){return XCLS[c]?`${stName(XCLS[c].st)} ${XCLS[c].lbl}`:c==='INTL'?'International':c==='OOS'?'Out of State':`${CF_NAME} ${CF_LBL[c]||c}`;}
+function cfExtra(){return XCLS_ORDER.filter(c=>XCLS[c]&&XCLS[c].st==='CF');}
+function clsOfSt(st){return st==='CF'?cfExtra().concat(CLS_ORDER):XST[st]?XST[st].cls.slice():[];}
+// how many players a side: six-man, eight-man and nine-man classes play their own game (and only each other)
+function clsFmt(c){const l=String(clsL(c)||'');return/six|6[- ]?man/i.test(l)?6:/8[- ]?man/i.test(l)?8:/9[- ]?man|^9[AB]|^9AA/i.test(l)?9:11;}
+function fmtName(n){return n===6?'six-man':n===8?'eight-man':n===9?'nine-man':'11-man';}
 function myClsOrder(){return clsOfSt(clsSt(G.cls));}
 function makeDivsAny(c){return XCLS[c]?makeStateDivisions(c):makeDivisions(c);}
 function clsSz(c){return XCLS[c]?{r:XCLS[c].r,t:XCLS[c].t,d:XCLS[c].d}:CLS_SZ[c]||CLS_SZ['3A'];}
@@ -11686,20 +11693,20 @@ function _xSchoolName(st,c,used){
   const n=`${stName(st)} Prep ${used.size}`;used.add(n);return{nm:n,city:stName(st)};
 }
 function makeStateDivisions(c){
-  const X=XCLS[c],st=X.st,used=_xUsedNames(),names=XDIV_NAMES[st];
-  let off=0;for(const k of XST[st].cls){if(k===c)break;off+=XCLS[k].d;}
+  const X=XCLS[c],st=X.st,used=_xUsedNames(),names=XDIV_NAMES[st]||[],SC=st==='CF'?cfExtra():XST[st].cls;
+  let off=0;for(const k of SC){if(k===c)break;off+=XCLS[k].d;}
   const sizes=[];const base=Math.floor(X.t/X.d);let rem=X.t-base*X.d;for(let d=0;d<X.d;d++)sizes.push(base+(rem-->0?1:0));
   // regional flavor in the playbooks: Midwest power and Wing-T, border-country spread and option
   const OFFP=XOFF[st]||XOFF.TA;
   const divs=[];
   for(let d=0;d<X.d;d++){const teams=[];
-    const _ci=XST[st].cls.indexOf(c),_cf=XST[st].cls.length>1?_ci/(XST[st].cls.length-1):0.5;
+    const _ci=SC.indexOf(c),_cf=st==='CF'?0:SC.length>1?_ci/(SC.length-1):0.5;
     for(let t=0;t<sizes[d];t++){const U=USA.on?usaTake(st):null;
       const{nm,city,cnty}=U||(USA.on?usaSchoolName(st,_cf,used):_xSchoolName(st,c,used)),msc=U?U.mascot:_xPick(XMASC[st]),ci=(_sId*7+d*3+t)%LCOLS.length,[c1,c2]=U?[U.c1,U.c2]:LCOLS[ci];if(U)used.add(nm);
       const abbr=U?U.abbr:abbr3(nm,_abbrUsed);
       teams.push({id:_sId++,name:nm,city,cnty:cnty==null?null:cnty,mascot:msc,cls:c,dIdx:d,abbr,c1,c2,prestige:rng(1,5),wins:0,losses:0,isP:false,offS:_xPick(OFFP),defS:pick(DEF_SCH),
         fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1});}
-    divs.push({name:names[off+d]||`${XST[st].name} District ${off+d+1}`,teams});}
+    divs.push({name:names[off+d]||`${stName(st)} District ${off+d+1}`,teams});}
   const all=divs.flatMap(v=>v.teams),nG=Math.max(1,Math.round(all.length*0.30)),nB=Math.max(1,Math.round(all.length*0.35)),sh=[...all].sort(()=>Math.random()-.5);
   sh.slice(0,nG).forEach(t=>t.tier='good');sh.slice(nG,nG+nB).forEach(t=>t.tier='bad');
   return divs;
@@ -11950,7 +11957,7 @@ function lgBuildSchedule(){
   }
   // 2) non-division games: other divisions and other classifications
   const pool=lgDivs().flatMap(d=>d.teams.map(t=>t.id)).filter(id=>id!==G.myId&&clsOf[id]!=='OOS');
-  const stOfId={},cnOf={};for(const id of pool){stOfId[id]=clsSt(clsOf[id]);cnOf[id]=clsOf[id]==='INTL'?0:clsNum(clsOf[id]);}
+  const stOfId={},cnOf={},fmOf={};for(const id of pool){stOfId[id]=clsSt(clsOf[id]);cnOf[id]=clsOf[id]==='INTL'?0:clsNum(clsOf[id]);fmOf[id]=clsFmt(clsOf[id]);}
   for(const w of W){
     const free=pool.filter(id=>!B(id,w));for(let i=free.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[free[i],free[j]]=[free[j],free[i]];}
     const left=new Set(free),byStL={};for(const id of free)(byStL[stOfId[id]]=byStL[stOfId[id]]||new Set()).add(id);
@@ -11958,12 +11965,12 @@ function lgBuildSchedule(){
     for(const a of free){if(!left.has(a))continue;del(a);
       let best=null,bs=-1e9,seen=0;const sa=stOfId[a],cands=sa==='INTL'?[byStL.CF||[]]:[byStL[sa]||[],byStL.INTL||[]];
       // the remaining teams are in shuffled order: the best of the first 40 open opponents is as good a match and far cheaper
-      for(const cand of cands)for(const b of cand){if(seen>=40)break;if(divOf[b]===divOf[a]||played.has(K(a,b)))continue;seen++;
+      for(const cand of cands)for(const b of cand){if(seen>=40)break;if(divOf[b]===divOf[a]||played.has(K(a,b))||fmOf[b]!==fmOf[a])continue;seen++;
         const ca=clsOf[a],cb=clsOf[b],ia=ca==='INTL',ib=cb==='INTL';let sc=R()*1.5;
         if(ia||ib)sc+=ia&&ib?-2:(stOfId[ia?b:a]==='CF'?1.2:-1.5);else{const gap=Math.abs(cnOf[a]-cnOf[b]);sc+=gap===0?0.6:gap===1?1.4:gap===2?0.2:-2;if(stOfId[a]!==stOfId[b])sc-=1.1;}
         sc-=Math.max(0,(cnt[b]||0)-(cnt[a]||0))*0.1;if(sc>bs){bs=sc;best=b;}}
       if(best!=null){del(best);add(w,a,best);}
-      else{const c=pool.filter(x=>x!==a&&!B(x,w)&&!played.has(K(a,x))&&stOfId[x]!=='INTL'&&stOfId[x]!==stOfId[a]);if(c.length)add(w,a,c[Math.floor(R()*c.length)]);}
+      else{const c=pool.filter(x=>x!==a&&!B(x,w)&&!played.has(K(a,x))&&stOfId[x]!=='INTL'&&stOfId[x]!==stOfId[a]&&fmOf[x]===fmOf[a]);if(c.length)add(w,a,c[Math.floor(R()*c.length)]);}
     }
   }
   G.lsch={yr:G.yr,sig,games,locked:false};
@@ -15846,7 +15853,12 @@ function geoBuild(cfg){
       {let lab=RL.slice(-5);if(RL.length<5){const o=[0,1,2,3,4].map(i=>RL[Math.floor(i*RL.length/5)]),cnt={},seen={};o.forEach(x=>cnt[x]=(cnt[x]||0)+1);
         lab=o.map(x=>{if(cnt[x]<2)return x;seen[x]=(seen[x]||0)+1;return x+' '+['I','II','III'][cnt[x]-seen[x]];});} // fewer than five real classes: split the small ones (Class S II, Class S I)
        CLS_ORDER.forEach((c,i)=>{CF_LBL[c]=lab[i];});}
-      CLS_ORDER.forEach((c,i)=>{const t=Math.max(8,Math.round(N/5)),d=Math.max(1,Math.round(t/8));sz[c]={r:rEq[c].map(v=>v+M[4]),t,d};});
+      const EXTRA=RL.length>5?RL.slice(0,RL.length-5):[],nC=5+EXTRA.length;
+      CLS_ORDER.forEach((c,i)=>{const t=Math.max(8,Math.round(N/nC)),d=Math.max(1,Math.round(t/8));sz[c]={r:rEq[c].map(v=>v+M[4]),t,d};});
+      // the classes below the five main ones (six-man, eight-man, the smallest divisions) are real leagues of the home state too
+      {let dsum=0;EXTRA.forEach((lb,i)=>{const c='CF-'+(i+1),t=Math.max(8,Math.round(N/nC)),d=Math.max(1,Math.round(t/8));
+        XCLS[c]={st:'CF',lbl:lb,t,d,r:rEq['1A'].map(v=>v+M[4]-3),mean:meanEq['1A']+M[4]*0.6-2,eq:'1A',home:1};XCLS_ORDER.push(c);dsum+=d;});
+       if(EXTRA.length)XDIV_NAMES.CF=divNames(ab,dsum).map(n=>n);}
       _repl(CLS_SZ,sz);const all=divNames(ab,CLS_ORDER.reduce((s,c)=>s+sz[c].d,0));let k=0;const dv={};for(const c of CLS_ORDER){dv[c]=all.slice(k,k+sz[c].d);k+=sz[c].d;}_repl(DIV_NAMES,dv);
       CF_NAME=nm;continue;}
     const lb=usaClsList(ab,X),n=lb.length,w=lb.map(()=>1),ws=n;
@@ -15954,7 +15966,7 @@ function usaPick(ab,n){const P=usaPool(ab);return P.map((p,i)=>[p,i]).sort((a,b)
 // next school for a class of this state; falls back to a made-up one when a league asks for more than the world planned
 function usaTake(code){
   const ab=USA.ab[code]||code;if(!USA.cur)USA.cur={};let C=USA.cur[ab];
-  if(!C){const need=code==='CF'?CLS_ORDER.reduce((a,c)=>a+CLS_SZ[c].t,0):(XST[code]?XST[code].cls.reduce((a,c)=>a+XCLS[c].t,0):0);C=USA.cur[ab]={list:usaPick(ab,need),i:0};}
+  if(!C){const need=code==='CF'?CLS_ORDER.reduce((a,c)=>a+CLS_SZ[c].t,0)+cfExtra().reduce((a,c)=>a+XCLS[c].t,0):(XST[code]?XST[code].cls.reduce((a,c)=>a+XCLS[c].t,0):0);C=USA.cur[ab]={list:usaPick(ab,need),i:0};}
   const p=C.list[C.i++];if(!p)return null;
   const cid=p.ckey!=null&&USA.cid?USA.cid[p.ckey]:null;return Object.assign({},p,{cnty:cid==null?null:cid});
 }
@@ -16186,6 +16198,7 @@ function generateStartingOffers(allDivsByClass){
     return[...pool].sort(()=>Math.random()-.5).slice(0,count);
   }
   const picks=[...pickFrom('1A','low',3),...pickFrom('2A','mid',3),...pickFrom('3A','low',3)];
+  for(const c of cfExtra())picks.push(...pickFrom(c,'low',2)); // six-man / eight-man jobs in the home state too
   const _few=USA.on&&ST_ORDER.length>13;
   for(const st of ST_ORDER){if(st==='CF'||(XST[st]&&XST[st].lite))continue;const L=clsOfSt(st),n=L.length;
     const mi=Math.floor((n-1)/2),li=Math.max(0,n-2);
@@ -20698,7 +20711,7 @@ function setRoute(e,name,out,col){
 const RCOL=['#ffd23f','#4fd1ff','#ff7ad9','#b6ff6a','#ff9f43'];
 function setupScrimmage(offCall,defCall){
   G.lastPos={};for(const e of G.ents)if(e.pl)G.lastPos[e.pl.id]=[e.x,e.y];
-  const _r=setupScrimmage0(offCall,defCall);if(SEVENS())gpSevensSetup();gpAfterSetup();return _r;
+  const _r=setupScrimmage0(offCall,defCall);if(SEVENS())gpSevensSetup();else if(GP&&GP.fmt&&GP.fmt<11)gpSmallSetup(GP.fmt);gpAfterSetup();return _r;
 }
 /* ===================== v2.16 7-on-7: the summer passing league ===================== */
 // seven a side: quarterback, center and five eligibles against two linebackers, three corners and two safeties.
@@ -20711,6 +20724,21 @@ function gpSevensSetup(){
   G.ents=G.ents.filter(e=>!(e.side==='o'&&e.role==='OL'&&e.slot!=='C')&&!(e.side==='d'&&e.role==='DL'));
   G.ol=(G.ol||[]).filter(e=>G.ents.includes(e));
   for(const e of G.ents)if(e.pl)e.pl.helmetOff=true;
+}
+// six-man, eight-man and nine-man: fewer linemen and one less receiver; the defense drops to match
+function gpSmallSetup(n){
+  const offOut=n===6?['LT','LG','RG','RT']:n===8?['LT','RT']:['LT'];
+  const keep=new Set([G.rb,G.moMan,G.qb]),rOut=n<=9?([G.SL,G.te,G.Z].find(e=>e&&!keep.has(e))||null):null;
+  const gone=new Set(G.ents.filter(e=>e.side==='o'&&e.role==='OL'&&offOut.includes(e.slot)));if(rOut)gone.add(rOut);
+  for(const k of['SL','te','Z'])if(G[k]&&gone.has(G[k]))G[k]=null;
+  const dOrder=n===6?['DT1','DT2','WLB','NB','SS']:n===8?['DT2','NB','SS']:['DT2','NB'];
+  const D=G.ents.filter(e=>e.side==='d');let dn=D.length;
+  // whoever was covering the man who left goes first
+  for(const d of D)if(dn>n&&d.cover&&d.cover.man&&gone.has(d.cover.man)){gone.add(d);dn--;}
+  for(const sl of dOrder){if(dn<=n)break;const d=D.find(e=>e.slot===sl&&!gone.has(e));if(d){gone.add(d);dn--;}}
+  for(const d of D)if(dn>n&&!gone.has(d)&&d.role==='DL'){gone.add(d);dn--;}
+  G.ents=G.ents.filter(e=>!gone.has(e));G.ol=(G.ol||[]).filter(e=>G.ents.includes(e));
+  for(const d of G.ents)if(d.side==='d'&&d.cover&&d.cover.man&&!G.ents.includes(d.cover.man))d.cover={type:'blitz'};
 }
 function gpSevensTick(){
   if(!SEVENS()||G.phase!=='live'||!G.play||G.play.kind!=='scrimmage')return;
@@ -20739,7 +20767,7 @@ function setupScrimmage0(offCall,defCall){
   Object.assign(G,{qb,rb,ol,te,X,Z,SL,form:F});
   if(offCall.kind==='pass'){
     const C=offCall.data;[X,Z,SL,te,rb].forEach((e,i)=>setRoute(e,C.r[i],e.x<CX?-1:1,RCOL[i]));
-    G.recv=[X,Z,SL,te,rb].filter(e=>e.route);
+    G.recv=[X,Z,SL,te,rb].filter(e=>e&&e.route);
   }else{G.recv=[];}
   setupDefense(D,ly,L,defCall);
   G.ents=L;G.refs=mkRefs(ly);
@@ -21148,7 +21176,7 @@ function snapScrimmage(){
   if(O.kind==='pass'){
     G.rb.block=G.rb.route===null||(Math.random()<(P.def.id==='C0'||P.def.id==='FZ'?0.55:0.25)&&G.rb.route&&G.rb.route.name==='check');
     if(G.rb.block)G.rb.route=null;
-    G.recv=[G.X,G.Z,G.SL,G.te,G.rb].filter(e=>e.route&&!e.block);
+    G.recv=[G.X,G.Z,G.SL,G.te,G.rb].filter(e=>e&&e.route&&!e.block&&G.ents.includes(e));
     for(const d of G.ents)if(d.press&&d.cover&&d.cover.type==='man'&&dist(d,d.cover.man)<2.2){
       const r=d.cover.man;if(Math.random()<clamp(((r.pl?(r.pl.rte?(r.pl.agi+r.pl.rte)/2:r.pl.agi):75)-(d.pl.prs||d.pl.cov))*0.02+0.25,0.05,0.7)){d.slip=0.35;}else r.jam=rnd(0.15,0.4);}
     if(O.data&&O.data.screen)for(const d of G.ents)if(d.role==='DL')d.engDur=rnd(0.5,0.9);
