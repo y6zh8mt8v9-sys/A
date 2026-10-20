@@ -32,6 +32,39 @@ function pcCreate(d){
 // ── Player Career mode: coach trust, playing time and transfers ──
 const PC_STARTERS={QB:1,RB:1,WR:3,TE:1,OL:5,DL:4,LB:3,CB:2,S:2,K:1,P:1};
 function pcActive(){const p=myPlayer();return!!(G&&G.pcLock&&p&&G.players.includes(p)&&p.sId===G.myId&&!p.grad)?p:null;}
+// ── Player Career mode runs the team for you: the head coach handles schedule, depth chart, training, staff and recruiting ──
+function pcAuto(){return!!(typeof G!=='undefined'&&G&&G.pcLock);}
+// coach pages are hidden; in college the high school team's pages go too
+function pcHidePg(pg){return pcAuto()&&(['depth','jv','recr','scout','training','staff','cust','advisor'].includes(pg)||(ccOn()&&['roster','sched','recls'].includes(pg)));}
+// run a coach action without its toasts and page changes
+function pcQuiet(fn){const n=nav,nt=notify;nav=function(){};notify=function(){};try{return fn();}finally{nav=n;notify=nt;}}
+// the schedule: the rival in week 5 (an ongoing rival from the division, or the usual one), the open dates filled with fair
+// opponents, then locked in (no builder)
+function pcAutoSched(){if(!G||!Array.isArray(G.sched))return;const C=G.sched.filter(g=>g.custom),E=C.filter(g=>g._empty);
+  if(E.length&&E.length===C.length&&!G.sched.some(g=>g.result)){const md=myDiv(),cr=md&&(G.chosenRivals||[]).find(id=>id!==G.myId&&md.teams.some(t=>t.id===id)),r=md?getRival(G.myId,md):null;
+    G.seasonRivalId=cr||(r?r.id:null);genSched();}
+  if(G.sched.some(g=>g.custom&&g._empty)){sbFill();schedLock();}G.customSchedPending=false;}
+function pcAutoSP(){let n=0;for(const p of G.players)if(p.sId===G.myId&&!p.grad&&p.sp>0){spApply(p);n++;}if(n)try{updateRats();}catch(e){}}
+// captains: the best upperclassmen (leaders first) when a spot is open
+function pcAutoCaptains(){const c=captains();if(c.length>=3)return;const sc=p=>p.rat+(p.yr===12?3:0)+((p.traits||[]).includes('leader')?5:0);
+  const L=myP().filter(p=>p.yr>=11&&!c.includes(p.id)&&!p.xferOut).sort((a,b)=>sc(b)-sc(a));while(c.length<3&&L.length)c.push(L.shift().id);}
+// money: a sponsor and a fundraiser every season, the summer camp in the offseason
+function pcAutoMoney(){const F=finYr();try{if(!F.sponsDone)pcQuiet(()=>finSponsor());if(!F.fundDone)pcQuiet(()=>finFund());if(!F.campDone&&G.phase==='offseason')pcQuiet(()=>finCamp());}catch(e){console.error('player career money',e);}}
+// staff, facilities and training level, bought in the Assistant GM's order of value (facilities once training is maxed:
+// a training upgrade resets them), keeping a little money in the bank
+function pcAutoBudget(){const keep=10000,all=G.players.filter(p=>p.sId===G.myId);
+  for(let i=0;i<60;i++){const tl=getTrainLevel(),o=aiBudgetOpts({all}).find(x=>x.ok&&x.id&&(x.id[0]!=='f'||tl>=20)&&(G.unlimitedMoney||G.budget-x.c>=keep));if(!o)break;const b=G.budget;
+    pcQuiet(()=>o.id[0]==='t'?upgradeTrainLevel():o.id[0]==='s'?upgSt(o.id[1],o.c):upgFac(o.id[1],o.c));if(!G.unlimitedMoney&&G.budget===b)break;
+    addLog(`<span style="color:var(--gn)">Program upgrade: ${o.k} for $${o.c.toLocaleString()}.</span>`);}}
+// reclassification: the school moves up when it can (state title and the money)
+function pcMoveUp(){const O=myClsOrder(),i=O.indexOf(G.cls);if(i<0||i>=O.length-1||!moveUpChamp()||!hasFunds(CLS_MOVEUP_COST[clsEq(G.cls)]||0))return null;
+  const old=G.cls;if(!moveUpDo())return null;return bEvPop('Moving up',`After the state title the school moves up from <strong>${clsL(old)}</strong> to <strong style="color:var(--gd)">${clsL(G.cls)}</strong>.`,null,'var(--gd)');}
+// on every page change: nothing the coach would handle is left waiting
+function pcAutoTick(){if(!pcAuto()||ccOn()||!G.myId||!myS()||!Array.isArray(G.players))return;
+  if(!G.pcAutoV){G.pcAutoV=1;G.benched={};for(const p of G.players)if(p.sId===G.myId)p.depth={};} // older saves: the hand-set depth chart goes
+  else if(G.benched&&Object.keys(G.benched).some(k=>(G.benched[k]||[]).length))G.benched={};
+  if(Array.isArray(G.sched)&&G.sched.some(g=>g.custom&&g._empty))pcAutoSched();
+  pcAutoSP();pcAutoCaptains();pcAutoMoney();}
 // ═══════════ COLLEGE CAREER ═══════════
 // Player Career goes on after high school: you play for the college you signed with. Every college fields the high school
 // players it signed (rated for college: 15 to 30 overall lower than in high school, less for the best players and big stat

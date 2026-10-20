@@ -85,7 +85,7 @@ function pgNews(){
 
 let _rs={k:'rat',d:-1},_rpf='ALL';
 function pgRoster(sid){
-  const sch=getS(sid);const isMe=sid===G.myId;let pl=sPlayers(sid);
+  const sch=getS(sid);const isMe=sid===G.myId,ed=!pcAuto();let pl=sPlayers(sid); // ed: Player Career shows the roster read-only
   window._setRS=(k)=>{if(_rs.k===k)_rs.d*=-1;else{_rs.k=k;_rs.d=-1;}nav('roster',sid);};
   window._setPF=(p)=>{_rpf=p;nav('roster',sid);};
   if(_rpf!=='ALL')pl=pl.filter(p=>p.pos===_rpf);
@@ -101,7 +101,7 @@ function pgRoster(sid){
   const capPct=isMe?varsityRosterCount/MAX_VARSITY:null;
   const capColor=capPct===null?'':capPct>=1?'var(--rd)':capPct>=0.9?'var(--gd)':'var(--gn)';
   return`<div class="pnl"><div class="ph">${sLogo(sch,30)} &nbsp;${sch.name} ${sch.mascot} <span style="font-size:12px;font-weight:400;color:var(--mu)">${sPlayers(sid).length} players</span>${isMe?`<span style="margin-left:8px;background:${capPct>=1?'rgba(204,34,34,.18)':'rgba(34,184,112,.1)'};border:1px solid ${capColor};color:${capColor};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Varsity ${varsityRosterCount}/${MAX_VARSITY}${capPct>=1?'  AT CAP':''}</span>`:''}</div>
-    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p==='ALL'?'All':p}</button>`).join('')}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div></div>
+    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p==='ALL'?'All':p}</button>`).join('')}</div>${ed?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div>`:''}</div>
     <div style="overflow-x:auto"><table><thead><tr>
       <th>#</th><th onclick="_setRS('name')">Name ${ar('name')}</th>
       <th onclick="_setRS('pos')">Pos ${ar('pos')}</th><th onclick="_setRS('yr')">Yr ${ar('yr')}</th>
@@ -112,7 +112,7 @@ function pgRoster(sid){
       <th onclick="_setRS('spd')">Spd ${ar('spd')}</th><th onclick="_setRS('str')">Str ${ar('str')}</th><th onclick="_setRS('awr')">Awr ${ar('awr')}</th>
       <th>Ht</th><th>Wt</th><th onclick="_setRS('gpa')">GPA ${ar('gpa')}</th>
       <th>Traits</th><th>Inj</th>
-      ${isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:'<th></th>'}
+      ${!ed?'':isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:'<th></th>'}
     </tr></thead>
     <tbody>${pl.map(p=>`<tr class="cl" onclick="showPlayer(${p.id})">
       <td style="color:var(--mu)">${p.num}</td><td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,28)}<span>${p.fn} ${p.ln}</span></div></td>
@@ -126,7 +126,7 @@ function pgRoster(sid){
       <td>${gpaL(p.gpa)}</td>
       <td>${(p.traits||[]).map(t=>trB(t)).join('')}</td>
       <td>${injBadgeTable(p)}</td>
-      ${isMe?`<td style="color:var(--te);font-weight:700">${p.sp||0}</td><td>
+      ${isMe&&ed?`<td style="color:var(--te);font-weight:700">${p.sp||0}</td><td>
         <div style="display:flex;gap:3px;align-items:center">
           <button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button>
           ${p.onJV?`<button class="btn bxs bgn" onclick="event.stopPropagation();callUpToVarsity(${p.id})" title="Call up to Varsity" style="font-size:9px;padding:2px 5px">V</button>`
@@ -134,7 +134,7 @@ function pgRoster(sid){
           <button class="btn bxs" onclick="event.stopPropagation();confirmCutPlayer(${p.id})" title="Cut player" style="background:var(--rd);font-size:9px;padding:2px 5px"></button>
         </div>
       </td>`:''}
-      ${isMe?'':`<td><button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button></td>`}
+      ${isMe||!ed?'':`<td><button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button></td>`}
     </tr>`).join('')}</tbody></table></div></div>`;
 }
 
@@ -318,7 +318,8 @@ function pgTrain(){
   </div></div>`;
 }
 
-window.autoSP=function(pid){const p=getP(pid);if(!p||!(p.sp>0))return;const sp=p.sp;p.rat=clamp(p.rat+sp,1,Math.max(p.pot,p.rat));p.pot=Math.max(p.pot,p.rat);_attrBoostForOvr(p,sp);p.sp=0;updateRats();notify(`${p.fn} ${p.ln}: ${sp} SP → +${sp} OVR! Attributes boosted.`);nav('training');};
+function spApply(p){const sp=p.sp;p.rat=clamp(p.rat+sp,1,Math.max(p.pot,p.rat));p.pot=Math.max(p.pot,p.rat);_attrBoostForOvr(p,sp);p.sp=0;return sp;}
+window.autoSP=function(pid){const p=getP(pid);if(!p||!(p.sp>0))return;const sp=spApply(p);updateRats();notify(`${p.fn} ${p.ln}: ${sp} SP → +${sp} OVR! Attributes boosted.`);nav('training');};
 
 window.upgradeTrainLevel=function(){
   const tLvl=getTrainLevel();
@@ -621,8 +622,8 @@ function pgSched(){
     <span>Schedule: ${2026+(G.yr-1)} Season
       ${hasRivalry?'<span style="color:var(--gd);font-size:12px;font-weight:700;margin-left:10px"> Rivalry included</span>':''}
     </span>
-    ${noGamesPlayed&&!hasEmpty?`<button class="bgh bsm" onclick="openScheduleBuilder()"> Edit Schedule</button>`:''}
-    ${hasEmpty?`<button class="btn" style="padding:4px 12px;font-size:12px;background:var(--rd)" onclick="openScheduleBuilder()"> Finish Building Schedule!</button>`:''}
+    ${noGamesPlayed&&!hasEmpty&&!pcAuto()?`<button class="bgh bsm" onclick="openScheduleBuilder()"> Edit Schedule</button>`:''}
+    ${hasEmpty&&!pcAuto()?`<button class="btn" style="padding:4px 12px;font-size:12px;background:var(--rd)" onclick="openScheduleBuilder()"> Finish Building Schedule!</button>`:''}
   </div>
   ${sosAvg>0?`<div style="padding:6px 14px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
     <span style="color:${sosTierDisp.color};font-weight:700">${sosTierDisp.icon} SOS: ${sosTierDisp.label}</span>

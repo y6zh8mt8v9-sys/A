@@ -83,12 +83,12 @@ function navInit(){
   if(!bar.querySelector('.nb-home')){const hb=document.createElement('button');hb.className='nb nb-home';hb.textContent='\u2039 Home';hb.title='Dashboard';hb.onclick=()=>nav('dash');const st=document.getElementById('nav-team-strip');bar.insertBefore(hb,st?st.nextSibling:bar.firstChild);}
   pr.innerHTML=NAV_GROUPS.map(([k,l,ic])=>`<button class="np" id="np-${k}" role="tab" onclick="navGo('${k}')"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg><span>${l}</span><i></i></button>`).join('');
 }
-function navGo(k){const g=NAV_GROUPS.find(x=>x[0]===k);if(!g)return;const last=(G.navLast||{})[k];nav(last&&g[3].includes(last)&&(last!=='mine'||G.myPlayerId!=null)?last:g[3][0]);}
+function navGo(k){const g=NAV_GROUPS.find(x=>x[0]===k);if(!g)return;const last=(G.navLast||{})[k],P=g[3].filter(pg=>!pcHidePg(pg));nav(last&&P.includes(last)&&(last!=='mine'||G.myPlayerId!=null)?last:P[0]||'dash');}
 function navSync(page){
   try{navInit();const g=navGroupOf(page);document.body.dataset.navg=g;(G.navLast||(G.navLast={}))[g]=page;
-    for(const[k]of NAV_GROUPS){const b=document.getElementById('np-'+k);if(b)b.classList.toggle('on',k===g);}
+    for(const[k,,,P]of NAV_GROUPS){const b=document.getElementById('np-'+k);if(b){b.classList.toggle('on',k===g);b.style.display=P.every(pcHidePg)?'none':'';}}
     const vis=id=>{const e=document.getElementById(id);return!!(e&&e.style.display!=='none');};
-    const h=document.getElementById('np-home');if(h)h.classList.toggle('dot',vis('news-badge'));const pg=document.getElementById('np-program');if(pg)pg.classList.toggle('dot',vis('adv-badge'));
+    const h=document.getElementById('np-home');if(h)h.classList.toggle('dot',vis('news-badge'));const pg=document.getElementById('np-program');if(pg)pg.classList.toggle('dot',vis('adv-badge')&&!pcHidePg('advisor'));
     {const c=gdsMain().cnav!==false;document.body.classList.toggle('cnav',c);document.body.classList.toggle('cnav-dash',c&&page==='dash');
      const T=cnavTodo();document.querySelectorAll('#nav-bar .nb[id^="nb-"]').forEach(b=>{const k=b.id.slice(3);b.classList.toggle('todo',!!T[k]&&k!=='news');});}
     const on=document.querySelector('#nav-bar .nb.on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'});}catch(e){}
@@ -107,25 +107,26 @@ function dashTiles(o){
   // next game
   let nb;if(opp){const r=dtOD(opp.id),lbl=no?(ng.isRivalry?'Rivalry week':'Week '+ng.wk)+(ng.date?' · '+ng.date:''):(poRoundName(ng.playoffRound)||ng.label||'Playoffs');
     nb=`<div class="dt-ng"><div style="min-width:0"><div class="dt-sub">${lbl}</div><div class="dt-big">${opp.name} ${opp.mascot}</div><div class="dt-sub">${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}</div>${no&&ng.isRivalry?rivalryWeekHtml(opp):''}${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div></div><div class="dt-logo">${sLogo(opp,96)}</div></div>`;}
-  else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
+  else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)&&!pcAuto()?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
   const tNext=dtTile('Next game',opp?`viewSchool(${opp.id})`:`nav('sched')`,nb,'dt-tall');
   // schedule
   const up=G.sched.filter(g=>!g.result&&g.type!=='bye').slice(0,5);
   const tSched=dtTile('Schedule'+dot('sched'),`nav('sched')`,up.length?`<div class="dt-list">${up.map(g=>{const t=g.oppId!=null?getS(g.oppId):null;return`<div><b>W${g.wk}</b>${t?sLogo(t,26):'<span class="dt-nl"></span>'}<span class="dt-ln">${t?t.name:(g._empty?'Open slot':g.label||'TBD')}</span><span class="dt-mu">${g.type==='playoff'?'Playoff':g.isRivalry?'Rival':g.custom?'Non-league':'League'}</span></div>`;}).join('')}</div>`:`<div class="dt-mu">No games left on the schedule.</div>`);
-  // team management
-  const mo=moraleOf(),mine=dtOD(G.myId);
-  const tTeam=dtTile('Team management',`nav('depth')`,`<div class="dt-bar"><i style="width:${clamp(mo,0,100)}%;background:${mo>=60?'var(--gn)':mo>=40?'var(--gd)':'#e5534b'}"></i></div><div class="dt-sub">${G.offS} / ${G.defS} · Morale: ${mo} (${moraleLbl(mo)})</div>${dtChips(mine)}<div class="dt-stars">${stars(Math.round(G.prestige||1))}</div><div class="dt-sub" style="margin-top:6px">${pl.length} players · QB chemistry ${Math.round(chemAvg())}</div>`,'dt-tall');
+  // team management (Player Career: the team, read-only)
+  const mo=moraleOf(),mine=dtOD(G.myId),pa=pcAuto();
+  const tTeam=dtTile(pa?'Team':'Team management',pa?`nav('roster')`:`nav('depth')`,`<div class="dt-bar"><i style="width:${clamp(mo,0,100)}%;background:${mo>=60?'var(--gn)':mo>=40?'var(--gd)':'#e5534b'}"></i></div><div class="dt-sub">${G.offS} / ${G.defS} · Morale: ${mo} (${moraleLbl(mo)})</div>${dtChips(mine)}<div class="dt-stars">${stars(Math.round(G.prestige||1))}</div><div class="dt-sub" style="margin-top:6px">${pl.length} players · QB chemistry ${Math.round(chemAvg())}</div>`,'dt-tall');
   // recruiting (offers coming in) and seniors (leaving)
   const offers=pl.reduce((a,p)=>a+((p.offers||[]).length),0),commits=pl.filter(p=>p.committed).length,srs=pl.filter(p=>p.yr===12).length;
   const xin=xferInList().length,xout=xferOutList().length;
-  const tRec=dtTile('Transfers',`nav('scout')`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
-  const tSr=dtTile('Transfers'+(xout?'<i class="dt-dot"></i>':''),`xferLeaveOpen()`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${xout+srs}${xout?` · ${xout} transfer${xout>1?'s':''}`:''}</span></div>`,'dt-half');
+  const tRec=dtTile('Transfers',pa?`nav('roster')`:`nav('scout')`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
+  const tSr=dtTile('Transfers'+(xout&&!pa?'<i class="dt-dot"></i>':''),pa?`nav('roster')`:`xferLeaveOpen()`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${xout+srs}${xout?` · ${xout} transfer${xout>1?'s':''}`:''}</span></div>`,'dt-half');
   const n0=(newsItems||[])[0];
   const tNews=dtTile('News'+dot('news'),`nav('news')`,n0?`<div class="dt-news">${n0.headline}</div><div class="dt-mu">${n0.sub||''}</div>`:`<div class="dt-mu">No news yet.</div>`);
   // training and scouting
   const tl=getTrainLevel();
-  const tTrain=dtTile('Training'+dot('training'),`nav('training')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">${pracAvailable()?`Weekly practice is ready`:'This week\'s practice is done'}</div>${pracAvailable()?`<button class="btn bsm" style="margin-top:8px" onclick="event.stopPropagation();pracOpen()">Practice</button>`:''}`,'dt-tall');
-  const tScout=dtTile('Scouting',`nav('scout')`,`<div class="dt-sub">Scout your next opponents and the prospects in your area.</div>${opp?`<div class="dt-sub" style="margin-top:6px">Next: <b>${opp.name}</b></div>`:''}`);
+  const tTrain=pa?dtTile('Training',`nav('mine')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">The coaching staff runs practice every week.</div>`,'dt-tall')
+    :dtTile('Training'+dot('training'),`nav('training')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">${pracAvailable()?`Weekly practice is ready`:'This week\'s practice is done'}</div>${pracAvailable()?`<button class="btn bsm" style="margin-top:8px" onclick="event.stopPropagation();pracOpen()">Practice</button>`:''}`,'dt-tall');
+  const tScout=dtTile('Scouting',pa?(opp?`viewSchool(${opp.id})`:`nav('teams')`):`nav('scout')`,`<div class="dt-sub">Scout your next opponents and the prospects in your area.</div>${opp?`<div class="dt-sub" style="margin-top:6px">Next: <b>${opp.name}</b></div>`:''}`);
   // standings and top players
   const dv=(G.divisions||[]).find(d=>d.teams.some(t=>t.id===G.myId));let stB='<div class="dt-mu">No division.</div>';
   if(dv){const rows=dv.teams.slice().sort((a,b)=>(b.wins-a.wins)||(a.losses-b.losses)).slice(0,6);
@@ -134,7 +135,7 @@ function dashTiles(o){
   const top=pl.slice().sort((a,b)=>b.rat-a.rat).slice(0,5);
   const tTop=dtTile('Top players',`nav('roster')`,`<div class="dt-list">${top.map(p=>`<div><b>${p.pos}</b><span class="dt-ln">${p.fn} ${p.ln}</span><span class="dt-mu">${yrL(p.yr)}</span>${rb(p.rat)}</div>`).join('')}</div>`);
   // program
-  const tProg=dtTile('Program'+dot('advisor'),`nav('advisor')`,`<div class="dt-sub">Assistant GM, watchlist, trophies and history.</div><div class="dt-list" style="margin-top:8px">${[['advisor','Assistant GM'],['trophy','Trophy Case'],['hof','Hall of Fame'],['hist','History & Records']].map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`,'dt-tall');
+  const tProg=dtTile('Program'+dot('advisor'),pa?`nav('trophy')`:`nav('advisor')`,`<div class="dt-sub">${pa?'Watchlist':'Assistant GM, watchlist'}, trophies and history.</div><div class="dt-list" style="margin-top:8px">${[['advisor','Assistant GM'],['trophy','Trophy Case'],['hof','Hall of Fame'],['hist','History & Records']].filter(([k])=>!pcHidePg(k)).map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`,'dt-tall');
   const tLeague=dtTile('League',`nav('rank')`,`<div class="dt-list">${[['rank','Rankings'],['playoff','Playoffs'],['teams','Teams'],['leads','Leaders']].map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`);
   let alerts='';try{alerts=jobPanel()+pcPanel()+s7Panel();}catch(e){}
   const pills=`<span class="dt-pill" title="Record">${G.wins}-${G.losses}</span><span class="dt-pill" title="Prestige">★ ${Math.round(G.prestige||1)}</span><span class="dt-pill" style="color:var(--gn)" title="Budget">$${(G.budget/1000).toFixed(0)}k</span>`;
@@ -147,18 +148,22 @@ function cnavTodo(){const t={},vis=id=>{const e=document.getElementById(id);retu
   try{if(vis('news-badge'))t.news='New';}catch(e){}
   try{if(vis('adv-badge'))t.advisor='Advice';}catch(e){}
   try{const p=pcActive();if(p&&p.pcSP>0)t.mine=p.pcSP+' SP';}catch(e){}
-  try{if(G.phase==='offseason'&&G.sched.some(g=>g._empty))t.sched='Build it';}catch(e){}
-  try{if(pracAvailable())t.training='Practice';}catch(e){}
-  try{const n=xferOutList().length;if(n)t.roster=n+' leaving';}catch(e){}
+  const pa=pcAuto(); // Player Career: the coach's to-dos are not yours
+  try{if(!pa&&G.phase==='offseason'&&G.sched.some(g=>g._empty))t.sched='Build it';}catch(e){}
+  try{if(!pa&&pracAvailable())t.training='Practice';}catch(e){}
+  try{const n=xferOutList().length;if(n&&!pa)t.roster=n+' leaving';}catch(e){}
   try{if(G.phase==='postseason'&&G.playoff&&!G.playoff.stateChampId&&!G.playoff.stateChamp)t.playoff='Live';}catch(e){}
+  for(const k in t)if(pcHidePg(k))delete t[k];
   return t;}
 function cnavLbl(pg){if(NL[pg])return NL[pg];const b=document.getElementById('nb-'+pg);return b?b.textContent.trim():pg;}
 function cnavHub(force){if(!force&&gdsMain().cnav===false)return'';const T=cnavTodo();
-  const cards=NAV_GROUPS.map(([k,l,ic,pages])=>{const ps=pages.filter(pg=>pg!=='dash'&&(pg!=='mine'||G.myPlayerId!=null)&&(pg!=='college'||ccOn())&&(pg!=='social'||G.myPlayerId!=null)&&(pg!=='recls'||(document.getElementById('nb-recls')||{style:{}}).style.display!=='none'));if(!ps.length)return'';
+  const cards=NAV_GROUPS.map(([k,l,ic,pages])=>{const ps=pages.filter(pg=>pg!=='dash'&&!pcHidePg(pg)&&(pg!=='mine'||G.myPlayerId!=null)&&(pg!=='college'||ccOn())&&(pg!=='social'||G.myPlayerId!=null)&&(pg!=='recls'||(document.getElementById('nb-recls')||{style:{}}).style.display!=='none'));if(!ps.length)return'';
     const n=ps.filter(pg=>T[pg]).length;
     return`<div class="cnav-card"><div class="cnav-h"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg>${l}${n?`<small>${n} to do</small>`:''}</div><div class="cnav-sub">${ps.map(pg=>`<button class="${T[pg]?'todo':''}" onclick="nav('${pg}')">${cnavLbl(pg)}${T[pg]?`<span>${T[pg]}</span>`:''}</button>`).join('')}</div></div>`;}).join('');
   return`<div class="cnav-hub">${cards}</div>`;}
 function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e){}
+  if(pcHidePg(page)){page='dash';arg=undefined;} // Player Career: coach pages (old saves, deep links) go to the dashboard
+  try{pcAutoTick();}catch(e){console.error('player career auto',e);}
   const _prevPg=G._page;
   G._page=page;G._arg=arg;
   if(['dash','depth','roster','jv'].includes(page)){try{autoJVCallup(true);}catch(e){console.error('autoJVCallup',e);}}
@@ -191,6 +196,7 @@ function updateSbCard(){
   {const b=document.getElementById('nb-mine');if(b)b.style.display=G.myPlayerId!=null?'':'none';}
   {const b=document.getElementById('nb-college');if(b)b.style.display=ccOn()?'':'none';}
   {const b=document.getElementById('nb-social');if(b)b.style.display=G.myPlayerId!=null?'':'none';}
+  for(const k of['roster','depth','jv','recr','scout','training','staff','cust','sched','advisor','recls']){const b=document.getElementById('nb-'+k);if(b)b.style.display=pcHidePg(k)?'none':'';}
   const ms=myS();if(!ms)return;
   const nm=document.getElementById('sb-team-name');
   const sub=document.getElementById('sb-team-sub');
