@@ -4285,6 +4285,7 @@ let _sbStep=0; // 0 = pick rivalry, 1 = pick custom games
 let _sbTargetWk=null; // which week slot is currently selected for filling
 
 function openScheduleBuilder(){
+  if(pcAuto()){pcAutoSched();return;} // Player Career: the coaching staff builds it
   G.customSchedPending=false;
   _sbCls=G.cls; // default to own classification
   _sbSearch='';window._sbShow=60;
@@ -4592,14 +4593,17 @@ window.addCustomGame=function(schId){
 
 // v2.14: fill every open slot in one tap with fair opponents from your own classification (closest in strength first)
 window.sbAutoFill=function(){
+  if(!G.sched.some(g=>g.custom&&g._empty))return;sbFill();
+  _sbTargetWk=null;renderScheduleBuilder();
+};
+function sbFill(){
   const empty=G.sched.filter(g=>g.custom&&g._empty);if(!empty.length)return;
   const myO=Math.round((G.offR+G.defR)/2),taken=new Set(G.sched.filter(g=>g.oppId).map(g=>g.oppId));taken.add(G.myId);
   const _f=clsFmt(G.cls);let pool=allSchools().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)===G.cls);
   if(pool.length<empty.length)pool=pool.concat(allSchoolsAll().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)!==G.cls&&clsFmt(x.cls)===_f));
   pool=pool.map(x=>({x,d:Math.abs(teamOvr(x.id)-myO)+Math.random()*6})).sort((a,b)=>a.d-b.d);
   for(const g of empty){const c=pool.shift();if(!c)break;g.oppId=c.x.id;g._empty=false;g.isRivalry=!!(G.chosenRivals&&G.chosenRivals.includes(c.x.id));g.date=fmtDate(g.wk-1);}
-  _sbTargetWk=null;renderScheduleBuilder();
-};
+}
 window.removeCustomGame=function(wk){
   const slot=G.sched.find(g=>g.wk===wk&&g.custom);
   if(!slot)return;
@@ -4609,6 +4613,12 @@ window.removeCustomGame=function(wk){
 };
 
 window.finalizeSchedule=function(){
+  schedLock();
+  clo();
+  nav('dash');
+  notify('Schedule locked in! Season begins.');
+};
+function schedLock(){
   // Auto-fill any remaining empty slots with random in-classification teams (shouldn't happen)
   const scheduled=new Set(G.sched.filter(g=>g.oppId).map(g=>g.oppId));
   scheduled.add(G.myId);
@@ -4622,10 +4632,7 @@ window.finalizeSchedule=function(){
   const playoffSlots=G.sched.filter(g=>g.type==='bye');
   const regLen=regGames.length;
   playoffSlots.forEach((g,i)=>{g.wk=regLen+i+1;g.date=fmtDate(regLen+i);});
-  clo();
-  nav('dash');
-  notify('Schedule locked in! Season begins.');
-};
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 function regSched(){return G.sched.filter(g=>g.type==='regular'&&!g._empty);}
@@ -5205,7 +5212,12 @@ function s7Start(){
   const sd=[0,7,3,4,1,6,2,5].filter(i=>i<field.length).map(i=>field[i]);const pairs=[];for(let i=0;i+1<sd.length;i+=2)pairs.push([sd[i],sd[i+1]]);
   G.s7={yr:G.yr,picks:G.s7&&G.s7.yr===G.yr?G.s7.picks:[],field,round:0,rounds:[pairs.map(([a,b])=>({a,b,w:null,sc:null}))],series:null,done:false,res:[]};}
 window.s7Open=function(){
-  if(!G.s7||G.s7.yr!==G.yr||!G.s7.paid){s7Signup();return;}s7Render();};
+  if(!G.s7||G.s7.yr!==G.yr||!G.s7.paid){if(pcAuto()){s7AutoEnter();return;}s7Signup();return;}s7Render();};
+// Player Career: the coach enters the league with his best 14
+function s7AutoEnter(){if(!G.unlimitedMoney&&G.budget<S7_FEE){notify('The program can\'t afford the 7-on-7 entry fee this year','w');return;}
+  const ids=s7AutoPick();s7Start();if(!G.s7||G.s7.yr!==G.yr||!G.s7.rounds)return;if(!G.unlimitedMoney)G.budget-=S7_FEE;G.s7.picks=ids;G.s7.paid=true;addLog(`<span style="color:var(--gd)">The coach entered the 7-on-7 Summer League (-$${S7_FEE.toLocaleString()})</span>`);s7Render();}
+// Player Career: you play the 7-on-7 games only when the coach picked your player
+function s7MineIn(){const p=pcActive();return!!(p&&!(p.inj>0)&&G.s7&&G.s7.picks.includes(p.id));}
 function s7Signup(){
   const pl=myP().filter(p=>!(p.inj>0)),O=['QB','WR','TE','RB'],D=['CB','S','LB'],sel=new Set((G.s7&&G.s7.yr===G.yr&&G.s7.picks)||s7AutoPick());
   const row=p=>`<label style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:13px"><input type="checkbox" class="s7-ck" value="${p.id}" style="width:auto;min-height:0" ${sel.has(p.id)?'checked':''} onchange="s7Count()"><b style="width:30px">${p.pos}</b>${p.fn} ${p.ln}<span style="margin-left:auto;color:var(--mu)">${p.rat} · ${['','','','','','','','','','Fr','So','Jr','Sr'][p.yr]||''}</span></label>`;
@@ -5234,8 +5246,8 @@ function s7Render(){const S=G.s7;if(!S)return;const my=s7MyGame(),rn=['Quarterfi
   const rows=S.rounds.map((R,i)=>`<div style="margin-bottom:8px"><div style="font-weight:800;font-size:12px;color:var(--mu)">${rn[i]||'Round '+(i+1)}</div>${R.map(g=>`<div class="dr"><span>${g.a===G.myId?'<b>':''}${s7Name(g.a)}${g.a===G.myId?'</b>':''} vs ${g.b===G.myId?'<b>':''}${s7Name(g.b)}${g.b===G.myId?'</b>':''}</span><span>${g.sc?g.sc.join('-'):'–'}</span></div>`).join('')}</div>`).join('')
     +(S.series?`<div style="font-weight:800;font-size:12px;color:var(--mu)">League final · best of five</div><div class="dr"><span>${s7Name(S.series.a)} vs ${s7Name(S.series.b)}</span><span>${S.series.wa}-${S.series.wb}</span></div>${S.series.games.map((g,i)=>`<div style="font-size:12px;color:var(--mu)">Game ${i+1}: ${g.join('-')}</div>`).join('')}`:'');
   openMo(`<h2>7-on-7 Summer League</h2><div style="font-size:13px;margin-bottom:10px">${S.done?(S.champ===G.myId?'<b style="color:var(--gd)">League champions!</b>':`Your run is over. Champion: <b>${s7Name(S.champ)}</b>`):my?`Next: <b>${s7Name(my.opp)}</b>${my.kind==='series'?` · league final, game ${S.series.games.length+1}`:''}`:'Waiting on the other games…'}</div>
-    ${rows}<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:10px;flex-wrap:wrap">${my?`<label style="font-size:12px;display:flex;gap:6px;align-items:center;margin-right:auto">Game length <select style="width:auto;min-height:0" onchange="G.s7.qn=+this.value"><option value="1"${S.qn===1?' selected':''}>1 quarter</option><option value="2"${S.qn!==1?' selected':''}>2 quarters</option></select></label><button class="btn bgn" onclick="s7Play()">Play it</button><button class="bgh" onclick="s7Sim()">Simulate</button>`:''}<button class="bgh" onclick="clo()">Close</button></div>`);}
-window.s7Play=function(){const my=s7MyGame();if(!my)return;const opp=getS(my.opp);clo();window._gdMode='all';window._gdInfo={kind:'s7',info:{opp,label:'7-on-7 Summer League'}};gdStart();};
+    ${rows}<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:10px;flex-wrap:wrap">${my?`<label style="font-size:12px;display:flex;gap:6px;align-items:center;margin-right:auto">Game length <select style="width:auto;min-height:0" onchange="G.s7.qn=+this.value"><option value="1"${S.qn===1?' selected':''}>1 quarter</option><option value="2"${S.qn!==1?' selected':''}>2 quarters</option></select></label>${!pcAuto()||s7MineIn()?`<button class="btn bgn" onclick="s7Play()">Play it</button>`:''}<button class="bgh" onclick="s7Sim()">Simulate</button>`:''}<button class="bgh" onclick="clo()">Close</button></div>`);}
+window.s7Play=function(){const my=s7MyGame();if(!my)return;if(pcAuto()&&!s7MineIn()){s7Sim();return;}const opp=getS(my.opp);clo();window._gdMode='all';window._gdInfo={kind:'s7',info:{opp,label:'7-on-7 Summer League'}};gdStart();};
 window.s7Sim=function(){const my=s7MyGame();if(!my)return;const[a,b]=s7SimGame(G.myId,my.opp);s7Record(a,b);};
 // a result for your game; the other games of the round are simulated, then the bracket moves on
 function s7Record(my,op){const S=G.s7,g=s7MyGame();if(!g)return;
@@ -5263,7 +5275,8 @@ function s7Finish(champ){const S=G.s7;S.done=true;S.champ=champ;
   addLog(`<span style="color:var(--gd)">7-on-7 league ${me?'champions':'finished'} · ${won} win${won===1?'':'s'}${n?` · ${n} new offer${n===1?'':'s'}`:''}</span>`);}
 function s7Panel(){if(!G||G.phase!=='postseason')return'';const S=G.s7&&G.s7.yr===G.yr?G.s7:null;
   if(S&&S.done)return'';
-  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">7-on-7 Summer League</div><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:13px;color:var(--mu)">${S&&S.paid?'Your passing league team is in the bracket.':'Optional: pick 7 on offense and 7 on defense and play the best programs of your class. Best-of-five final; standouts get college looks. Entry $'+S7_FEE.toLocaleString()+'.'}</div><button class="btn" onclick="s7Open()">${S&&S.paid?'Open bracket':'Enter the league'}</button></div></div>`;}
+  if(pcAuto()&&!(S&&S.paid)&&!G.unlimitedMoney&&G.budget<S7_FEE)return'';
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">7-on-7 Summer League</div><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:13px;color:var(--mu)">${S&&S.paid?'Your passing league team is in the bracket.':pcAuto()?'The coach takes his best 7 on offense and 7 on defense to the passing league. Best-of-five final; standouts get college looks.':'Optional: pick 7 on offense and 7 on defense and play the best programs of your class. Best-of-five final; standouts get college looks. Entry $'+S7_FEE.toLocaleString()+'.'}</div><button class="btn" onclick="s7Open()">${S&&S.paid?'Open bracket':pcAuto()?'See the bracket':'Enter the league'}</button></div></div>`;}
 const _pgDash0=pgDash;pgDash=function(){if(gdsMain().cnav!==false)return _pgDash0();let x='';try{x=jobPanel()+s7Panel();}catch(e){}try{x=pcPanel()+x;}catch(e){}return x+_pgDash0();};
 // ═══════════ v2.16 PROGRAM MONEY: boosters, merchandise, broadcasts, sponsors, fundraisers, summer camps ═══════════
 function finYr(){if(!G.fin||G.fin.yr!==G.yr)G.fin={yr:G.yr,boost:0,merch:0,tv:0,spons:0,fund:0,camp:0,sign:0,fundDone:false,sponsDone:false,campDone:false};return G.fin;}
@@ -5969,7 +5982,8 @@ function campSendInvites(C,mineOut){
   const picks=[];const used=new Set();
   for(let k=0;k<C.size*4&&picks.length<C.size&&cand.length;k++){const i=Math.floor(Math.pow(Math.random(),1.6)*cand.length),p=cand[i][1];if(used.has(p.id))continue;used.add(p.id);picks.push(p);}
   for(const p of picks){C.inv++;
-    if(p.sId===G.myId){G.campInv=(G.campInv||[]).filter(v=>getP(v.pid)&&v.yr===G.yr);if(G.campInv.filter(v=>v.pid===p.id).length>=3)continue;
+    if(p.sId===G.myId&&p.id===G.myPlayerId&&pcAuto()){try{const r=campRun(p,C,true);C.att++;addNews('offer',`Camp: ${p.fn} ${p.ln} grades ${r.grade}`,`${C.name}, ${r.got.length} offer${r.got.length!==1?'s':''}.`);}catch(e){}} // Player Career: your player goes
+    else if(p.sId===G.myId&&!pcAuto()){G.campInv=(G.campInv||[]).filter(v=>getP(v.pid)&&v.yr===G.yr);if(G.campInv.filter(v=>v.pid===p.id).length>=3)continue;
       const inv={id:'c'+Date.now().toString(36)+Math.floor(Math.random()*1e6),pid:p.id,yr:G.yr,wk:G.week||0,camp:{host:C.host,lvl:C.lvl,pr:C.pr,name:C.name,schools:C.schools,size:C.size}};
       G.campInv.push(inv);if(mineOut)mineOut.push([p,C]);}
     else if(Math.random()<0.8){try{campRun(p,C,true);C.att++;}catch(e){}}}
@@ -6072,7 +6086,7 @@ function ncampMake(){_colStReady();
     for(const x of pick){const pos=x.pos.sort((a,b)=>b[1]-a[1]).slice(0,1+Math.floor(Math.random()*2)),spots=Math.min(4,pos.reduce((a,b)=>a+b[1],0));
       L.push({id:'n'+G.yr+'_'+(n++),host:x.c.school,lvl:x.c.lvl,pr:x.c.pr,st:x.c.st,pos:pos.map(a=>a[0]),spots,fee:ncampFee(x.c),att:[],mine:[],done:false,res:null});}}
   // other high schools send their own seniors at those positions
-  const S=G.players.filter(p=>!p.grad&&p.yr===12&&!p.committed&&p.sId&&p.sId!==G.myId&&p.pos!=='K');
+  const S=G.players.filter(p=>!p.grad&&p.yr===12&&!p.committed&&p.sId&&(p.sId!==G.myId||pcAuto())&&p.pos!=='K'); // Player Career: your school sends its seniors like the others
   for(const C of L){const cand=S.filter(p=>C.pos.includes(p.pos)),near=cand.map(p=>[Math.abs(recLevel(p)-(C.pr-6)),p]).filter(a=>a[0]<16).sort((a,b)=>a[0]-b[0]).slice(0,C.spots*12);
     const want=C.spots*(3+Math.floor(Math.random()*3));for(const[,p]of near.sort(()=>Math.random()-.5)){if(C.att.length>=want)break;if(plSt(p)!==C.st&&Math.random()>0.45)continue;C.att.push(p.id);}}
   return L;}
@@ -6080,8 +6094,8 @@ function ncampActive(){return G.ncamp&&G.ncamp.yr===G.yr&&!G.ncamp.done;}
 function ncampTick(left,pops){
   if(G.phase!=='regular'&&G.phase!=='offseason')return;
   if(left<=2&&left>0&&(!G.ncamp||G.ncamp.yr!==G.yr)){G.ncamp={yr:G.yr,done:false,list:ncampMake()};
-    addNews('offer',' College needs camps',`${G.ncamp.list.length} colleges with open spots hold camps over the final two weeks. Send a senior from the Recruiting page.`);
-    if(pops)pops.push(bEvPop(' Needs Camps Open',`${G.ncamp.list.length} colleges still have open spots and are holding camps over the <strong>final two weeks</strong> of the season. You can pay to send a senior at a position they need; other schools send theirs too, and only the host college can offer.<div style="margin-top:6px;font-size:12px;color:var(--mu)">Open the Recruiting page to send players.</div>`,null,'var(--b2)'));}
+    addNews('offer',' College needs camps',`${G.ncamp.list.length} colleges with open spots hold camps over the final two weeks.${pcAuto()?'':' Send a senior from the Recruiting page.'}`);
+    if(pops&&!pcAuto())pops.push(bEvPop(' Needs Camps Open',`${G.ncamp.list.length} colleges still have open spots and are holding camps over the <strong>final two weeks</strong> of the season. You can pay to send a senior at a position they need; other schools send theirs too, and only the host college can offer.<div style="margin-top:6px;font-size:12px;color:var(--mu)">Open the Recruiting page to send players.</div>`,null,'var(--b2)'));}
   if(left===0&&ncampActive())ncampResolve(pops);
 }
 function ncampSend(cid,pid){
@@ -6543,6 +6557,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
 
 // ═══════════ OFFSEASON (3 PHASES) ═══════════
 function runOffseason(){
+  if(pcAuto()){pcOffseason();return;}
   if(G.osPhase===0&&G.gradShown!==G.yr){G.gradShown=G.yr;seniorCeremony();return;}
   if(G.osPhase===0){showOsPhase(0,' Winter Offseason','Dec–Feb: Weight training, film study, and recruiting visits.');return;}
   if(G.osPhase===1){showOsPhase(1,' Spring Offseason','Mar–May: Spring practices, position training, and scouting camps.');return;}
@@ -6571,10 +6586,19 @@ window.selectOsFocus=function(f){
   const btn=document.getElementById('os-confirm');if(btn){btn.disabled=false;btn.style.opacity='1';}
 };
 window.confirmOsPhase=function(phase){
-  G.tFocus=_osFocusSel;applyPhaseTrain(phase);G.osPhase=phase+1;clo();
-  if(phase===0){const pops=[];for(const p of myP())try{campInviteCheck(p,null,true);}catch(e){}const n=(G.campInv||[]).length;if(n)addNews('offer',` ${n} Spring Camp Invite${n>1?'s':''}`,'College camps want your players. Check the Recruiting page.');}
+  osPhaseDo(phase);clo();
   if(G.osPhase<3)runOffseason();else finalizeOffseason();
 };
+function osPhaseDo(phase){
+  G.tFocus=_osFocusSel;applyPhaseTrain(phase);G.osPhase=phase+1;
+  if(phase===0){const pops=[];for(const p of myP())try{campInviteCheck(p,null,true);}catch(e){}const n=(G.campInv||[]).length;if(n&&!pcAuto())addNews('offer',` ${n} Spring Camp Invite${n>1?'s':''}`,'College camps want your players. Check the Recruiting page.');}
+}
+// Player Career: senior night, the three training phases (balanced focus) and the new season, no coach screens
+function pcOffseason(){
+  if(G.osPhase===0&&G.gradShown!==G.yr){G.gradShown=G.yr;if(myP().some(p=>p.yr===12))seniorHonor();}
+  _osFocusSel='balanced';for(let ph=G.osPhase||0;ph<3;ph++)osPhaseDo(ph);
+  finalizeOffseason();
+}
 
 function applyPhaseTrain(phase){
   const foc=_osFocusSel;const ocB=G.staff.oc.lvl;const dcB=G.staff.dc.lvl;
@@ -7022,7 +7046,9 @@ function finalizeOffseason(){
     }
   }
   // MOVE-UP: offer at end of season if eligible (and not just demoted)
-  const _moveUpPop=(!_demResult.demoted)?buildMoveUpPop():null;
+  const _pcA=pcAuto()&&!ccOn(); // Player Career: the school decides, then the staff builds the schedule and spends the budget
+  const _moveUpPop=(!_demResult.demoted)?(_pcA?pcMoveUp():buildMoveUpPop()):null;
+  if(_pcA){try{pcAutoSched();pcAutoBudget();pcAutoSP();pcAutoCaptains();}catch(e){console.error('player career auto',e);}}
   const _frPops=newFr.slice(0,5).map(p=>bFrPop(p));
   const _trPops=newTr.map(p=>bTrPop(p));
   _popQ=[...pops,..._frPops,..._trPops,...(_sosSPPops||[]),...(_moveUpPop?[_moveUpPop]:[])];
@@ -7587,7 +7613,7 @@ function pgRecls(){
             <div class="dr"><span class="a">State Champ at ${clsL(G.cls)}</span><span style="color:${champAtCurrent?'var(--gn)':'var(--rd)'};font-weight:700">${champAtCurrent?'✓ Earned':' Not yet'}</span></div>
             <div class="dr"><span class="a">Budget needed</span><span style="color:${canAffordUp?'var(--gn)':'var(--rd)'};font-weight:700">$${(moveUpCost/1000).toFixed(0)}k (have $${(G.budget/1000).toFixed(0)}k)</span></div>
           </div>
-          <button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%"> Move Up to ${nextUp}</button>`
+          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%"> Move Up to ${nextUp}</button>`}`
           :`<div style="font-size:12px;color:var(--mu)">Already in the highest classification (${myClsOrder().slice(-1)[0]}).</div>`}
         </div>
       </div>
@@ -7614,6 +7640,8 @@ function pgRecls(){
   </div>`;
 }
 
+// at least one state championship at the current classification
+function moveUpChamp(){return G.hist.filter(h=>(h.stateChamp||h.champ)&&h.cls===G.cls).length>0||G.trophies.filter(t=>t.type==='State'&&(t.cls===G.cls||!t.cls)).length>0;}
 function buildMoveUpPop(){
   // Called at end of season, offer move-up if eligible
   const ms=myS();
@@ -7622,8 +7650,7 @@ function buildMoveUpPop(){
   const nextCls=myClsOrder()[clsIdx+1];
   const cost=CLS_MOVEUP_COST[clsEq(G.cls)]||0;
   // Requirement: at least one state championship at current classification
-  const champAtCurrent=G.hist.filter(h=>(h.stateChamp||h.champ)&&h.cls===G.cls).length>0
-    || G.trophies.filter(t=>t.type==='State'&&(t.cls===G.cls||!t.cls)).length>0;
+  const champAtCurrent=moveUpChamp();
   if(!champAtCurrent){
     // Show info pop, not yet eligible
     return `<div class="pc" style="border-top-color:var(--mu)">
@@ -7654,13 +7681,14 @@ function buildMoveUpPop(){
   </div>`;
 }
 
-window.confirmMoveUp=function(){
+window.confirmMoveUp=function(){if(moveUpDo())nxp();};
+function moveUpDo(){
   const clsIdx=myClsOrder().indexOf(G.cls);
-  if(clsIdx>=myClsOrder().length-1)return;
+  if(clsIdx>=myClsOrder().length-1)return false;
   const oldCls=G.cls;
   const nextCls=myClsOrder()[clsIdx+1];
   const cost=CLS_MOVEUP_COST[clsEq(G.cls)]||0;
-  if(!hasFunds(cost)){notify('Not enough budget!','e');return;}
+  if(!hasFunds(cost)){notify('Not enough budget!','e');return false;}
   if(!G.unlimitedMoney)G.budget-=cost;
 
   // ── 1. Find player's school object and current division ──
@@ -7705,8 +7733,8 @@ window.confirmMoveUp=function(){
   for(const div of G.divisions)for(const t of div.teams){t.wins=0;t.losses=0;}
 
   addLog(`<span style="color:var(--gd)"> Reclassified UP to ${nextCls}! Joined the <strong>${targetDiv.name}</strong> division. You have 3 years of demotion immunity to adjust.</span>`);
-  nxp();
-};
+  return true;
+}
 
 window.declineMoveUp=function(){
   nxp();
@@ -7880,7 +7908,7 @@ function bAwardPop(award, winner, runnerUp, cls, isMyPlayer, winnerSnap, ruSnap,
   </div>`;
 }
 function bSenPop(p){let msg='';if(p.committed){const e={FBS:'',FCS:'',D2:'',D3:'',JUCO:''}[p.committed.lvl]||'';msg=`${e} <strong>${p.fn} ${p.ln}</strong> → <strong style="color:var(--te)">${p.committed.school}</strong> (${p.committed.lvl})`;}else msg=` <strong>${p.fn} ${p.ln}</strong> (${p.pos}) will not play college football.`;return`<div class="pc"><h3> Signing Day</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div>${stars(p.stars)} ${rb(p.rat)}</div><div style="margin-top:10px;font-size:13px;line-height:1.6">${msg}</div>${p.offers.length?`<div style="margin-top:8px;font-size:11px;color:var(--mu)">${p.offers.length} total offer(s)</div>`:''}</div>`;}
-function bFrPop(p){const jvNote=p.onJV?'<div style="margin-top:6px;background:#0a1a30;border:1px solid #336;border-radius:3px;padding:4px 8px;font-size:11px;color:#88ccff"> Starting on <strong>JV Team</strong>: call up to Varsity anytime</div>':'';return`<div class="pc"><h3> New Freshman!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:var(--hd);font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${stars(p.stars)} <span class="pb2">${p.pos}</span> ${rb(p.rat)} → <span style="color:var(--gn)">${p.potLo||p.pot}</span>–<span style="color:var(--pot,#f0b429)">${p.potHi||p.pot}</span> pot</div><div>${devB(p.dev)} ${(p.traits||[]).map(t=>trB(t)).join('')}</div><div style="margin-top:6px;font-size:12px;color:var(--mu)">GPA: ${gpaL(p.gpa)} | ${htf(p.ht)}, ${p.wt} lbs</div><div style="margin-top:6px">${interestBadges(p.interests)}</div>${jvNote}</div>`;}
+function bFrPop(p){const jvNote=p.onJV&&!pcAuto()?'<div style="margin-top:6px;background:#0a1a30;border:1px solid #336;border-radius:3px;padding:4px 8px;font-size:11px;color:#88ccff"> Starting on <strong>JV Team</strong>: call up to Varsity anytime</div>':'';return`<div class="pc"><h3> New Freshman!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:var(--hd);font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${stars(p.stars)} <span class="pb2">${p.pos}</span> ${rb(p.rat)} → <span style="color:var(--gn)">${p.potLo||p.pot}</span>–<span style="color:var(--pot,#f0b429)">${p.potHi||p.pot}</span> pot</div><div>${devB(p.dev)} ${(p.traits||[]).map(t=>trB(t)).join('')}</div><div style="margin-top:6px;font-size:12px;color:var(--mu)">GPA: ${gpaL(p.gpa)} | ${htf(p.ht)}, ${p.wt} lbs</div><div style="margin-top:6px">${interestBadges(p.interests)}</div>${jvNote}</div>`;}
 function bTrPop(p){return`<div class="pc" style="border-top-color:var(--te)"><h3 style="color:var(--te)"> Transfer!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:var(--hd);font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${yrL(p.yr)} <span class="pb2">${p.pos}</span> ${rb(p.rat)}</div><div>${devB(p.dev)}</div></div>`;}
 function showPop(){if(_popI>=_popQ.length){document.getElementById('pu').classList.remove('open');if(_popCb){const cb=_popCb;_popCb=null;cb();}return;}document.getElementById('pui').innerHTML=_popQ[_popI];document.getElementById('pun').textContent=_popI<_popQ.length-1?`Continue (${_popI+1}/${_popQ.length}) →`:'Done ✓';document.getElementById('pu').classList.add('open');}
 function nxp(){_popI++;if(_popI>=_popQ.length){document.getElementById('pu').classList.remove('open');_popQ=[];if(_popCb){const cb=_popCb;_popCb=null;cb();}}else{showPop();}}
@@ -7900,12 +7928,12 @@ function navInit(){
   if(!bar.querySelector('.nb-home')){const hb=document.createElement('button');hb.className='nb nb-home';hb.textContent='\u2039 Home';hb.title='Dashboard';hb.onclick=()=>nav('dash');const st=document.getElementById('nav-team-strip');bar.insertBefore(hb,st?st.nextSibling:bar.firstChild);}
   pr.innerHTML=NAV_GROUPS.map(([k,l,ic])=>`<button class="np" id="np-${k}" role="tab" onclick="navGo('${k}')"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg><span>${l}</span><i></i></button>`).join('');
 }
-function navGo(k){const g=NAV_GROUPS.find(x=>x[0]===k);if(!g)return;const last=(G.navLast||{})[k];nav(last&&g[3].includes(last)&&(last!=='mine'||G.myPlayerId!=null)?last:g[3][0]);}
+function navGo(k){const g=NAV_GROUPS.find(x=>x[0]===k);if(!g)return;const last=(G.navLast||{})[k],P=g[3].filter(pg=>!pcHidePg(pg));nav(last&&P.includes(last)&&(last!=='mine'||G.myPlayerId!=null)?last:P[0]||'dash');}
 function navSync(page){
   try{navInit();const g=navGroupOf(page);document.body.dataset.navg=g;(G.navLast||(G.navLast={}))[g]=page;
-    for(const[k]of NAV_GROUPS){const b=document.getElementById('np-'+k);if(b)b.classList.toggle('on',k===g);}
+    for(const[k,,,P]of NAV_GROUPS){const b=document.getElementById('np-'+k);if(b){b.classList.toggle('on',k===g);b.style.display=P.every(pcHidePg)?'none':'';}}
     const vis=id=>{const e=document.getElementById(id);return!!(e&&e.style.display!=='none');};
-    const h=document.getElementById('np-home');if(h)h.classList.toggle('dot',vis('news-badge'));const pg=document.getElementById('np-program');if(pg)pg.classList.toggle('dot',vis('adv-badge'));
+    const h=document.getElementById('np-home');if(h)h.classList.toggle('dot',vis('news-badge'));const pg=document.getElementById('np-program');if(pg)pg.classList.toggle('dot',vis('adv-badge')&&!pcHidePg('advisor'));
     {const c=gdsMain().cnav!==false;document.body.classList.toggle('cnav',c);document.body.classList.toggle('cnav-dash',c&&page==='dash');
      const T=cnavTodo();document.querySelectorAll('#nav-bar .nb[id^="nb-"]').forEach(b=>{const k=b.id.slice(3);b.classList.toggle('todo',!!T[k]&&k!=='news');});}
     const on=document.querySelector('#nav-bar .nb.on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'});}catch(e){}
@@ -7924,25 +7952,26 @@ function dashTiles(o){
   // next game
   let nb;if(opp){const r=dtOD(opp.id),lbl=no?(ng.isRivalry?'Rivalry week':'Week '+ng.wk)+(ng.date?' · '+ng.date:''):(poRoundName(ng.playoffRound)||ng.label||'Playoffs');
     nb=`<div class="dt-ng"><div style="min-width:0"><div class="dt-sub">${lbl}</div><div class="dt-big">${opp.name} ${opp.mascot}</div><div class="dt-sub">${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}</div>${no&&ng.isRivalry?rivalryWeekHtml(opp):''}${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div></div><div class="dt-logo">${sLogo(opp,96)}</div></div>`;}
-  else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
+  else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)&&!pcAuto()?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
   const tNext=dtTile('Next game',opp?`viewSchool(${opp.id})`:`nav('sched')`,nb,'dt-tall');
   // schedule
   const up=G.sched.filter(g=>!g.result&&g.type!=='bye').slice(0,5);
   const tSched=dtTile('Schedule'+dot('sched'),`nav('sched')`,up.length?`<div class="dt-list">${up.map(g=>{const t=g.oppId!=null?getS(g.oppId):null;return`<div><b>W${g.wk}</b>${t?sLogo(t,26):'<span class="dt-nl"></span>'}<span class="dt-ln">${t?t.name:(g._empty?'Open slot':g.label||'TBD')}</span><span class="dt-mu">${g.type==='playoff'?'Playoff':g.isRivalry?'Rival':g.custom?'Non-league':'League'}</span></div>`;}).join('')}</div>`:`<div class="dt-mu">No games left on the schedule.</div>`);
-  // team management
-  const mo=moraleOf(),mine=dtOD(G.myId);
-  const tTeam=dtTile('Team management',`nav('depth')`,`<div class="dt-bar"><i style="width:${clamp(mo,0,100)}%;background:${mo>=60?'var(--gn)':mo>=40?'var(--gd)':'#e5534b'}"></i></div><div class="dt-sub">${G.offS} / ${G.defS} · Morale: ${mo} (${moraleLbl(mo)})</div>${dtChips(mine)}<div class="dt-stars">${stars(Math.round(G.prestige||1))}</div><div class="dt-sub" style="margin-top:6px">${pl.length} players · QB chemistry ${Math.round(chemAvg())}</div>`,'dt-tall');
+  // team management (Player Career: the team, read-only)
+  const mo=moraleOf(),mine=dtOD(G.myId),pa=pcAuto();
+  const tTeam=dtTile(pa?'Team':'Team management',pa?`nav('roster')`:`nav('depth')`,`<div class="dt-bar"><i style="width:${clamp(mo,0,100)}%;background:${mo>=60?'var(--gn)':mo>=40?'var(--gd)':'#e5534b'}"></i></div><div class="dt-sub">${G.offS} / ${G.defS} · Morale: ${mo} (${moraleLbl(mo)})</div>${dtChips(mine)}<div class="dt-stars">${stars(Math.round(G.prestige||1))}</div><div class="dt-sub" style="margin-top:6px">${pl.length} players · QB chemistry ${Math.round(chemAvg())}</div>`,'dt-tall');
   // recruiting (offers coming in) and seniors (leaving)
   const offers=pl.reduce((a,p)=>a+((p.offers||[]).length),0),commits=pl.filter(p=>p.committed).length,srs=pl.filter(p=>p.yr===12).length;
   const xin=xferInList().length,xout=xferOutList().length;
-  const tRec=dtTile('Transfers',`nav('scout')`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
-  const tSr=dtTile('Transfers'+(xout?'<i class="dt-dot"></i>':''),`xferLeaveOpen()`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${xout+srs}${xout?` · ${xout} transfer${xout>1?'s':''}`:''}</span></div>`,'dt-half');
+  const tRec=dtTile('Transfers',pa?`nav('roster')`:`nav('scout')`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
+  const tSr=dtTile('Transfers'+(xout&&!pa?'<i class="dt-dot"></i>':''),pa?`nav('roster')`:`xferLeaveOpen()`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${xout+srs}${xout?` · ${xout} transfer${xout>1?'s':''}`:''}</span></div>`,'dt-half');
   const n0=(newsItems||[])[0];
   const tNews=dtTile('News'+dot('news'),`nav('news')`,n0?`<div class="dt-news">${n0.headline}</div><div class="dt-mu">${n0.sub||''}</div>`:`<div class="dt-mu">No news yet.</div>`);
   // training and scouting
   const tl=getTrainLevel();
-  const tTrain=dtTile('Training'+dot('training'),`nav('training')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">${pracAvailable()?`Weekly practice is ready`:'This week\'s practice is done'}</div>${pracAvailable()?`<button class="btn bsm" style="margin-top:8px" onclick="event.stopPropagation();pracOpen()">Practice</button>`:''}`,'dt-tall');
-  const tScout=dtTile('Scouting',`nav('scout')`,`<div class="dt-sub">Scout your next opponents and the prospects in your area.</div>${opp?`<div class="dt-sub" style="margin-top:6px">Next: <b>${opp.name}</b></div>`:''}`);
+  const tTrain=pa?dtTile('Training',`nav('mine')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">The coaching staff runs practice every week.</div>`,'dt-tall')
+    :dtTile('Training'+dot('training'),`nav('training')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">${pracAvailable()?`Weekly practice is ready`:'This week\'s practice is done'}</div>${pracAvailable()?`<button class="btn bsm" style="margin-top:8px" onclick="event.stopPropagation();pracOpen()">Practice</button>`:''}`,'dt-tall');
+  const tScout=dtTile('Scouting',pa?(opp?`viewSchool(${opp.id})`:`nav('teams')`):`nav('scout')`,`<div class="dt-sub">Scout your next opponents and the prospects in your area.</div>${opp?`<div class="dt-sub" style="margin-top:6px">Next: <b>${opp.name}</b></div>`:''}`);
   // standings and top players
   const dv=(G.divisions||[]).find(d=>d.teams.some(t=>t.id===G.myId));let stB='<div class="dt-mu">No division.</div>';
   if(dv){const rows=dv.teams.slice().sort((a,b)=>(b.wins-a.wins)||(a.losses-b.losses)).slice(0,6);
@@ -7951,7 +7980,7 @@ function dashTiles(o){
   const top=pl.slice().sort((a,b)=>b.rat-a.rat).slice(0,5);
   const tTop=dtTile('Top players',`nav('roster')`,`<div class="dt-list">${top.map(p=>`<div><b>${p.pos}</b><span class="dt-ln">${p.fn} ${p.ln}</span><span class="dt-mu">${yrL(p.yr)}</span>${rb(p.rat)}</div>`).join('')}</div>`);
   // program
-  const tProg=dtTile('Program'+dot('advisor'),`nav('advisor')`,`<div class="dt-sub">Assistant GM, watchlist, trophies and history.</div><div class="dt-list" style="margin-top:8px">${[['advisor','Assistant GM'],['trophy','Trophy Case'],['hof','Hall of Fame'],['hist','History & Records']].map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`,'dt-tall');
+  const tProg=dtTile('Program'+dot('advisor'),pa?`nav('trophy')`:`nav('advisor')`,`<div class="dt-sub">${pa?'Watchlist':'Assistant GM, watchlist'}, trophies and history.</div><div class="dt-list" style="margin-top:8px">${[['advisor','Assistant GM'],['trophy','Trophy Case'],['hof','Hall of Fame'],['hist','History & Records']].filter(([k])=>!pcHidePg(k)).map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`,'dt-tall');
   const tLeague=dtTile('League',`nav('rank')`,`<div class="dt-list">${[['rank','Rankings'],['playoff','Playoffs'],['teams','Teams'],['leads','Leaders']].map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`);
   let alerts='';try{alerts=jobPanel()+pcPanel()+s7Panel();}catch(e){}
   const pills=`<span class="dt-pill" title="Record">${G.wins}-${G.losses}</span><span class="dt-pill" title="Prestige">★ ${Math.round(G.prestige||1)}</span><span class="dt-pill" style="color:var(--gn)" title="Budget">$${(G.budget/1000).toFixed(0)}k</span>`;
@@ -7964,18 +7993,22 @@ function cnavTodo(){const t={},vis=id=>{const e=document.getElementById(id);retu
   try{if(vis('news-badge'))t.news='New';}catch(e){}
   try{if(vis('adv-badge'))t.advisor='Advice';}catch(e){}
   try{const p=pcActive();if(p&&p.pcSP>0)t.mine=p.pcSP+' SP';}catch(e){}
-  try{if(G.phase==='offseason'&&G.sched.some(g=>g._empty))t.sched='Build it';}catch(e){}
-  try{if(pracAvailable())t.training='Practice';}catch(e){}
-  try{const n=xferOutList().length;if(n)t.roster=n+' leaving';}catch(e){}
+  const pa=pcAuto(); // Player Career: the coach's to-dos are not yours
+  try{if(!pa&&G.phase==='offseason'&&G.sched.some(g=>g._empty))t.sched='Build it';}catch(e){}
+  try{if(!pa&&pracAvailable())t.training='Practice';}catch(e){}
+  try{const n=xferOutList().length;if(n&&!pa)t.roster=n+' leaving';}catch(e){}
   try{if(G.phase==='postseason'&&G.playoff&&!G.playoff.stateChampId&&!G.playoff.stateChamp)t.playoff='Live';}catch(e){}
+  for(const k in t)if(pcHidePg(k))delete t[k];
   return t;}
 function cnavLbl(pg){if(NL[pg])return NL[pg];const b=document.getElementById('nb-'+pg);return b?b.textContent.trim():pg;}
 function cnavHub(force){if(!force&&gdsMain().cnav===false)return'';const T=cnavTodo();
-  const cards=NAV_GROUPS.map(([k,l,ic,pages])=>{const ps=pages.filter(pg=>pg!=='dash'&&(pg!=='mine'||G.myPlayerId!=null)&&(pg!=='college'||ccOn())&&(pg!=='social'||G.myPlayerId!=null)&&(pg!=='recls'||(document.getElementById('nb-recls')||{style:{}}).style.display!=='none'));if(!ps.length)return'';
+  const cards=NAV_GROUPS.map(([k,l,ic,pages])=>{const ps=pages.filter(pg=>pg!=='dash'&&!pcHidePg(pg)&&(pg!=='mine'||G.myPlayerId!=null)&&(pg!=='college'||ccOn())&&(pg!=='social'||G.myPlayerId!=null)&&(pg!=='recls'||(document.getElementById('nb-recls')||{style:{}}).style.display!=='none'));if(!ps.length)return'';
     const n=ps.filter(pg=>T[pg]).length;
     return`<div class="cnav-card"><div class="cnav-h"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg>${l}${n?`<small>${n} to do</small>`:''}</div><div class="cnav-sub">${ps.map(pg=>`<button class="${T[pg]?'todo':''}" onclick="nav('${pg}')">${cnavLbl(pg)}${T[pg]?`<span>${T[pg]}</span>`:''}</button>`).join('')}</div></div>`;}).join('');
   return`<div class="cnav-hub">${cards}</div>`;}
 function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e){}
+  if(pcHidePg(page)){page='dash';arg=undefined;} // Player Career: coach pages (old saves, deep links) go to the dashboard
+  try{pcAutoTick();}catch(e){console.error('player career auto',e);}
   const _prevPg=G._page;
   G._page=page;G._arg=arg;
   if(['dash','depth','roster','jv'].includes(page)){try{autoJVCallup(true);}catch(e){console.error('autoJVCallup',e);}}
@@ -8008,6 +8041,7 @@ function updateSbCard(){
   {const b=document.getElementById('nb-mine');if(b)b.style.display=G.myPlayerId!=null?'':'none';}
   {const b=document.getElementById('nb-college');if(b)b.style.display=ccOn()?'':'none';}
   {const b=document.getElementById('nb-social');if(b)b.style.display=G.myPlayerId!=null?'':'none';}
+  for(const k of['roster','depth','jv','recr','scout','training','staff','cust','sched','advisor','recls']){const b=document.getElementById('nb-'+k);if(b)b.style.display=pcHidePg(k)?'none':'';}
   const ms=myS();if(!ms)return;
   const nm=document.getElementById('sb-team-name');
   const sub=document.getElementById('sb-team-sub');
@@ -8282,7 +8316,7 @@ function pgNews(){
 
 let _rs={k:'rat',d:-1},_rpf='ALL';
 function pgRoster(sid){
-  const sch=getS(sid);const isMe=sid===G.myId;let pl=sPlayers(sid);
+  const sch=getS(sid);const isMe=sid===G.myId,ed=!pcAuto();let pl=sPlayers(sid); // ed: Player Career shows the roster read-only
   window._setRS=(k)=>{if(_rs.k===k)_rs.d*=-1;else{_rs.k=k;_rs.d=-1;}nav('roster',sid);};
   window._setPF=(p)=>{_rpf=p;nav('roster',sid);};
   if(_rpf!=='ALL')pl=pl.filter(p=>p.pos===_rpf);
@@ -8298,7 +8332,7 @@ function pgRoster(sid){
   const capPct=isMe?varsityRosterCount/MAX_VARSITY:null;
   const capColor=capPct===null?'':capPct>=1?'var(--rd)':capPct>=0.9?'var(--gd)':'var(--gn)';
   return`<div class="pnl"><div class="ph">${sLogo(sch,30)} &nbsp;${sch.name} ${sch.mascot} <span style="font-size:12px;font-weight:400;color:var(--mu)">${sPlayers(sid).length} players</span>${isMe?`<span style="margin-left:8px;background:${capPct>=1?'rgba(204,34,34,.18)':'rgba(34,184,112,.1)'};border:1px solid ${capColor};color:${capColor};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Varsity ${varsityRosterCount}/${MAX_VARSITY}${capPct>=1?'  AT CAP':''}</span>`:''}</div>
-    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p==='ALL'?'All':p}</button>`).join('')}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div></div>
+    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p==='ALL'?'All':p}</button>`).join('')}</div>${ed?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div>`:''}</div>
     <div style="overflow-x:auto"><table><thead><tr>
       <th>#</th><th onclick="_setRS('name')">Name ${ar('name')}</th>
       <th onclick="_setRS('pos')">Pos ${ar('pos')}</th><th onclick="_setRS('yr')">Yr ${ar('yr')}</th>
@@ -8309,7 +8343,7 @@ function pgRoster(sid){
       <th onclick="_setRS('spd')">Spd ${ar('spd')}</th><th onclick="_setRS('str')">Str ${ar('str')}</th><th onclick="_setRS('awr')">Awr ${ar('awr')}</th>
       <th>Ht</th><th>Wt</th><th onclick="_setRS('gpa')">GPA ${ar('gpa')}</th>
       <th>Traits</th><th>Inj</th>
-      ${isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:'<th></th>'}
+      ${!ed?'':isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:'<th></th>'}
     </tr></thead>
     <tbody>${pl.map(p=>`<tr class="cl" onclick="showPlayer(${p.id})">
       <td style="color:var(--mu)">${p.num}</td><td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,28)}<span>${p.fn} ${p.ln}</span></div></td>
@@ -8323,7 +8357,7 @@ function pgRoster(sid){
       <td>${gpaL(p.gpa)}</td>
       <td>${(p.traits||[]).map(t=>trB(t)).join('')}</td>
       <td>${injBadgeTable(p)}</td>
-      ${isMe?`<td style="color:var(--te);font-weight:700">${p.sp||0}</td><td>
+      ${isMe&&ed?`<td style="color:var(--te);font-weight:700">${p.sp||0}</td><td>
         <div style="display:flex;gap:3px;align-items:center">
           <button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button>
           ${p.onJV?`<button class="btn bxs bgn" onclick="event.stopPropagation();callUpToVarsity(${p.id})" title="Call up to Varsity" style="font-size:9px;padding:2px 5px">V</button>`
@@ -8331,7 +8365,7 @@ function pgRoster(sid){
           <button class="btn bxs" onclick="event.stopPropagation();confirmCutPlayer(${p.id})" title="Cut player" style="background:var(--rd);font-size:9px;padding:2px 5px"></button>
         </div>
       </td>`:''}
-      ${isMe?'':`<td><button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button></td>`}
+      ${isMe||!ed?'':`<td><button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button></td>`}
     </tr>`).join('')}</tbody></table></div></div>`;
 }
 
@@ -8515,7 +8549,8 @@ function pgTrain(){
   </div></div>`;
 }
 
-window.autoSP=function(pid){const p=getP(pid);if(!p||!(p.sp>0))return;const sp=p.sp;p.rat=clamp(p.rat+sp,1,Math.max(p.pot,p.rat));p.pot=Math.max(p.pot,p.rat);_attrBoostForOvr(p,sp);p.sp=0;updateRats();notify(`${p.fn} ${p.ln}: ${sp} SP → +${sp} OVR! Attributes boosted.`);nav('training');};
+function spApply(p){const sp=p.sp;p.rat=clamp(p.rat+sp,1,Math.max(p.pot,p.rat));p.pot=Math.max(p.pot,p.rat);_attrBoostForOvr(p,sp);p.sp=0;return sp;}
+window.autoSP=function(pid){const p=getP(pid);if(!p||!(p.sp>0))return;const sp=spApply(p);updateRats();notify(`${p.fn} ${p.ln}: ${sp} SP → +${sp} OVR! Attributes boosted.`);nav('training');};
 
 window.upgradeTrainLevel=function(){
   const tLvl=getTrainLevel();
@@ -8818,8 +8853,8 @@ function pgSched(){
     <span>Schedule: ${2026+(G.yr-1)} Season
       ${hasRivalry?'<span style="color:var(--gd);font-size:12px;font-weight:700;margin-left:10px"> Rivalry included</span>':''}
     </span>
-    ${noGamesPlayed&&!hasEmpty?`<button class="bgh bsm" onclick="openScheduleBuilder()"> Edit Schedule</button>`:''}
-    ${hasEmpty?`<button class="btn" style="padding:4px 12px;font-size:12px;background:var(--rd)" onclick="openScheduleBuilder()"> Finish Building Schedule!</button>`:''}
+    ${noGamesPlayed&&!hasEmpty&&!pcAuto()?`<button class="bgh bsm" onclick="openScheduleBuilder()"> Edit Schedule</button>`:''}
+    ${hasEmpty&&!pcAuto()?`<button class="btn" style="padding:4px 12px;font-size:12px;background:var(--rd)" onclick="openScheduleBuilder()"> Finish Building Schedule!</button>`:''}
   </div>
   ${sosAvg>0?`<div style="padding:6px 14px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
     <span style="color:${sosTierDisp.color};font-weight:700">${sosTierDisp.icon} SOS: ${sosTierDisp.label}</span>
@@ -10292,14 +10327,14 @@ function aiFx(){
 }
 function aiBudgetOpts(f){
   const o=[],tl=(typeof getTrainLevel==='function')?getTrainLevel():(G.trainLevel||1),inj=f.all.filter(p=>p.inj>0).length;
-  if(tl<20)o.push({k:'Training Facility (level '+(tl+1)+')',c:Math.round(5000+tl*4000),v:10-tl*.35,page:'training',why:'It lifts development for every player, every year.'});
+  if(tl<20)o.push({k:'Training Facility (level '+(tl+1)+')',c:Math.round(5000+tl*4000),v:10-tl*.35,page:'training',id:['t'],why:'It lifts development for every player, every year.'});
   const sn={hc:'Assistant Head Coach',oc:'Offensive Coordinator',dc:'Defensive Coordinator',rc:'Recruiting Coordinator'};
   for(const k in sn){const s=G.staff&&G.staff[k];if(!s||s.lvl>=5)continue;
     let v=k==='rc'?(s.lvl<=1?9:s.lvl===2?7:4):k==='hc'?6:k==='oc'?(G.offR<=G.defR?6.5:4):(G.defR<G.offR?6.5:4);
     const why=k==='rc'?'Better incoming freshmen classes.':k==='hc'?'Adds an overall skill-point bonus.':k==='oc'?'Boosts offensive skill points.':'Boosts defensive skill points.';
-    o.push({k:sn[k]+' (level '+(s.lvl+1)+')',c:(s.lvl+1)*20000,v,page:'staff',why});}
+    o.push({k:sn[k]+' (level '+(s.lvl+1)+')',c:(s.lvl+1)*20000,v,page:'staff',id:['s',k],why});}
   const fn={weight:['Weight Room',4,'Strength gains.'],film:['Film Room',4,'Awareness gains.'],train:['Practice Field',5,'Overall training bonus.'],med:['Medical Staff',3+Math.min(4,inj),'Shorter injury recovery.']};
-  for(const k in fn){const cur=(G.fac&&G.fac[k])||1;if(cur>=5)continue;o.push({k:fn[k][0]+' (level '+(cur+1)+')',c:(cur+1)*15000,v:fn[k][1],page:'staff',why:fn[k][2]});}
+  for(const k in fn){const cur=(G.fac&&G.fac[k])||1;if(cur>=5)continue;o.push({k:fn[k][0]+' (level '+(cur+1)+')',c:(cur+1)*15000,v:fn[k][1],page:'staff',id:['f',k],why:fn[k][2]});}
   o.forEach(x=>{x.r=x.v/(x.c/10000);x.ok=hasFunds(x.c);});
   return o.sort((a,b)=>b.r-a.r);
 }
@@ -10892,6 +10927,11 @@ let _gdCtx=null;
 function gdChoose(kind,info,simFn){
   if(ccOn()){notify('Your player is in college now: the high school season plays out in the background.','w');return;}
   const opp=info.opp,me=myS();if(!opp||window._gdAutoSim){simFn();return;}
+  const pa=pcAuto();
+  if(pa){ // Player Career: the staff runs practice and picks the uniform; a game your player can't play in is simulated
+    if(kind==='reg'||kind==='po')try{if(pracAvailable())pracSimRows();}catch(e){console.error('practice',e);}
+    const pp=pcActive();if(!pp||pp.inj>0){simFn();return;}
+    let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else if(kind==='po')hi=(G.wins||0)>=(opp.wins||0)?0:1;window._gdUni=hi?'away':'home';}
   window._gdSim=simFn;window._gdInfo={kind,info};
   openMo(`<div style="text-align:center;padding:6px 4px 2px">
     <div style="font-size:13px;color:var(--mu);margin-bottom:10px">${info.label||''}</div>
@@ -10901,14 +10941,14 @@ function gdChoose(kind,info,simFn){
       <div style="text-align:center">${sLogo(opp,64)}<div style="font-weight:800;margin-top:4px">${opp.mascot}</div></div></div>
     ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;if(kind==='po'&&info.slot&&poRoundName(info.slot.playoffRound)==='State Final')return`<div style="font-size:12px;color:var(--gd);font-weight:800;margin:-6px 0 12px">State Final · neutral site · ${stateFinalVenue()}</div>`;if(kind==='reg'&&G.sched[info.idx]&&G.sched[info.idx].isRivalry)return rivalryWeekHtml(opp)+`<div style="height:8px"></div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
     ${(()=>{const w=gdWxFor(kind,info);return w?`<div class="gd-wx">${wxIcon(w,22)}<div><b>${wxLine(w)}</b><div>${wxEffects(w)}</div></div></div>`:'';})()}
-    <div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">Your uniform</div>
+    ${pa?'':`<div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">Your uniform</div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">${[['home','Home'],['away','Away'],['alt','Alternate']].map(([k,l])=>`<button class="gd-uni${(window._gdUni||'home')===k?' on':''}" data-k="${k}" onclick="gdPickUni('${k}')">${uniSvg(uniOf(me,k),(myP()[0]||{}).num,54)}<span>${l}</span></button>`).join('')}</div>
     <div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">How do you want to play?</div>
-    <div class="gd-modes" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">${[['all','Full game','You play every snap'],['coach','Coach mode','You call plays, the team runs them'],['off','Offense only','Defense drives are simmed'],['def','Defense only','Offense drives are simmed']].map(([k,l,d])=>`<button class="gd-uni gd-mode${(window._gdMode||'all')===k?' on':''}" data-k="${k}" onclick="window._gdMode='${k}';document.querySelectorAll('.gd-mode').forEach(b=>b.classList.toggle('on',b.dataset.k==='${k}'))" style="padding:8px 12px;min-width:120px"><span style="font-weight:900">${l}</span><small style="display:block;font-size:10px;opacity:.75;font-weight:600">${d}</small></button>`).join('')}</div>
+    <div class="gd-modes" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">${[['all','Full game','You play every snap'],['coach','Coach mode','You call plays, the team runs them'],['off','Offense only','Defense drives are simmed'],['def','Defense only','Offense drives are simmed']].map(([k,l,d])=>`<button class="gd-uni gd-mode${(window._gdMode||'all')===k?' on':''}" data-k="${k}" onclick="window._gdMode='${k}';document.querySelectorAll('.gd-mode').forEach(b=>b.classList.toggle('on',b.dataset.k==='${k}'))" style="padding:8px 12px;min-width:120px"><span style="font-weight:900">${l}</span><small style="display:block;font-size:10px;opacity:.75;font-weight:600">${d}</small></button>`).join('')}</div>`}
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button class="btn bgn" style="min-width:180px;font-size:16px" onclick="clo();gdStart()">Play Game</button>
       <button class="bgh" style="min-width:180px;font-size:16px" onclick="clo();window._gdSim&&window._gdSim()">Simulate</button></div>
-    <div style="font-size:11px;color:var(--mu);margin-top:12px">Play it yourself with your real roster, or let the sim decide.</div></div>`);
+    <div style="font-size:11px;color:var(--mu);margin-top:12px">${pa?'Play it as your player (the coach calls the plays), or let the sim decide.':'Play it yourself with your real roster, or let the sim decide.'}</div></div>`);
 }
 function gdStart(){
   const ctx=window._gdInfo;if(!ctx)return;const opp=ctx.info.opp,me=myS();_gdCtx=ctx;
@@ -11531,11 +11571,12 @@ function pracFinish(res){
   const rows=pracGrant(gains);
   try{showLoading('Practice wrap-up',myS(),5,()=>pracShow(rows,'Practice results'));}catch(e){pracShow(rows,'Practice results');}
 }
-function pracSim(){
+function pracSim(){pracShow(pracSimRows(),'Simulated practice');}
+function pracSimRows(){
   const ps=myP().filter(p=>!(p.inj>0)).sort((a,b)=>b.rat-a.rat).slice(0,30),gains={};
   for(const p of ps){let xp=2+Math.floor(Math.random()*3);if(p.traits&&p.traits.includes('hard-worker'))xp+=1;if(p.yr<=10)xp+=1;gains[p.id]=xp;}
   if(window._pracJV!==false)for(const p of G.players.filter(q=>q.sId===G.myId&&q.onJV&&!(q.inj>0))){let xp=2+Math.floor(Math.random()*2);if(p.traits&&p.traits.includes('hard-worker'))xp+=1;gains[p.id]=(gains[p.id]||0)+xp;}
-  const rows=pracGrant(gains);pracShow(rows,'Simulated practice');
+  return pracGrant(gains);
 }
 
 // ═══════════ INTERNATIONAL TEAMS (fixed, hand-made) ═══════════
@@ -13799,7 +13840,7 @@ function viewSchool(id){
         ${rb(teamOvr(id))}<span class="sbh">${s.offS}/${s.defS}</span>
         <span style="color:var(--mu);font-size:12px">${s.lite?`${pl.length} tracked prospect${pl.length===1?'':'s'}`:`${pl.length} players`}</span>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="bgh bsm" onclick="clo();nav('roster',${id})">Full roster / edit players</button><button class="bgh bsm" onclick="clo();openEditSch(${id})">Edit team</button>${id!==G.myId&&!s.intl&&!s.lite?`<button class="bgh bsm" onclick="coachTakeOver(${id})">Coach this team…</button>`:''}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="bgh bsm" onclick="clo();nav('roster',${id})">${pcAuto()?'Full roster':'Full roster / edit players'}</button>${pcAuto()?'':`<button class="bgh bsm" onclick="clo();openEditSch(${id})">Edit team</button>`}${id!==G.myId&&!s.intl&&!s.lite&&!pcAuto()?`<button class="bgh bsm" onclick="coachTakeOver(${id})">Coach this team…</button>`:''}</div>
     </div>
   </div>
   ${s.lite?`<div style="font-size:12px;color:var(--mu);margin:-6px 0 10px;padding:8px 10px;border:1px solid var(--bd);border-radius:6px">${stName(clsSt(s.cls))} is a light state: the school plays its full season and state playoffs, and the game follows its top prospects. Team strength ${s.str||50}.</div>`:''}
@@ -13887,7 +13928,7 @@ function showPlayer(id){
   if(!p)return;
   const isGraduated=!G.players.find(x=>x.id===id);
   const sch=getS(p.sId)||{name:'Alumni',id:p.sId,c1:'#333',c2:'#fff',mascot:'Alumni',abbr:'AL'};
-  const isMe=p.sId===G.myId;
+  const isMe=p.sId===G.myId,ctl=isMe&&!pcAuto(),own=p.id===G.myPlayerId; // ctl: coach controls (none in Player Career)
   const isSpecialPos=(p.pos==='OL'||p.pos==='K');
   const streakBadge=p.streak==='hot'?`<span style="background:#7f2d00;color:#ff9966;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700"> Hot Streak (${p.streakGamesLeft}g left)</span>`:p.streak==='cold'?`<span style="background:#0a2a3a;color:#4fc3f7;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700"> Cold Streak (${p.streakGamesLeft}g left)</span>`:'';
   const archBadge=p.arch?`<span style="background:#0a2a10;border:1px solid #1a6030;color:#44dd88;border-radius:3px;padding:1px 7px;font-size:11px;font-weight:700">${p.arch}</span>`:'';
@@ -13949,7 +13990,7 @@ function showPlayer(id){
     <button class="tab" onclick="swMTab(this,'pv-gl')">Game Log</button>
     <button class="tab" onclick="swMTab(this,'pv-cr')">Career</button>
     <button class="tab" onclick="swMTab(this,'pv-o')">Offers (${p.offers.length})</button>
-    ${isMe&&(p.sp||0)>0?`<button class="tab" onclick="swMTab(this,'pv-sp')">Skill Points (${p.sp})</button>`:''}
+    ${ctl&&(p.sp||0)>0?`<button class="tab" onclick="swMTab(this,'pv-sp')">Skill Points (${p.sp})</button>`:''}
     ${isGraduated?`<button class="tab" onclick="swMTab(this,'pv-st')"> Story</button>`:''}
   </div>
   <div id="pv-b"><div class="g2">
@@ -14008,16 +14049,16 @@ function showPlayer(id){
       </div>
     </div>`:''}
     ${p.committed?`<div style="padding:8px;background:rgba(34,184,112,.1);border:1px solid rgba(34,184,112,.3);border-radius:4px;margin-bottom:10px;font-size:13px"> Committed to ${p.committed.school} (${p.committed.lvl})${p.dreamSchool&&p.committed.school===p.dreamSchool.school?'  Dream School!':''}</div>`:''}
-    ${isMe&&!p.committed&&p.offers.length?`<div style="margin-bottom:10px">
+    ${(ctl||(isMe&&own))&&!p.committed&&p.offers.length?`<div style="margin-bottom:10px">
       <select id="csel" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:4px;font-size:12px;margin-right:8px">
         ${p.offers.map(o=>`<option value='${JSON.stringify(o)}'>${o.lvl}: ${o.school}${(()=>{const c=COL_BY[o.school+'|'+o.lvl];return c&&!colRoom(c,p,false)?' (spots filled)':'';})()}${p.dreamSchool&&o.school===p.dreamSchool.school?' ':''}</option>`).join('')}
       </select>
       <button class="btn bsm bgn" onclick="commitNow(${p.id})">Commit Now</button>
     </div>`:''}
-    ${isMe&&p.yr>=10?`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Camps this year: ${campsUsed(p)}/${campCap()}${(p.camps||[]).length?' · '+p.camps.slice(-3).map(c=>`${c.name} (${c.grade}${c.offers?', '+c.offers+' offer'+(c.offers>1?'s':''):''})`).join(' · '):''}${(G.campInv||[]).some(v=>v.pid===p.id)?' · <a href="#" onclick="clo();nav(\'recr\');return false" style="color:var(--te)">camp invite waiting</a>':''}</div>`:''}
+    ${isMe&&p.yr>=10?`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Camps this year: ${campsUsed(p)}/${campCap()}${(p.camps||[]).length?' · '+p.camps.slice(-3).map(c=>`${c.name} (${c.grade}${c.offers?', '+c.offers+' offer'+(c.offers>1?'s':''):''})`).join(' · '):''}${ctl&&(G.campInv||[]).some(v=>v.pid===p.id)?' · <a href="#" onclick="clo();nav(\'recr\');return false" style="color:var(--te)">camp invite waiting</a>':''}</div>`:''}
     <div style="display:flex;flex-wrap:wrap;gap:4px">${p.offers.map(o=>`<span class="ob ${(()=>{const m={FBS:'of',FCS:'oc',D2:'od',NAIA:'on',D3:'ot',JUCO:'oj'};return m[o.lvl]||'od';})()}">${p.dreamSchool&&o.school===p.dreamSchool.school?' ':''}${o.lvl==='JUCO'?'JUCO interest':o.lvl}: ${o.school}</span>`).join('')||'<span style="color:var(--mu)">No offers yet.</span>'}</div>
   </div>
-  ${isMe&&(p.sp||0)>0?`<div id="pv-sp" class="hid">
+  ${ctl&&(p.sp||0)>0?`<div id="pv-sp" class="hid">
     <div style="font-size:12px;color:var(--mu);margin-bottom:10px">You have <strong style="color:var(--te)">${p.sp} skill points</strong>. Spending SP upgrades OVR and automatically boosts attributes.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <div style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:10px;text-align:center;min-width:110px">
@@ -14036,10 +14077,10 @@ function showPlayer(id){
     </div>
     <button class="bgh bsm" onclick="autoSP(${p.id})">Auto-upgrade all SP</button>
   </div>`:''}
-  ${isMe?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+  ${ctl?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="bgh bsm" onclick="clo();editPlayer(${p.id})"> Edit Player &amp; Equipment</button><button class="bgh bsm" onclick="capToggle(${p.id});clo();showPlayer(${p.id})">${captains().includes(p.id)?'Remove captain':'Name captain'}</button>${colFlipTarget(p)?`<button class="bgh bsm" onclick="pushFlip(${p.id})">Push him to flip to ${colFlipTarget(p).school}</button>`:''}${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
   </div>`:''}
-  ${!isMe&&!isGraduated&&G.players.includes(p)&&getS(p.sId)&&!getS(p.sId).fp?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+  ${!isMe&&!pcAuto()&&!isGraduated&&G.players.includes(p)&&getS(p.sId)&&!getS(p.sId).fp?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
     ${plScouted(p)?`<button class="btn bsm" onclick="meetOpen(${p.id})">Set up a meeting (transfer pitch)</button><span style="font-size:11px;color:var(--mu)">Cares most about ${PRIO_TXT[plPriority(p)]} · ${meetLeft()} meeting${meetLeft()===1?'':'s'} left · ${transferWindow()?'transfer window open':'transfers open in the offseason'}</span>`:`<button class="bgh bsm" onclick="clo();scoutPlayer(${p.id})">Scout him (${scoutLeft()} left)</button><span style="font-size:11px;color:var(--mu)">Scout a player to learn what he cares about; you can meet with him the season after.</span>`}
   </div>`:''}`);}
 // ═══════════ v2.14 PLAYER MEETINGS: talk a JV player into moving up, or pitch another school's player on transferring ═══════════
@@ -14613,13 +14654,15 @@ function seniorCeremony(){const S=myP().filter(p=>p.yr===12).sort((a,b)=>b.rat-a
   openMo(`<h2>Senior Night · Class of ${yr+1}</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">${S.length} senior${S.length>1?'s':''} played their last game for ${ms.name} ${ms.mascot}. The team and the crowd say thank you.</div>
     <div style="display:grid;gap:8px;max-height:56vh;overflow-y:auto">${S.map(p=>`<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px">${face(p.fs,44)}<div style="flex:1;min-width:0"><div style="font-weight:800">${p.fn} ${p.ln}${captains().includes(p.id)?' <span style="color:var(--gd)">(C)</span>':''}</div><div style="font-size:12px;color:var(--mu)">${p.pos} · ${p.rat} OVR${p.stars>=2?` · ${p.stars}★`:''}</div><div style="font-size:12px">${p.committed&&p.committed.school?`Signed with <b>${p.committed.school}</b>${p.committed.lvl?` (${p.committed.lvl})`:''}`:'Undecided: signing day is next'}</div></div></div>`).join('')}</div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="seniorDone()">Honor the seniors</button></div>`);}
-window.seniorDone=function(){G.morale=clamp(moraleOf()+3,5,100);clo();addLog(`<span style="color:var(--gd)">Senior Night: the Class of ${(G.baseYear||2026)+G.yr} was honored.</span>`);runOffseason();};
+window.seniorDone=function(){seniorHonor();clo();runOffseason();};
+function seniorHonor(){G.morale=clamp(moraleOf()+3,5,100);addLog(`<span style="color:var(--gd)">Senior Night: the Class of ${(G.baseYear||2026)+G.yr} was honored.</span>`);}
 
 // ═══════════ ACTIONS ═══════════
 function advWk(){
   if(ccOn()){ccNext();return;}
   if(G.phase==='playoffs'){advPlayoffWeek();return;}
   try{autoJVCallup();}catch(e){console.error('autoJVCallup',e);}
+  if(G.sched.some(g=>g.custom&&g._empty)&&pcAuto())pcAutoSched(); // Player Career: the staff fills it
   if(G.sched.some(g=>g.custom&&g._empty)){
     notify('Finish building your schedule first!','e');
     openScheduleBuilder();
@@ -14635,7 +14678,7 @@ function advWk(){
   }
   const game=G.sched[idx];
   // v2.00: the first game of a new career offers the interactive gameplay tutorial first (asked once per save)
-  if(!G.tutAsked&&!G.tutDone&&G.yr===1&&!G.sched.some(g=>g.result&&g.type==='regular')&&!window._gdAutoSim){tutOffer(true);return;}
+  if(!G.tutAsked&&!G.tutDone&&G.yr===1&&!G.sched.some(g=>g.result&&g.type==='regular')&&!window._gdAutoSim&&!pcAuto()){tutOffer(true);return;}
   const oppTeam=getS(game.oppId);
   const myTeam=myS();
   const label=oppTeam?`Week ${game.wk}: vs ${oppTeam.name} ${oppTeam.mascot}`:`Week ${game.wk}`;
@@ -17102,8 +17145,9 @@ function startGame(){
     checkAndFillRosters();
     _allClsDivs=null;_setupDivs=null;_mapOffers=[];for(const c of MAPC){c.offers=[];} // the setup map's lists: free them
     try{if(pcDraft)pcCreate(pcDraft);}catch(e){console.error('player career',e);}
+    if(G.pcLock){clo();try{pcAutoSched();}catch(e){console.error('player career schedule',e);}} // Player Career: no schedule builder, the staff builds it
     nav(G.myPlayerId!=null?'mine':'dash');
-    showTutorial();
+    showTutorial();if(G.pcLock){const i=TUT_PAGES.findIndex(x=>x.tab==='Player Career');if(i>=0)goTutTab(i);}
   });
 }
 // ═══════════ PLAYER CREATOR (Player Career): who he is, how he looks, what he wears and his starting ratings ═══════════
@@ -17227,6 +17271,39 @@ function pcCreate(d){
 // ── Player Career mode: coach trust, playing time and transfers ──
 const PC_STARTERS={QB:1,RB:1,WR:3,TE:1,OL:5,DL:4,LB:3,CB:2,S:2,K:1,P:1};
 function pcActive(){const p=myPlayer();return!!(G&&G.pcLock&&p&&G.players.includes(p)&&p.sId===G.myId&&!p.grad)?p:null;}
+// ── Player Career mode runs the team for you: the head coach handles schedule, depth chart, training, staff and recruiting ──
+function pcAuto(){return!!(typeof G!=='undefined'&&G&&G.pcLock);}
+// coach pages are hidden; in college the high school team's pages go too
+function pcHidePg(pg){return pcAuto()&&(['depth','jv','recr','scout','training','staff','cust','advisor'].includes(pg)||(ccOn()&&['roster','sched','recls'].includes(pg)));}
+// run a coach action without its toasts and page changes
+function pcQuiet(fn){const n=nav,nt=notify;nav=function(){};notify=function(){};try{return fn();}finally{nav=n;notify=nt;}}
+// the schedule: the rival in week 5 (an ongoing rival from the division, or the usual one), the open dates filled with fair
+// opponents, then locked in (no builder)
+function pcAutoSched(){if(!G||!Array.isArray(G.sched))return;const C=G.sched.filter(g=>g.custom),E=C.filter(g=>g._empty);
+  if(E.length&&E.length===C.length&&!G.sched.some(g=>g.result)){const md=myDiv(),cr=md&&(G.chosenRivals||[]).find(id=>id!==G.myId&&md.teams.some(t=>t.id===id)),r=md?getRival(G.myId,md):null;
+    G.seasonRivalId=cr||(r?r.id:null);genSched();}
+  if(G.sched.some(g=>g.custom&&g._empty)){sbFill();schedLock();}G.customSchedPending=false;}
+function pcAutoSP(){let n=0;for(const p of G.players)if(p.sId===G.myId&&!p.grad&&p.sp>0){spApply(p);n++;}if(n)try{updateRats();}catch(e){}}
+// captains: the best upperclassmen (leaders first) when a spot is open
+function pcAutoCaptains(){const c=captains();if(c.length>=3)return;const sc=p=>p.rat+(p.yr===12?3:0)+((p.traits||[]).includes('leader')?5:0);
+  const L=myP().filter(p=>p.yr>=11&&!c.includes(p.id)&&!p.xferOut).sort((a,b)=>sc(b)-sc(a));while(c.length<3&&L.length)c.push(L.shift().id);}
+// money: a sponsor and a fundraiser every season, the summer camp in the offseason
+function pcAutoMoney(){const F=finYr();try{if(!F.sponsDone)pcQuiet(()=>finSponsor());if(!F.fundDone)pcQuiet(()=>finFund());if(!F.campDone&&G.phase==='offseason')pcQuiet(()=>finCamp());}catch(e){console.error('player career money',e);}}
+// staff, facilities and training level, bought in the Assistant GM's order of value (facilities once training is maxed:
+// a training upgrade resets them), keeping a little money in the bank
+function pcAutoBudget(){const keep=10000,all=G.players.filter(p=>p.sId===G.myId);
+  for(let i=0;i<60;i++){const tl=getTrainLevel(),o=aiBudgetOpts({all}).find(x=>x.ok&&x.id&&(x.id[0]!=='f'||tl>=20)&&(G.unlimitedMoney||G.budget-x.c>=keep));if(!o)break;const b=G.budget;
+    pcQuiet(()=>o.id[0]==='t'?upgradeTrainLevel():o.id[0]==='s'?upgSt(o.id[1],o.c):upgFac(o.id[1],o.c));if(!G.unlimitedMoney&&G.budget===b)break;
+    addLog(`<span style="color:var(--gn)">Program upgrade: ${o.k} for $${o.c.toLocaleString()}.</span>`);}}
+// reclassification: the school moves up when it can (state title and the money)
+function pcMoveUp(){const O=myClsOrder(),i=O.indexOf(G.cls);if(i<0||i>=O.length-1||!moveUpChamp()||!hasFunds(CLS_MOVEUP_COST[clsEq(G.cls)]||0))return null;
+  const old=G.cls;if(!moveUpDo())return null;return bEvPop('Moving up',`After the state title the school moves up from <strong>${clsL(old)}</strong> to <strong style="color:var(--gd)">${clsL(G.cls)}</strong>.`,null,'var(--gd)');}
+// on every page change: nothing the coach would handle is left waiting
+function pcAutoTick(){if(!pcAuto()||ccOn()||!G.myId||!myS()||!Array.isArray(G.players))return;
+  if(!G.pcAutoV){G.pcAutoV=1;G.benched={};for(const p of G.players)if(p.sId===G.myId)p.depth={};} // older saves: the hand-set depth chart goes
+  else if(G.benched&&Object.keys(G.benched).some(k=>(G.benched[k]||[]).length))G.benched={};
+  if(Array.isArray(G.sched)&&G.sched.some(g=>g.custom&&g._empty))pcAutoSched();
+  pcAutoSP();pcAutoCaptains();pcAutoMoney();}
 // ═══════════ COLLEGE CAREER ═══════════
 // Player Career goes on after high school: you play for the college you signed with. Every college fields the high school
 // players it signed (rated for college: 15 to 30 overall lower than in high school, less for the best players and big stat
@@ -17944,7 +18021,7 @@ const TUT_PAGES=[
       <li><strong>Menu</strong>: the Dashboard lists every section (Team, Season, League, Program) with its pages. A gold dot marks a page that needs you (new news, a schedule to build, practice, skill points). Each page opens on its own; <strong>‹ Home</strong> takes you back. Settings → Menu layout switches back to the classic tabs.</li>
       <li><strong>Job offers</strong>: after a good season other schools in your league call about their head coaching job. The offers sit on the Dashboard until your first game of the new season. A rebuild job comes with a bigger budget.</li>
       <li><strong>Division names</strong>: in a real-states world your home state uses its own class names (Texas 2A to 6A, Ohio Division VII to I, Class S to LL in Connecticut...).</li>
-      <li><strong>Player Career</strong>: pick a school on the map, then build your player: name, position, archetype, height and weight, up to 3 interests and 2 character traits, his look and his gear. Attribute points build a freshman between 40 and 55 overall. In Player Career mode the school already has a head coach, so you don't create one.</li>
+      <li><strong>Player Career</strong>: pick a school on the map, then build your player: name, position, archetype, height and weight, up to 3 interests and 2 character traits, his look and his gear. Attribute points build a freshman between 40 and 55 overall. In Player Career mode the school already has a head coach, so you don't create one: he runs the team for you.</li>
       <li><strong>Levels and skill points</strong>: every game earns your player XP (more for big games, wins and the playoffs). Each level gives 3 skill points to spend on any attribute on the My Player page. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 above 90.</li>
       <li><strong>Catch meter</strong>: in Player Career only your own player gets one.</li>
       <li><strong>Transfers</strong>: meet a scouted player any time. During the season a yes means he joins you next season (seniors can't, they graduate). Your own players may want to transfer out, depending on what they care about, their traits and morale; never more than 15% of your roster in a year. Talk to them from the Players leaving tile; they leave when offseason training ends.</li>
@@ -18164,6 +18241,7 @@ const TUT_PAGES=[
       <li><b>Coach trust</b> (0 to 100) goes up with good games and wins and down with turnovers, drops and losses. Trust also moves you up the depth chart.</li>
       <li><b>Call for the ball</b> (B key, Y / Triangle or the button) makes your quarterback look your way, and a running back gets a run called for him. Do not ask on every play: the coach notices.</li>
       <li><b>Transfer</b> from the Dashboard in the offseason, before the first game: you join a school in your league and start over with neutral trust.</li>
+      <li><b>The coach runs the team.</b> The schedule, depth chart, JV call-ups, practice, offseason training, skill points, captains, staff, facilities, recruiting and reclassification are all handled for you. You only play as your player: his games, his skill points, his commitment and his transfer.</li>
       <li>After your senior year, follow his college and pro career on <b>My Player</b>.</li>
     </ul>`},
   {tab:'Money & trophies',icon:'',title:'Ticket Sales and the Trophy Case',body:`

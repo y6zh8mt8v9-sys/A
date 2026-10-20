@@ -486,7 +486,8 @@ function campSendInvites(C,mineOut){
   const picks=[];const used=new Set();
   for(let k=0;k<C.size*4&&picks.length<C.size&&cand.length;k++){const i=Math.floor(Math.pow(Math.random(),1.6)*cand.length),p=cand[i][1];if(used.has(p.id))continue;used.add(p.id);picks.push(p);}
   for(const p of picks){C.inv++;
-    if(p.sId===G.myId){G.campInv=(G.campInv||[]).filter(v=>getP(v.pid)&&v.yr===G.yr);if(G.campInv.filter(v=>v.pid===p.id).length>=3)continue;
+    if(p.sId===G.myId&&p.id===G.myPlayerId&&pcAuto()){try{const r=campRun(p,C,true);C.att++;addNews('offer',`Camp: ${p.fn} ${p.ln} grades ${r.grade}`,`${C.name}, ${r.got.length} offer${r.got.length!==1?'s':''}.`);}catch(e){}} // Player Career: your player goes
+    else if(p.sId===G.myId&&!pcAuto()){G.campInv=(G.campInv||[]).filter(v=>getP(v.pid)&&v.yr===G.yr);if(G.campInv.filter(v=>v.pid===p.id).length>=3)continue;
       const inv={id:'c'+Date.now().toString(36)+Math.floor(Math.random()*1e6),pid:p.id,yr:G.yr,wk:G.week||0,camp:{host:C.host,lvl:C.lvl,pr:C.pr,name:C.name,schools:C.schools,size:C.size}};
       G.campInv.push(inv);if(mineOut)mineOut.push([p,C]);}
     else if(Math.random()<0.8){try{campRun(p,C,true);C.att++;}catch(e){}}}

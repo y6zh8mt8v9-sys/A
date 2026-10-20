@@ -70,8 +70,9 @@ function startGame(){
     checkAndFillRosters();
     _allClsDivs=null;_setupDivs=null;_mapOffers=[];for(const c of MAPC){c.offers=[];} // the setup map's lists: free them
     try{if(pcDraft)pcCreate(pcDraft);}catch(e){console.error('player career',e);}
+    if(G.pcLock){clo();try{pcAutoSched();}catch(e){console.error('player career schedule',e);}} // Player Career: no schedule builder, the staff builds it
     nav(G.myPlayerId!=null?'mine':'dash');
-    showTutorial();
+    showTutorial();if(G.pcLock){const i=TUT_PAGES.findIndex(x=>x.tab==='Player Career');if(i>=0)goTutTab(i);}
   });
 }
 // ═══════════ PLAYER CREATOR (Player Career): who he is, how he looks, what he wears and his starting ratings ═══════════
