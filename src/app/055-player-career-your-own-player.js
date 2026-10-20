@@ -293,7 +293,7 @@ window.ccSimMine=function(){const x=window._ccG;if(!x)return;const{g,plvl}=x,C=G
   ccMyResult(g,plvl,sc[0],sc[1],st,played,'sim');};
 // Game Day: both colleges with their real rosters; you control only your player
 function ccTeamObj(k){const I=colInfo(k),ci=ccIx(k),r=ccR(ccH('sch',k)),L=G.cc.S&&G.cc.S[ccLvlOf(k)],x=L&&L.rec[k];
-  return{id:900000+ci,fp:true,roster:ccRoster(k).filter(p=>!(p.inj>0)),name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,abbr:(I.abbr||colAbbr(I.name)).slice(0,4),logoKey:colLK(I),mash:I.mash,customLogo:I.customLogo,
+  return{id:900000+ci,fp:true,roster:ccRoster(k).filter(p=>!(p.inj>0)),name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,abbr:(I.abbr||colAbbr(I.name)).slice(0,4),logoKey:I.logoKey,mash:I.mash,customLogo:I.customLogo,
     offS:OFF_SCH[Math.floor(r()*OFF_SCH.length)],defS:DEF_SCH[Math.floor(r()*DEF_SCH.length)],cls:G.cls,wins:x?x[0]:0,losses:x?x[1]:0,col:k};}
 window.ccGdStart=function(){const x=window._ccG;if(!x)return;const{g,plvl}=x,C=G.cc,o=ccOppOf(g),hs=ccHomeSide(g);
   const me=ccTeamObj(C.k),op=ccTeamObj(o),homeIdx=hs===1?1:0,H=homeIdx?op:me,Hk=homeIdx?o:C.k;

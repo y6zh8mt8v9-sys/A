@@ -162,9 +162,8 @@ function colDef(k){if(_colDefC[k])return _colDefC[k];const i=k.lastIndexOf('|'),
   return _colDefC[k]={k,name:n,lvl:lv,mascot:ms[h%ms.length],c1:pal[0],c2:pal[1],abbr:colAbbr(n)};}
 function colInfo(k){if(k&&typeof k==='object')k=k.school+'|'+k.lvl;const c=COL_BY[k],M=colMetaSrc()[k]||{},I=Object.assign({},colDef(k),M);
   I.k=k;I.name=c?c.school:I.name;I.pr=c?c.pr:(M.pr||0);I.st=M.st||(c&&c.st)||'CF';I.lvl=c?c.lvl:I.lvl;try{I.conf=colConfOf(k);}catch(e){}return I;}
-function colLK(I){if(I.logoKey)return I.logoKey;const e=typeof _LK!=='undefined'&&_LK[String(I.mascot||'').toLowerCase()];return e&&_LGO[e[0]]?e[0]:undefined;}
-function colLogo(k,sz){try{const I=colInfo(k);return sLogo({name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,logoKey:colLK(I),mash:I.mash,customLogo:I.customLogo},sz||24);}catch(e){return'';}}
-function colTeamObj(k){const I=colInfo(k);return{name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,abbr:I.abbr,logoKey:colLK(I),mash:I.mash,customLogo:I.customLogo,col:k};}
+function colLogo(k,sz){try{const I=colInfo(k);return sLogo({name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,logoKey:I.logoKey,mash:I.mash,customLogo:I.customLogo},sz||24);}catch(e){return'';}}
+function colTeamObj(k){const I=colInfo(k);return{name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,abbr:I.abbr,logoKey:I.logoKey,mash:I.mash,customLogo:I.customLogo,col:k};}
 function colConfOf(k){try{const C=G&&G.cc&&G.cc.conf;if(C&&C.by&&C.by[k]!=null)return C.list[C.by[k]].name;}catch(e){}return'';}
 // renaming a college moves every reference: offers, commitments, dream schools, class books, signing lists, alumni, college career
 function colRename(oldK,newName){const i=oldK.lastIndexOf('|'),on=oldK.slice(0,i),lv=oldK.slice(i+1),nk=newName+'|'+lv;if(nk===oldK)return oldK;
@@ -199,7 +198,7 @@ function colFormHtml(I,ctx){const lg=Object.keys(_LGO||{}).sort(),opt=(v,l,c)=>`
 window._ceLogo=undefined;
 function colEditRead(){const v=id=>{const e=document.getElementById(id);return e?e.value:'';};return{name:wsClean(v('ce-n')),mascot:wsClean(v('ce-m')).slice(0,24),abbr:wsClean(v('ce-a')).toUpperCase().replace(/[^A-Z&]/g,'').slice(0,5),st:v('ce-st'),c1:v('ce-c1'),c2:v('ce-c2'),logoKey:v('ce-lk')||undefined,mash:v('ce-mash')||undefined,pr:clamp(Math.round(+v('ce-pr'))||50,1,99),cf:v('ce-cf')};}
 window.colEditPrev=function(){const r=colEditRead(),I=colInfo(window._ceK),lg=window._ceLogo!==undefined?window._ceLogo:I.customLogo,e=document.getElementById('ce-prev');
-  if(e)e.innerHTML=sLogo({name:r.name||I.name,mascot:r.mascot||I.mascot,c1:r.c1,c2:r.c2,logoKey:colLK({logoKey:r.logoKey,mascot:r.mascot||I.mascot}),mash:r.mash,customLogo:lg},84);};
+  if(e)e.innerHTML=sLogo({name:r.name||I.name,mascot:r.mascot||I.mascot,c1:r.c1,c2:r.c2,logoKey:r.logoKey,mash:r.mash,customLogo:lg},84);};
 window.colEditUpload=function(inp){const f=inp.files&&inp.files[0];if(!f)return;logoShrink(f,d=>{window._ceLogo=d;const u=document.getElementById('ce-up');if(u)u.textContent='Custom logo in use';colEditPrev();});};
 window.colEditClearLogo=function(){window._ceLogo=null;const u=document.getElementById('ce-up');if(u)u.textContent='';colEditPrev();};
 window.colEditReset=function(){const M=colMetaSrc(),k=window._ceK;delete M[k];window._ceLogo=undefined;if(!window._wsColEdit)try{buildColleges();}catch(e){}colEditReopen(k);};

@@ -177,61 +177,9 @@ function sLogo(s,sz=28){
   if(!s)return'';
   if(s.customLogo)return`<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><image href="${s.customLogo}" x="0" y="0" width="${sz}" height="${sz}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   if(s.intl&&s.intl!=='US'&&INTL_LOGO[s.id]){const L=intlLogoSvg(s,sz);if(L)return L;}
-  const ck=['p1',s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0,s.logoKey||'',s.mash||''].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
+  const ck=['v3',s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0,s.logoKey||'',s.mash||''].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
   let _st='CF';try{_st=s.cls?clsSt(s.cls):'CF';}catch(e){}_LGcur=_ST_GLYPHS[_st]||null;
   try{return _sLogoBody(s,sz,ck);}finally{_LGcur=null;}
-}
-function _sLogoBody(s,sz,ck){
-  let c1=_hx(s.c1)?s.c1:'#33415c',c2=_hx(s.c2)?s.c2:'#ffffff';
-  const h=[...(s.name||'')+'|'+(s.mascot||'')].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7),h2=h>>>7,h3=h>>>13;
-  if(h2%4===3){const t=c1;c1=c2;c2=t;}
-  if(Math.abs(_lm(c1)-_lm(c2))<.28)c2=_lm(c1)>.5?'#141b24':'#f2f4f7';
-  const ini=((s.name||s.mascot||'?').match(/[A-Za-z]/)||['?'])[0].toUpperCase();
-  const P={var:(h>>>11)%2,F:c1,K:_lm(c1)>.45?_mx(c1,'#000000',.7):'#f4f6f8',L:_mx(c1,'#ffffff',.42),D:_mx(c1,'#000000',.4),A:Math.abs(_lm(c1)-_lm('#f0b72f'))<.22?c2:'#f0b72f',O:'#0b1118',ch:ini};
-  const rm=['shade','shade','shade','flat','flat','mono'][(h>>>9)%6];if(rm==='mono'){P.L=c2;P.A=c2;P.D=_mx(c1,'#000000',.35);}
-  const mk=(s.mascot||'').toLowerCase(),key=(s.logoKey&&_LGO[s.logoKey])?[s.logoKey,'']:_LK[mk],tc=_lm(c2)<.4?_mx(c2,'#ffffff',.6):c2;
-  const FONT="font-family=\"'Alfa Slab One',Impact,'Arial Black',sans-serif\"";
-  let body;
-  const small=sz<=44,up=t=>String(t||'').toUpperCase();
-  const words=(s.name||'').replace(/\bHigh\b/ig,' ').trim().split(/\s+/).filter(w=>/[A-Za-z]/.test(w));
-  const two=(words.length>1?(words[0][0]+words[1][0]):(ini+'H')).toUpperCase();
-  const word=up(s.mascot||''),scr=(s.mascot||'').charAt(0).toUpperCase()+(s.mascot||'').slice(1).toLowerCase();
-  const TX=(x,y,fs,t,ex)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${fs}" font-weight="400" fill="${c1}" ${ex||''}>${t}</text>`;
-  let k='',mas='';
-  if(key){k=key[0];let v=key[1];const alts=s.logoKey?null:_ALT[mk];if(alts&&h3%3===0){k=alts[(h3>>>2)%alts.length];v='';}
-    let PP=P;if(v==='polar')PP=Object.assign({},P,{F:'#eef2f6',L:'#ffffff',D:'#aebbc8',K:'#1b2430'});else if(v==='zebra')PP=Object.assign({},P,{F:'#f2f2f2',L:'#ffffff',D:'#17191c',K:'#111111'});else if(v==='raven')PP=Object.assign({},P,{F:'#23262d',L:'#5a6170',D:'#0d0e11',K:'#f4f6f8'});
-    mas=_LGO[k](PP,v);if(_FLIP.has(k)&&(h3>>>4)%2)mas=`<g transform="${_MR}">${mas}</g>`;
-    if(rm==='shade'&&PP!==P&&PP.F!==c1)mas=mas.split(`fill="${PP.F}"`).join(`fill="url(#${_lgG(PP.F)})"`);}
-  let sty=['block','block','inter','outline','word','head','head','head','letter','script','stack','tag'][h%12];
-  if(!key&&!['block','inter'].includes(sty))sty=(h>>>3)%2?'block':'inter';
-  if(!key&&!['block','inter','outline','stack'].includes(sty))sty=(h>>>3)%2?'block':'inter';
-  if(small&&['word','script','stack','tag'].includes(sty))sty=key?'head':'block';
-  if(k==='paw'||k==='claw')sty=small?'head':(sty==='word'?'word':'head');
-  if(s.logoKey&&_LGO[s.logoKey])sty='head';
-  const ol=(g)=>g.replace(/fill="[^"]*" stroke="[^"]*" stroke-width="[^"]*"/,`fill="${P.O}" stroke="${P.O}" stroke-width="20"`);
-  const sw1=(words[0]||s.name||'').toUpperCase().slice(0,12);
-  if(sty==='block')body=_gt(ini,50,92,96,94,c1);
-  else if(sty==='outline')body=_gt(ini,50,92,96,94,c1,30)+_gt(ini,50,92,96,94,tc,4);
-  else if(sty==='stack')body=_gt(sw1,50,40,24,94,c1,8)+_gt(word||ini,50,84,36,96,c1,9)+`<path d="M8,51 L92,51" stroke="${c1}" stroke-width="5" stroke-linecap="round"/>`;
-  else if(sty==='tag')body=`<g transform="translate(2 0) scale(.8)">${mas}</g>`+_gt(two,78,96,24,36,c1,8);
-  else if(sty==='inter'){const g2=_gt(two[1],63,95,70,60,c1);body=_gt(two[0],38,80,82,70,c1)+ol(g2)+g2;}
-  else if(sty==='word')body=`<g transform="translate(19 0) scale(.62)">${mas}</g>`+_gt(word,50,98,22,94,c1,8);
-  else if(sty==='script')body=`<text class="scr" x="50" y="62" text-anchor="middle" font-size="44" fill="${c1}" textLength="90" lengthAdjust="spacingAndGlyphs" transform="rotate(-7 50 55)">${scr}</text><path d="M10,78 C36,90 68,86 94,66" fill="none" stroke="${c1}" stroke-width="5.5" stroke-linecap="round"/>`;
-  else if(sty==='letter')body=_gt(ini,50,94,104,96,_mx(c2,c1,.3))+`<g transform="translate(15 4) scale(.72)">${mas}</g>`;
-  else body=`<g transform="translate(8 7) scale(.84)">${mas}</g>`;
-  // v2.16 mascot mashup: a second icon as a badge on the logo
-  let badge='';
-  if(s.mash&&_LGO[s.mash]){try{const P2=Object.assign({},P,{F:c2,L:_mx(c2,'#ffffff',.42),D:_mx(c2,'#000000',.4),K:_lm(c2)>.45?_mx(c2,'#000000',.7):'#f4f6f8'});badge=`<circle cx="78" cy="78" r="17" fill="${c1}" stroke="${P.O}" stroke-width="3"/><g transform="translate(66 66) scale(.24)">${_LGO[s.mash](P2,'')}</g>`;}catch(e){}}
-  if(rm==='shade')body=body.split(`fill="${c1}"`).join(`fill="url(#${_lgG(c1)})"`);
-  // Varsity patch: ink silhouette, team-color band, contrasting field, emblem fitted inside
-  const FR=['M50 4 L90 14 L90 50 C90 74 72 88 50 97 C28 88 10 74 10 50 L10 14 Z','M50 4 A46 46 0 1 1 49.99 4 Z','M22 6 H78 L94 22 V78 L78 94 H22 L6 78 V22 Z','M10 10 H36 L50 4 L64 10 H90 V52 C90 76 72 89 50 97 C28 89 10 76 10 52 Z'];
-  const fi=(h>>>17)%4,fd=FR[fi],cy=fi===0||fi===3?47:50,sIn=small?.88:.85,box=small?62:56;
-  const sc_=(k_)=>`transform="translate(50 50) scale(${k_}) translate(-50 -50)"`;
-  const bb=_lgm(body);let tf='';
-  if(bb){const SK={anchor:10,cyclone:11,buck:8,axes:7,wheel:9,swords:9,pirate:7,ram:8,hornet:5,tractor:4,stingray:4,dolphin:3,marlin:3,shark:3};const pad=Math.max(sty==='outline'?6:0,(SK[k]||0)*.6);const sc=Math.min(1.1,(box-2*pad)/Math.max(bb.width,bb.height,1));tf=`translate(${(50-(bb.x+bb.width/2)*sc).toFixed(2)} ${(cy-(bb.y+bb.height/2)*sc).toFixed(2)}) scale(${sc.toFixed(3)})`;}
-  const frame=`<path d="${fd}" fill="${P.O}" stroke="${P.O}" stroke-width="${small?5:6}" stroke-linejoin="round"/><path d="${fd}" fill="${c1}"/><path d="${fd}" fill="${c2}" ${sc_(sIn)}/>`+(small?'':`<path d="${fd}" fill="none" stroke="${c1}" stroke-width="1.6" ${sc_(sIn-.06)}/>`);
-  const out=`<svg width="__SZ__" height="__SZ__" viewBox="0 0 100 100" class="lg" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;overflow:visible">${frame}<g transform="${tf}">${body}</g>${badge}</svg>`;
-  _LGC.set(ck,out);return out.split('__SZ__').join(sz);
 }
 
 function fmtDate(idx){if(!GAME_DATES[idx])return'';const d=GAME_DATES[idx];const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${mn[d.getMonth()]} ${d.getDate()}`;}
