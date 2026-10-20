@@ -243,7 +243,3 @@ function _lgm(b){
     m=document.createElementNS('http://www.w3.org/2000/svg','g');m.id='lg-m';d.appendChild(m);}
    m.innerHTML=b;const r=m.getBBox();m.innerHTML='';return r.width>0&&r.height>0?r:null;}catch(e){return null;}
 }
-function _lgFonts(){
-  if(window._lgFR)return;window._lgFR=1;
-  try{if(document.fonts&&document.fonts.load)Promise.all([document.fonts.load('64px Graduate'),document.fonts.load('64px "Kaushan Script"')]).then(f=>{if(!f.some(x=>x&&x.length))return;_LGC.clear();try{if(typeof G!=='undefined'&&G&&G._page&&document.getElementById('ct')&&document.getElementById('ct').innerHTML)nav(G._page,G._arg);}catch(e){}}).catch(()=>{});}catch(e){}
-}

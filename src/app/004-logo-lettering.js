@@ -1,6 +1,5 @@
-let _LGcur=null;
-function _gw(t){const T=_LGcur||_LG_G;let w=0;for(const c of t){const g=T[c]||T[' '];w+=g[0];}return w;}
-function _gt(t,cx,base,h,maxW,fill,sw,extra){t=String(t||'').toUpperCase().replace(/[^A-Z ]/g,'');const W=_gw(t)||1;let sc=h/100;if(maxW&&W*sc>maxW)sc=maxW/W;const T=_LGcur||_LG_G;let x=-W/2,o='';for(const c of t){const g=T[c]||T[' '];if(g[1])o+=`<path d="${g[1]}" transform="translate(${x.toFixed(1)} 0)"/>`;x+=g[0];}
+function _gw(t){const T=_LG_V;let w=0;for(const c of t){const g=T[c]||T[' '];w+=g[0];}return w;}
+function _gt(t,cx,base,h,maxW,fill,sw,extra){t=String(t||'').toUpperCase().replace(/[^A-Z ]/g,'');const W=_gw(t)||1;let sc=h/100;if(maxW&&W*sc>maxW)sc=maxW/W;const T=_LG_V;let x=-W/2,o='';for(const c of t){const g=T[c]||T[' '];if(g[1])o+=`<path d="${g[1]}" transform="translate(${x.toFixed(1)} 0)"/>`;x+=g[0];}
   return`<g transform="translate(${cx} ${base}) scale(${sc.toFixed(4)})" fill="${fill}" stroke="${fill}" stroke-width="${sw==null?7:sw}" stroke-linejoin="round" ${extra||''}>${o}</g>`;}
 function _hx(c){c=(c||'').trim();if(/^#[0-9a-f]{3}$/i.test(c))c='#'+[...c.slice(1)].map(x=>x+x).join('');return /^#[0-9a-f]{6}$/i.test(c)?[1,3,5].map(i=>parseInt(c.substr(i,2),16)):null;}
 function _mx(a,b,t){const A=_hx(a)||[60,60,60],B=_hx(b)||[0,0,0];return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');}

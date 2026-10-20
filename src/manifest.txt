@@ -13,7 +13,6 @@ shell/11-vendor-end-app-start.html
 app/000-boot-theme-settings.js
 app/001-division-names-per-classification-8.js
 app/002-player-interests-cosmetic.js
-app/003-data-st_glyphs.js
 app/003a-data-varsity-glyphs.js
 app/003b-data-mascot-images.js
 app/004-logo-lettering.js

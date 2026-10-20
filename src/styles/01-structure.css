@@ -19,11 +19,9 @@ b,strong{font-weight:700}
 .rkb{display:inline-block;font-family:var(--hd)!important;font-weight:800;font-size:max(10px,.85em);padding:0 6px;margin-right:5px;border-radius:4px;line-height:1.5;vertical-align:.08em;cursor:pointer;user-select:none;-webkit-user-select:none}
 .rkb.rk-a{color:#2a1a00;background:#ffc23f}.rkb.rk-n{color:#fff;background:#2f6ad0}.rkb.rk-c{color:#fff;background:#c9372f}
 .rkb:focus-visible{outline:2px solid #fff;outline-offset:1px}
-/* icons and logo lettering */
+/* icons */
 .gi{width:1.05em;height:1.05em;vertical-align:-.17em;fill:currentColor;display:inline-block;flex-shrink:0;margin-right:.3em}
 .gi:only-child{margin-right:0}
-svg.lg text{font-family:'Graduate','Alfa Slab One',Impact,'Arial Black',sans-serif!important}
-svg.lg text.scr{font-family:'Kaushan Script','Brush Script MT',cursive!important}
 *{scrollbar-width:thin;scrollbar-color:rgba(163,179,198,.35) transparent}
 button,.nb,select,input{min-height:34px}
 /* rating badges */
