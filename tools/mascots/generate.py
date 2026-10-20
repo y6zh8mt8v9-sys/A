@@ -25,7 +25,8 @@ PROMPT = ("Professional high school athletics mascot logo: {subject}. Fierce and
           "proportions, in the style of a modern college or professional sports team primary logo. Clean vector "
           "illustration, bold dark outlines, crisp cel shading with three or four tones. Grayscale only: black, white "
           "and shades of gray, no color at all. One subject, centered, filling most of the frame, isolated on a plain "
-          "pure white background. No text, no letters, no numbers, no border, no badge, no circle, no ground shadow.")
+          "pure white background. An original design that does not copy any real school's or team's logo. "
+          "No text, no letters, no numbers, no border, no badge, no circle, no ground shadow.")
 
 
 def load():
