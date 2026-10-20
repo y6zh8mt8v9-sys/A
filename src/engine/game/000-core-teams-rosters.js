@@ -186,8 +186,8 @@ function gpShowPreview(){
   if(!GP.previewHtml){gpIntroSkip();return;}
   const ov=document.createElement('div');ov.id='gpPrev';
   ov.style.cssText='position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;background:rgba(3,14,28,.55);padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch';
-  ov.innerHTML='<div style="margin:auto;width:min(620px,96vw);border-radius:22px;padding:16px 18px 14px;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.06)),rgba(8,30,52,.92);border:1px solid rgba(255,255,255,.3);box-shadow:0 20px 50px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.45)">'+GP.previewHtml+
-    '<div style="text-align:center;margin-top:12px"><button id="gpPrevGo" style="min-height:46px;padding:0 30px;border-radius:999px;border:1px solid rgba(255,255,255,.5);font:900 16px Nunito,system-ui,sans-serif;color:#fff;cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.14) 48%,rgba(0,0,0,0) 52%),#22a8f0">Coin toss &#8594;<\/button><\/div><\/div>';
+  ov.innerHTML='<div style="margin:auto;width:min(620px,96vw);border-radius:14px;padding:16px 18px 14px;background:rgba(14,26,43,.96);color:#f2f5f7;border:1px solid rgba(214,228,245,.14);border-top:4px solid var(--tA,#2f66c0);box-shadow:0 20px 50px rgba(2,8,18,.5)">'+GP.previewHtml+
+    '<div style="text-align:center;margin-top:12px"><button id="gpPrevGo" style="min-height:46px;padding:0 30px;border-radius:8px;border:0;font:700 16px Barlow,system-ui,sans-serif;color:var(--tOn,#fff);cursor:pointer;background:var(--tA,#2f66c0)">Coin toss<\/button><\/div><\/div>';
   document.body.appendChild(ov);document.getElementById('gpPrevGo').onclick=gpIntroSkip;
 }
 

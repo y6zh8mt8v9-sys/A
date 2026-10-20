@@ -138,7 +138,7 @@ function olNk(e){return e.nk||(e.nk=++OL.nk);}
 function olWait(txt){let el=document.getElementById('olWait');
   if(!txt){if(el)el.remove();return;}
   if(!el){el=document.createElement('div');el.id='olWait';el.setAttribute('role','status');
-    el.style.cssText='position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top));transform:translateX(-50%);z-index:70;padding:7px 16px;border-radius:999px;font:800 13px Nunito,system-ui,sans-serif;color:#0d2a43;background:linear-gradient(180deg,#fff,#dff1fd);border:1px solid rgba(13,42,67,.25);box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;max-width:92vw;text-align:center';
+    el.style.cssText='position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top));transform:translateX(-50%);z-index:70;padding:7px 16px;border-radius:8px;font:800 13px Nunito,system-ui,sans-serif;color:#0d2a43;background:linear-gradient(180deg,#fff,#dff1fd);border:1px solid rgba(13,42,67,.25);box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;max-width:92vw;text-align:center';
     document.body.appendChild(el);}
   el.textContent=txt;}
 function olKickWait(){if(G.client){const s=OL.s;return s&&s.kw!=null?s.kw:null;}return G.rmeter?G.rmeter.team:G.meter?G.me:null;}

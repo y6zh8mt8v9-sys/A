@@ -15,11 +15,11 @@ function pgDash(){
     actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="openScheduleBuilder()"> Build Your Schedule</button>`;
   } else if(G.phase==='offseason'&&no&&nextUnplayed&&nextUnplayed.type==='regular'){
     // a new season that has not started yet: the next step is week 1, not the offseason
-    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">▶ Play Week ${nextUnplayed.wk}</button>`;
+    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">Play Week ${nextUnplayed.wk}</button>`;
   } else if(G.phase==='offseason'){
     actionBtn=`<button class="btn bgn" style="padding:8px 18px;font-size:14px" onclick="doOffseason()">Begin Offseason</button>`;
   } else if(G.phase==='regular'&&no){
-    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">▶ Play Week ${nextUnplayed.wk}</button>`;
+    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">Play Week ${nextUnplayed.wk}</button>`;
   } else if((G.phase==='regular'||G.phase==='playoffs')&&regDone&&!playoffSlot&&!G.playoff){
     actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="startPlayoffs()">State Playoffs</button>`;
   } else if(G.phase==='playoffs'&&playoffSlot&&playoffOpp){
@@ -44,26 +44,26 @@ function pgDash(){
     const favStr=myOvr>oppOvr?`<span style="color:var(--gn);font-size:11px">▲ Favored +${myOvr-oppOvr}</span>`:myOvr<oppOvr?`<span style="color:var(--te);font-size:11px">▼ Underdog −${oppOvr-myOvr}</span>`:`<span style="color:var(--mu);font-size:11px">Even matchup</span>`;
     nextGameBlock=`<div class="dash-next-game${nextUnplayed.isRivalry?' rivalry':''}">
       <div class="dash-ng-header">
-        <span class="dash-ng-title">${nextUnplayed.isRivalry?' RIVALRY WEEK, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
+        <span class="dash-ng-title">${nextUnplayed.isRivalry?' Rivalry week, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
         ${favStr}
       </div>
       ${(()=>{const w=gdWxFor('reg',{idx:G.sched.indexOf(nextUnplayed),opp:no});return w?`<div class="dash-ng-wx" title="${wxEffects(w)}">${wxIcon(w,16)}<span><b>Forecast:</b> ${wxLine(w)}</span></div>`:'';})()}
       <div class="dash-ng-body">
         <div class="dash-vs-block">
           <div style="display:flex;align-items:center;gap:8px">${sLogo(ms,49)}<div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800">${ms.mascot}</div>
+            <div style="font-family:var(--hd);font-size:16px;font-weight:800">${ms.mascot}</div>
             <div style="font-size:10px;color:var(--mu)">${rb(myOvr)}</div>
           </div></div>
           <div class="dash-vs-sep">VS</div>
           <div style="display:flex;align-items:center;gap:8px">${sLogo(no,49)}<div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800">${no.name} ${no.mascot}</div>
+            <div style="font-family:var(--hd);font-size:16px;font-weight:800">${no.name} ${no.mascot}</div>
             <div style="font-size:10px;color:var(--mu)">${no.city} · ${no.wins}-${no.losses} · ${rb(oppOvr)}</div>
           </div></div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button class="bgh bsm" onclick="viewSchool(${no.id})">View</button>
           ${pracAvailable()?`<button class="bgh bsm" onclick="pracOpen()">Practice</button>`:`<span style="font-size:11px;color:var(--mu);align-self:center">Practiced</span>`}
-          <button class="btn${nextUnplayed.isRivalry?' bgd':''}" style="padding:7px 16px" onclick="advWk()">▶ ${nextUnplayed.isRivalry?' Play Rivalry':'Play Game'}</button>
+          <button class="btn${nextUnplayed.isRivalry?' bgd':''}" style="padding:7px 16px" onclick="advWk()">${nextUnplayed.isRivalry?' Play Rivalry':'Play Game'}</button>
         </div>
       </div>
     </div>`;
@@ -78,12 +78,12 @@ function pgDash(){
       <div class="dash-ng-body">
         <div class="dash-vs-block">
           <div style="display:flex;align-items:center;gap:8px">${sLogo(ms,49)}<div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800">${ms.mascot}</div>
+            <div style="font-family:var(--hd);font-size:16px;font-weight:800">${ms.mascot}</div>
             <div style="font-size:10px;color:var(--mu)">${rb(Math.round((G.offR+G.defR)/2))}</div>
           </div></div>
           <div class="dash-vs-sep">VS</div>
           <div style="display:flex;align-items:center;gap:8px">${sLogo(playoffOpp,49)}<div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800">${playoffOpp.name} ${playoffOpp.mascot}</div>
+            <div style="font-family:var(--hd);font-size:16px;font-weight:800">${playoffOpp.name} ${playoffOpp.mascot}</div>
             <div style="font-size:10px;color:var(--mu)">${rb(teamOvr(playoffOpp.id))} · Win to advance!</div>
           </div></div>
         </div>
@@ -123,7 +123,7 @@ function pgDash(){
       </div>
       ${coachCard()}
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--mu);text-transform:uppercase">${phaseLabel}</div>
+        <div style="font-family:var(--hd);font-size:13px;color:var(--mu);">${phaseLabel}</div>
         ${actionBtn}
       </div>
     </div>

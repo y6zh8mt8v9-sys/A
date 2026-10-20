@@ -50,14 +50,14 @@
   <!-- SETUP SCREEN: two-column layout with map on left, controls on right -->
   <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:1200px;gap:10px;padding:16px;">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;">
-      <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;text-transform:uppercase;letter-spacing:2px;margin:0"><span class="r">GRIDIRON</span>&nbsp;<span class="b">27</span></h1>
+      <h1 style="font-family:var(--hd);font-size:42px;font-weight:900;letter-spacing:2px;margin:0"><span class="r">Gridiron</span>&nbsp;<span class="b">27</span></h1>
       <p style="color:var(--mu);font-size:13px;margin:0">Pick your states, take a job offer from the map and build your program.</p>
     </div>
     <div style="display:flex;gap:16px;width:100%;flex-wrap:wrap;justify-content:center;align-items:flex-start;">
       <!-- LEFT: County Map -->
       <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
         <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:14px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--mu);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
             <span id="map-st-title">State of Crestfield</span>
             <span style="font-size:11px;font-weight:400;color:var(--mu)">tap a state, then a highlighted county to view job offers</span>
           </div>
@@ -70,7 +70,7 @@
             <div id="map-tooltip" style="display:none;position:absolute;background:var(--s1);border:1px solid var(--bd);border-radius:5px;padding:6px 10px;font-size:11px;pointer-events:none;z-index:20;min-width:140px;box-shadow:0 4px 14px rgba(0,0,0,.6)"></div>
           </div>
           <!-- Legend -->
-          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;">
+          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;font-size:10px;font-family:var(--hd);font-weight:700;">
             <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;background:#22b870;border-radius:2px;opacity:.8"></div>Small school</div>
             <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;background:#4da6ff;border-radius:2px;opacity:.8"></div>Mid-size school</div>
             <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;background:#f5c030;border-radius:2px;opacity:.8"></div>Large school</div>
@@ -79,14 +79,14 @@
         </div>
         <!-- Offer county panel, shows when a county is selected -->
         <div id="offer-county-panel" style="display:none;background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:14px;width:700px;max-width:calc(100vw - 40px);">
-          <div id="offer-county-title" style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;text-transform:uppercase;color:var(--te);margin-bottom:10px;"></div>
+          <div id="offer-county-title" style="font-family:var(--hd);font-size:15px;font-weight:900;color:var(--te);margin-bottom:10px;"></div>
           <div id="offer-county-schools" style="display:flex;flex-direction:column;gap:6px;"></div>
         </div>
       </div>
       <!-- RIGHT: Setup form -->
       <div style="display:flex;flex-direction:column;gap:10px;min-width:300px;max-width:340px;">
         <div class="sbox" style="width:100%;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:4px;"> Coach Setup</div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:4px;"> Coach Setup</div>
           <div class="fg"><label>Coach Name</label><input id="s-coach" value="Coach Smith"></div>
           <div class="fg"><label>Theme</label>
             <div style="display:flex;gap:8px;">
@@ -101,13 +101,13 @@
         </div>
         <!-- v2.16 your world: the real states you play in -->
         <div class="sbox" style="width:100%;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div style="flex:1;min-width:160px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--mu)">Your World</div><div id="usa-info" style="font-size:13px;margin-top:2px">Real USA</div></div>
+          <div style="flex:1;min-width:160px"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu)">Your World</div><div id="usa-info" style="font-size:13px;margin-top:2px">Real USA</div></div>
           <button class="btn" onclick="usaPickOpen()">Choose states</button>
           <button class="bgh bsm" onclick="showTutorial();setTimeout(()=>{const i=TUT_PAGES.findIndex(p=>p.tab==='States &amp; conferences'||p.tab==='States & conferences');if(i>=0)goTutTab(i);},50)">How it works</button>
         </div>
         <!-- v2.14 Player Career: create your own player and follow him through high school, college and the pros -->
         <div class="sbox" style="width:100%;padding:14px 16px;" id="pc-box">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:8px;">Player Career <span style="font-weight:600;text-transform:none">(optional)</span></div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:8px;">Player Career <span style="font-weight:600;text-transform:none">(optional)</span></div>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer"><input type="checkbox" id="pc-on" onchange="document.getElementById('pc-fields').style.display=this.checked?'':'none'"> Create my own player</label>
           <div id="pc-fields" style="display:none;margin-top:8px">
             <div style="display:flex;gap:6px"><div class="fg" style="flex:1"><label>First name</label><input id="pc-fn" placeholder="First" maxlength="18"></div><div class="fg" style="flex:1"><label>Last name</label><input id="pc-ln" placeholder="Last" maxlength="18"></div></div>
@@ -118,13 +118,13 @@
         </div>
         <!-- Your 9 Offers box -->
         <div class="sbox" style="width:100%;padding:14px 16px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;"> Your Job Offers</div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;"> Your Job Offers</div>
           <div id="offer-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
           <div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Your home state has offered you nine jobs and every other state a few. Scroll the country map, tap a state to zoom in, tap a highlighted county, then accept a school's offer. You can start your career in any of the 13 states.</div>
         </div>
         <!-- Selected school + rival picker -->
         <div id="selected-school-panel" class="sbox" style="width:100%;display:none;padding:14px 16px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--gn);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;"> Job Offer Accepted</div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gn);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;"> Job Offer Accepted</div>
           <div id="selected-school-info" style="margin-bottom:10px;"></div>
           <!-- Rivalry picker -->
           <div class="fg" id="rivalry-fg" style="display:none">
@@ -150,7 +150,7 @@
 
 <div id="app" class="hid">
   <div id="tb">
-    <span class="logo"><span class="r">GRIDIRON</span>&nbsp;<span class="b">27</span></span>
+    <span class="logo"><span class="r">Gridiron</span>&nbsp;<span class="b">27</span></span>
     <span class="tb-sep">|</span>
     <div class="tb-tn"><span id="tbl"></span><span id="tbn" style="font-size:14px"></span><span id="tbr"></span></div>
     <div class="pill"><span>Season</span><strong id="tbyr">2026</strong></div>
@@ -239,13 +239,13 @@
 <div id="settings-modal" onclick="closeSettings(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;align-items:center;justify-content:center;">
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:10px;width:420px;max-width:95vw;padding:22px 24px;position:relative;" onclick="event.stopPropagation()">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--te)"> Settings</div>
+      <div style="font-family:var(--hd);font-size:20px;font-weight:900;letter-spacing:.5px;color:var(--te)"> Settings</div>
       <button onclick="closeSettings()" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;line-height:1;padding:2px 5px;border-radius:3px" onmouseover="this.style.color='var(--rd)'" onmouseout="this.style.color='var(--mu)'">✕</button>
     </div>
 
     <!-- Theme -->
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:14px 16px;margin-bottom:12px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:10px"> Appearance</div>
+      <div style="font-family:var(--hd);font-size:12px;font-weight:800;letter-spacing:.8px;color:var(--mu);margin-bottom:10px"> Appearance</div>
       <div style="display:flex;gap:8px">
         <button id="set-dark-btn" class="btn" style="flex:1;background:var(--ac)" onclick="setTheme('dark')"> Dark Mode</button>
         <button id="set-light-btn" class="bgh" style="flex:1" onclick="setTheme('light')"> Light Mode</button>
@@ -254,20 +254,20 @@
 
     <!-- Unlimited Money -->
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:14px 16px;margin-bottom:20px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:10px"> Gameplay</div>
+      <div style="font-family:var(--hd);font-size:12px;font-weight:800;letter-spacing:.8px;color:var(--mu);margin-bottom:10px"> Gameplay</div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--tx)"> Unlimited Money</div>
           <div style="font-size:11px;color:var(--mu);margin-top:2px">Bypass all budget costs. Budget display shows ∞.</div>
         </div>
-        <button id="set-unlim-btn" onclick="toggleUnlimitedMoney()" style="min-width:70px;padding:6px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;transition:all .15s;border:2px solid var(--bd);background:var(--s3);color:var(--mu)">OFF</button>
+        <button id="set-unlim-btn" onclick="toggleUnlimitedMoney()" style="min-width:70px;padding:6px 14px;border-radius:20px;font-family:var(--hd);font-size:13px;font-weight:800;letter-spacing:.4px;cursor:pointer;transition:all .15s;border:2px solid var(--bd);background:var(--s3);color:var(--mu)">OFF</button>
       </div>
       <div id="set-league" style="margin-top:12px"></div>
     </div>
 
     <!-- v2.14 Game Day settings (the same ones as the in-game pause menu) -->
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:14px 16px;margin-bottom:20px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:10px">Game Day</div>
+      <div style="font-family:var(--hd);font-size:12px;font-weight:800;letter-spacing:.8px;color:var(--mu);margin-bottom:10px">Game Day</div>
       <div id="set-gd"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:14px"><button class="bgh" style="flex:1" onclick="closeSettings();errReport()">Error report</button></div>
@@ -293,7 +293,7 @@
 <div id="div-editor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:600;align-items:center;justify-content:center;">
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:22px 26px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;position:relative;">
     <button onclick="closeDivEditor()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;">&#10005;</button>
-    <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;color:var(--te);margin-bottom:4px;"> Rename Divisions</h2>
+    <h2 style="font-family:var(--hd);font-size:19px;font-weight:900;color:var(--te);margin-bottom:4px;"> Rename Divisions</h2>
     <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">Edit the name of any division. Changes apply when you close this panel.</p>
     <div id="div-editor-list" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
@@ -308,7 +308,7 @@
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--b2);border-radius:8px;width:860px;max-width:98vw;max-height:94vh;overflow:hidden;display:flex;flex-direction:column;position:relative;">
     <div style="padding:16px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div>
-        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;text-transform:uppercase;color:var(--te);margin:0;"> Team Builder</h2>
+        <h2 style="font-family:var(--hd);font-size:21px;font-weight:900;color:var(--te);margin:0;"> Team Builder</h2>
         <div style="font-size:11px;color:var(--mu);margin-top:2px;">Add, edit and manage teams in every state and division. Your changes are saved as you go, so you can stop and continue later.</div>
       </div>
       <button onclick="closeTeamBuilder()" style="background:none;border:none;color:var(--mu);font-size:22px;cursor:pointer;padding:4px 8px;">✕</button>
@@ -362,4 +362,4 @@
 <div id="pu"><div id="pui"></div><button class="btn bbl" id="pun" onclick="nxp()">Continue</button></div>
 <div id="nf"></div>
 
-<script>
+<script>/* GSAP 3.13.0, GreenSock standard license (no charge): https://gsap.com/standard-license */

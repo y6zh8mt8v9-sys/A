@@ -163,7 +163,7 @@ function renderLeagueRules(){const el=document.getElementById('set-league');if(!
   const seg=(k,v0,opts)=>`<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${opts.map(([v,l])=>`<button class="${v0===v?'btn':'bgh'} bxs" style="min-height:30px;padding:4px 10px" onclick='ruleSet(${JSON.stringify(k)},${JSON.stringify(v)})'>${l}</button>`).join('')}</div>`;
   const row=(l,sub,h)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap"><div style="flex:1;min-width:150px"><div style="font-size:13px;font-weight:700">${l}</div>${sub?`<div style="font-size:11px;color:var(--mu);margin-top:2px">${sub}</div>`:''}</div>${h}</div>`;
   const later=G.poN&&G.poN!==R.n;
-  el.innerHTML=`<div style="font-size:12px;font-weight:800;color:var(--mu);margin:4px 0 8px;text-transform:uppercase;letter-spacing:.06em">League rules (this career)</div>`
+  el.innerHTML=`<div style="font-size:12px;font-weight:800;color:var(--mu);margin:4px 0 8px;letter-spacing:.06em">League rules (this career)</div>`
     +row('Playoff teams',later?`This season keeps ${G.poN} teams; ${R.n} from next season.`:'Teams in your classification\'s state playoffs.',seg('poN',R.n,[[4,'4'],[8,'8'],[16,'16'],[32,'32']]))
     +row('Who qualifies','Division winners first: every division champion is in, then the best records.',seg('poQ',R.q,[['record','Best records'],['div','Division winners first']]))
     +row('Earned progression','On: ratings can\'t be typed in. Players earn them in practice, games, position battles and with SP.',seg('earned',!!cur.earned,[[false,'Off'],[true,'On']]));}

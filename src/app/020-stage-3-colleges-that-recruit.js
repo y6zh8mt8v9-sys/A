@@ -121,7 +121,7 @@ function ncampResolve(pops){
       try{starStep(g.p,null,true);}catch(e){}}
     C.res={n:graded.length,offered};
     for(const id of C.mine){const p=getP(id),g=graded.find(x=>x.p.id===id);if(p&&g)mineRes.push([p,C,g.grade,offered.includes(id)]);}}
-  if(mineRes.length){const h=mineRes.map(([p,C,gr,ok])=>`<div style="margin:4px 0"><strong>${p.fn} ${p.ln}</strong> (${p.pos}) at ${C.host}, grade <b>${gr}</b> · ${ok?'<span style="color:var(--gn)">OFFER!</span>':'<span style="color:var(--mu)">no offer</span>'}</div>`).join('');
+  if(mineRes.length){const h=mineRes.map(([p,C,gr,ok])=>`<div style="margin:4px 0"><strong>${p.fn} ${p.ln}</strong> (${p.pos}) at ${C.host}, grade <b>${gr}</b> · ${ok?'<span style="color:var(--gn)">Offer!</span>':'<span style="color:var(--mu)">no offer</span>'}</div>`).join('');
     addNews('offer',' Needs camp results',mineRes.map(([p,C,,ok])=>`${p.fn} ${p.ln}: ${ok?'offer from '+C.host:'no offer'}`).join(' · '));
     if(pops)pops.push(bEvPop(' Needs Camp Results',h,null,'var(--gd)'));}
 }
@@ -170,12 +170,12 @@ function pgColleges(){_colStReady();
 }
 window.colShow=function(k){_colStReady();
   const c=COL_BY[k];if(!c)return;const m=colCommitMap(),ps=(m[k]||[]).slice().sort((a,b)=>b.yr-a.yr||(b.stars||0)-(a.stars||0)||b.rat-a.rat),o=colCls(c,G.yr),yr0=2026+(G.yr-1);
-  const need=Object.keys(o.need).map(pos=>{const cm=o.com[pos]||0,n=o.need[pos];return`<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 7px;border-radius:999px;background:${cm>=n?'rgba(40,180,90,.18)':'var(--s2)'};border:1px solid var(--bd);font-size:11px"><b>${pos}</b> ${cm}/${n}</span>`;}).join('');
-  const row=p=>{const s=getS(p.sId);return`<tr class="cl" onclick="clo();showPlayer(${p.id})"><td>${p.fn} ${p.ln}${p.sId===G.myId?' <span style="color:var(--gd);font-size:10px">YOURS</span>':''}</td><td><span class="pb2">${p.pos}</span></td><td>${stars(p.stars)}</td><td>${p.rat}</td><td>${s?s.name:''}</td><td>${s?stName(stOf(s)):''}${s&&stOf(s)===c.st?' <span style="color:var(--gn);font-size:10px">IN-STATE</span>':''}</td></tr>`;};
+  const need=Object.keys(o.need).map(pos=>{const cm=o.com[pos]||0,n=o.need[pos];return`<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 7px;border-radius:8px;background:${cm>=n?'rgba(40,180,90,.18)':'var(--s2)'};border:1px solid var(--bd);font-size:11px"><b>${pos}</b> ${cm}/${n}</span>`;}).join('');
+  const row=p=>{const s=getS(p.sId);return`<tr class="cl" onclick="clo();showPlayer(${p.id})"><td>${p.fn} ${p.ln}${p.sId===G.myId?' <span style="color:var(--gd);font-size:10px">Yours</span>':''}</td><td><span class="pb2">${p.pos}</span></td><td>${stars(p.stars)}</td><td>${p.rat}</td><td>${s?s.name:''}</td><td>${s?stName(stOf(s)):''}${s&&stOf(s)===c.st?' <span style="color:var(--gn);font-size:10px">In-state</span>':''}</td></tr>`;};
   const sr=ps.filter(p=>p.yr===12),jr=ps.filter(p=>p.yr<12);
   const sg=G.colSigned&&G.colSigned.by&&G.colSigned.by[k]||[];
   const signed=sg.length?`<div style="margin-top:12px;font-weight:900">Signed last year (${2026+(G.colSigned.yr-1)})</div><div style="font-size:12px;color:var(--mu);margin-bottom:4px">${sg.length} high school signees</div>
-    <div style="overflow-x:auto"><table><tbody>${sg.slice().sort((a,b)=>b[2]-a[2]||b[3]-a[3]).map(x=>`<tr><td>${x[0]}${x[6]?' <span style="color:var(--gd);font-size:10px">YOURS</span>':''}</td><td><span class="pb2">${x[1]}</span></td><td>${stars(x[2])}</td><td>${x[3]}</td><td>${x[4]}</td><td>${stName(x[5])}</td></tr>`).join('')}</tbody></table></div>`:'';
+    <div style="overflow-x:auto"><table><tbody>${sg.slice().sort((a,b)=>b[2]-a[2]||b[3]-a[3]).map(x=>`<tr><td>${x[0]}${x[6]?' <span style="color:var(--gd);font-size:10px">Yours</span>':''}</td><td><span class="pb2">${x[1]}</span></td><td>${stars(x[2])}</td><td>${x[3]}</td><td>${x[4]}</td><td>${stName(x[5])}</td></tr>`).join('')}</tbody></table></div>`:'';
   const CI=colInfo(k);openMo(`<div style="padding:4px 2px"><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${colLogo(k,64)}<div style="flex:1"><div style="font-weight:900;font-size:20px">${c.school} ${CI.mascot}</div><div style="font-size:12px;color:var(--mu)">${CI.abbr}${CI.conf?' · '+CI.conf:''}</div></div><button class="bgh bsm" onclick="openColEdit('${k.replace(/'/g,"\\'")}')">Edit</button></div><div style="font-size:12px;color:var(--mu);margin-bottom:8px">${c.lvl} · ${stName(c.st)} · prestige ${c.pr} · signs a ${o.cap}-player class this year (${colHsLeft(o)} spots still open; about ${Math.round(colPIn(c.lvl,c.st)*100)}% from ${stName(c.st)})</div>
     <div style="font-weight:800;margin-bottom:4px">Class of ${yr0+1} needs</div><div>${need}</div>
     <div style="margin-top:10px;font-weight:900">Committed seniors (${sr.length})</div>${sr.length?`<div style="overflow-x:auto"><table><tbody>${sr.map(row).join('')}</tbody></table></div>`:'<div style="color:var(--mu);font-size:12px">No senior commitments yet.</div>'}

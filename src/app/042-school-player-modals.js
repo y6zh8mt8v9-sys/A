@@ -7,7 +7,7 @@ function viewSchool(id){
       <h2 style="margin-bottom:3px">${s.name} ${s.mascot}</h2>
       <div style="color:var(--mu);font-size:13px">${s.city} • ${clsName(s.cls||G.cls)} • ${div?.name||'?'}</div>
       <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;white-space:nowrap;color:${w>=l?'var(--gn)':'var(--te)'}">${w}-${l}</span>
+        <span style="font-family:var(--hd);font-size:18px;font-weight:800;white-space:nowrap;color:${w>=l?'var(--gn)':'var(--te)'}">${w}-${l}</span>
         ${rb(teamOvr(id))}<span class="sbh">${s.offS}/${s.defS}</span>
         <span style="color:var(--mu);font-size:12px">${s.lite?`${pl.length} tracked prospect${pl.length===1?'':'s'}`:`${pl.length} players`}</span>
       </div>
@@ -143,7 +143,7 @@ function showPlayer(id){
         <button class="wbtn" onclick="togWl(${p.id})">${p.wl?'★':'☆'}</button>
         ${isMe?`<button class="hbtn" onclick="togHof(${p.id})"></button>`:''}
       </div>
-      <h2 style="margin-bottom:4px">#${p.num} ${p.fn} ${p.ln}${p.mine?' <span style="font-size:11px;background:var(--gd);color:#111;border-radius:999px;padding:2px 8px;font-weight:900;vertical-align:middle">MY PLAYER</span>':''}${isGraduated?' <span style="font-size:12px;color:var(--gd);font-weight:400">Alumni</span>':''}</h2>
+      <h2 style="margin-bottom:4px">#${p.num} ${p.fn} ${p.ln}${p.mine?' <span style="font-size:11px;background:var(--gd);color:#111;border-radius:8px;padding:2px 8px;font-weight:900;vertical-align:middle">MY PLAYER</span>':''}${isGraduated?' <span style="font-size:12px;color:var(--gd);font-weight:400">Alumni</span>':''}</h2>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <span class="pb2" style="font-size:12px">${p.pos}</span>${yrL(p.yr)} ${rb(p.rat)} ${stars(p.stars)} ${devBClickable(p)}
         ${archBadge} ${schemeFitBadge} ${streakBadge}
@@ -166,7 +166,7 @@ function showPlayer(id){
   </div>
   <div id="pv-b"><div class="g2">
     <div>
-      <div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:6px">PHYSICAL</div>
+      <div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:6px">Physical</div>
       <div class="dr"><span class="a">Height</span><span>${htf(p.ht)}</span></div>
       <div class="dr"><span class="a">Weight</span><span>${p.wt} lbs</span></div>
       ${(ovrSync(p),'')}<div style="margin-top:6px">${attrPanel(p,false)}</div><div style="font-size:10px;color:var(--mu)">● counts toward his ${p.pos} overall</div>
@@ -174,12 +174,12 @@ function showPlayer(id){
         <div class="prw" style="margin-top:3px"><div class="prf" style="width:${(p.rat/effPot(p)*100).toFixed(0)}%"></div></div>
       </div>
       <div style="margin-top:10px">
-        <div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:4px">INTERESTS</div>
+        <div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:4px">Interests</div>
         <div>${interestBadges(p.interests)}</div>
       </div>
       ${p.dreamSchool?`<div style="margin-top:10px">
         <div style="font-weight:700;font-size:12px;color:var(--gd);margin-bottom:4px"> DREAM SCHOOL</div>
-        <div style="background:#1a1200;border:1px solid var(--gd);border-radius:5px;padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd)">${p.dreamSchool.school} <span style="font-size:11px;color:var(--mu);font-weight:400">${p.dreamSchool.lvl}</span></div>
+        <div style="background:#1a1200;border:1px solid var(--gd);border-radius:5px;padding:6px 10px;font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gd)">${p.dreamSchool.school} <span style="font-size:11px;color:var(--mu);font-weight:400">${p.dreamSchool.lvl}</span></div>
         ${p.committed&&p.committed.school===p.dreamSchool.school?'<div style="font-size:10px;color:var(--gn);margin-top:3px"> Dream fulfilled!</div>':'<div style="font-size:10px;color:var(--mu);margin-top:3px">If they offer, he commits instantly.</div>'}
       </div>`:''}
     </div>
@@ -207,15 +207,15 @@ function showPlayer(id){
   <div id="pv-gl" class="hid">${gameLogHtml(p)}</div>
   <div id="pv-cr" class="hid">${careerHtml(p)}</div>
   <div id="pv-s" class="hid"><div class="g2">
-    <div><div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:6px">THIS SEASON${isSpecialPos?' (Rating-Based)':''}</div>${rows(sH())}<div class="dr"><span class="a">Games</span><span>${p.seasStats.gp||0}</span></div></div>
-    <div><div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:6px">CAREER</div>${rows(cH())}<div class="dr"><span class="a">Career Games</span><span>${p.carStats.gp||0}</span></div></div>
+    <div><div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:6px">This season${isSpecialPos?' (Rating-Based)':''}</div>${rows(sH())}<div class="dr"><span class="a">Games</span><span>${p.seasStats.gp||0}</span></div></div>
+    <div><div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:6px">Career</div>${rows(cH())}<div class="dr"><span class="a">Career Games</span><span>${p.carStats.gp||0}</span></div></div>
   </div></div>
   <div id="pv-o" class="hid">
     <div style="font-size:12px;color:var(--mu);margin-bottom:8px">Rat: ${rb(p.rat)} | Stars: ${stars(p.stars)} | GPA: ${gpaL(p.gpa)} | Dev: ${devB(p.dev)}${isSpecialPos?' <span style="color:var(--te)">'+p.pos+': Stars based on rating & traits</span>':p.seasStats.gp===0?' <span style="color:var(--gd)">Must play games to earn stars!</span>':''}</div>
     ${p.dreamSchool?`<div style="background:#1a1200;border:1px solid var(--gd);border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
       <span style="font-size:18px"></span>
       <div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--gd)">DREAM SCHOOL: ${p.dreamSchool.school} (${p.dreamSchool.lvl})</div>
+        <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd)">DREAM SCHOOL: ${p.dreamSchool.school} (${p.dreamSchool.lvl})</div>
         <div style="font-size:10px;color:var(--mu)">${p.committed&&p.committed.school===p.dreamSchool.school?' Dream fulfilled, committed!':'If they offer, he commits instantly.'}</div>
       </div>
     </div>`:''}

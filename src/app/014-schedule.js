@@ -126,13 +126,13 @@ function renderRivalryPicker(){
     return`<div onclick="window._pickSeasonRival(${s.id})" style="background:${isSel?'rgba(245,192,48,.12)':'var(--s2)'};border:2px solid ${isSel?'var(--gd)':'var(--bd)'};border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:12px" onmouseover="if(!${isSel})this.style.borderColor='var(--ac)'" onmouseout="if(!${isSel})this.style.borderColor='var(--bd)'">
       ${sLogo(s,43)}
       <div style="flex:1;min-width:0">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px">${s.name} ${s.mascot}</div>
+        <div style="font-family:var(--hd);font-weight:800;font-size:14px">${s.name} ${s.mascot}</div>
         <div style="font-size:10px;color:var(--mu)">${s.city} · ${s.wins||0}-${s.losses||0} last season${histCount?` · <span style="color:var(--gd)"> ${histCount} rivalry game${histCount!==1?'s':''}</span>`:''}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
         ${rb(ovr)}
         ${diffStr}
-        ${isOldRival?'<span style="font-size:9px;background:rgba(245,192,48,.2);color:var(--gd);border-radius:3px;padding:1px 5px;font-weight:700">ONGOING RIVAL</span>':''}
+        ${isOldRival?'<span style="font-size:9px;background:rgba(245,192,48,.2);color:var(--gd);border-radius:3px;padding:1px 5px;font-weight:700">Ongoing rival</span>':''}
       </div>
       ${isSel?'<span style="font-size:22px"></span>':''}
     </div>`;
@@ -141,7 +141,7 @@ function renderRivalryPicker(){
   const canContinue=!!G.seasonRivalId;
   const rivalInfo=currentRival?`<div style="background:rgba(245,192,48,.1);border:1px solid var(--gd);border-radius:6px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
     ${sLogo(currentRival,38)}
-    <div><div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--gd)"> ${currentRival.name} ${currentRival.mascot}</div>
+    <div><div style="font-family:var(--hd);font-weight:800;font-size:14px;color:var(--gd)"> ${currentRival.name} ${currentRival.mascot}</div>
     <div style="font-size:11px;color:var(--mu)">Selected as your ${yr} Rivalry Game (Week 5)</div></div>
   </div>`:'';
 
@@ -246,7 +246,7 @@ function renderScheduleBuilder(){
     if(g.isDivision){
       const s=getS(g.oppId);
       return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
+        <span style="font-family:var(--hd);font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
         ${s?sLogo(s,32):''}
         <span style="font-size:12px;flex:1">${s?s.name+' '+s.mascot:'?'}</span>
         ${g.isRivalry?'<span style="font-size:10px;font-weight:800;color:var(--gd)"> RIVALRY</span>':'<span style="font-size:10px;color:var(--te);font-weight:700">DIV</span>'}
@@ -256,15 +256,15 @@ function renderScheduleBuilder(){
     if(g._empty){
       const isSel=_sbTargetWk===g.wk;
       return`<div onclick="_sbSelectSlot(${g.wk})" style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-bottom:1px solid var(--bd);border-radius:4px;cursor:pointer;background:${isSel?'rgba(47,111,237,.18)':'transparent'};border:${isSel?'1px solid var(--ac)':'1px solid transparent'};margin:1px 0;transition:all .12s" onmouseover="if(${!isSel})this.style.background='rgba(47,111,237,.07)'" onmouseout="if(${!isSel})this.style.background='transparent'">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
+        <span style="font-family:var(--hd);font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
         <span style="font-size:12px;color:${isSel?'var(--te)':'var(--bd)'};flex:1;font-style:italic;font-weight:${isSel?700:400}">${isSel?'← pick a team':'open slot –'}</span>
-        <span style="font-size:10px;color:${isSel?'var(--te)':'var(--te)'};font-weight:700">${isSel?'SELECTING':'CUSTOM'}</span>
+        <span style="font-size:10px;color:${isSel?'var(--te)':'var(--te)'};font-weight:700">${isSel?'Selecting':'Custom'}</span>
       </div>`;
     }
     const s=getS(g.oppId);
     const cls=s?s.cls||G.cls:'?';
     return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">
-      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
+      <span style="font-family:var(--hd);font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
       ${s?sLogo(s,32):''}
       <span style="font-size:12px;flex:1">${s?s.name+' '+s.mascot:'?'}</span>
       <span style="font-size:10px;font-weight:700;color:var(--te)">${clsL(cls)}</span>
@@ -279,7 +279,7 @@ function renderScheduleBuilder(){
   <div style="display:flex;gap:16px;height:72vh;min-height:400px">
     <!-- LEFT: current schedule -->
     <div style="width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--te)">Your Schedule</div>
+      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te)">Your Schedule</div>
       <div style="font-size:11px;color:var(--mu)">${filled.length}/${totalCustom} custom slots filled · ${emptySlots.length} remaining</div>
       ${emptySlots.length>0?`<div style="font-size:10px;color:var(--te);font-weight:700;background:rgba(47,111,237,.1);border-radius:3px;padding:3px 7px"> Click a week slot, then pick a team →</div><button class="bgh" onclick="sbAutoFill()" style="width:100%;font-size:13px;padding:7px">Auto-fill open slots</button>`:''}
       <div style="flex:1;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px">${schedPreview}</div>
@@ -290,11 +290,11 @@ function renderScheduleBuilder(){
     </div>
     <!-- RIGHT: team picker -->
     <div style="flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--te)">Pick Opponents</div>
+      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te)">Pick Opponents</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-        <select onchange="_sbSetCls(this.value)" style="background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:3px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">${[...ST_ORDER,...(G.allLeagues&&G.allLeagues.INTL?['INTL']:[])].map(k=>{const v=k==='INTL'?'INTL':'ST:'+k,on=_sbSt()===k;return`<option value="${v}"${on?' selected':''}>${k==='INTL'?'International':stName(k)}</option>`;}).join('')}</select>
-        ${clsList.filter(c=>_sbSt()!=='INTL'&&clsSt(c)===_sbSt()).map(c=>`<button title="${clsName(c)}" onclick="_sbSetCls('${c}')" style="background:${_sbCls===c?'var(--ac)':'var(--s2)'};border:1px solid ${_sbCls===c?'var(--ac)':'var(--bd)'};color:${_sbCls===c?'var(--tOn,#fff)':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">${clsL(c)}${c===G.cls?' ★':''}</button>`).join('')}
-        <button onclick="_sbSetCls('ALL')" style="background:${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--s2)'};border:1px solid ${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--bd)'};color:${!_sbCls||_sbCls==='ALL'?'var(--tOn,#fff)':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px">ALL</button>
+        <select onchange="_sbSetCls(this.value)" style="background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:3px 6px;font-family:var(--hd);font-weight:700;font-size:12px">${[...ST_ORDER,...(G.allLeagues&&G.allLeagues.INTL?['INTL']:[])].map(k=>{const v=k==='INTL'?'INTL':'ST:'+k,on=_sbSt()===k;return`<option value="${v}"${on?' selected':''}>${k==='INTL'?'International':stName(k)}</option>`;}).join('')}</select>
+        ${clsList.filter(c=>_sbSt()!=='INTL'&&clsSt(c)===_sbSt()).map(c=>`<button title="${clsName(c)}" onclick="_sbSetCls('${c}')" style="background:${_sbCls===c?'var(--ac)':'var(--s2)'};border:1px solid ${_sbCls===c?'var(--ac)':'var(--bd)'};color:${_sbCls===c?'var(--tOn,#fff)':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px">${clsL(c)}${c===G.cls?' ★':''}</button>`).join('')}
+        <button onclick="_sbSetCls('ALL')" style="background:${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--s2)'};border:1px solid ${!_sbCls||_sbCls==='ALL'?'var(--ac)':'var(--bd)'};color:${!_sbCls||_sbCls==='ALL'?'var(--tOn,#fff)':'var(--tx)'};padding:3px 10px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px">ALL</button>
       </div>
       <div>
         <input id="sb-search" placeholder="Search team or mascot…" value="${_sbSearch}" oninput="const _v=this.value;clearTimeout(window._sbQT);window._sbQT=setTimeout(()=>{_sbSearch=_v;window._sbShow=60;renderScheduleBuilder();const _e=document.getElementById('sb-search');if(_e){_e.focus();try{_e.setSelectionRange(_e.value.length,_e.value.length);}catch(x){}}},250)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:6px 10px;border-radius:4px;font-size:12px;width:100%;outline:none">
@@ -343,26 +343,26 @@ function renderScheduleBuilder(){
   openMo(`<h2> Build Your ${yr2} Schedule</h2>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:stretch">
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
-      <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">Division Games (Locked)</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--te)">5 Games</div>
+      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">Division Games (Locked)</div>
+      <div style="font-family:var(--hd);font-size:20px;font-weight:900;color:var(--te)">5 Games</div>
       <div style="font-size:11px;color:var(--mu)">Weeks 1–5 · Rival in Wk 5</div>
     </div>
     ${rivalSch?`<div style="background:rgba(245,192,48,.08);border:1px solid var(--gd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px;display:flex;align-items:center;gap:10px">
       ${sLogo(rivalSch,38)}
       <div>
-        <div style="font-size:10px;color:var(--gd);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:2px"> Rivalry (Wk 5)</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800">${rivalSch.name} ${rivalSch.mascot}</div>
+        <div style="font-size:10px;color:var(--gd);letter-spacing:1px;font-weight:700;margin-bottom:2px"> Rivalry (Wk 5)</div>
+        <div style="font-family:var(--hd);font-size:14px;font-weight:800">${rivalSch.name} ${rivalSch.mascot}</div>
         <div style="font-size:10px;color:var(--mu)">${rb(teamOvr(rivalSch.id))}</div>
       </div>
     </div>`:''}
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
-      <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">Custom Slots</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--te)">${filled.length}/${totalCustom} Filled</div>
+      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">Custom Slots</div>
+      <div style="font-family:var(--hd);font-size:20px;font-weight:900;color:var(--te)">${filled.length}/${totalCustom} Filled</div>
       <div style="font-size:11px;color:var(--mu)">${emptySlots.length} remaining · any class</div>
     </div>
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
-      <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px"> Strength of Schedule</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:${sosTier.color}">${sosTier.icon} ${sosTier.label} (${projSOS||'?'} OVR)</div>
+      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px"> Strength of Schedule</div>
+      <div style="font-family:var(--hd);font-size:18px;font-weight:900;color:${sosTier.color}">${sosTier.icon} ${sosTier.label} (${projSOS||'?'} OVR)</div>
       <div style="font-size:11px;color:var(--mu)">Playoff seeding: ${sosSeedStr}</div>
     </div>
   </div>

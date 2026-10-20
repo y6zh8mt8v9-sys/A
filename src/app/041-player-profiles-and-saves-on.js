@@ -291,7 +291,7 @@ function renderStoryCard(p,compact){
   const cf=_genCollegeCareerFacts(p);
   if(compact){
     return`<div style="margin-top:8px;padding:8px 10px;background:rgba(47,111,237,.06);border:1px solid rgba(47,111,237,.2);border-radius:6px;cursor:pointer" onclick="event.stopPropagation();showPlayer(${p.id})">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span>${st.icon}</span><span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--te)">${st.outcome}</span><span style="font-size:10px;color:var(--mu)">${st.storyYr}</span></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span>${st.icon}</span><span style="font-family:var(--hd);font-weight:800;font-size:12px;color:var(--te)">${st.outcome}</span><span style="font-size:10px;color:var(--mu)">${st.storyYr}</span></div>
       <div style="font-size:11px;color:var(--tx);line-height:1.4">${st.headline}</div>
       ${cf?`<div style="font-size:10px;color:var(--mu);margin-top:3px"> ${cf.school} (${cf.lvl}) · ${cf.statsBlock.split(' ').slice(0,4).join(' ')}…</div>`:''}
     </div>`;
@@ -300,7 +300,7 @@ function renderStoryCard(p,compact){
   const fbsPrestigeLabel=cf&&cf.lvl==='FBS'?(cf.fbsTier==='elite'?' <span style="color:var(--gd);font-size:10px">★ Elite Program</span>':cf.fbsTier==='good'?' <span style="color:var(--mu);font-size:10px">★ Major Program</span>':''):'';
   const collegeHtml=cf?`
     <div style="background:rgba(34,184,112,.05);border:1px solid rgba(34,184,112,.2);border-radius:8px;padding:12px 14px;margin-bottom:10px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;color:var(--gn);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px"> College Career, ${cf.school} (${cf.lvl})${fbsPrestigeLabel}</div>
+      <div style="font-family:var(--hd);font-weight:900;font-size:13px;color:var(--gn);letter-spacing:.3px;margin-bottom:8px"> College Career, ${cf.school} (${cf.lvl})${fbsPrestigeLabel}</div>
       ${cf.dreamNote?`<div style="font-size:11px;color:var(--gd);margin-bottom:6px;font-style:italic"> ${cf.dreamNote}</div>`:''}
       <div style="font-size:12px;color:var(--tx);margin-bottom:6px"> <strong>Stats:</strong> ${cf.statsBlock}</div>
       ${cf.awards.length?`<div style="font-size:12px;color:var(--gd);margin-bottom:6px"> <strong>Awards:</strong> ${cf.awards.join(', ')}</div>`:''}
@@ -313,7 +313,7 @@ function renderStoryCard(p,compact){
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <span style="font-size:20px">${st.icon}</span>
         <div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;color:var(--te);text-transform:uppercase;letter-spacing:.3px">${st.outcome} · ${st.storyYr}</div>
+          <div style="font-family:var(--hd);font-weight:900;font-size:15px;color:var(--te);letter-spacing:.3px">${st.outcome} · ${st.storyYr}</div>
           <div style="font-size:12px;font-weight:700;color:var(--tx);margin-top:1px">${st.headline}</div>
         </div>
       </div>
@@ -402,9 +402,9 @@ function pgHoF(){
   </div>`;
 
   const pager=(filtered.length>HOF_PAGE_SIZE)?`<div style="display:flex;align-items:center;gap:8px;margin-top:12px;justify-content:center">
-    <button onclick="window._hofPage=Math.max(0,window._hofPage-1);nav('hof')" ${page===0?'disabled':''} style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 12px;color:var(--tx);cursor:pointer;opacity:${page===0?.4:1}">◀ Prev</button>
+    <button onclick="window._hofPage=Math.max(0,window._hofPage-1);nav('hof')" ${page===0?'disabled':''} style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 12px;color:var(--tx);cursor:pointer;opacity:${page===0?.4:1}">Prev</button>
     <span style="font-size:12px;color:var(--mu)">Page ${page+1} of ${totalPages}</span>
-    <button onclick="window._hofPage=Math.min(${totalPages-1},window._hofPage+1);nav('hof')" ${page>=totalPages-1?'disabled':''} style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 12px;color:var(--tx);cursor:pointer;opacity:${page>=totalPages-1?.4:1}">Next ▶</button>
+    <button onclick="window._hofPage=Math.min(${totalPages-1},window._hofPage+1);nav('hof')" ${page>=totalPages-1?'disabled':''} style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 12px;color:var(--tx);cursor:pointer;opacity:${page>=totalPages-1?.4:1}">Next</button>
   </div>`:'';
 
   return`<div class="pnl"><div class="ph"> Hall of Fame <span style="font-size:12px;font-weight:400;color:var(--mu)">${allHof.length} enshrined</span></div>
@@ -437,11 +437,11 @@ function togHof(id){
 function pgHist(){
   const rks=['passYds','passTD','rushYds','rushTD','recYds','recTD','krYds','krTD','tackles','sacks','ints','pbu','pancakes'];
   const rl={passYds:'Pass Yards',passTD:'Pass TDs',rushYds:'Rush Yards',rushTD:'Rush TDs',recYds:'Rec Yards',recTD:'Rec TDs',krYds:'Kick Return Yards',krTD:'Kick Return TDs',tackles:'Tackles',sacks:'Sacks',ints:'INTs',pbu:'Pass Breakups',pancakes:'Pancake Blocks'};
-  const recRow=(type,label)=>`<div style="margin-bottom:14px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase">${label}</div>
+  const recRow=(type,label)=>`<div style="margin-bottom:14px"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;">${label}</div>
     <table><thead><tr><th>Category</th><th>Record</th><th>Player</th><th>Pos</th><th>Season</th></tr></thead>
     <tbody>${rks.map(k=>{const rec=G.schoolRecs?.[type]?.[k];return`<tr>
       <td style="font-weight:700;color:var(--mu)">${rl[k]}</td>
-      <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--gd)">${rec&&rec.val?rec.val:'–'}</span></td>
+      <td><span style="font-family:var(--hd);font-size:20px;font-weight:900;color:var(--gd)">${rec&&rec.val?rec.val:'–'}</span></td>
       <td>${rec&&rec.pid?`<span class="cl" style="color:var(--te);cursor:pointer" onclick="showPlayer(${rec.pid})">${rec.name}</span>`:'–'}</td>
       <td>${rec&&rec.pos?`<span class="pb2">${rec.pos}</span>`:'–'}</td>
       <td style="color:var(--mu)">${rec&&rec.date?rec.date:'–'}</td>
@@ -451,8 +451,8 @@ function pgHist(){
   let _histClsFilter=window._histClsFilter||'ALL';
   window._setHistCls=function(cls){window._histClsFilter=cls;nav('hist');};
   const histClsBar=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
-    <span style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
-    ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
+    <span style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
+    ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
   </div>`;
   function _awardCell(aw,icon,color){
     if(!aw)return`<td style="color:var(--mu)">–</td>`;
@@ -469,7 +469,7 @@ function pgHist(){
       const champName=lg.champName||'TBD';
       return`<tr>
         <td style="font-weight:700;color:var(--gd)">${2026+(G.yr-1)} (Current)</td>
-        <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${clsL(cls)}</span></td>
+        <td><span style="font-family:var(--hd);font-weight:700;color:var(--te)">${clsL(cls)}</span></td>
         <td style="color:var(--mu);font-style:italic">In Progress</td>
         <td colspan="3" style="font-size:11px;color:var(--mu)">Current leader: ${leader?`${leader.name} ${leader.mascot} (${leader.wins}-${leader.losses})`:'–'} · Last champ: ${champName}</td>
         <td colspan="2" style="color:var(--mu)">–</td>
@@ -502,13 +502,13 @@ function pgHist(){
             return`<td style="font-weight:${isMe?700:400};color:${isMe?'var(--gd)':'var(--tx)'}">${isMe?' ':''}${dw.name} <span style="color:var(--mu);font-size:10px">${dw.rec}</span></td>`;
           }).join('')
         :G.divisions.map(()=>`<td style="color:var(--mu)">–</td>`).join('');
-      const clsCell=`<td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${clsL(champCls)}</span></td>`;
+      const clsCell=`<td><span style="font-family:var(--hd);font-weight:700;color:var(--te)">${clsL(champCls)}</span></td>`;
       return`<tr><td style="font-weight:700;color:var(--gd)">${yr}</td>${clsCell}${champCell}${divCells}${_awardCell(h.mrFootball,'','var(--gd)')}${_awardCell(h.freshmanOTY,'','var(--b2)')}</tr>`;
     }).join('')}${!histToShow.length&&!otherLeagueLiveRows?`<tr><td colspan="20" style="color:var(--mu);text-align:center;padding:14px">No history for this classification yet.</td></tr>`:''}</tbody></table></div>
 
     ${G.hist.length&&Object.values(G.hist.some(h=>h.otherLeagueChamps&&Object.keys(h.otherLeagueChamps).length>0)?G.hist:[])?`
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);text-transform:uppercase;margin-bottom:8px;"> All Classification Champions by Season</div>
+      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;"> All Classification Champions by Season</div>
       <div style="overflow-x:auto"><table><thead><tr>
         <th>Season</th>${['1A','2A','3A','4A','5A'].map(cls=>`<th${cls===G.cls?` style="color:var(--te)"`:''}>${clsL(cls)}${cls===G.cls?' ★':''}</th>`).join('')}
       </tr></thead><tbody>
@@ -533,17 +533,17 @@ function pgHist(){
 
     ${(()=>{ // v2.00: national champions and the neighbor states' champions
       const nh=(G.natHist||[]).slice().reverse();
-      const natT=`<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);text-transform:uppercase;margin-bottom:8px;">National Championship Games</div>
+      const natT=`<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">National Championship Games</div>
         ${nh.length?`<div style="overflow-x:auto"><table><thead><tr><th>Season</th><th>Champion</th><th>Score</th><th>Runner-up</th><th>Venue</th></tr></thead><tbody>${nh.map(h=>{const me=h.w===G.myId,ml=h.l===G.myId;return`<tr>
           <td style="font-weight:700;color:var(--gd)">${2026+(h.yr-1)}</td><td style="font-weight:${me?800:600};color:${me?'var(--gd)':'var(--tx)'}">${h.wName} <span style="font-size:10px;color:var(--mu)">${stName(h.wSt)} · ${h.wCls}</span></td>
           <td style="font-weight:700">${h.ws}-${h.ls}${h.ot?' OT':''}</td><td style="color:${ml?'var(--te)':'var(--tx)'}">${h.lName} <span style="font-size:10px;color:var(--mu)">${stName(h.lSt)} · ${h.lCls}</span></td><td style="font-size:11px;color:var(--mu)">${h.venue||''}</td></tr>`;}).join('')}</tbody></table></div>`:'<div style="color:var(--mu);font-size:12px">The first National Championship is played after this season&#39;s state playoffs, between the top two teams in the final national poll.</div>'}</div>`;
       const stT=ST_ORDER.filter(k=>k!=='CF').map(k=>{const cl=clsOfSt(k),xs=G.hist.filter(h=>(h.otherLeagueChamps&&cl.some(c=>h.otherLeagueChamps[c]))||cl.includes(h.cls));if(!xs.length)return'';
-        return`<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);text-transform:uppercase;margin-bottom:8px;">${stName(k)} State Champions</div>
+        return`<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">${stName(k)} State Champions</div>
         <div style="overflow-x:auto"><table><thead><tr><th>Season</th>${cl.map(c=>`<th title="${clsName(c)}">${XCLS[c].lbl}</th>`).join('')}</tr></thead><tbody>${xs.slice().reverse().map(h=>`<tr><td style="font-weight:700;color:var(--gd)">${2026+(h.yr-1)}</td>${cl.map(c=>{const oc=c===h.cls?(h.stateChampName?{name:h.stateChampName,rec:''}:null):(h.otherLeagueChamps||{})[c];return oc?`<td style="color:var(--te)">${oc.name} <span style="color:var(--mu);font-size:10px">${oc.rec}</span></td>`:'<td style="color:var(--mu)">–</td>';}).join('')}</tr>`).join('')}</tbody></table></div></div>`;}).join('');
       return _histClsFilter==='ALL'?natT+stT:'';})()}
     ${(_histClsFilter==='ALL'&&G.allLeagues&&Object.keys(G.allLeagues).length)?`
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);text-transform:uppercase;margin-bottom:8px;"> All-Time State Champions by Classification</div>
+      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;"> All-Time State Champions by Classification</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
         ${['1A','2A','3A','4A','5A'].map(cls=>{
           let champName='–';
@@ -560,7 +560,7 @@ function pgHist(){
           }
           const isMyCls=cls===G.cls;
           return`<div style="background:var(--s2);border:1px solid ${isMyCls?'var(--ac)':'var(--bd)'};border-radius:6px;padding:8px 12px;min-width:130px;text-align:center;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:${isMyCls?'var(--te)':'var(--te)'};">${clsL(cls)}${isMyCls?' ★':''}</div>
+            <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:${isMyCls?'var(--te)':'var(--te)'};">${clsL(cls)}${isMyCls?' ★':''}</div>
             <div style="font-size:11px;font-weight:700;color:var(--tx);margin-top:3px">${champName}</div>
             <div style="font-size:10px;color:var(--mu)">Last State Champ</div>
           </div>`;
@@ -581,19 +581,19 @@ function pgHist(){
     `<table style="margin-bottom:16px"><thead><tr><th>Season</th><th>Record</th><th>Class</th><th>Prestige</th><th>Achievements</th></tr></thead>
     <tbody>${G.hist.map(h=>`<tr>
       <td>${2026+(h.yr-1)}</td><td>${recStr(h.wins,h.losses)}</td>
-      <td><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${clsL(h.cls||G.cls)}</span></td>
+      <td><span style="font-family:var(--hd);font-weight:700;color:var(--te)">${clsL(h.cls||G.cls)}</span></td>
       <td>${''.repeat(Math.round(h.prestige))}</td>
       <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?' State Champion':h.champ?' Division Champ':'–'}</td>
     </tr>`).join('')}</tbody></table>`}
-    ${G.trophies&&G.trophies.length?`<div style="margin-bottom:16px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;text-transform:uppercase"> Trophy Cabinet</div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'NATIONAL CHAMPS':t.type==='State'?'STATE CHAMPS':'DIV CHAMPS'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
+    ${G.trophies&&G.trophies.length?`<div style="margin-bottom:16px"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;"> Trophy Cabinet</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'National champs':t.type==='State'?'State champs':'Division champs'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
     </div>
     <div id="hist-lg" class="hid">${leagueHistHtml}</div>
     <div id="hist-aw" class="hid">${(()=>{
       if(!G.hist.length)return'<div style="color:var(--mu)">No seasons completed yet.</div>';
       const awClsBar=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
-        <span style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
-        ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
+        <span style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
+        ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
       </div>`;
       const awHistToShow=_histClsFilter==='ALL'?G.hist:G.hist.filter(h=>(h.cls||G.cls)===_histClsFilter);
       function awardDetailRow(aw, icon, color, label){
@@ -621,7 +621,7 @@ function pgHist(){
         const yr=2026+(h.yr-1);
         const mrIsMe=h.mrFootball&&h.mrFootball.sId===G.myId;
         const frIsMe=h.freshmanOTY&&h.freshmanOTY.sId===G.myId;
-        const cls=`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--te)">${h.cls?clsL(h.cls):'–'}</span>`;
+        const cls=`<span style="font-family:var(--hd);font-weight:700;color:var(--te)">${h.cls?clsL(h.cls):'–'}</span>`;
         function aRow(aw,icon,color,label){
           if(!aw)return`<tr><td style="font-weight:700;color:var(--mu)">${icon} ${label}</td><td>${yr}</td><td>${clsL(cls)}</td><td colspan="4" style="color:var(--mu)">–</td></tr>`;
           const isMe=aw.sId===G.myId;

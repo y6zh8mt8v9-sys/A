@@ -154,7 +154,7 @@ function pgRecls(){
   ${immunityActive?`<div style="background:#0a2a12;border:2px solid var(--gn);border-radius:7px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
     <span style="font-size:20px"></span>
     <div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gn);text-transform:uppercase">Demotion Immunity Active</div>
+      <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gn);">Demotion Immunity Active</div>
       <div style="font-size:11px;color:var(--mu);margin-top:2px">You moved up to <strong style="color:var(--tx)">${clsL(G.cls)}</strong>: you cannot be relegated for <strong style="color:var(--gn)">${immunityYearsLeft} more season${immunityYearsLeft!==1?'s':''}</strong>. Use this time to build your program.</div>
     </div>
   </div>`:''}
@@ -165,22 +165,22 @@ function pgRecls(){
         <div class="pb">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
             <div style="flex:1">
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:4px">Current Classification</div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--te)">${clsL(G.cls)}</div>
+              <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);margin-bottom:4px">Current Classification</div>
+              <div style="font-family:var(--hd);font-size:28px;font-weight:900;color:var(--te)">${clsL(G.cls)}</div>
             </div>
             ${canGoDown?`<div style="text-align:center">
               <div style="font-size:10px;color:var(--mu);margin-bottom:3px">If demoted</div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--rd)">${nextDown}</div>
+              <div style="font-family:var(--hd);font-size:18px;font-weight:800;color:var(--rd)">${nextDown}</div>
             </div>`:'<div style="color:var(--mu);font-size:11px">Lowest class</div>'}
             ${canGoUp?`<div style="text-align:center">
               <div style="font-size:10px;color:var(--mu);margin-bottom:3px">Can move up to</div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--gn)">${nextUp}</div>
+              <div style="font-family:var(--hd);font-size:18px;font-weight:800;color:var(--gn)">${nextUp}</div>
             </div>`:'<div style="color:var(--mu);font-size:11px">Top class</div>'}
           </div>
           <div style="margin-bottom:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-              <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase">Demotion Pressure ${pressureLabel}</span>
-              <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:${pressureColor}">${barPct}%</span>
+              <span style="font-family:var(--hd);font-size:13px;font-weight:800;">Demotion Pressure ${pressureLabel}</span>
+              <span style="font-family:var(--hd);font-size:18px;font-weight:900;color:${pressureColor}">${barPct}%</span>
             </div>
             <div style="background:var(--s3);border-radius:6px;height:14px;overflow:hidden;border:1px solid var(--bd)">
               <div style="height:100%;width:${barPct}%;background:${pressureColor};border-radius:6px;transition:width .4s;${pressure>=100?'animation:pulse 1s infinite':''}"></div>

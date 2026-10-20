@@ -278,8 +278,8 @@ function finalizeOffseason(){
     const devChangePop=`<div class="pc" style="border-top-color:${titleColor};text-align:left">
       <h3 style="color:${titleColor};text-align:center">${titleIcon} Preseason Dev Report</h3>
       <div style="font-size:12px;color:var(--mu);text-align:center;margin-bottom:12px">Based on last season's performance, some players' dev traits and potentials have shifted.</div>
-      ${devRows?`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;color:var(--te);text-transform:uppercase;margin-bottom:4px">Dev Trait Changes</div>${devRows}`:''}
-      ${potRows?`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;color:var(--te);text-transform:uppercase;margin-top:10px;margin-bottom:4px">Potential Changes</div>${potRows}`:''}
+      ${devRows?`<div style="font-family:var(--hd);font-size:11px;font-weight:800;color:var(--te);margin-bottom:4px">Dev Trait Changes</div>${devRows}`:''}
+      ${potRows?`<div style="font-family:var(--hd);font-size:11px;font-weight:800;color:var(--te);margin-top:10px;margin-bottom:4px">Potential Changes</div>${potRows}`:''}
       <div style="margin-top:12px;font-size:11px;color:var(--mu);background:var(--s3);padding:7px 10px;border-radius:4px;border-left:3px solid var(--gd)"> Dev traits affect SP earned per offseason phase. Potential caps how high a player can grow.</div>
     </div>`;
     pops.push(devChangePop);
@@ -420,7 +420,7 @@ function finalizeOffseason(){
   const divBonus=divWon?35000:0;
   if(divWon){
     pops.push(bEvPop(' Division Champions!',`Your team won the division title! <strong style="color:var(--gd)">+$35,000 bonus!</strong>`,null,'var(--gd)'));
-    addLog(`<span style="color:var(--gd)"> DIVISION CHAMPIONS! +$35,000</span>`);
+    addLog(`<span style="color:var(--gd)"> Division champions! +$35,000</span>`);
   }
   G.budget+=baseBudget+divBonus;
   // ── Snapshot record BEFORE resetting wins/losses for the new year ──

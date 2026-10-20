@@ -29,7 +29,7 @@ function socK(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?Math.round(n/1e3)+'
 function pgSocial(){const S=soc(),p=myPlayer();if(!S||!p)return`<div class="pnl"><div class="ph">Huddle</div><div class="pb" style="color:var(--mu)">Huddle is the social app of a player career. Start a Player Career to use it.</div></div>`;
   try{const b=document.getElementById('nb-social');if(b)b.classList.remove('todo');}catch(e){}
   const mine=S.posts.filter(o=>o.a==='me').length;
-  return`<div class="pnl soc"><div class="pb" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">${face(p.fs,64)}<div style="flex:1;min-width:200px"><div style="font:900 24px/1.1 'Barlow Condensed',sans-serif">${p.fn} ${p.ln}</div><div style="color:var(--mu);font-size:13px">${socH(p)} · ${p.pos}</div>
+  return`<div class="pnl soc"><div class="pb" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">${face(p.fs,64)}<div style="flex:1;min-width:200px"><div style="font:900 24px/1.1 var(--hd)">${p.fn} ${p.ln}</div><div style="color:var(--mu);font-size:13px">${socH(p)} · ${p.pos}</div>
       <div style="display:flex;gap:18px;margin-top:6px;font-size:14px"><span><b>${socK(S.fol)}</b> followers</span><span><b>${mine}</b> posts</span></div></div></div>
     <div class="pb" style="border-top:1px solid var(--bd)"><div style="font-size:13px;font-weight:800;margin-bottom:6px">Post something</div><div style="display:flex;gap:6px;flex-wrap:wrap">${SOC_OWN.map((t,i)=>`<button class="bgh bsm" onclick="socMine(${i})">${t}</button>`).join('')}</div></div></div>
    <div class="pnl"><div class="ph">Feed</div><div class="pb" style="padding:0">${S.posts.length?S.posts.map(o=>`<article class="soc-post"><div>${socAv(o)}</div><div style="flex:1;min-width:0"><div style="font-size:13px"><b>${o.a==='me'?p.fn+' '+p.ln:o.h.slice(1)}</b>${o.v?' <span class="soc-v" title="Verified outlet">verified</span>':''} <span style="color:var(--mu)">${o.h} · ${o.w}</span></div><div style="margin:4px 0 6px;font-size:14px;line-height:1.4">${o.txt}</div>
@@ -103,8 +103,8 @@ function pgMine(){
   const head=`<div class="pnl"><div class="pb" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
     <div>${face(p.fs,84)}</div>
     <div style="flex:1;min-width:220px">
-      <div style="font-size:12px;color:var(--mu);font-weight:800;letter-spacing:.06em;text-transform:uppercase">My Player${active?' · '+gl:' · Alumnus'}</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;line-height:1.05">#${p.num} ${p.fn} ${p.ln}</div>
+      <div style="font-size:12px;color:var(--mu);font-weight:800;letter-spacing:.06em;">My Player${active?' · '+gl:' · Alumnus'}</div>
+      <div style="font-family:var(--hd);font-size:30px;font-weight:900;line-height:1.05">#${p.num} ${p.fn} ${p.ln}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px"><span class="pb2">${p.pos}</span>${rb(p.rat)} ${stars(p.stars||0)} ${devB(p.dev)} ${p.arch?`<span style="font-size:11px;color:var(--mu)">${p.arch}</span>`:''}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:6px">${sch?sch.name+' '+sch.mascot:''} · potential ${p.potLo||p.pot}–${p.potHi||p.pot} · Level ${p.pcLv||1}</div>
     </div>

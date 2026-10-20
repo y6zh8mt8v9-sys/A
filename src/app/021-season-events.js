@@ -96,7 +96,7 @@ function buildPlayoffBracket(){
     if(noQChamp){
       G.playoff.stateChampId=noQChamp.id;
       const champRec=`${noQChamp.wins}-${noQChamp.losses}`;
-      addLog(`<span style="color:var(--gd)"> STATE CHAMPION: ${noQChamp.name} ${noQChamp.mascot} (${champRec})</span>`);
+      addLog(`<span style="color:var(--gd)"> State champion: ${noQChamp.name} ${noQChamp.mascot} (${champRec})</span>`);
       const noQPop=bEvPop(' State Champion Crowned',`Your team did not qualify for the playoffs.<br><br><strong style="color:var(--gd)">${noQChamp.name} ${noQChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(noQChamp,64),'var(--gd)');
       _popQ=[noQPop];_popI=0;_popCb=()=>nav('dash');showPop();
     }
@@ -124,7 +124,7 @@ function setNextPlayoffGame(){
       G.trophies=G.trophies||[];
       G.trophies.push({type:'State',yr:G.yr,rec:`${G.wins}-${G.losses}`,cls:G.cls});
       G.prestige=clamp(G.prestige+.6,1,5);G.budget+=75000;
-      addLog(`<span style="color:var(--gd)"> STATE CHAMPIONS! ${G.wins}-${G.losses} +$75,000</span>`);
+      addLog(`<span style="color:var(--gd)"> State champions! ${G.wins}-${G.losses} +$75,000</span>`);
     }
     const remainingSlots=G.sched.filter(g=>(g.type==='playoff'||g.type==='bye')&&!g.result);
     for(const s of remainingSlots){s.type='bye';s.result='bye';s.label='Bye Week';}
@@ -248,7 +248,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
     G.prestige=clamp(G.prestige+.15,1,5);
     G.budget+=2000;
   } else if(iWin&&isFinal){
-    addNews('playoff',` STATE CHAMPIONS! ${myS().mascot} ${myScore}–${oppScore}`,`${myS().name} are the State Champions!`);
+    addNews('playoff',` State champions! ${myS().mascot} ${myScore}–${oppScore}`,`${myS().name} are the State Champions!`);
     G.prestige=clamp(G.prestige+.15,1,5);
     G.budget+=2000;
   } else {
@@ -256,7 +256,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
     addNews('bad',` Eliminated: ${roundName}, ${opp.mascot} ${oppScore}–${myScore}`,`Season ends here. Rebuild for next year.`);
   }
 
-  addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}"> ${roundName}: ${iWin?'WIN':'LOSS'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
+  addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}"> ${roundName}: ${iWin?'Win':'Loss'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
 
   simPlayoffRound(slot.playoffRound,slot,iWin);
 
@@ -274,7 +274,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
     if(stateChamp){
       G.playoff.stateChampId=stateChamp.id;
       const champRec=`${stateChamp.wins}-${stateChamp.losses}`;
-      addLog(`<span style="color:var(--gd)"> STATE CHAMPION: ${stateChamp.name} ${stateChamp.mascot} (${champRec})</span>`);
+      addLog(`<span style="color:var(--gd)"> State champion: ${stateChamp.name} ${stateChamp.mascot} (${champRec})</span>`);
       pops.push(bEvPop(' State Champion Crowned',`<strong style="color:var(--gd)">${stateChamp.name} ${stateChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(stateChamp,64),'var(--gd)'));
     }
     G.phase='postseason';
@@ -282,7 +282,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
     // Call setNextPlayoffGame(), it correctly sets champ flag, pushes State trophy, awards prestige/budget
     setNextPlayoffGame();
     if(G.playoff.champ){
-      pops.push(bEvPop(' STATE CHAMPIONS! ',`Year ${2026+(G.yr-1)}, ${G.wins}-${G.losses} + Playoff Run!<br>Your program has won the State Championship! <strong style="color:var(--gd)">$75,000 bonus!</strong>`,null,'var(--gd)'));
+      pops.push(bEvPop(' State champions! ',`Year ${2026+(G.yr-1)}, ${G.wins}-${G.losses} + Playoff Run!<br>Your program has won the State Championship! <strong style="color:var(--gd)">$75,000 bonus!</strong>`,null,'var(--gd)'));
     } else {
       // Shouldn't happen (we just won), but guard anyway
       const champ=G.playoff.bracket[0];

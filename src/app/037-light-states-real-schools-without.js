@@ -163,12 +163,12 @@ function natRecord(wId,lId,ws,ls,ot){
   G.natHist.push({yr:G.yr,w:wId,l:lId,ws,ls,ot:ot?1:0,wName:`${w.name} ${w.mascot}`,lName:`${l.name} ${l.mascot}`,wSt:stOf(w),lSt:stOf(l),wCls:w.cls,lCls:l.cls,venue:n.venue});
   const yr=2026+(G.yr-1);
   if(wId===G.myId){G.trophies=G.trophies||[];G.trophies.push({type:'National',yr:G.yr,rec:`${G.wins}-${G.losses}`,cls:G.cls});G.prestige=clamp(G.prestige+.6,1,5);G.budget+=100000;
-    addLog(`<span style="color:var(--gd)">NATIONAL CHAMPIONS! ${ws}-${ls} vs ${l.name} ${l.mascot} +$100,000</span>`);}
+    addLog(`<span style="color:var(--gd)">National champions! ${ws}-${ls} vs ${l.name} ${l.mascot} +$100,000</span>`);}
   else if(lId===G.myId){G.prestige=clamp(G.prestige+.2,1,5);G.budget+=25000;addLog(`<span style="color:var(--te)">National Championship: lost ${ls}-${ws} to ${w.name} ${w.mascot} (+$25,000 for the appearance)</span>`);}
   addNews('playoff',`${w.name} ${w.mascot} win the ${yr} National Championship`,`${ws}-${ls}${ot?' (OT)':''} over ${l.name} ${l.mascot} at ${n.venue}.`);
   _RK=null;
   const mine=wId===G.myId||lId===G.myId;
-  return bEvPop(wId===G.myId?'NATIONAL CHAMPIONS!':'National Champion Crowned',
+  return bEvPop(wId===G.myId?'National champions!':'National Champion Crowned',
     wId===G.myId?`${w.name} ${w.mascot} beat ${l.name} ${l.mascot} <strong>${ws}-${ls}</strong>${ot?' in overtime':''} at ${n.venue}.<br><br>Your program is the <strong style="color:var(--gd)">${yr} National Champion</strong>! <strong style="color:var(--gd)">+$100,000</strong>`
       :`<strong style="color:var(--gd)">${w.name} ${w.mascot}</strong> (${stName(stOf(w))}) beat ${l.name} ${l.mascot} (${stName(stOf(l))}) <strong>${ws}-${ls}</strong>${ot?' in overtime':''} at ${n.venue} to win the <strong>${yr} National Championship</strong>.${mine?'<br><br>Reaching the title game still lifts your program: <strong>+$25,000</strong>.':''}`,
     sLogo(w,64),'var(--gd)');

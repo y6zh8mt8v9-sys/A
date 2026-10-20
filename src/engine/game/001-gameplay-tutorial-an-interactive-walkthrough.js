@@ -16,9 +16,9 @@ function tutShow(no,title,html,btn){
   const k=no+'|'+title+'|'+html;if(TUT.last===k)return;TUT.last=k;
   const b=tutBox();
   b.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font:900 11px Nunito,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#7fd3ff">Coach · step ${no} of ${TUT_STEPS}<\/span>
-    <button id="tutSkip" style="margin-left:auto;background:none;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;font:800 11px Nunito,sans-serif;padding:3px 10px;cursor:pointer">Skip tutorial<\/button><\/div>
+    <button id="tutSkip" style="margin-left:auto;background:none;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;font:800 11px Nunito,sans-serif;padding:3px 10px;cursor:pointer">Skip tutorial<\/button><\/div>
     <div style="font:900 16px Nunito,sans-serif;margin-bottom:4px">${title}<\/div><div>${html}<\/div>
-    ${btn?`<div style="text-align:right;margin-top:10px"><button id="tutGo" style="min-height:38px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.5);font:900 14px Nunito,sans-serif;color:#fff;cursor:pointer;background:#22a8f0">${btn}<\/button><\/div>`:''}`;
+    ${btn?`<div style="text-align:right;margin-top:10px"><button id="tutGo" style="min-height:38px;padding:0 20px;border-radius:8px;border:1px solid rgba(255,255,255,.5);font:900 14px Nunito,sans-serif;color:#fff;cursor:pointer;background:#2f66c0">${btn}<\/button><\/div>`:''}`;
   const sk=document.getElementById('tutSkip');if(sk)sk.onclick=e=>{e.stopPropagation();tutEnd(false);};
   const go=document.getElementById('tutGo');if(go)go.onclick=e=>{e.stopPropagation();tutNext();};
   b.onpointerdown=e=>e.stopPropagation();
@@ -274,7 +274,7 @@ function gpPassBtnTick(){
   let b=document.getElementById('gpRePass');
   const show=(G.client?olScrambling():gpScrambling()&&!isAI(G.offTeam)&&G.offTeam===G.me)&&!G.test&&!G.noDraw;
   if(!b){if(!show)return;b=document.createElement('button');b.id='gpRePass';b.textContent='Pass';
-    b.style.cssText='position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;min-height:48px;padding:0 30px;border-radius:999px;border:1px solid rgba(255,255,255,.6);font:900 17px Nunito,system-ui,sans-serif;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.12) 48%,rgba(0,0,0,0) 52%),#22a8f0;box-shadow:0 6px 16px rgba(0,0,0,.35)';
+    b.style.cssText='position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;min-height:48px;padding:0 30px;border-radius:8px;border:1px solid rgba(255,255,255,.6);font:900 17px Nunito,system-ui,sans-serif;color:#fff;background:var(--tA,#2f66c0);box-shadow:0 6px 16px rgba(0,0,0,.35)';
     b.onclick=ev=>{ev.stopPropagation();if(G.client){olCmd('repass');return;}if(gpScrambling()){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}};document.body.appendChild(b);}
   b.style.display=show?'block':'none';
 }
@@ -395,7 +395,7 @@ function gpAudOpen(e){
   el=document.createElement('div');el.id='gpAud';
   el.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(420px,92vw);max-height:80vh;overflow-y:auto;border-radius:18px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.06)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);color:#fff;font:600 13px Nunito,system-ui,sans-serif;box-shadow:0 18px 40px rgba(0,0,0,.5)';
   const keys=Object.keys(ROUTES).filter(k=>k!=='block'||e.role==='TE'||e.role==='RB');
-  el.innerHTML=`<div style="font-weight:900;font-size:16px;margin-bottom:2px">Audible: #${e.pl.num} ${nm(e.pl)}<\/div><div style="opacity:.75;margin-bottom:8px">Now: ${e.route?e.route.name:'block'} · chance he gets the call: ${Math.round(gpAudOK(e)*100)}%<\/div><div style="display:flex;flex-wrap:wrap;gap:6px">${keys.map(k=>`<button data-k="${k}" style="min-height:36px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:800 12px Nunito,system-ui,sans-serif;cursor:pointer">${k}<\/button>`).join('')}<\/div><div style="text-align:right;margin-top:10px"><button data-x="1" style="min-height:34px;padding:0 14px;border-radius:999px;border:0;background:#334;color:#fff;font-weight:800">Cancel<\/button><\/div>`;
+  el.innerHTML=`<div style="font-weight:900;font-size:16px;margin-bottom:2px">Audible: #${e.pl.num} ${nm(e.pl)}<\/div><div style="opacity:.75;margin-bottom:8px">Now: ${e.route?e.route.name:'block'} · chance he gets the call: ${Math.round(gpAudOK(e)*100)}%<\/div><div style="display:flex;flex-wrap:wrap;gap:6px">${keys.map(k=>`<button data-k="${k}" style="min-height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:800 12px Nunito,system-ui,sans-serif;cursor:pointer">${k}<\/button>`).join('')}<\/div><div style="text-align:right;margin-top:10px"><button data-x="1" style="min-height:34px;padding:0 14px;border-radius:8px;border:0;background:#334;color:#fff;font-weight:800">Cancel<\/button><\/div>`;
   el.onclick=ev=>{ev.stopPropagation();const b=ev.target.closest('button');if(!b)return;el.remove();if(b.dataset.k)gpAudible(e,b.dataset.k);};
   document.body.appendChild(el);
 }

@@ -200,7 +200,7 @@ function simGame(idx,silent=false,forced=null){
   // ────────────────────────────────────────────────────────────────────────
 
   updateRats();
-  addLog(`<span style="color:${iWin?'var(--gn)':'var(--te)'}">${iWin?'WIN':'LOSS'} vs ${opp.name} ${opp.mascot}: ${myScore}-${oppScore} (${game.date})</span>`);
+  addLog(`<span style="color:${iWin?'var(--gn)':'var(--te)'}">${iWin?'Win':'Loss'} vs ${opp.name} ${opp.mascot}: ${myScore}-${oppScore} (${game.date})</span>`);
   const sorted=Object.entries(sm).map(([pid,st])=>({p:getP(parseInt(pid)),st})).filter(x=>x.p);
   const tQB=sorted.filter(x=>x.p.pos==='QB').sort((a,b)=>b.st.passYds-a.st.passYds)[0];
   const tRB=sorted.filter(x=>x.p.pos==='RB').sort((a,b)=>b.st.rushYds-a.st.rushYds)[0];

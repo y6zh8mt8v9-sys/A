@@ -3,8 +3,18 @@ function _ttEl(id){return document.getElementById(id);}
 function showTitle(openLoad){
   const t=_ttEl('title');if(!t)return;t.classList.remove('hid');_ttEl('coachc')&&_ttEl('coachc').classList.add('hid');
   _ttEl('tt-load').classList.toggle('hid',!openLoad);_ttEl('tt-main').classList.toggle('hid',!!openLoad);
-  ttRefresh();ttClock();
+  ttRefresh();ttClock();ttIntro();
 }
+// the title screen's one moment of motion: the name rises in, the 27 lights up like scoreboard bulbs, the menu follows.
+// Once per visit, under a second, and not at all when the device asks for reduced motion
+function ttIntro(){if(window._ttIntroDone)return;window._ttIntroDone=1;
+  try{if(!window.gsap||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const g=window.gsap,q=s=>document.querySelectorAll('#tt-main '+s);
+    const tl=g.timeline({defaults:{ease:'power3.out'}});
+    tl.from(q('.tt-name .a'),{y:28,opacity:0,duration:.45})
+      .from(q('.tt-name .b'),{opacity:0,duration:.06,repeat:4,yoyo:true,ease:'none'},'-=.2')
+      .from(q('.tt-tag, .tt-ver'),{y:10,opacity:0,duration:.35,stagger:.05},'-=.1')
+      .from(q('.tt-btn'),{y:12,opacity:0,duration:.32,stagger:.04,clearProps:'transform,opacity'},'-=.25')
+      .from(q('.tt-legal'),{opacity:0,duration:.3},'-=.15');}catch(e){}}
 function hideTitle(){const t=_ttEl('title');if(t)t.classList.add('hid');if(window._sbT){clearInterval(window._sbT);window._sbT=null;}}
 function ttClock(){if(window._sbT)return;let s=120;window._sbT=setInterval(()=>{const el=document.getElementById('sb-clock'),t=_ttEl('title');if(!el||!t||t.classList.contains('hid')){clearInterval(window._sbT);window._sbT=null;return;}s=s<=0?120:s-1;el.textContent='4TH '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s===114){const h=document.getElementById('sb-h');if(h)h.textContent=h.textContent==='21'?'27':'21';}},1000);}
 function ttNew(){hideTitle();_ttEl('app').classList.add('hid');_ttEl('setup').classList.remove('hid');setupEnsure();}

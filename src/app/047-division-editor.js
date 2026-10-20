@@ -28,7 +28,7 @@ function renderDivEditorList(){
   const list=document.getElementById('div-editor-list');
   list.innerHTML=_setupDivs.map((d,i)=>`
     <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:11px;color:var(--mu);font-family:'Barlow Condensed',sans-serif;font-weight:700;min-width:22px;text-align:right;">${i+1}.</span>
+      <span style="font-size:11px;color:var(--mu);font-family:var(--hd);font-weight:700;min-width:22px;text-align:right;">${i+1}.</span>
       <input class="ei div-name-input" value="${d.name}" placeholder="Division ${i+1} name" style="flex:1;" oninput="liveDivName(this,${i})">
       <span style="font-size:10px;color:var(--mu);white-space:nowrap;">${d.teams.length} teams</span>
     </div>
@@ -215,23 +215,23 @@ function tbRenderBrowse(){
       <input placeholder="Find any school…" oninput="tbSearch(this.value)" style="flex:1 1 180px;padding:5px 8px">
       ${tbDraftCount()?`<span style="font-size:11px;color:var(--gn)">${tbDraftCount()} saved change${tbDraftCount()===1?'':'s'}</span><button class="bgh bxs" onclick="tbDraftClear()">Discard my changes</button>`:''}</div>
     <div id="tb-find" style="margin-bottom:8px"></div>
-    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);font-weight:700;margin-bottom:6px;">View Classification:</div>
+    <div style="font-size:10px;letter-spacing:1px;color:var(--mu);font-weight:700;margin-bottom:6px;">View Classification:</div>
     <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
       ${clsOfSt(tbStCur()).map(cls=>`
-        <button onclick="tbSetCls('${cls}')" style="background:${_tbCls===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_tbCls===cls?'var(--ac)':'var(--bd)'};color:${_tbCls===cls?'var(--tOn,#fff)':'var(--tx)'};padding:4px 12px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;">
+        <button onclick="tbSetCls('${cls}')" style="background:${_tbCls===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_tbCls===cls?'var(--ac)':'var(--bd)'};color:${_tbCls===cls?'var(--tOn,#fff)':'var(--tx)'};padding:4px 12px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:13px;">
           ${(clsName(cls)||cls).replace(stName(tbStCur())+' ','')}${cls===curGameCls?' ★':''}
         </button>`).join('')}
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;margin-bottom:10px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--te)">League: ${clsName(_tbCls)}</div>
-      ${_tbCls===curGameCls?`<span style="font-size:10px;background:var(--ac);color:var(--tOn,#fff);padding:2px 7px;border-radius:3px;font-weight:700;">YOUR CLASS ★</span>`:''}
+      <div style="font-family:var(--hd);font-size:15px;font-weight:800;color:var(--te)">League: ${clsName(_tbCls)}</div>
+      ${_tbCls===curGameCls?`<span style="font-size:10px;background:var(--ac);color:var(--tOn,#fff);padding:2px 7px;border-radius:3px;font-weight:700;">Your class ★</span>`:''}
       <span style="font-size:11px;color:var(--mu)">${divs.reduce((s,d)=>s+d.teams.length,0)} teams · ${divs.length} divisions</span>
     </div>
   </div>
   ${divs.map((div,dIdx)=>`
     <div style="margin-bottom:18px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--bd);">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);text-transform:uppercase;">${div.name}</div>
+        <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);">${div.name}</div>
         <span style="font-size:10px;color:var(--mu)">${div.teams.length} teams</span>
         <button class="bgh bxs" style="margin-left:auto" onclick="tbPull(${dIdx})">Bring in a school</button><button class="btn bsm bbl" style="padding:2px 9px;font-size:10px;" onclick="tbAddToDiv(${dIdx})">Add a new team</button>
       </div>
@@ -265,12 +265,12 @@ function tbRenderAdd(dIdx){
   const selDiv=dIdx!==undefined?dIdx:0;
   const divs=tbGetDivs(_tbCls);
   return`<div style="max-width:520px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);margin-bottom:14px;text-transform:uppercase;"> Add New Team</div>
+    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:14px;"> Add New Team</div>
     <div class="fg" style="margin-bottom:10px;">
       <label>Classification</label>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">
         ${clsOfSt(tbStCur()).map(cls=>`
-          <button onclick="tbSwitchAddCls('${cls}')" id="tb-add-cls-${cls}" style="background:${_tbCls===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_tbCls===cls?'var(--ac)':'var(--bd)'};color:${_tbCls===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;">
+          <button onclick="tbSwitchAddCls('${cls}')" id="tb-add-cls-${cls}" style="background:${_tbCls===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_tbCls===cls?'var(--ac)':'var(--bd)'};color:${_tbCls===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:13px;">
             ${(clsName(cls)||cls).replace(stName(tbStCur())+' ','')}
           </button>`).join('')}
       </div>
@@ -307,7 +307,7 @@ function tbRenderAdd(dIdx){
     <div style="display:flex;align-items:center;gap:14px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:12px 16px;margin-bottom:14px;">
       <div id="tb-add-preview-logo" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;"></div>
       <div>
-        <div id="tb-add-preview-name" style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;">Preview Team</div>
+        <div id="tb-add-preview-name" style="font-family:var(--hd);font-size:16px;font-weight:900;">Preview Team</div>
         <div id="tb-add-preview-sub" style="font-size:11px;color:var(--mu);">Mascot · City</div>
       </div>
     </div>
@@ -407,12 +407,12 @@ function tbEditTeam(dIdx,tIdx){
   tbOk(t);const allClsOptions=clsOfSt(clsSt(_tbCls)).map(cls=>`<optgroup label="${clsName(cls)}">${(tbGetDivs(cls)||[]).map((d,i)=>`<option value="${cls}|${i}"${cls===_tbCls&&i===dIdx?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</optgroup>`).join('');
   // Set active tab to browse context but show edit form inline
   body.innerHTML=`<div style="max-width:520px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;text-transform:uppercase;"> Edit team: ${t.name} ${t.mascot} <span style="color:var(--te)">(${clsName(_tbCls)})</span></div>
+    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;"> Edit team: ${t.name} ${t.mascot} <span style="color:var(--te)">(${clsName(_tbCls)})</span></div>
     <div class="g2" style="gap:10px;margin-bottom:10px;">
       <div class="fg"><label>School Name</label><input class="ei" id="tb-edit-name" value="${t.name}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-edit-mascot" value="${t.mascot}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>City</label><input class="ei" id="tb-edit-city" value="${t.city}"></div>
-      <div class="fg"><label>Abbreviation (3 letters)</label><input class="ei" id="tb-edit-abbr" value="${t.abbr||''}" maxlength="3" style="text-transform:uppercase"></div>
+      <div class="fg"><label>Abbreviation (3 letters)</label><input class="ei" id="tb-edit-abbr" value="${t.abbr||''}" maxlength="3" style=""></div>
       <div class="fg"><label>Move to Division (any classification)</label>
         <select class="ei" id="tb-edit-div">
           ${allClsOptions}
@@ -440,7 +440,7 @@ function tbEditTeam(dIdx,tIdx){
     <div style="display:flex;align-items:center;gap:14px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:12px 16px;margin-bottom:14px;">
       <div id="tb-edit-preview-logo" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">${sLogo(t,48)}</div>
       <div>
-        <div id="tb-edit-preview-name" style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;">${t.name}</div>
+        <div id="tb-edit-preview-name" style="font-family:var(--hd);font-size:16px;font-weight:900;">${t.name}</div>
         <div id="tb-edit-preview-sub" style="font-size:11px;color:var(--mu);">${t.mascot} · ${t.city}</div>
       </div>
     </div>
@@ -501,7 +501,7 @@ function tbDeleteTeam(dIdx,tIdx){
   const body=document.getElementById('tb-body');
   body.innerHTML=`<div style="max-width:420px;text-align:center;padding:20px 0;">
     <div style="font-size:32px;margin-bottom:10px;"></div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--rd);margin-bottom:8px;">Remove Team?</div>
+    <div style="font-family:var(--hd);font-size:18px;font-weight:900;color:var(--rd);margin-bottom:8px;">Remove Team?</div>
     <div style="font-size:13px;color:var(--tx);margin-bottom:6px;"><strong>${t.name} ${t.mascot}</strong></div>
     <div style="font-size:12px;color:var(--mu);margin-bottom:20px;">from ${divs[dIdx].name} [${_tbCls}] · This cannot be undone.</div>
     <div style="display:flex;gap:10px;justify-content:center;">
@@ -545,7 +545,7 @@ function tbRenderExport(){
     return`<div class="dr"><span class="a">${stName(st)}${cl.includes(curCls)?' ★':''}</span><span style="font-weight:700">${tc} teams · ${cl.length} classification${cl.length===1?'':'s'}</span></div>`;
   }).join('')+(ST_ORDER.length>12?`<div class="dr"><span class="a">And ${ST_ORDER.length-12} more state${ST_ORDER.length-12===1?'':'s'}</span><span></span></div>`:'');
   return`<div style="max-width:560px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase;"> Export Team Pack</div>
+    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;"> Export Team Pack</div>
     <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">
       Save every school in this world (each state, classification, division name and logo) as a <strong>.json</strong> file. ★ marks the state you play in.
     </p>
@@ -558,7 +558,7 @@ function tbRenderExport(){
       <button class="btn bbl" onclick="tbExportCSV()" style="flex:1;min-width:140px;"> Export CSV (current class)</button>
     </div>
     <div style="border-top:1px solid var(--bd);padding-top:16px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase;"> Import Team Pack</div>
+      <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;"> Import Team Pack</div>
       <p style="font-size:12px;color:var(--mu);margin-bottom:10px;">
         Schools load into the same state they were built in, and the other states stay as they are. That means you can stack packs: load a Michigan pack, then an Indiana pack, and play with both. Pick those states in League Setup first.
       </p>

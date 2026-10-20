@@ -145,7 +145,7 @@ function injBadgeTable(p){
   const col=p.injCareer?'#ff0066':p.injSeason?'var(--rd)':'var(--ac)';
   const nm=p.injName||'Injured';
   let suffix='';
-  if(p.injCareer)suffix=' <span style="font-size:9px;font-weight:800;background:rgba(255,0,102,.2);border:1px solid #ff0066;border-radius:3px;padding:0 3px">CAREER</span>';
+  if(p.injCareer)suffix=' <span style="font-size:9px;font-weight:800;background:rgba(255,0,102,.2);border:1px solid #ff0066;border-radius:3px;padding:0 3px">Career</span>';
   else if(p.injSeason)suffix=' <span style="font-size:9px;font-weight:800;background:rgba(204,34,34,.2);border:1px solid var(--rd);border-radius:3px;padding:0 3px">SEASON</span>';
   else suffix=' <span style="font-size:10px;color:var(--mu)">('+p.inj+'w)</span>';
   return '<span style="color:'+col+'"> '+nm+suffix+'</span>';
@@ -153,7 +153,7 @@ function injBadgeTable(p){
 function injBadgeDepth(p){
   if(!p.inj||p.inj<=0)return '';
   const col=p.injCareer?'#ff0066':p.injSeason?'var(--rd)':'var(--ac)';
-  const lbl=p.injCareer?'CAREER':p.injSeason?'SEASON':p.inj+'w';
+  const lbl=p.injCareer?'Career':p.injSeason?'Season':p.inj+'w';
   const nm=p.injName||'Injured';
   return '<span style="color:'+col+';font-size:10px" title="'+nm+'"> '+lbl+'</span>';
 }
@@ -174,7 +174,7 @@ function triggerCareerEndingInjury(p){
   const qualifiesHof=p.rat>=72||(p.sg!=null?p.sg:p.stars)>=3||(p.carStats&&(p.carStats.rushYds>2000||p.carStats.recYds>1500||p.carStats.passTD>40||p.carStats.tackles>150));
   const hofBlock=qualifiesHof?`
     <div style="background:rgba(245,192,48,.10);border:1px solid var(--gd);border-radius:6px;padding:12px 14px;margin:14px 0;text-align:center">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd);margin-bottom:4px"> Hall of Fame Worthy</div>
+      <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gd);margin-bottom:4px"> Hall of Fame Worthy</div>
       <div style="font-size:12px;color:var(--tx);margin-bottom:10px">${p.fn} ${p.ln} had a career deserving recognition. Enshrine them in the Hall of Fame?</div>
       <div style="display:flex;gap:10px;justify-content:center">
         <button class="btn bgd" style="font-size:13px;padding:7px 18px" onclick="careerInjHof(${p.id},true)"> Yes, Enshrine</button>
@@ -189,11 +189,11 @@ function triggerCareerEndingInjury(p){
     <h3 style="color:var(--rd);text-align:center"> Career-Ending Injury</h3>
     <div style="margin:12px auto;text-align:center">${face(p.fs,60)}</div>
     <div style="text-align:center;margin-bottom:12px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900">${p.fn} ${p.ln}</div>
+      <div style="font-family:var(--hd);font-size:20px;font-weight:900">${p.fn} ${p.ln}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:3px">${p.pos} · ${yrL(p.yr)} · ${rb(p.rat)} · ${stars(p.stars)}</div>
     </div>
     <div style="background:rgba(204,34,34,.12);border:1px solid rgba(204,34,34,.4);border-radius:6px;padding:12px 14px;margin-bottom:10px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--rd);margin-bottom:4px"> ${p.injName||'Severe Injury'}</div>
+      <div style="font-family:var(--hd);font-size:15px;font-weight:800;color:var(--rd);margin-bottom:4px"> ${p.injName||'Severe Injury'}</div>
       <div style="font-size:13px;color:var(--tx)">This injury ends <strong>${p.fn} ${p.ln}</strong>'s football career. They will be removed from the roster immediately.</div>
     </div>
     ${hofBlock}

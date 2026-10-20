@@ -268,7 +268,7 @@ function stadPrevFar(st,day){
 function stadPreviewSvg(i,w){
   w=w||300;const H=120,day=i.day,ind=i.indoor;let o='';
   const R=(x,y,ww,hh,c,op)=>`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${c}"${op!=null?` opacity="${op}"`:''}/>`;
-  if(ind){o+=R(0,0,300,76,'#4a505a');o+=R(0,0,300,52,'#2a2e35');o+=R(0,64,300,10,i.wall);for(let k=0;k<6;k++)o+=R(10+k*50,6,34,4,'#f4f7ff');for(let k=0;k<12;k++)o+=R(k*25,0,1,52,'#3a3f48');o+=R(0,30,300,24,i.wall);o+=`<text x="150" y="45" font-size="9" font-weight="900" text-anchor="middle" fill="${i.c2}" font-family="Nunito,sans-serif">PERFORMANCE CENTER</text>`;}
+  if(ind){o+=R(0,0,300,76,'#4a505a');o+=R(0,0,300,52,'#2a2e35');o+=R(0,64,300,10,i.wall);for(let k=0;k<6;k++)o+=R(10+k*50,6,34,4,'#f4f7ff');for(let k=0;k<12;k++)o+=R(k*25,0,1,52,'#3a3f48');o+=R(0,30,300,24,i.wall);o+=`<text x="150" y="45" font-size="9" font-weight="900" text-anchor="middle" fill="${i.c2}" font-family="Nunito,sans-serif">Performance center</text>`;}
   else{o+=`<defs><linearGradient id="sk${i.tier}${i.kind}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${day?'#4f9de0':'#070b1c'}"/><stop offset="1" stop-color="${day?'#bfe3f7':'#1b2850'}"/></linearGradient></defs>`+R(0,0,300,56,`url(#sk${i.tier}${i.kind})`);
     if(day)o+=`<circle cx="262" cy="13" r="7" fill="#fff4c2"/>`;else o+=`<circle cx="262" cy="12" r="4" fill="#e9e7d6"/>`;
     o+=stadPrevFar(i.st||'CF',day);
@@ -316,8 +316,8 @@ function stadPanel(){
       ${n?`<div style="font-size:12px;color:var(--te);margin-top:6px">Next: ${n.name} (${stadDesc(n)})</div>`:''}
       <button class="btn bsm bbl" style="margin-top:10px" ${can?'onclick="upgStad()"':'disabled style="opacity:.4;margin-top:10px"'}>${t>=20?'MAX':`Upgrade $${c.toLocaleString()}`}</button></div></div>
     <div style="display:flex;gap:2px;margin-top:10px">${Array.from({length:20},(_,k)=>`<div style="flex:1;height:6px;border-radius:2px;background:${k<t?'var(--ac)':'var(--bd)'}"></div>`).join('')}</div>
-    <div style="font-size:12px;font-weight:800;color:var(--mu);margin-top:12px">CUSTOMIZE</div>${stadCustHtml(s.stadC||{},i,'stadSetC')}
-    <div style="font-size:12px;font-weight:800;color:var(--mu);margin-top:16px">PRACTICE FACILITY</div>
+    <div style="font-size:12px;font-weight:800;color:var(--mu);margin-top:12px">Customize</div>${stadCustHtml(s.stadC||{},i,'stadSetC')}
+    <div style="font-size:12px;font-weight:800;color:var(--mu);margin-top:16px">Practice facility</div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:6px">
       <div style="flex:1 1 240px;max-width:320px">${stadPreviewSvg(pi,320)}</div>
       <div style="flex:1 1 220px;min-width:0"><div style="font-weight:800">${pi.pl?pi.name+` <span style="font-size:11px;color:var(--mu)">Level ${pi.pl}/16</span>`:'No practice field yet'}</div><div style="font-size:12px;color:var(--mu);margin-top:2px">${stadDesc(pi)}</div>
@@ -363,12 +363,12 @@ function gdPreviewHtml(me,opp,homeIdx){
   const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:12px;background:rgba(255,255,255,.08);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
   const stars=T.map(s=>_gdStars(s).map(p=>star(p,s)).join(''));
   return`<div style="font-family:Nunito,'Segoe UI',system-ui,sans-serif;color:#eef7ff">
-    <div style="text-align:center;font-size:11px;letter-spacing:.12em;font-weight:900;opacity:.8">MATCHUP PREVIEW</div>
+    <div style="text-align:center;font-size:11px;letter-spacing:.12em;font-weight:900;opacity:.8">Matchup preview</div>
     <div style="display:flex;align-items:center;gap:10px;margin:8px 0 10px">${col(me,0)}<div style="font-weight:900;font-size:22px;opacity:.7">VS</div>${col(opp,1)}</div>
     <table style="margin:0 auto 10px;border-collapse:collapse;font-size:13px">${row('Record',rec(me),rec(opp))}${row('Last 3',form(logs[0]),form(logs[1]))}${row('Points for / game',ppg(logs[0],'us'),ppg(logs[1],'us'))}${row('Points against / game',ppg(logs[0],'them'),ppg(logs[1],'them'))}${row('Team rating',ovr(me),ovr(opp))}</table>
-    <div style="font-size:12px;font-weight:900;opacity:.8;margin-bottom:4px">KEYS TO THE GAME</div>
+    <div style="font-size:12px;font-weight:900;opacity:.8;margin-bottom:4px">Keys to the game</div>
     <ul style="margin:0 0 10px 18px;padding:0;font-size:13px;line-height:1.45">${facts.slice(0,6).map(f=>`<li>${f}</li>`).join('')}</ul>
-    <div style="font-size:12px;font-weight:900;opacity:.8">PLAYERS TO WATCH</div>
+    <div style="font-size:12px;font-weight:900;opacity:.8">Players to watch</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1 1 220px">${stars[0]}</div><div style="flex:1 1 220px">${stars[1]}</div></div></div>`;
 }
 

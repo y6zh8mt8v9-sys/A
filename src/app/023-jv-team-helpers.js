@@ -144,7 +144,7 @@ window.confirmCutPlayer=function(pid){
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     ${face(p.fs,52)}
     <div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900">${p.fn} ${p.ln}</div>
+      <div style="font-family:var(--hd);font-size:18px;font-weight:900">${p.fn} ${p.ln}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:3px">${p.pos} • ${yrL(p.yr)} • ${rb(p.rat)}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:2px">${devB(p.dev)} ${stars(p.stars)}</div>
     </div>

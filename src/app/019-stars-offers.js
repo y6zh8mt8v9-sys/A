@@ -321,7 +321,7 @@ function starStep(p,pops,force){
   else if(t<prev&&(force||Math.random()<0.3))p.stars=t<2&&prev<=2?0:prev-1;
   p.stars=clamp(p.stars||0,0,getStarCap(p));if(p.stars===1)p.stars=0;
   if(p.stars>prev&&p.sId===G.myId&&pops){
-    pops.push(bEvPop(p.stars-prev>1?` STAR SURGE! +${p.stars-prev} Stars!`:` ${p.fn} ${p.ln} Gained a Star!`,`Now ${stars(p.stars)}, ${p.pos}, ${p.rat} OVR, ${p.dev} dev.`,face(p.fs,48),'var(--gd)'));
+    pops.push(bEvPop(p.stars-prev>1?` Star surge! +${p.stars-prev} Stars!`:` ${p.fn} ${p.ln} Gained a Star!`,`Now ${stars(p.stars)}, ${p.pos}, ${p.rat} OVR, ${p.dev} dev.`,face(p.fs,48),'var(--gd)'));
     addNews('stargain',` ${p.fn} ${p.ln} Now ${p.stars}★`,`${p.pos} rising. OVR ${p.rat}, ${p.dev} dev.`);}
 }
 function checkStarsOffers(p,pops,isAI=false){

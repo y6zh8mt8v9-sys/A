@@ -1,14 +1,15 @@
 # Build order for app/index.html (tools/build.py). One file per line, relative to src/.
 shell/00-head.html
 styles/00-base.css
-styles/01-aero-layer.css
+styles/01-structure.css
 styles/02-scrolling-safari-fixes.css
 styles/03-schedule-builder-layout.css
 styles/04-title-screen.css
 styles/05-coach-creator.css
-styles/06-console-dark.css
-styles/07-console-light.css
+styles/06-design.css
 shell/10-style-end-body.html
+vendor/gsap-3.13.0.min.js
+shell/11-vendor-end-app-start.html
 app/000-boot-theme-settings.js
 app/001-division-names-per-classification-8.js
 app/002-player-interests-cosmetic.js

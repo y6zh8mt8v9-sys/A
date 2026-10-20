@@ -156,7 +156,7 @@ window.showDevTraitPopup=function(pid){
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
     ${face(p.fs,52)}
     <div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800">${p.fn} ${p.ln}</div>
+      <div style="font-family:var(--hd);font-size:17px;font-weight:800">${p.fn} ${p.ln}</div>
       <div style="font-size:12px;color:var(--mu)">${p.pos} • ${yrL(p.yr)} • ${rbDelta(p)} OVR</div>
     </div>
   </div>
@@ -174,7 +174,7 @@ window.showDevTraitPopup=function(pid){
     </div>
   </div>
 
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;text-transform:uppercase">Dev Progression Ladder</div>
+  <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">Dev Progression Ladder</div>
   <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
     ${DEV.map((d,i)=>`<div style="background:${d===p.dev?'var(--s3)':'var(--s2)'};border:${d===p.dev?`2px solid ${info.color}`:'1px solid var(--bd)'};border-radius:5px;padding:7px 12px;text-align:center;min-width:80px">
       <div style="font-size:${d===p.dev?'15px':'12px'};font-weight:${d===p.dev?900:600};color:${DEV_INFO[d].color}">${DEV_INFO[d].icon} ${d}</div>
@@ -183,33 +183,33 @@ window.showDevTraitPopup=function(pid){
   </div>
   <div style="font-size:11px;color:var(--mu);margin-bottom:14px">SP values above are base. Final SP per phase = base + performance (−1 to +3) + training level (0 to +3) + staff & traits.</div>
 
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;text-transform:uppercase">Next Offseason Chances</div>
+  <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">Next Offseason Chances</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
     <div style="background:rgba(34,184,112,.1);border:1px solid rgba(34,184,112,.3);border-radius:6px;padding:10px;text-align:center">
-      <div style="font-size:11px;color:var(--mu);margin-bottom:4px">UPGRADE CHANCE</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--gn)">${upgradeDisplay}</div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:4px">Upgrade chance</div>
+      <div style="font-family:var(--hd);font-size:24px;font-weight:900;color:var(--gn)">${upgradeDisplay}</div>
       ${nextDev?`<div style="font-size:11px;color:var(--gn);margin-top:3px">→ ${nextDev}</div>`:'<div style="font-size:10px;color:var(--mu);margin-top:3px">Already at maximum</div>'}
     </div>
     <div style="background:rgba(204,34,34,.1);border:1px solid rgba(204,34,34,.3);border-radius:6px;padding:10px;text-align:center">
-      <div style="font-size:11px;color:var(--mu);margin-bottom:4px">DOWNGRADE CHANCE</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--te)">${downgradeDisplay}</div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:4px">Downgrade chance</div>
+      <div style="font-family:var(--hd);font-size:24px;font-weight:900;color:var(--te)">${downgradeDisplay}</div>
       ${prevDev?`<div style="font-size:11px;color:var(--te);margin-top:3px">→ ${prevDev}</div>`:'<div style="font-size:10px;color:var(--mu);margin-top:3px">Already at minimum</div>'}
     </div>
   </div>
 
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;text-transform:uppercase">Potential Range</div>
+  <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">Potential Range</div>
   <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:10px 14px;margin-bottom:14px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div style="text-align:center">
-        <div style="font-size:10px;color:var(--mu);text-transform:uppercase;font-weight:700">Floor</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--gn)">${p.potLo||p.pot}</div>
+        <div style="font-size:10px;color:var(--mu);font-weight:700">Floor</div>
+        <div style="font-family:var(--hd);font-size:22px;font-weight:900;color:var(--gn)">${p.potLo||p.pot}</div>
       </div>
       <div style="flex:1;background:var(--bd);border-radius:3px;height:8px;position:relative">
         <div style="position:absolute;left:0;top:0;height:8px;border-radius:3px;background:linear-gradient(90deg,var(--gn),#f0b429);width:${Math.round((effPot(p)-(p.potLo||p.pot))/Math.max(1,(p.potHi||p.pot)-(p.potLo||p.pot))*100)}%"></div>
       </div>
       <div style="text-align:center">
-        <div style="font-size:10px;color:var(--mu);text-transform:uppercase;font-weight:700">Ceiling</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--pot,#f0b429)">${p.potHi||p.pot}</div>
+        <div style="font-size:10px;color:var(--mu);font-weight:700">Ceiling</div>
+        <div style="font-family:var(--hd);font-size:22px;font-weight:900;color:var(--pot,#f0b429)">${p.potHi||p.pot}</div>
       </div>
     </div>
     <div style="font-size:12px;color:var(--tx);margin-bottom:4px">

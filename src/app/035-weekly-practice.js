@@ -13,7 +13,7 @@ function pracOpen(){
   const sw=[['#d8333b','Red'],['#2fa84f','Green'],['#2f7fe0','Blue']].map(([c,l])=>`<button class="gd-uni${qc===c?' on':''}" onclick="window._pracQB='${c}';pracOpen()" style="padding:6px 12px"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${c};border:1px solid #fff;vertical-align:middle"></span> ${l}</button>`).join('');
   openMo(`<div style="padding:4px 2px">
     <div style="font-weight:900;font-size:20px;margin-bottom:4px">Weekly Practice</div>
-    <div style="display:inline-block;font-weight:900;font-size:13px;padding:4px 12px;border-radius:999px;background:var(--ac);color:var(--tOn,#fff);margin-bottom:8px">${PRAC_REPS} reps per practice · no game clock</div>
+    <div style="display:inline-block;font-weight:900;font-size:13px;padding:4px 12px;border-radius:8px;background:var(--ac);color:var(--tOn,#fff);margin-bottom:8px">${PRAC_REPS} reps per practice · no game clock</div>
     <div style="font-size:13px;color:var(--mu);margin-bottom:12px">Each rep is one play from the 35. Offense wears white, defense black. Players earn XP for taking reps and for big plays; every 10 XP becomes a skill point. One practice per week.</div>
     ${(()=>{const me=myS(),pi=pracInfo(stadOf(me),me.stadC,me);return`<div style="font-size:12px;margin:-4px 0 12px"><b>Venue:</b> ${pi.name}${pi.pl?'':' (your own practice field comes at stadium tier 5)'}</div>`;})()}
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:12px">

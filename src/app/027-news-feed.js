@@ -30,9 +30,9 @@ function buildNewsItems(){
   if(G.log&&G.log.length){
     for(let i=0;i<Math.min(G.log.length,30);i++){
       const l=G.log[i];
-      const isWin=l.includes('WIN');const isLoss=l.includes('LOSS');
+      const isWin=/\b(WIN|Win)\b/.test(l);const isLoss=/\b(LOSS|Loss)\b/.test(l); // older saves wrote WIN / LOSS
       const isOffer=l.includes('FBS:')||l.includes('FCS:');
-      const isChamp=l.includes('STATE CHAMP')||l.includes('CHAMPION');
+      const isChamp=/state champ|champion/i.test(l);
       if(isChamp)items.push({cls:'playoff',icon:'',headline:'State Championship!',sub:l.replace(/<[^>]+>/g,'').trim(),time:'–'});
       else if(isOffer)items.push({cls:'offer',icon:'',headline:'College Offer',sub:l.replace(/<[^>]+>/g,'').trim(),time:'–'});
       else if(isWin)items.push({cls:'my-team',icon:'',headline:'Victory',sub:l.replace(/<[^>]+>/g,'').trim(),time:'–'});
@@ -101,7 +101,7 @@ function pgRoster(sid){
   const capPct=isMe?varsityRosterCount/MAX_VARSITY:null;
   const capColor=capPct===null?'':capPct>=1?'var(--rd)':capPct>=0.9?'var(--gd)':'var(--gn)';
   return`<div class="pnl"><div class="ph">${sLogo(sch,30)} &nbsp;${sch.name} ${sch.mascot} <span style="font-size:12px;font-weight:400;color:var(--mu)">${sPlayers(sid).length} players</span>${isMe?`<span style="margin-left:8px;background:${capPct>=1?'rgba(204,34,34,.18)':'rgba(34,184,112,.1)'};border:1px solid ${capColor};color:${capColor};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Varsity ${varsityRosterCount}/${MAX_VARSITY}${capPct>=1?'  AT CAP':''}</span>`:''}</div>
-    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p}</button>`).join('')}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div></div>
+    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p==='ALL'?'All':p}</button>`).join('')}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div></div>
     <div style="overflow-x:auto"><table><thead><tr>
       <th>#</th><th onclick="_setRS('name')">Name ${ar('name')}</th>
       <th onclick="_setRS('pos')">Pos ${ar('pos')}</th><th onclick="_setRS('yr')">Yr ${ar('yr')}</th>
@@ -119,7 +119,7 @@ function pgRoster(sid){
       <td><span class="pb2">${p.pos}</span></td><td>${yrL(p.yr)}${p.onJV?'<span style="background:#0a1a30;border:1px solid #336;color:#88ccff;border-radius:3px;padding:0 4px;font-size:9px;font-weight:800;margin-left:3px">JV</span>':''}</td>
       <td>${isMe?rbDelta(p):rb(p.rat)}</td><td style="color:var(--mu);font-size:11px"><span style="color:var(--gn)">${p.potLo||p.pot}</span>–<span style="color:var(--pot,#f0b429)">${p.potHi||p.pot}</span></td>
       <td>${devB(p.dev)}</td>
-      <td style="font-size:11px">${p.arch?`<span style="background:#0a2a10;border:1px solid #1a6030;color:#44dd88;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;font-family:'Barlow Condensed',sans-serif">${p.arch}</span>`:'–'}${p.streak==='hot'?' ':p.streak==='cold'?' ':''}</td>
+      <td style="font-size:11px">${p.arch?`<span style="background:#0a2a10;border:1px solid #1a6030;color:#44dd88;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;font-family:var(--hd)">${p.arch}</span>`:'–'}${p.streak==='hot'?' ':p.streak==='cold'?' ':''}</td>
       <td>${stars(p.stars)}</td>
       <td>${atv(p,'spd')}</td><td>${atv(p,'str')}</td><td>${atv(p,'awr')}</td>
       <td style="color:var(--mu)">${htf(p.ht)}</td><td style="color:var(--mu)">${p.wt}</td>
@@ -156,11 +156,11 @@ function pgDepth(){
       const activePlayers=byPos[pos].filter(p=>!benchedIds.includes(p.id));
       const benchedPlayers=byPos[pos].filter(p=>benchedIds.includes(p.id));
       return`<div style="margin-bottom:14px">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase">${pos} <span style="font-size:10px;color:var(--mu)">(${starterSlots} starters)</span></div>
+        <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;">${pos} <span style="font-size:10px;color:var(--mu)">(${starterSlots} starters)</span></div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
           ${!byPos[pos].length?'<span style="color:var(--mu);font-size:12px">No players</span>':
           [...activePlayers.map((p,i)=>`<div class="pbn ${i<starterSlots?'st':''}" style="min-width:165px">
-            <div style="font-size:10px;color:var(--mu)">Depth ${i+1}${i<starterSlots?'<span style="color:var(--gd)">STARTER</span>':''}</div>
+            <div style="font-size:10px;color:var(--mu)">Depth ${i+1}${i<starterSlots?'<span style="color:var(--gd)">Starter</span>':''}</div>
             <div style="display:flex;align-items:center;gap:7px;margin:3px 0">${face(p.fs,30)}<span style="font-weight:700;font-size:13px">${p.fn} ${p.ln}</span></div>
             <div style="display:flex;gap:5px;align-items:center;margin-top:3px">${yrL(p.yr)} ${rbDelta(p)} ${injBadgeDepth(p)}</div>
             <div style="display:flex;gap:4px;margin-top:4px">
@@ -170,7 +170,7 @@ function pgDepth(){
             </div>
           </div>`),
           ...benchedPlayers.map(p=>`<div class="pbn benched-card" style="min-width:165px">
-            <div style="font-size:10px;color:var(--mu)">BENCHED <span class="bench-badge">Bench</span></div>
+            <div style="font-size:10px;color:var(--mu)">Benched <span class="bench-badge">Bench</span></div>
             <div style="display:flex;align-items:center;gap:7px;margin:3px 0">${face(p.fs,30)}<span style="font-weight:700;font-size:13px">${p.fn} ${p.ln}</span></div>
             <div style="display:flex;gap:5px;align-items:center;margin-top:3px">${yrL(p.yr)} ${rbDelta(p)} ${injBadgeDepth(p)}</div>
             <div style="display:flex;gap:4px;margin-top:4px">
@@ -232,23 +232,23 @@ function pgTrain(){
     <div class="pb">
       <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
-          <div style="font-size:12px;color:var(--mu);margin-bottom:4px;font-weight:700;text-transform:uppercase">Training Level</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--pot,#f0b429);letter-spacing:2px">${starHTML}</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--tx);margin-top:2px">${tLvl}/20</div>
+          <div style="font-size:12px;color:var(--mu);margin-bottom:4px;font-weight:700;">Training Level</div>
+          <div style="font-family:var(--hd);font-size:28px;font-weight:900;color:var(--pot,#f0b429);letter-spacing:2px">${starHTML}</div>
+          <div style="font-family:var(--hd);font-size:22px;font-weight:900;color:var(--tx);margin-top:2px">${tLvl}/20</div>
           <div style="font-size:11px;color:var(--mu);margin-top:4px">The higher the level the faster your players will evolve and reach their full potential.</div>
         </div>
-        <button class="btn bbl" style="min-width:110px;padding:10px 18px;font-size:14px;font-weight:700" ${canUpg?`onclick="window.upgradeTrainLevel()"`:''} ${!canUpg?(tLvl>=20?'disabled style="opacity:.5"':`disabled style="opacity:.5" title="Need $${upgCost.toLocaleString()}"`):''}>${tLvl>=20?'MAXED':'UPGRADE<br><span style="font-size:11px;font-weight:500">$'+upgCost.toLocaleString()+'</span>'}</button>
+        <button class="btn bbl" style="min-width:110px;padding:10px 18px;font-size:14px;font-weight:700" ${canUpg?`onclick="window.upgradeTrainLevel()"`:''} ${!canUpg?(tLvl>=20?'disabled style="opacity:.5"':`disabled style="opacity:.5" title="Need $${upgCost.toLocaleString()}"`):''}>${tLvl>=20?'Maxed':'Upgrade<br><span style="font-size:11px;font-weight:500">$'+upgCost.toLocaleString()+'</span>'}</button>
       </div>
       <div style="margin-top:10px;display:flex;gap:4px">${Array.from({length:20},(_,i)=>`<div style="flex:1;height:6px;border-radius:3px;background:${i<tLvl?'var(--b2)':'var(--bd)'}"></div>`).join('')}</div>
       <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
         <div style="background:rgba(34,184,112,.08);border:1px solid rgba(34,184,112,.25);border-radius:5px;padding:8px;text-align:center">
-          <div style="color:var(--mu);font-size:10px;text-transform:uppercase;font-weight:700">Potential Unlocked</div>
-          <div style="font-size:18px;font-weight:900;color:var(--gn);font-family:'Barlow Condensed',sans-serif">${Math.round(tf*100)}%</div>
+          <div style="color:var(--mu);font-size:10px;font-weight:700">Potential Unlocked</div>
+          <div style="font-size:18px;font-weight:900;color:var(--gn);font-family:var(--hd)">${Math.round(tf*100)}%</div>
           <div style="color:var(--mu);font-size:10px">of each player's ceiling</div>
         </div>
         <div style="background:rgba(100,150,255,.08);border:1px solid rgba(100,150,255,.25);border-radius:5px;padding:8px;text-align:center">
-          <div style="color:var(--mu);font-size:10px;text-transform:uppercase;font-weight:700">Training Gain Bonus</div>
-          <div style="font-size:18px;font-weight:900;color:#6496ff;font-family:'Barlow Condensed',sans-serif">+${Math.round(tf*30)}%</div>
+          <div style="color:var(--mu);font-size:10px;font-weight:700">Training Gain Bonus</div>
+          <div style="font-size:18px;font-weight:900;color:#6496ff;font-family:var(--hd)">+${Math.round(tf*30)}%</div>
           <div style="color:var(--mu);font-size:10px">offseason SP growth</div>
         </div>
       </div>
@@ -282,9 +282,9 @@ function pgTrain(){
             <td style="color:var(--mu)">${p.yr===9?'Fr':p.yr===10?'So':p.yr===11?'Jr':'Sr'}</td>
             <td>
               <div style="display:flex;align-items:center;gap:6px">
-                <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--gn)">${lo}</span>
+                <span style="font-family:var(--hd);font-size:13px;font-weight:700;color:var(--gn)">${lo}</span>
                 <span style="color:var(--mu);font-size:11px">–</span>
-                <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--pot,#f0b429)">${hi}</span>
+                <span style="font-family:var(--hd);font-size:13px;font-weight:700;color:var(--pot,#f0b429)">${hi}</span>
                 <div style="flex:1;min-width:40px;background:var(--bd);border-radius:3px;height:5px;position:relative">
                   <div style="position:absolute;left:0;top:0;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--gn),#f0b429);width:${pct}%"></div>
                 </div>
@@ -364,10 +364,10 @@ function pgStaff(){
   </div>
   ${stadPanel()}
   <div class="pnl"><div class="ph">Playbook</div><div class="pb"><div class="g2">
-    <div><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--mu)">OFFENSIVE SCHEME</div>
+    <div><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--mu)">Offensive scheme</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${OFF_SCH.map(s=>`<button class="bgh ${G.offS===s?'btn bbl':''}" onclick="G.offS=this.textContent;myS().offS=G.offS;nav('staff')" style="font-size:11px">${s}</button>`).join('')}</div>
     </div>
-    <div><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--mu)">DEFENSIVE SCHEME</div>
+    <div><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--mu)">Defensive scheme</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${DEF_SCH.map(s=>`<button class="bgh ${G.defS===s?'btn bbl':''}" onclick="G.defS=this.textContent;myS().defS=G.defS;nav('staff')" style="font-size:11px">${s}</button>`).join('')}</div>
     </div>
   </div></div></div>
@@ -433,34 +433,34 @@ function pgCust(){
   const teamForm=`<div class="g2">
     <div>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">${sLogo(ms,56)}<div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900">${ms.name}</div>
+        <div style="font-family:var(--hd);font-size:18px;font-weight:900">${ms.name}</div>
         <div style="font-size:13px;color:var(--mu)">${ms.mascot} • ${ms.city}</div>
       </div></div>
       <div class="fg" style="margin-bottom:9px"><label>Team Name</label><input class="ei" id="cn" value="${ms.name}"></div>
       <div class="fg" style="margin-bottom:9px"><label>Mascot</label><input class="ei" id="cm" value="${ms.mascot}"></div>
       <div class="fg" style="margin-bottom:9px"><label>City</label><input class="ei" id="cc" value="${ms.city}"></div>
-      <div class="fg" style="margin-bottom:9px"><label>Abbreviation (3 letters)</label><input class="ei" id="ca" value="${ms.abbr}" maxlength="3" style="text-transform:uppercase"></div>
+      <div class="fg" style="margin-bottom:9px"><label>Abbreviation (3 letters)</label><input class="ei" id="ca" value="${ms.abbr}" maxlength="3" style=""></div>
       <button class="btn bgn" onclick="applyC()">Apply Changes</button>
     </div>
     <div>
-      <div style="font-size:11px;color:var(--mu);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700">Custom Logo Upload</div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:10px;letter-spacing:1px;font-weight:700">Custom Logo Upload</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
         <div id="logoPreview" style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:var(--s2);flex-shrink:0">${ms.customLogo?`<img src="${ms.customLogo}" alt="Team logo" style="width:56px;height:56px;object-fit:contain">`:`<span style="font-size:9px;color:var(--mu);text-align:center;padding:4px">No custom logo</span>`}</div>
         <div style="flex:1">
-          <label for="logoUpload" style="display:block;background:var(--b2);color:#fff;text-align:center;padding:6px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;margin-bottom:5px"> Upload Logo</label>
+          <label for="logoUpload" style="display:block;background:var(--b2);color:#fff;text-align:center;padding:6px 10px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;margin-bottom:5px"> Upload Logo</label>
           <input type="file" id="logoUpload" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
           <button class="bgh bsm" onclick="clearCustomLogo()" style="width:100%;font-size:11px" ${ms.customLogo?'':'disabled'}>✕ Remove Custom Logo</button>
           <div style="font-size:10px;color:var(--mu);margin-top:3px">PNG, JPG or SVG</div>
         </div>
       </div>
-      <div style="font-size:11px;color:var(--mu);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700">Logo Colors</div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:10px;letter-spacing:1px;font-weight:700">Logo Colors</div>
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div><div style="font-size:10px;color:var(--mu);margin-bottom:3px">Primary</div><input type="color" value="${ms.c1}" id="cc1" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
         <div><div style="font-size:10px;color:var(--mu);margin-bottom:3px">Secondary</div><input type="color" value="${ms.c2}" id="cc2" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
       </div>
       <div style="font-size:10px;color:var(--mu);margin-bottom:5px">Preset Combos</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">${LCOLS.slice(0,18).map(([c1,c2])=>`<div onclick="document.getElementById('cc1').value='${c1}';document.getElementById('cc2').value='${c2}'" style="width:26px;height:26px;border-radius:50%;background:${c1};border:2px solid ${c2};cursor:pointer;display:inline-block"></div>`).join('')}</div>
-      <div style="margin-top:14px"><div style="font-size:11px;color:var(--mu);margin-bottom:7px;font-weight:700">EDIT ANY SCHOOL</div>
+      <div style="margin-top:14px"><div style="font-size:11px;color:var(--mu);margin-bottom:7px;font-weight:700">Edit any school</div>
         <input placeholder="Find any school in any state…" oninput="schFind(this.value)" style="width:100%;padding:5px 8px">
         <div id="schFindL" style="margin-top:6px;max-height:240px;overflow-y:auto"></div>
         <div style="font-size:10px;color:var(--mu);margin-top:4px">Or open any school (tap its name anywhere in the game) and press Edit team.</div>
@@ -566,7 +566,7 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
     <div class="fg"><label>Team Name</label><input class="ei" id="en" value="${s.name}"></div>
     <div class="fg"><label>Mascot</label><input class="ei" id="em" value="${s.mascot}"></div>
     <div class="fg"><label>City</label><input class="ei" id="ec" value="${s.city}"></div>
-    <div class="fg"><label>Abbreviation</label><input class="ei" id="ea" value="${s.abbr}" maxlength="3" style="text-transform:uppercase"></div>
+    <div class="fg"><label>Abbreviation</label><input class="ei" id="ea" value="${s.abbr}" maxlength="3" style=""></div>
     <div class="fg"><label>Primary Color</label><input type="color" id="ec1" value="${s.c1}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
     <div class="fg"><label>Secondary Color</label><input type="color" id="ec2" value="${s.c2}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
     <div class="fg"><label>Off Scheme</label><select class="ei" id="eos">${OFF_SCH.map(sc=>`<option ${sc===s.offS?'selected':''}>${sc}</option>`).join('')}</select></div>
@@ -576,11 +576,11 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
     <div class="fg"><label>Logo preview</label><div id="elk-prev">${sLogo(s,64)}</div></div>
   </div>
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
-    <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px">Custom Logo</div>
+    <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:6px">Custom Logo</div>
     <div style="display:flex;align-items:center;gap:10px">
       <div id="schLogoPreview" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--s2);flex-shrink:0">${s.customLogo?`<img src="${s.customLogo}" alt="Team logo" style="width:48px;height:48px;object-fit:contain">`:'<span style="font-size:9px;color:var(--mu)">None</span>'}</div>
       <div style="flex:1">
-        <label for="schLogoUpload" style="display:block;background:var(--b2);color:#fff;text-align:center;padding:5px 8px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;margin-bottom:4px"> Upload Logo</label>
+        <label for="schLogoUpload" style="display:block;background:var(--b2);color:#fff;text-align:center;padding:5px 8px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:11px;margin-bottom:4px"> Upload Logo</label>
         <input type="file" id="schLogoUpload" accept="image/*" style="display:none" onchange="handleSchLogoUpload(this,${sid})">
         ${s.customLogo?`<button class="bgh bsm" onclick="clearSchLogo(${sid})" style="width:100%;font-size:10px">✕ Remove</button>`:''}
       </div>
@@ -644,9 +644,9 @@ function pgSched(){
       return`<tr class="${rowCls}${opp?' cl':''}" ${opp?`onclick="viewSchool(${opp.id})"`:''} ${isRiv?'style="background:rgba(245,192,48,.04);border-left:2px solid var(--gd)"':isEmpty?'style="opacity:.5"':''}>
         <td>${isRiv?`<strong style="color:var(--gd)">${g.wk}</strong>`:g.wk}</td>
         <td style="color:var(--mu)">${g.date||'–'}</td>
-        <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--te)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--mu)">OPEN</span>':'<span style="font-size:10px;font-weight:700;color:var(--mu)">BYE</span>'}</td>
+        <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--te)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--mu)">Open</span>':'<span style="font-size:10px;font-weight:700;color:var(--mu)">BYE</span>'}</td>
         <td>${isEmpty?`<span style="color:var(--mu);font-style:italic">open slot –</span>`:opp?`<div style="display:flex;align-items:center;gap:6px">${sLogo(opp,32)} ${isRiv?`<strong style="color:var(--gd)">${opp.name} ${opp.mascot}</strong>`:opp.name+' '+opp.mascot}</div>`:isBye?`<span style="color:var(--mu)">Bye Week –</span>`:'–'}</td>
-        <td>${opp?`<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:${oppCls===G.cls?'var(--te)':clsNum(oppCls)>clsNum(G.cls)?'var(--rd)':'var(--gn)'}" title="${clsName(oppCls)}">${oppCls}</span>`:'–'}</td>
+        <td>${opp?`<span style="font-family:var(--hd);font-size:11px;font-weight:700;color:${oppCls===G.cls?'var(--te)':clsNum(oppCls)>clsNum(G.cls)?'var(--rd)':'var(--gn)'}" title="${clsName(oppCls)}">${oppCls}</span>`:'–'}</td>
         <td>${opp?rb(teamOvr(opp.id)):'–'}</td>
         <td>${g.result&&g.result!=='bye'?`<strong style="color:${g.result==='W'?'var(--gn)':'var(--te)'}">${g.result}</strong>`:g.result==='bye'?'<span style="color:var(--mu)">BYE</span>':'<span style="color:var(--mu)">–</span>'}</td>
         <td>${g.result&&g.result!=='bye'?`${g.my}-${g.opp}`:'–'}</td>
@@ -671,8 +671,8 @@ function fltLabel(v){return v==='NAT'?`National · all ${ST_ORDER.length} states
 function fltSchoolIds(v){const ids=new Set();for(const c of fltClasses(v))for(const d of divisionsForCls(c))for(const t of d.teams)ids.add(t.id);return ids;}
 function clsFilterBar(activeCls,onclickFn,label,noIntl){
   const v=activeCls||G.cls,stK=v==='NAT'||v==='INTL'?null:v==='ALL'?'CF':v.startsWith('ST:')?v.slice(3):clsSt(v);
-  const b=(x,l,on)=>`<button onclick="${onclickFn}('${x}')" style="background:${on?'var(--ac)':'var(--s2)'};border:1px solid ${on?'var(--ac)':'var(--bd)'};color:${on?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;">${l}</button>`;
-  const lab=t=>`<span style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-right:4px;min-width:44px">${t}</span>`;
+  const b=(x,l,on)=>`<button onclick="${onclickFn}('${x}')" style="background:${on?'var(--ac)':'var(--s2)'};border:1px solid ${on?'var(--ac)':'var(--bd)'};color:${on?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;">${l}</button>`;
+  const lab=t=>`<span style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-right:4px;min-width:44px">${t}</span>`;
   const states=ST_ORDER.map(k=>[k==='CF'?'ALL':'ST:'+k,stName(k),k]);
   // many states: one dropdown instead of a wall of buttons
   let h=states.length>6?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">${lab('State')}<select onchange="${onclickFn}(this.value)" style="padding:5px 8px;border-radius:4px;max-width:100%">${states.map(([x,l,k])=>`<option value="${x}"${stK===k?' selected':''}>${l}${k==='CF'?' (home)':XST[k]&&XST[k].lite?' (light)':''}</option>`).join('')}<option value="NAT"${v==='NAT'?' selected':''}>National (every state)</option>${!noIntl&&G.allLeagues&&G.allLeagues.INTL?`<option value="INTL"${v==='INTL'?' selected':''}>International</option>`:''}</select></div>`
@@ -701,18 +701,18 @@ function pgStand(){
     // Section header for ALL mode
     if(clsesToShow.length>1){
       const isMyCls=cls===G.cls;
-      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;color:${isMyCls?'var(--te)':'var(--te)'};margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--bd);">${clsName(cls)} ${isMyCls?'<span style="font-size:11px;font-weight:700;color:var(--te)">◀ YOUR CLASS</span>':''}</div>`;
+      html+=`<div style="font-family:var(--hd);font-size:16px;font-weight:900;color:${isMyCls?'var(--te)':'var(--te)'};margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--bd);">${clsName(cls)} ${isMyCls?'<span style="font-size:11px;font-weight:700;color:var(--te)">Your class</span>':''}</div>`;
     }
 
     for(const div of divs){
       const isMyDiv=div.teams.some(t=>t.id===G.myId);
       const sorted=[...div.teams].sort((a,b)=>{const aw=a.wins/(a.wins+a.losses+.001),bw=b.wins/(b.wins+b.losses+.001);return bw-aw||b.wins-a.wins;});
-      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--te)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--te);font-size:11px">◀ YOUR DIVISION</span>':''}</div>
+      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--te)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--te);font-size:11px">Your division</span>':''}</div>
         <table><thead><tr><th>#</th><th>School</th><th>W</th><th>L</th><th>Win%</th><th>Ovr</th><th>Scheme</th></tr></thead>
         <tbody>${sorted.map((s,i)=>{const isMe=s.id===G.myId;const w=s.wins,l=s.losses;const wp=w+l>0?(w/(w+l)*100).toFixed(0)+'%':'–';
           return`<tr class="cl" onclick="viewSchool(${s.id})" ${isMe?'style="background:rgba(204,34,34,.07)"':''}>
             <td style="color:var(--mu)">${i+1}</td>
-            <td><div style="display:flex;align-items:center;gap:6px">${sLogo(s,32)}<span>${isMe?'<strong>':''}${s.name} ${s.mascot}${isMe?'</strong>':''}</span>${isMe?'<span style="color:var(--te);font-size:10px">YOU</span>':''}</div></td>
+            <td><div style="display:flex;align-items:center;gap:6px">${sLogo(s,32)}<span>${isMe?'<strong>':''}${s.name} ${s.mascot}${isMe?'</strong>':''}</span>${isMe?'<span style="color:var(--te);font-size:10px">You</span>':''}</div></td>
             <td style="color:var(--gn)">${w}</td><td style="color:var(--te)">${l}</td>
             <td>${wp}</td><td>${rb(teamOvr(s.id))}</td>
             <td style="font-size:11px;color:var(--mu)">${s.offS}/${s.defS}</td>
@@ -727,14 +727,14 @@ function pgPlayoff(){
   const pl=G.playoff;const curYear=2026+(G.yr-1);
   if(!pl)return`<div class="pnl"><div class="ph"> State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. Top 16 teams by win% qualify. Complete your schedule first.</div></div></div>`;
   const field=pl.field||[];
-  return`<div class="pnl"><div class="ph"> State Playoffs, ${curYear} ${pl.stateChamp?'<span style="color:var(--gd)"> STATE CHAMPS!</span>':''}</div><div class="pb">
+  return`<div class="pnl"><div class="ph"> State Playoffs, ${curYear} ${pl.stateChamp?'<span style="color:var(--gd)"> State champs!</span>':''}</div><div class="pb">
     <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Top 16 qualifiers from ${clsL(G.cls)} classification:</div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">${field.map((sid,i)=>{const s=getS(sid);if(!s)return'';const isMe=sid===G.myId;const elim=pl.rounds&&pl.rounds.some(r=>r.results&&r.results.find(res=>res.loser===sid));return`<div style="background:${isMe?'rgba(204,34,34,.1)':'var(--s2)'};border:1px solid ${isMe?'var(--ac)':elim?'var(--bd)':'var(--bd)'};border-radius:5px;padding:5px 10px;display:flex;align-items:center;gap:5px;opacity:${elim&&!isMe?.5:1}"><span style="color:var(--mu);font-size:10px">#${i+1}</span>${sLogo(s,29)}<span style="font-size:12px;font-weight:${isMe?700:400}">${s.name}</span></div>`;}).join('')}
     </div>
     ${pl.rounds&&pl.rounds.length?pl.rounds.map(r=>{
       const roundName=poRoundName(r.round)||`Round ${r.round}`;
       return`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:10px;margin-bottom:8px">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase">${roundName}</div>
+        <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;">${roundName}</div>
         <table style="font-size:12px"><tbody>${r.results.map(res=>{
           const a=getS(res.a),b=res.b?getS(res.b):null;const w=getS(res.winner);
           const isMyGame=res.a===G.myId||res.b===G.myId;
@@ -743,7 +743,7 @@ function pgPlayoff(){
             <td style="padding:3px 8px;color:var(--mu)">vs</td>
             <td style="padding:3px 8px">${b?`${sLogo(b,26)} ${b.name}`:'-'}</td>
             <td style="padding:3px 8px;font-weight:700;color:${res.winner===res.b?'var(--gn)':'var(--mu)'}">${res.b?(res.winner===res.b?res.wScore:res.lScore):''}</td>
-            ${isMyGame?`<td style="padding:3px 8px;color:${res.winner===G.myId?'var(--gn)':'var(--ac);font-weight:700'}">${res.winner===G.myId?'✓ WIN':' LOSS'}</td>`:''}</tr>`;
+            ${isMyGame?`<td style="padding:3px 8px;color:${res.winner===G.myId?'var(--gn)':'var(--ac);font-weight:700'}">${res.winner===G.myId?'✓ WIN':' Loss'}</td>`:''}</tr>`;
         }).join('')}</tbody></table>
       </div>`;
     }).join(''):''}
@@ -759,16 +759,16 @@ function pgTeams(){
   let teams=fltClasses(activeCls).flatMap(c=>divisionsForCls(c).flatMap(d=>d.teams));
   if(!teams.length)teams=allSchools(); // fallback
   return clsFilterBar(activeCls,'_setTeamsCls','View Class')
-  +`<div style="margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase">All Teams: ${fltLabel(activeCls)} <span style="font-size:13px;color:var(--mu);font-weight:400">${teams.length} teams</span></div>
+  +`<div style="margin-bottom:10px;font-family:var(--hd);font-size:18px;font-weight:900;">All Teams: ${fltLabel(activeCls)} <span style="font-size:13px;color:var(--mu);font-weight:400">${teams.length} teams</span></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px">
     ${teams.sort((a,b)=>teamOvr(b.id)-teamOvr(a.id)).map(s=>{const isMe=s.id===G.myId;const sCls=s.cls||G.cls;return`
     <div class="pbr" onclick="viewSchool(${s.id})" style="${isMe?'border-color:var(--ac);':''}">
-      ${sLogo(s,40)}<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;line-height:1.2">${s.name}</div>
+      ${sLogo(s,40)}<div style="font-family:var(--hd);font-size:11px;font-weight:800;line-height:1.2">${s.name}</div>
       <div style="font-size:10px;color:var(--mu)">${s.mascot}</div>
       <div style="font-size:10px;font-weight:700;color:var(--te)">${XCLS[sCls]?clsName(sCls):sCls}</div>
       <div>${recStr(s.wins,s.losses)}</div><div>${rb(teamOvr(s.id))}</div>
       <div style="font-size:10px;color:var(--mu)">${s.lite?`light state · ${sPlayers(s.id).length} prospect${sPlayers(s.id).length===1?'':'s'}`:`${sPlayers(s.id).length} players`}</div>
-      ${isMe?'<div style="font-size:10px;color:var(--te);font-weight:700">◀ YOU</div>':''}
+      ${isMe?'<div style="font-size:10px;color:var(--te);font-weight:700">You</div>':''}
     </div>`;}).join('')}
   </div>`;
 }
@@ -806,7 +806,7 @@ function pgLeads(){
     return`<tr class="cl" onclick="showPlayer(${p.id})" ${isMe?'style="background:rgba(204,34,34,.05)"':''}>
       <td style="color:var(--mu)">${i+1}</td><td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,24)}${isMe?'<strong>':''}${p.fn} ${p.ln}${isMe?'</strong>':''}</div></td>
       <td><div style="display:flex;align-items:center;gap:4px">${sLogo(sch,26)} <span style="font-size:11px">${sch?sch.name:'?'}</span></div></td>
-      <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--te)" title="${clsName(sCls)}">${sCls}</span></td>
+      <td><span style="font-family:var(--hd);font-size:11px;font-weight:700;color:var(--te)" title="${clsName(sCls)}">${sCls}</span></td>
       <td><span class="pb2">${p.pos}</span></td><td>${yrL(p.yr)}</td>
       <td>${rb(p.rat)}</td><td>${devB(p.dev)}</td><td>${stars(p.stars)}</td><td>${gpaL(p.gpa)}</td>
       <td style="font-size:11px">${p.offers.length>0?p.offers.slice(0,2).map(o=>ofB(o)).join('')+(p.offers.length>2?`<span style="color:var(--mu)"> +${p.offers.length-2}</span>`:''):'–'}</td>
@@ -817,7 +817,7 @@ function pgLeads(){
 
 window._recrTab='mine';window.recrTab=function(t){window._recrTab=t;nav('recr');};
 function pgRecr(){
-  const tabs=`<div style="display:flex;gap:6px;margin-bottom:12px">${[['mine','Your recruits'],['col','College classes']].map(([k,l])=>`<button onclick="recrTab('${k}')" style="background:${_recrTab===k?'var(--ac)':'var(--s2)'};border:1px solid ${_recrTab===k?'var(--ac)':'var(--bd)'};color:${_recrTab===k?'var(--tOn,#fff)':'var(--tx)'};border-radius:6px;padding:5px 14px;cursor:pointer;font-weight:800;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.03em">${l}</button>`).join('')}</div>`;
+  const tabs=`<div style="display:flex;gap:6px;margin-bottom:12px">${[['mine','Your recruits'],['col','College classes']].map(([k,l])=>`<button onclick="recrTab('${k}')" style="background:${_recrTab===k?'var(--ac)':'var(--s2)'};border:1px solid ${_recrTab===k?'var(--ac)':'var(--bd)'};color:${_recrTab===k?'var(--tOn,#fff)':'var(--tx)'};border-radius:6px;padding:5px 14px;cursor:pointer;font-weight:800;font-family:var(--hd);letter-spacing:.03em">${l}</button>`).join('')}</div>`;
   if(_recrTab==='col')return tabs+pgColleges();
   return tabs+_pgRecrMine();
 }

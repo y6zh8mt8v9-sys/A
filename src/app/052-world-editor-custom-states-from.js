@@ -19,7 +19,7 @@ function meBody(){
   const list=cu.map((c,i)=>{const n=c.counties.length,st=X.st[c.ab];return`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px;border-radius:8px;background:${ME.active===c.ab?'rgba(63,162,243,.18)':'var(--s2)'};border:1px solid var(--bd)">
     <span style="width:14px;height:14px;border-radius:4px;background:${ME_COL[i%ME_COL.length]}"></span>
     <input id="me-n-${i}" value="${c.name}" maxlength="30" style="width:150px" placeholder="State name">
-    <input id="me-a-${i}" value="${c.ab}" maxlength="3" style="width:56px;text-transform:uppercase" placeholder="ABR">
+    <input id="me-a-${i}" value="${c.ab}" maxlength="3" style="width:56px;" placeholder="ABR">
     <span style="font-size:11px;color:var(--mu)">${n} counties${st?` · about ${usaTeams(c.ab,X)} schools`:''}</span>
     <button class="${ME.active===c.ab?'btn':'bgh'} bxs" onclick="wsGrab();ME.active='${c.ab}';wsRender()">${ME.active===c.ab?'Painting':'Paint'}</button>
     <button class="bgh bxs" onclick="wsGrab();meDel(${i})">Delete</button></div>`;}).join('');
@@ -156,7 +156,7 @@ function _landColorSt(c){const M=MAP_STATES[c.st]||MAP_STATES.CF,L=M.land,b=M.bb
 function renderMapTabs(){
   const box=document.getElementById('map-st-tabs');if(!box)return;
   const cnt={};_mapOffers.forEach(o=>{cnt[o.st]=(cnt[o.st]||0)+1;});
-  const chip=(k,l,on,n)=>`<button onclick="mapSetSt(${k?`'${k}'`:'null'})" style="background:${on?'var(--ac)':'var(--s2)'};border:1px solid ${on?'var(--ac)':'var(--bd)'};color:${on?'var(--tOn,#fff)':'var(--tx)'};border-radius:6px;padding:3px 10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;white-space:nowrap">${l}${n?` <span style="opacity:.75">${n}</span>`:''}</button>`;
+  const chip=(k,l,on,n)=>`<button onclick="mapSetSt(${k?`'${k}'`:'null'})" style="background:${on?'var(--ac)':'var(--s2)'};border:1px solid ${on?'var(--ac)':'var(--bd)'};color:${on?'var(--tOn,#fff)':'var(--tx)'};border-radius:6px;padding:3px 10px;cursor:pointer;font-family:var(--hd);font-weight:800;font-size:12px;white-space:nowrap">${l}${n?` <span style="opacity:.75">${n}</span>`:''}</button>`;
   const many=ST_ORDER.length>13,sorted=ST_ORDER.slice().sort((a,b)=>a==='CF'?-1:b==='CF'?1:stName(a).localeCompare(stName(b)));
   box.innerHTML=`<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">${chip(null,'Whole country',_mapSt==null,0)}${many?`${chip('CF',stName('CF'),_mapSt==='CF',cnt.CF||0)}<select onchange="mapSetSt(this.value||null)" style="padding:4px 8px;border-radius:6px;font-weight:800;font-size:12px"><option value="">Jump to a state…</option>${sorted.map(k=>`<option value="${k}"${_mapSt===k?' selected':''}>${stName(k)}${cnt[k]?` (${cnt[k]} jobs)`:''}</option>`).join('')}</select>`:ST_ORDER.map(k=>chip(k,stName(k),_mapSt===k,cnt[k]||0)).join('')}</div>
     ${_mapSt?`<div style="font-size:11px;color:var(--mu);margin-top:6px">${MAP_STATES[_mapSt].tag}</div>`:`<div style="font-size:11px;color:var(--mu);margin-top:6px">Scroll or drag the map, then tap a state to zoom in. Colored counties have job offers.</div>`}`;
@@ -246,7 +246,7 @@ function renderCountyMap(prevSt){
   const cnt={};_mapOffers.forEach(o=>{cnt[o.st]=(cnt[o.st]||0)+1;});
   let snames='';
   for(const s of ST_ORDER){const M=MAP_STATES[s];if(st&&s===st)continue;const fs=st?9*k:USA.on?clamp(Math.sqrt((M.bb[2]-M.bb[0])*(M.bb[3]-M.bb[1]))/7,7,13):(['KM','AU','CO','AC','GR'].includes(s)?10:13),dim=st?.75:1;
-    snames+=`<g pointer-events="none" opacity="${dim}"><text x="${M.lx}" y="${M.ly}" text-anchor="middle" font-size="${fs}" font-weight="900" letter-spacing="${st?.5*k:1.5}" fill="#fff" stroke="#2c2416" stroke-width="${(st?2.4*k:3)}" paint-order="stroke" style="text-transform:uppercase">${USA.on&&!st&&(M.bb[2]-M.bb[0])<M.name.length*fs*0.62?(USA.ab[s]||s):M.name.toUpperCase()}</text>
+    snames+=`<g pointer-events="none" opacity="${dim}"><text x="${M.lx}" y="${M.ly}" text-anchor="middle" font-size="${fs}" font-weight="900" letter-spacing="${st?.5*k:1.5}" fill="#fff" stroke="#2c2416" stroke-width="${(st?2.4*k:3)}" paint-order="stroke" style="">${USA.on&&!st&&(M.bb[2]-M.bb[0])<M.name.length*fs*0.62?(USA.ab[s]||s):M.name.toUpperCase()}</text>
       ${cnt[s]&&!st?`<g transform="translate(${M.lx},${M.ly+11})"><rect x="-22" y="-7" width="44" height="13" rx="6.5" fill="#f7b928" stroke="#2c2416" stroke-width="1"/><text y="3" text-anchor="middle" font-size="8.5" font-weight="900" fill="#1b1b1b">${cnt[s]} jobs</text></g>`:''}</g>`;}
   const mtn=(x,y,s)=>`<path d="M${x-7*s},${y} L${x},${y-9*s} L${x+7*s},${y} Z" fill="#7d6a52" opacity=".6"/><path d="M${x-2.2*s},${y-6.2*s} L${x},${y-9*s} L${x+2.2*s},${y-6.2*s} Z" fill="#fff" opacity=".75"/>`;
   const peaks=D.peaks.filter(p=>!st||p.st===st).map(p=>mtn(p.x,p.y,p.s*(st?Math.max(.8,k*1.2):1))).join('');
@@ -334,7 +334,7 @@ window.onCountyHover=function(e,id){
   const mx=e.clientX-wRect.left;
   const my=e.clientY-wRect.top;
   const offers=_mapOffers.filter(o=>o.countyId===id);
-  let html=`<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--tx)">${cntyLbl(county)}</div>`;
+  let html=`<div style="font-family:var(--hd);font-weight:800;font-size:13px;color:var(--tx)">${cntyLbl(county)}</div>`;
   if(offers.length){
     html+=`<div style="font-size:10px;color:var(--mu);margin-top:2px">${offers.length} job offer${offers.length>1?'s':''}</div>`;
     offers.forEach(o=>{
@@ -378,7 +378,7 @@ window.onCountyClick=function(id){
     return`<div class="offer-card cls-${t.cls.toLowerCase()} ${isSelected?'sel-offer':''}" onclick="selectOfferSchool(${t.id},${o.countyId})">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--tx)">${t.name} ${t.mascot}</div>
+          <div style="font-family:var(--hd);font-size:15px;font-weight:800;color:var(--tx)">${t.name} ${t.mascot}</div>
           <div style="font-size:11px;color:var(--mu)">${t.city} · ${cntyLbl(county)}</div>
         </div>
         <div style="text-align:right">
@@ -462,7 +462,7 @@ function renderOfferPopup(){
     ${_offerPopupOffers.length>1?`
     <div class="offer-popup-nav" style="margin-top:12px">
       ${_offerPopupOffers.map((_,i)=>`<div class="offer-popup-nav-dot ${i===_offerPopupIdx?'on':''}" onclick="offerPopupGo(${i})" title="Offer ${i+1}"></div>`).join('')}
-      <span style="font-size:10px;color:var(--mu);font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-left:6px">${_offerPopupIdx+1} / ${_offerPopupOffers.length}</span>
+      <span style="font-size:10px;color:var(--mu);font-family:var(--hd);font-weight:700;margin-left:6px">${_offerPopupIdx+1} / ${_offerPopupOffers.length}</span>
     </div>`:''}`;
 }
 
@@ -505,7 +505,7 @@ window.selectOfferSchool=function(teamId,countyId){
   panel.style.display='';
   const t=offer.team;
   const clsCol=offCol(t.cls);
-  info.innerHTML=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--tx)">${t.name} ${t.mascot}</div>
+  info.innerHTML=`<div style="font-family:var(--hd);font-size:18px;font-weight:900;color:var(--tx)">${t.name} ${t.mascot}</div>
     <div style="font-size:11px;color:var(--mu);margin-top:3px">${t.city} · ${cntyLbl(MAPC[countyId])}</div>
     <div style="font-size:12px;color:${clsCol};font-weight:700;margin-top:4px">${clsName(t.cls)}</div>`;
 
@@ -533,14 +533,14 @@ function renderOfferList(){
     const t=o.team;
     const clsCol=offCol(t.cls);
     const county=MAPC[o.countyId]||{name:'?'};
-    const head=o.st!==_lastSt?`<div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;color:var(--te);margin:${_lastSt?'8px':'0'} 0 2px">${stName(o.st)}</div>`:'';_lastSt=o.st;
+    const head=o.st!==_lastSt?`<div style="font-family:var(--hd);font-size:12px;font-weight:900;color:var(--te);margin:${_lastSt?'8px':'0'} 0 2px">${stName(o.st)}</div>`:'';_lastSt=o.st;
     const isSelected=_selectedOfferTeam&&_selectedOfferTeam.id===t.id;
     const logoSvg=sLogo(t,32);
     return head+`<div class="offer-card cls-${t.cls.toLowerCase()} ${isSelected?'sel-offer':''}" style="cursor:pointer;border-left:3px solid ${clsCol}" onclick="mapSetSt('${o.st}');onCountyClick(${o.countyId});onCountyClickFocus(${o.countyId})">
       <div style="display:flex;align-items:center;gap:8px">
         <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${logoSvg}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name} ${t.mascot}</div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name} ${t.mascot}</div>
           <div style="font-size:10px;color:var(--mu)">${cntyLbl(county)} · <span style="color:${clsCol}">${clsL(t.cls)}</span></div>
         </div>
         ${isSelected?`<div style="font-size:11px;color:var(--gn);font-weight:700"></div>`:''}

@@ -60,7 +60,7 @@ const IV_Q={win:['Big win tonight. What was working out there?','Your team looke
   rival:['That rivalry game was intense. What does it mean to you?','Anything to say to the other side after tonight?'],playoff:['Playoff football. How does it feel?','One step closer to a title. What is the message?'],potw:['Player of the Week! How does it feel?','Everybody is talking about your game. Your reaction?']};
 function interviewOpen(kind,o){if(document.getElementById('mo')&&document.getElementById('mo').classList.contains('open')){if((o._n=(o._n||0)+1)<8)setTimeout(()=>interviewOpen(kind,o),2500);return;}
   const q=pick(IV_Q[kind]||IV_Q.win),pc=!!pcActive(),who=pc?myPlayer():null,outlet=pick([MEDIA.fni,MEDIA.rival,'Channel 8 Sports']);
-  window._ivK=kind;openMo(`<div style="font-size:11px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">${outlet} · interview</div>
+  window._ivK=kind;openMo(`<div style="font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.06em">${outlet} · interview</div>
    <h2 style="margin:4px 0 10px">"${q}"</h2><div style="display:flex;flex-direction:column;gap:8px">
    <button class="bgh" style="text-align:left;padding:10px 14px" onclick="interviewAns(0)"><b>Credit the team</b><br><small style="color:var(--mu)">"It's all about the guys around me. We did it together."</small></button>
    <button class="bgh" style="text-align:left;padding:10px 14px" onclick="interviewAns(1)"><b>Stay confident</b><br><small style="color:var(--mu)">"We expect to win every week. This is who we are."</small></button>

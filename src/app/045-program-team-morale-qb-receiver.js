@@ -153,7 +153,7 @@ function _doOffseason(){
         glSet(slot.wk,opp,myScore,oppScore,'po');try{applyStats(sm);}finally{_glCtx=null;}gateAfter(opp,'po',slot.wk);
   try{progAfterGame(iWin,{playoff:true,sm,margin:myScore-oppScore});}catch(e){console.error('program',e);}try{checkStreaks(sm,[],true);}catch(e){}
         const roundName=poRoundName(slot.playoffRound)||`Round ${slot.playoffRound}`;
-        addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}"> ${roundName}: ${iWin?'WIN':'LOSS'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
+        addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}"> ${roundName}: ${iWin?'Win':'Loss'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
         simPlayoffRound(slot.playoffRound,slot,iWin);
         if(!iWin){
           G.playoff.myElim=true;
