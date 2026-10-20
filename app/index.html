@@ -23126,7 +23126,7 @@ function gpResultSound(S,r){
 }
 function proceed(){
   G.lastRec=G.rec;G.rec=null;
-  if(G.demo&&G.demoTD){G.demoTD=false;const R=G.lastRec;if(R&&R.frames.length>40){G.demo.clips.push(R);if(G.demo.clips.length>8)G.demo.clips.shift();G.demo.fresh++;}}
+  if(G.demo&&G.demoTD){G.demoTD=false;const R=G.lastRec;if(R&&R.frames.length>40){G.demo.clips.push(R);if(G.demo.clips.length>4)G.demo.clips.shift();G.demo.fresh++;}}
   aiTimeout();
   if(G.q<=4&&G.clock<=0&&G.next!=='conv'){periodEnd();return;}
   nextSnap();
@@ -24059,8 +24059,24 @@ function camera(dt){
 function recordFrame(){
   const R=G.rec;if(!R)return;
   if(G.time-R.last<1/30)return;R.last=G.time;
-  if(R.frames.length<900)R.frames.push(frameData(true));
+  if(R.frames.length<900)R.frames.push(recPack(frameData(true),R));
 }
+// replay frames are kept small (a long play used to hold 30 MB and more, which crashed some PCs): a pose is one number
+// array, and what stays the same through the play (uniform, body, number, looks) is stored once per player and shared;
+// the frame on screen is unpacked on the fly
+function recPack(F,R){const n=JK.length,T=R?(R.tpl||(R.tpl=[])):null;
+  for(let j=0;j<F.ents.length;j++){const S=F.ents[j],P=S.pp;
+    if(P&&!(P instanceof Float32Array)){const a=new Float32Array(n*2);for(let i=0;i<n;i++){const v=P[JK[i]];if(v){a[2*i]=v[0];a[2*i+1]=v[1];}else a[2*i]=a[2*i+1]=NaN;}S.pp=a;}
+    if(!T)continue;const t=T[j];
+    if(!t||t.num!==S.num||t.team!==S.team||t.ref!==S.ref||t.body!==S.body){T[j]=S;continue;}
+    const o=Object.create(t);for(const k in S){if(!Object.prototype.hasOwnProperty.call(S,k))continue;const v=S[k];if(v!==t[k])o[k]=v;}
+    const pk=S.pk,tp=t.pk;if(pk&&tp&&pk.sheet===tp.sheet&&pk.team===tp.team&&pk.skin===tp.skin&&pk.build===tp.build&&pk.bare===tp.bare&&pk.slim===tp.slim&&pk.hair===tp.hair&&pk.hst===tp.hst){const q=Object.create(tp);q.anim=pk.anim;q.frame=pk.frame;o.pk=q;}
+    F.ents[j]=o;}
+  F.z=1;return F;}
+function recGet(R,i){const F=R.frames[i];if(!F||!F.z)return F;if(R._ci===i&&R._cf)return R._cf;const n=JK.length;
+  const ents=F.ents.map(S=>{const o={};for(const k in S)o[k]=S[k];const a=o.pp;if(a instanceof Float32Array){const pp={};for(let j=0;j<n;j++)if(a[2*j]===a[2*j])pp[JK[j]]=[a[2*j],a[2*j+1]];o.pp=pp;}
+    if(o.pk&&Object.getPrototypeOf(o.pk)!==Object.prototype){const q={};for(const k in o.pk)q[k]=o.pk[k];o.pk=q;}return o;});
+  R._ci=i;R._cf=Object.assign({},F,{ents});return R._cf;}
 function startReplay(onExit){
   const R=(G.rec&&G.rec.frames.length)?G.rec:G.lastRec;if(!R||!R.frames.length)return;
   G.replay={R,i:0,speed:0.6,playing:true,prev:G.phase,onExit};G.phase='replay';
@@ -24843,7 +24859,7 @@ function gpKeysHtml(){return`<div class="ctlg kbg">${KB_ACT.map(([a,l])=>`<div c
 function gpKeysWire(box,rerender){
   box.querySelectorAll('.kbb').forEach(b=>b.onclick=()=>{KB.wait=b.dataset.a;rerender();});}
 addEventListener('keydown',ev=>{if(!KB.wait)return;ev.preventDefault();ev.stopImmediatePropagation();
-  const a=KB.wait,k=ev.key.toLowerCase();KB.wait=null;
+  const a=KB.wait,k=String(ev.key||'').toLowerCase();if(!k)return;KB.wait=null;
   if(k!=='escape'){
     const DEF=['jukeU','jukeD','dive','slow','spin','stiff','truck','hurdle','scramble'];
     if(!DEF.includes(a)&&['w','a','s','d'].includes(k)){flash('W A S D move your defender. Pick another key.');}
@@ -25015,7 +25031,7 @@ cv.addEventListener('pointerup',ev=>{
 cv.addEventListener('pointercancel',ev=>{if(G.ptr&&ev.pointerId===G.ptr.id){G.ptr=null;G.aim=null;G.joy=null;G.pjoy=null;}});
 const keys=new Set();
 addEventListener('keydown',ev=>{
-  const k=ev.key.toLowerCase();
+  const k=String(ev.key||'').toLowerCase();if(!k)return; // Chrome autofill sends key events without a key
   if(G.phase==='replay'&&k==='escape'){exitReplay();return;}
   if((k==='escape'||k==='p')&&!G.client&&G.phase!=='over'&&!G.recVid&&!(ev.target&&/INPUT|SELECT|TEXTAREA/.test(ev.target.tagName))){gpPause(!G.paused);ev.preventDefault();return;}
   if(G.paused)return;
@@ -25048,7 +25064,7 @@ addEventListener('keydown',ev=>{
     else if(k===kb('tackle'))userTackle();else if(k===kb('play')){intMeterTap();}
   }
 });
-addEventListener('keyup',ev=>keys.delete(ev.key.toLowerCase()));
+addEventListener('keyup',ev=>keys.delete(String(ev.key||'').toLowerCase()));
 function gpPreJoy(){ // who gets a pre-snap stick: your defender, or your Player Career man (not as quarterback)
   if(G.client||G.test||!G.play||G.play.kind!=='scrimmage'||isAI(G.act)&&!pcOn())return false;
   return pcOn()?!pcMe(G.qb):G.offTeam!==G.me&&!!G.uctl;
@@ -25092,9 +25108,16 @@ function frame(now){
   // the title-screen demo runs at 30 fps and low resolution so the menus stay smooth on slower PCs and Chromebooks
   if(G.demo){if(!G._dfit){G._dfit=1;fit();}G._dacc=(G._dacc||0)+dt;G._dfr=(G._dfr||0)+1;if(G._dfr%2){requestAnimationFrame(frame);return;}const d2=Math.min(0.066,G._dacc);G._dacc=0;
     if(d2>0&&G.demo.state!=='warm')try{step(d2);}catch(err){console.error(err);}requestAnimationFrame(frame);return;}
-  if(dt>0&&!(G.demo&&G.demo.state==='warm'))try{step(dt*gspd());}catch(err){console.error(err);}
+  if(dt>0&&!(G.demo&&G.demo.state==='warm'))try{step(dt*gspd());gpErrRun=0;}catch(err){console.error(err);gpStepErr(err);}
   requestAnimationFrame(frame);
 }
+// an error that repeats every frame used to freeze Game Day (it looked like a crash): it is logged once, and if the
+// game cannot get past it the rest is simulated so the result and the season are kept
+let gpErrRun=0,gpErrSeen={};
+function gpStepErr(err){gpErrRun++;const m=String(err&&err.message||err).slice(0,200);
+  if(!gpErrSeen[m]){gpErrSeen[m]=1;try{if(window.parent&&window.parent!==window&&window.parent.gpErrLog)window.parent.gpErrLog(m,err&&err.stack,'gameday-step');}catch(_){}}
+  if(gpErrRun===150&&!G.demo&&!G.client&&G.phase!=='over'){try{flash('Game Day hit a problem. Simulating the rest so your game counts.');}catch(_){}
+    setTimeout(()=>{try{gpSimRest();}catch(e2){try{if(window.parent&&window.parent.gpErrLog)window.parent.gpErrLog('sim fallback failed: '+e2.message,e2.stack,'gameday-step');}catch(_){}}},600);}}
 function clockTicks(){if(GP&&GP.practice)return false;return G.clockRun&&G.q<=4&&!G.conv&&!(G.play&&G.play.kind==='xp');}
 function step(dt){
   if(G.client){olClientStep(dt);return;}
@@ -25107,7 +25130,7 @@ function step(dt){
   if(G.phase==='replay'){
     const P=G.replay;if(P.playing){P.i+=dt*30*P.speed;if(P.i>=P.R.frames.length-1){P.i=P.R.frames.length-1;P.playing=false;$('rPlay').textContent='Play again';if(P.demo)P.doneAt=G.time;}}
     if(P.demo&&!P.playing&&G.time-(P.doneAt||G.time)>0.7){gpDemoNext();return;}
-    const F=P.R.frames[Math.floor(P.i)];G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;
+    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;
   }
   if(G.phase==='presnap'){
     meterStep(dt);
@@ -25466,7 +25489,7 @@ function olClientStep(dt){
   G.time+=dt;
   if(G.phase==='replay'&&G.replay){
     const P=G.replay;if(P.playing){P.i+=dt*30*P.speed;if(P.i>=P.R.frames.length-1){P.i=P.R.frames.length-1;P.playing=false;$('rPlay').textContent='Play again';}}
-    const F=P.R.frames[Math.floor(P.i)];G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;}
+    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;}
   let F=olInterp();
   if(!F){F={ents:[],ball:null,flags:[],camY:G.camY,anch:G.anch,lines:null};drawScene(F);updateHUD();return;}
   OL.lastF=F;olSync(F);
