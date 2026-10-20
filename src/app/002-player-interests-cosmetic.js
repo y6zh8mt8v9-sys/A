@@ -21,34 +21,31 @@ function interestBadges(ints){
 }
 
 // ═══════════ DREAM SCHOOL ═══════════
-// Each player gets a dream school based on dev potential and position.
-// If that school ever offers them, they instantly commit.
-const _DREAM_FBS_ELITE=['Llano Grande','Coralina','Magnolia','Cascadia','Coralina State','Llano Grande State','Cumberland','Crestfield','Magnolia State','Llano Grande A&M','Wakota','Summit','Acadia','Cascadia State','Tierra Alta','Cumberland State'];
-const _DREAM_FBS_MID=['Crestfield Tech','Tierra Alta State','Central Tierra Alta','Beckett University','Cascadia Tech','Summit State','Winslow University','Wickham University','Ranger Christian','Summit Mines','Acadia Tech','Crestfield State','Magnolia A&M','Northam University','South Acadia','Ormsby University','Western Llano Grande','Eastern Magnolia','Southern Cascadia','Cumberland Tech','Borger State','Harrington University','Sonora State','Ravenwood','Elgin'];
-const _DREAM_FCS_SCHOOLS=['Silsbee State','Kaimana','Seguin','Dumas','Sandberg State','Kountze','Sweetwater Christian','Dalhart State','Cotulla State','Lampasas State','Southern Acadia State','Abilene','Northern Summit','Crestwood State','Westby State'];
-colKeepArr(_DREAM_FBS_ELITE,'FBS');colKeepArr(_DREAM_FBS_MID,'FBS');colKeepArr(_DREAM_FCS_SCHOOLS,'FCS');
-if(!_DREAM_FBS_MID.length)_DREAM_FBS_MID.push(...D1FBS.slice(-10));if(!_DREAM_FCS_SCHOOLS.length)_DREAM_FCS_SCHOOLS.push(...D1FCS.slice(0,8));
-
+// Each player gets a dream school based on dev potential and position, taken from this world's colleges (so renamed
+// and custom colleges show up). If that school ever offers them, they instantly commit.
+function _dreamPools(){const F=D1FBS,C=D1FCS.length?D1FCS:F,n=Math.min(16,F.length);
+  return{el:F.slice(0,n),mid:F.length>n?F.slice(n,Math.min(60,F.length)):F,fcs:C.slice(0,Math.min(30,C.length)),d2:D2.length?D2:C,d3:D3.length?D3:C};}
+function dreamOk(d){return!!(d&&typeof COL_BY!=='undefined'&&COL_BY[d.school+'|'+d.lvl]);}
 function genDreamSchool(dev, pot, pos){
-  const r=Math.random();
+  const r=Math.random(),P=_dreamPools(),fcsL=D1FCS.length?'FCS':'FBS',d2L=D2.length?'D2':fcsL,d3L=D3.length?'D3':fcsL;
   // Elite dev or high pot, dream big
   if(dev==='Elite Dev'||pot>=88){
-    return r<0.65?{lvl:'FBS',school:pick(_DREAM_FBS_ELITE)}:{lvl:'FBS',school:pick(_DREAM_FBS_MID)};
+    return r<0.65?{lvl:'FBS',school:pick(P.el)}:{lvl:'FBS',school:pick(P.mid)};
   }
   if(dev==='Star'||pot>=76){
-    if(r<0.35)return{lvl:'FBS',school:pick(_DREAM_FBS_ELITE)};
-    if(r<0.70)return{lvl:'FBS',school:pick(_DREAM_FBS_MID)};
-    return{lvl:'FCS',school:pick(_DREAM_FCS_SCHOOLS)};
+    if(r<0.35)return{lvl:'FBS',school:pick(P.el)};
+    if(r<0.70)return{lvl:'FBS',school:pick(P.mid)};
+    return{lvl:fcsL,school:pick(P.fcs)};
   }
   if(dev==='Impact'||pot>=64){
-    if(r<0.15)return{lvl:'FBS',school:pick(_DREAM_FBS_MID)};
-    if(r<0.55)return{lvl:'FCS',school:pick(_DREAM_FCS_SCHOOLS)};
-    return{lvl:'D2',school:pick(D2)};
+    if(r<0.15)return{lvl:'FBS',school:pick(P.mid)};
+    if(r<0.55)return{lvl:fcsL,school:pick(P.fcs)};
+    return{lvl:d2L,school:pick(P.d2)};
   }
   // Normal dev, modest dreams
-  if(r<0.25)return{lvl:'FCS',school:pick(_DREAM_FCS_SCHOOLS)};
-  if(r<0.60)return{lvl:'D2',school:pick(D2)};
-  return{lvl:'D3',school:pick(D3)};
+  if(r<0.25)return{lvl:fcsL,school:pick(P.fcs)};
+  if(r<0.60)return{lvl:d2L,school:pick(P.d2)};
+  return{lvl:d3L,school:pick(P.d3)};
 }
 
 const GAME_DATES=[];

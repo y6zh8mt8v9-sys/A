@@ -40,11 +40,13 @@ function _mimgTint(c1,c2,bw,ow){const id='mt'+c1.slice(1)+c2.slice(1)+Math.round
       +`<feMorphology in="SourceAlpha" operator="dilate" radius="${bw}" result="a1"/><feFlood flood-color="${c2}"/><feComposite in2="a1" operator="in" result="b1"/>`
       +`<feMorphology in="SourceAlpha" operator="dilate" radius="${bw+ow}" result="a2"/><feFlood flood-color="${_LGINK}"/><feComposite in2="a2" operator="in" result="b2"/>`
       +`<feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="t"/></feMerge></filter>`);_LGF[id]=1;}return id;}
+// the drawn art's bounds depend only on which drawing it is, so they are measured once per drawing
+const _LGBB=new Map();
 // a mascot (library image or drawn art) fitted into a box (x,y,w,h) with a band in c2 and an ink line around it
 function _vgMascot(L,x,y,w,h,bw,ow){
   if(L.img){const fl=L.flip?` transform="translate(${2*x+w} 0) scale(-1 1)"`:'';
     return`<use href="#${_mimgSym(L.img)}" x="${x}" y="${y}" width="${w}" height="${h}" filter="url(#${_mimgTint(L.c1,L.c2,bw,ow)})"${fl}/>`;}
-  const art=L.art,bb=_lgm(art);if(!bb)return'';
+  const art=L.art,bb=_LGBB.get(L.bk)||_lgm(art);if(!bb)return'';_LGBB.set(L.bk,bb);
   const sc=Math.min(w/bb.width,h/bb.height),tx=x+(w-bb.width*sc)/2-bb.x*sc,ty=y+(h-bb.height*sc)/2-bb.y*sc,k=1/sc;
   return`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${sc.toFixed(4)})">`+(ow?_vgSil(art,_LGINK,(bw+ow)*k):'')+(bw?_vgSil(art,L.c2,bw*k):'')+art+'</g>';}
 const _VG_STAR='M0 -10 L2.35 -3.24 L9.51 -3.09 L3.8 1.24 L5.88 8.09 L0 4 L-5.88 8.09 L-3.8 1.24 L-9.51 -3.09 L-2.35 -3.24Z';
@@ -99,7 +101,7 @@ function _sLogoBody(s,sz,ck){
   const P={var:(h>>>11)%2,F:c1,K:_lm(c1)>.45?_mx(c1,'#000000',.7):'#f4f6f8',L:_mx(c1,'#ffffff',.42),D:_mx(c1,'#000000',.4),A:Math.abs(_lm(c1)-_lm('#f0b72f'))<.22?c2:'#f0b72f',O:_LGINK,ch:ini};
   if(!L.img&&L.k){let PP=P;const v=L.v;
     if(v==='polar')PP=Object.assign({},P,{F:'#eef2f6',L:'#ffffff',D:'#aebbc8',K:'#1b2430'});else if(v==='zebra')PP=Object.assign({},P,{F:'#f2f2f2',L:'#ffffff',D:'#17191c',K:'#111111'});else if(v==='raven')PP=Object.assign({},P,{F:'#23262d',L:'#5a6170',D:'#0d0e11',K:'#f4f6f8'});
-    try{L.art=_LGO[L.k](PP,v);if(L.flip)L.art=`<g transform="${_MR}">${L.art}</g>`;}catch(e){L.art='';}}
+    try{L.art=_LGO[L.k](PP,v);if(L.flip)L.art=`<g transform="${_MR}">${L.art}</g>`;}catch(e){L.art='';}L.bk=L.k+'|'+v+'|'+L.flip+'|'+P.var+'|'+(L.k==='paw'||L.k==='claw'?ini:'');}
   const M=(x,y,w,hh)=>_vgMascot(L,x,y,w,hh,bw,ow);
   const letter=(r,tf,sc)=>(kb?_vgInk(r.o,tf,sc,c1,kb,bw+2.4,ow,sh):'')+_vgInk(r.o,tf,sc,c1,band,kb?2:bw,kb?0:ow,kb?0:sh);
   let body='';
