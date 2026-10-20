@@ -15,10 +15,12 @@ app/001-division-names-per-classification-8.js
 app/002-player-interests-cosmetic.js
 app/003-data-st_glyphs.js
 app/003a-data-varsity-glyphs.js
+app/003b-data-mascot-images.js
 app/004-logo-lettering.js
 app/005-mascots-that-now-have-their.js
 app/006-new-emblems-batch-a-mammals.js
 app/007-new-emblems-batch-c-people.js
+app/007a-varsity-mascot-art.js
 app/008-international-team-crests-one-hand.js
 app/008a-varsity-logos.js
 app/009-generation.js
