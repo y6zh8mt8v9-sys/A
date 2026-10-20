@@ -48,7 +48,7 @@ function _vgMascot(L,x,y,w,h,bw,ow){
   const sc=Math.min(w/bb.width,h/bb.height),tx=x+(w-bb.width*sc)/2-bb.x*sc,ty=y+(h-bb.height*sc)/2-bb.y*sc,k=1/sc;
   return`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${sc.toFixed(4)})">`+(ow?_vgSil(art,_LGINK,(bw+ow)*k):'')+(bw?_vgSil(art,L.c2,bw*k):'')+art+'</g>';}
 const _VG_STAR='M0 -10 L2.35 -3.24 L9.51 -3.09 L3.8 1.24 L5.88 8.09 L0 4 L-5.88 8.09 L-3.8 1.24 L-9.51 -3.09 L-2.35 -3.24Z';
-const _lgId=s=>(s.name||'')+'|'+(s.mascot||'');
+const _lgId=s=>(s.name||'')+'|'+(s.mascot||'')+'|'+(s.city||'');
 // everything that decides how a school's logo looks; lv is the school's uniqueness bump from lgUnique
 function _lgPlan(s,small){
   const lv=_LGV.get(_lgId(s))||0;

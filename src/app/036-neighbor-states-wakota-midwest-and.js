@@ -270,7 +270,7 @@ function makeStateDivisions(c){
   for(let d=0;d<X.d;d++){const teams=[];
     const _ci=SC.indexOf(c),_cf=st==='CF'?0:SC.length>1?_ci/(SC.length-1):0.5;
     for(let t=0;t<sizes[d];t++){const U=USA.on?usaTake(st):null;
-      const{nm,city,cnty}=U||(USA.on?usaSchoolName(st,_cf,used):_xSchoolName(st,c,used)),msc=U?U.mascot:_xPick(XMASC[st]),ci=(_sId*7+d*3+t)%LCOLS.length,[c1,c2]=U?[U.c1,U.c2]:LCOLS[ci];if(U)used.add(nm);
+      const{nm,city,cnty}=U||(USA.on?usaSchoolName(st,_cf,used):_xSchoolName(st,c,used)),msc=U?U.mascot:mascPick(Math.random,XMASC[st]),ci=(_sId*7+d*3+t)%LCOLS.length,[c1,c2]=U?[U.c1,U.c2]:LCOLS[ci];if(U)used.add(nm);
       const abbr=U?U.abbr:abbr3(nm,_abbrUsed);
       teams.push({id:_sId++,name:nm,city,cnty:cnty==null?null:cnty,mascot:msc,cls:c,dIdx:d,abbr,c1,c2,prestige:rng(1,5),wins:0,losses:0,isP:false,offS:_xPick(OFFP),defS:pick(DEF_SCH),
         fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1});}
