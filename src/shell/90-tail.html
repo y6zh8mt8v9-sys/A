@@ -1,0 +1,28 @@
+</script>
+<script>(function(){
+const K=["trophy", "medal", "cap", "cross", "clip", "football", "flame", "bulb", "check", "x", "up", "down", "bars", "snow", "dumbbell", "arrup", "arrdn", "warn", "scissors", "cal", "plus", "bolt", "star", "sun", "pencil", "shield", "save", "gear", "news", "building", "folder", "tie", "palette", "person", "people", "shuffle", "signal", "ruler", "globe", "swords", "ball", "note", "clapper", "gamepad", "zzz", "cupcake", "pan", "car", "bike", "swim", "boot", "hook", "skate", "bow", "chess", "case", "heart", "coin", "leaf", "book", "dot", "search", "pin"],NS='http://www.w3.org/2000/svg',RE=/[\ue000-\ue0ff]/,RG=/[\ue000-\ue0ff]/g;
+const strip=t=>t.replace(RG,'').replace(/^\s+/,'');
+function icon(ch){const k=K[ch.charCodeAt(0)-0xE000];const s=document.createElementNS(NS,'svg');s.setAttribute('class','gi');s.setAttribute('aria-hidden','true');if(k){const u=document.createElementNS(NS,'use');u.setAttribute('href','#gi-'+k);s.appendChild(u);}return s;}
+function text(n){
+  if(!RE.test(n.nodeValue))return;const p=n.parentNode;if(!p)return;
+  if(/^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE)$/i.test(p.nodeName)||p.namespaceURI===NS){n.nodeValue=n.nodeValue.replace(RG,'');return;}
+  const f=document.createDocumentFragment();
+  n.nodeValue.split(/([\ue000-\ue0ff])/).forEach(x=>{if(!x)return;f.appendChild(x.length===1&&RE.test(x)?icon(x):document.createTextNode(x));});
+  p.replaceChild(f,n);
+}
+function proc(n){
+  if(n.nodeType===3){text(n);if(n.parentNode&&typeof rkDecorate==='function'){try{rkDecorate(n);}catch(e){}}return;}
+  if(n.nodeType!==1||/^(SCRIPT|STYLE)$/i.test(n.nodeName))return;
+  const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT),a=[];while(w.nextNode())a.push(w.currentNode);a.forEach(text);
+  if(typeof rkDecorate==='function'){const w2=document.createTreeWalker(n,NodeFilter.SHOW_TEXT),b=[];while(w2.nextNode())b.push(w2.currentNode);b.forEach(x=>{try{rkDecorate(x);}catch(e){}});}
+  const els=[n].concat([...n.querySelectorAll('[title],[placeholder]')]);
+  els.forEach(e=>['title','placeholder'].forEach(at=>{const v=e.getAttribute&&e.getAttribute(at);if(v&&RE.test(v))e.setAttribute(at,strip(v));}));
+}
+const mo=new MutationObserver(ms=>{mo.disconnect();ms.forEach(m=>{if(m.type==='characterData'){text(m.target);if(m.target.parentNode&&typeof rkDecorate==='function'){try{rkDecorate(m.target);}catch(e){}}}else m.addedNodes.forEach(proc);});watch();});
+function watch(){mo.observe(document.body,{childList:true,subtree:true,characterData:true});}
+['alert','confirm','prompt'].forEach(f=>{const o=window[f];window[f]=function(m,...r){return o.call(window,String(m).replace(RG,''),...r);};});
+proc(document.body);document.title=strip(document.title);watch();
+})();
+</script>
+</body>
+</html>
