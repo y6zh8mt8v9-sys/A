@@ -14920,8 +14920,30 @@ function initAllClsDivs(){
 // ── Team Builder draft: every change is stored right away and re-applied whenever the setup map is rebuilt ──
 const TBD_KEY='gpgm_tbdraft';let _tbSt=null;
 function tbWorldKey(){try{return JSON.stringify(USA.on?{s:USA.cfg.states,h:USA.cfg.home,c:(USA.cfg.custom||[]).map(x=>x.ab)}:'classic');}catch(e){return'classic';}}
-function tbDraft(){let d=null;try{d=JSON.parse(localStorage.getItem(TBD_KEY)||'null');}catch(e){}if(!d||d.k!==tbWorldKey())d={k:tbWorldKey(),ed:{},del:[],add:[]};return d;}
-function tbDraftPut(d){try{localStorage.setItem(TBD_KEY,JSON.stringify(d));return true;}catch(e){tbStatus('Could not save your changes on this device (storage full: try smaller logo images).','var(--rd)');return false;}}
+// where a classification sits on the map: [state, its place among that state's classes, how many the state has]. Team packs and the
+// Team Builder draft carry it, so schools built in one world land in the same state in another (a Michigan pack, then an Indiana pack)
+function clsPort(c){if(!USA.on)return null;const st=clsSt(c),ab=USA.ab[st];if(!ab)return null;const L=clsOfSt(st),i=L.indexOf(c);return i<0?null:[ab,i,L.length];}
+function clsFromPort(p){if(!USA.on||!Array.isArray(p))return null;const st=USA.code[p[0]];if(!st)return null;const L=clsOfSt(st);if(!L.length)return null;
+  return L[clamp(L.length-1-((+p[2]||L.length)-1-(+p[1]||0)),0,L.length-1)];} // lined up from the biggest class down
+// ports for the classes of a pack taken out of a save, worked out from the class codes and the save's home state
+function packPorts(codes,home){const by={};for(const c of codes){let st=null,n=0;if(CLS_ORDER.includes(c)){st='CF';n=100+CLS_ORDER.indexOf(c);}else{const m=/^([A-Z]{2,3})-(\d+)$/.exec(c);if(m){st=m[1];n=+m[2];}}if(st)(by[st]=by[st]||[]).push([n,c]);}
+  const out={};for(const st in by){const ab=st==='CF'?home:st==='COL'?'CO':st;if(!ab)continue;const L=by[st].sort((a,b)=>a[0]-b[0]);L.forEach(([,c],i)=>out[c]=[ab,i,L.length]);}return out;}
+function tbDraftMove(d){const pt=d.pt||{},it=[],sp=x=>{const i=String(x||'').indexOf('|');return i<0?[x,'']:[x.slice(0,i),x.slice(i+1)];};
+  for(const k in d.ed){const[c,r]=sp(k),f=d.ed[k],[tc,td]=sp(f.to);it.push({t:'ed',p:pt[c],r,f,tp:pt[tc],td});}
+  for(const k of d.del){const[c,r]=sp(k);it.push({t:'del',p:pt[c],r});}
+  for(const a of d.add){const[tc,td]=sp(a.to);it.push({t:'add',f:a,tp:pt[tc],td});}
+  for(const x of d.park||[])it.push(x);
+  const ed={},del=[],add=[],park=[]; // edits for a state this world leaves out are parked and come back with the state
+  for(const x of it){if(x.t==='add'){const n=clsFromPort(x.tp);if(n){x.f.to=n+'|'+x.td;add.push(x.f);}else park.push(x);continue;}
+    const n=clsFromPort(x.p);if(!n){park.push(x);continue;}
+    if(x.t==='del'){del.push(n+'|'+x.r);continue;}
+    const tn=clsFromPort(x.tp);x.f.to=tn?tn+'|'+x.td:undefined;ed[n+'|'+x.r]=x.f;}
+  return{k:tbWorldKey(),ed,del,add,park:park.slice(0,4000)};}
+function tbDraft(){let d=null;try{d=JSON.parse(localStorage.getItem(TBD_KEY)||'null');}catch(e){}
+  if(d&&d.k!==tbWorldKey()&&d.pt&&USA.on){d=tbDraftMove(d);tbDraftPut(d);}
+  if(!d||d.k!==tbWorldKey())d={k:tbWorldKey(),ed:{},del:[],add:[]};return d;}
+function tbDraftPut(d){try{if(USA.on){const pt={},P=c=>{if(c&&!pt[c]){const p=clsPort(c);if(p)pt[c]=p;}};for(const k in d.ed){P(k.split('|')[0]);P(String(d.ed[k].to||'').split('|')[0]);}for(const k of d.del)P(k.split('|')[0]);for(const a of d.add)P(String(a.to||'').split('|')[0]);d.pt=pt;}
+  localStorage.setItem(TBD_KEY,JSON.stringify(d));return true;}catch(e){tbStatus('Could not save your changes on this device (storage full: try smaller logo images).','var(--rd)');return false;}}
 function tbOk(t){return t._ok||(t._ok=(t.cls||'')+'|'+t.name);}
 function tbFields(t){const f={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};for(const k of['c3','logoKey','mash','offS','defS'])if(t[k])f[k]=t[k];return f;}
 function tbRecord(t,op){const d=tbDraft();
@@ -14956,6 +14978,19 @@ window.tbDraftClear=function(){if(!confirm('Undo every Team Builder change and g
   _allClsDivs=null;try{_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);}catch(e){}initCountyMap();tbTab('browse');tbStatus('Team Builder changes cleared.','var(--gd)');};
 function tbStCur(){return _tbSt||clsSt(_tbCls)||'CF';}
 window.tbSetSt=function(st){_tbSt=st;_tbCls=clsOfSt(st)[0];tbTab('browse');};
+// any school in the same state can join this division, whatever classification it was in (a conference that mixes classes)
+let _tbPullTo=null;
+window.tbPull=function(dIdx){_tbPullTo={cls:_tbCls,dIdx};const el=document.getElementById('tb-find');if(!el)return;const dv=tbGetDivs(_tbCls)[dIdx];
+  el.innerHTML=`<div style="padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:6px"><div style="font-size:12px;margin-bottom:6px">Bring a school from anywhere in ${stName(tbStCur())} into <b>${dv?dv.name:'this division'}</b>. It plays its league games there from now on.</div>
+  <input id="tb-pull-q" placeholder="School, mascot or city" aria-label="Find a school to bring in" oninput="tbPullFind(this.value)" style="width:100%;padding:5px 8px"><div id="tb-pull-r" style="margin-top:6px"></div>
+  <button class="bgh bxs" style="margin-top:6px" onclick="_tbPullTo=null;document.getElementById('tb-find').innerHTML=''">Close</button></div>`;
+  try{el.scrollIntoView({block:'nearest'});document.getElementById('tb-pull-q').focus();}catch(e){}};
+window.tbPullFind=function(q){const el=document.getElementById('tb-pull-r'),P=_tbPullTo;if(!el||!P)return;q=String(q||'').trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}const out=[];
+  for(const c of clsOfSt(clsSt(P.cls)))(_allClsDivs[c]||[]).forEach((dd,di)=>dd.teams.forEach((t,ti)=>{if(out.length<30&&!(c===P.cls&&di===P.dIdx)&&(t.name+' '+t.mascot+' '+t.city).toLowerCase().includes(q))out.push([c,di,ti,t,dd.name]);}));
+  el.innerHTML=out.length?out.map(([c,di,ti,t,dn])=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bd)">${sLogo(t,24)}<div style="flex:1;min-width:0;font-size:12px"><b>${t.name} ${t.mascot}</b> <span style="color:var(--mu)">${dn} · ${clsName(c)}</span></div><button class="bgh bxs" onclick="tbBring('${c}',${di},${ti})">Bring here</button></div>`).join(''):'<div style="font-size:12px;color:var(--mu)">No school found.</div>';};
+window.tbBring=function(c,di,ti){const P=_tbPullTo,D=_allClsDivs[c],T=P&&_allClsDivs[P.cls];if(!P||!D||!D[di]||!T||!T[P.dIdx])return;const t=D[di].teams[ti];if(!t)return;
+  tbOk(t);D[di].teams.splice(ti,1);t.cls=P.cls;t.dIdx=P.dIdx;T[P.dIdx].teams.push(t);_tbPullTo=null;tbTab('browse');tbRecord(t,'edit');
+  tbStatus(`${t.name} now plays in ${T[P.dIdx].name}. Saved on this device.`);};
 window.tbSearch=function(q){const el=document.getElementById('tb-find');if(!el)return;q=String(q||'').trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}const out=[];
   for(const[c,dv]of Object.entries(_allClsDivs||{}))dv.forEach((dd,di)=>dd.teams.forEach((t,ti)=>{if(out.length<40&&(t.name+' '+t.mascot+' '+t.city).toLowerCase().includes(q))out.push([c,di,ti,t]);}));
   el.innerHTML=out.length?out.map(([c,di,ti,t])=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bd)">${sLogo(t,24)}<div style="flex:1;min-width:0;font-size:12px"><b>${t.name} ${t.mascot}</b> <span style="color:var(--mu)">${t.city} · ${clsName(c)}</span></div><button class="bgh bxs" onclick="_tbSt=clsSt('${c}');_tbCls='${c}';tbEditTeam(${di},${ti})">Edit</button></div>`).join(''):'<div style="font-size:12px;color:var(--mu)">No school found.</div>';};
@@ -15043,7 +15078,7 @@ function tbRenderBrowse(){
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--bd);">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--ac);text-transform:uppercase;">${div.name}</div>
         <span style="font-size:10px;color:var(--mu)">${div.teams.length} teams</span>
-        <button class="btn bsm bbl" style="margin-left:auto;padding:2px 9px;font-size:10px;" onclick="tbAddToDiv(${dIdx})">+ Add Team</button>
+        <button class="bgh bxs" style="margin-left:auto" onclick="tbPull(${dIdx})">Bring in a school</button><button class="btn bsm bbl" style="padding:2px 9px;font-size:10px;" onclick="tbAddToDiv(${dIdx})">Add a new team</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
         ${div.teams.map((t,tIdx)=>tbTeamCard(t,dIdx,tIdx)).join('')}
@@ -15351,32 +15386,30 @@ function tbRenderExport(){
   if(!_allClsDivs)initAllClsDivs();
   const allTeamsCount=Object.values(_allClsDivs).reduce((s,divs)=>s+divs.reduce((ss,d)=>ss+d.teams.length,0),0);
   const curCls=document.getElementById('s-cls')?.value||'3A';
-  const clsSummary=['1A','2A','3A','4A','5A'].map(cls=>{
-    const divs=_allClsDivs[cls]||[];
-    const tc=divs.reduce((s,d)=>s+d.teams.length,0);
-    return`<div class="dr"><span class="a">${clsL(cls)}${cls===curCls?' ★':''}</span><span style="font-weight:700">${tc} teams · ${divs.length} divisions</span></div>`;
-  }).join('');
+  const clsSummary=ST_ORDER.slice(0,12).map(st=>{const cl=clsOfSt(st),tc=cl.reduce((s,c)=>s+(_allClsDivs[c]||[]).reduce((ss,d)=>ss+d.teams.length,0),0);
+    return`<div class="dr"><span class="a">${stName(st)}${cl.includes(curCls)?' ★':''}</span><span style="font-weight:700">${tc} teams · ${cl.length} classification${cl.length===1?'':'s'}</span></div>`;
+  }).join('')+(ST_ORDER.length>12?`<div class="dr"><span class="a">And ${ST_ORDER.length-12} more state${ST_ORDER.length-12===1?'':'s'}</span><span></span></div>`:'');
   return`<div style="max-width:560px;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;text-transform:uppercase;"> Export Team Pack</div>
     <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">
-      Export all teams for <strong>all classifications (1A–5A)</strong>, division names, and logos as a <strong>.json</strong> file. Load it back on any future save using <strong>Import Teams</strong>. ★ marks your current game classification.
+      Save every school in this world (each state, classification, division name and logo) as a <strong>.json</strong> file. ★ marks the state you play in.
     </p>
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:12px 16px;margin-bottom:14px;">
       ${clsSummary}
       <div class="dr"><span class="a">Total Teams</span><span style="font-weight:700;color:var(--gn)">${allTeamsCount}</span></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-      <button class="btn bgn" onclick="tbExportPack()" style="flex:1;min-width:140px;"> Export All Classes</button>
+      <button class="btn bgn" onclick="tbExportPack()" style="flex:1;min-width:140px;"> Export all schools</button>
       <button class="btn bbl" onclick="tbExportCSV()" style="flex:1;min-width:140px;"> Export CSV (current class)</button>
     </div>
     <div style="border-top:1px solid var(--bd);padding-top:16px;">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--ac);margin-bottom:6px;text-transform:uppercase;"> Import Team Pack</div>
       <p style="font-size:12px;color:var(--mu);margin-bottom:10px;">
-        Load a previously exported <strong>.json</strong> team pack. This will <strong>restore all teams and divisions</strong> for every classification found in the file. Division names, colors, and logos are all restored.
+        Schools load into the same state they were built in, and the other states stay as they are. That means you can stack packs: load a Michigan pack, then an Indiana pack, and play with both. Pick those states in League Setup first.
       </p>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <button class="btn" onclick="tbImportFromTab()" style="flex:1;min-width:140px;"> Load Team Pack (.json)</button>
-        <span style="font-size:11px;color:var(--mu);">Restores all classifications from the imported pack. To take the teams out of a career, use <b>Export teams</b> on that save in Load Game, then load the file here.</span>
+        <span style="font-size:11px;color:var(--mu);">To take the teams out of a career, use <b>Export teams</b> on that save in Load Game, then load the file here.</span>
       </div>
     </div>
   </div>`;
@@ -15384,36 +15417,14 @@ function tbRenderExport(){
 
 function tbExportPack(){
   if(!_allClsDivs)initAllClsDivs();
-  const curCls=document.getElementById('s-cls')?.value||'3A';
-  // Build a pack with all classifications
-  const pack={
-    type:'gridiron_team_pack',
-    v:2,
-    cls:curCls, // player's current game class (for backward compat)
-    exportDate:new Date().toISOString().slice(0,10),
-    allClassifications:{}
-  };
-  for(const cls of ['1A','2A','3A','4A','5A']){
-    const divs=_allClsDivs[cls]||[];
-    pack.allClassifications[cls]={
-      divisions:divs.map(div=>({
-        name:div.name,
-        teams:div.teams.map(t=>({
-          name:t.name,mascot:t.mascot,city:t.city,
-          c1:t.c1,c2:t.c2,abbr:t.abbr,
-          prestige:t.prestige,tier:t.tier||'avg',
-          offS:t.offS,defS:t.defS,
-          customLogo:t.customLogo||null
-        }))
-      }))
-    };
-  }
-  const json=JSON.stringify(pack,null,2);
-  _fileSave(`gridiron_teams_all_${pack.exportDate}.json`,json);
-  const totalExported=Object.values(_allClsDivs).reduce((s,divs)=>s+divs.reduce((ss,d)=>ss+d.teams.length,0),0);
-  tbStatus(`✓ Exported all ${totalExported} teams (1A–5A)`);
+  const T=t=>{const o={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,tier:t.tier||'avg',offS:t.offS,defS:t.defS};for(const k of['c3','logoKey','mash','customLogo'])if(t[k])o[k]=t[k];return o;};
+  const L={},ports={};for(const[c,dv]of Object.entries(_allClsDivs)){if(!dv||c==='INTL'||c==='OOS')continue;L[c]={divisions:dv.map(d=>({name:d.name,teams:d.teams.filter(t=>t&&!t.intl).map(T)}))};const p=clsPort(c);if(p)ports[c]=p;}
+  const pack={type:'gridiron_team_pack',v:3,app:'Gridiron 27',cls:document.getElementById('s-cls')?.value||'3A',exportDate:new Date().toISOString().slice(0,10),allClassifications:L,
+    geo:USA.on?{mode:'usa',home:USA.home}:{mode:'classic'},ports:USA.on?ports:undefined};
+  _fileSave(`gridiron_teams_all_${pack.exportDate}.json`,JSON.stringify(pack));
+  const n=Object.values(L).reduce((s,c)=>s+c.divisions.reduce((ss,d)=>ss+d.teams.length,0),0);
+  tbStatus(`Exported ${n} teams from ${USA.on?ST_ORDER.length+' state'+(ST_ORDER.length===1?'':'s'):'every classification'}.`);
 }
-
 function tbExportCSV(){
   if(!_allClsDivs)initAllClsDivs();
   const cls=_tbCls||document.getElementById('s-cls')?.value||'3A';
@@ -15429,11 +15440,14 @@ function tbExportCSV(){
   tbStatus(`✓ CSV exported (${cls})`);
 }
 
-function tbImportV3(pack){if(!_allClsDivs)initAllClsDivs();const d=tbDraft();let ed=0,ad=0,dl=0,same=0;const miss=[];
+function tbImportV3(pack){if(!_allClsDivs)initAllClsDivs();const d=tbDraft();let ed=0,ad=0,dl=0,same=0;const miss=[],used=new Set();
+  const AC=pack.allClassifications||{},usa=pack.geo&&pack.geo.mode==='usa',ports=usa?(pack.ports&&typeof pack.ports==='object'?pack.ports:packPorts(Object.keys(AC),String(pack.geo.home||''))):null;
+  const target=c=>{if(ports&&USA.on){const p=ports[c];return p?clsFromPort(p):null;}return c;};
+  const missName=c=>{const p=ports&&ports[c];return p?((USA.X&&USA.X.st&&USA.X.st[p[0]]&&USA.X.st[p[0]].name)||p[0]):clsName(c);};
   const F=(t,c,di)=>{const f={name:wsClean(t.name),mascot:wsClean(t.mascot),city:wsClean(t.city),abbr:String(t.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:t.c1,c2:t.c2,prestige:clamp(Math.round(+t.prestige)||3,1,5),customLogo:t.customLogo||null,to:c+'|'+di};
     for(const k of['c3','logoKey','mash','offS','defS'])if(t[k])f[k]=t[k];return f;};
-  for(const[c,cd]of Object.entries(pack.allClassifications||{})){const D=_allClsDivs[c];if(!D){miss.push(c);continue;}
-    (cd.divisions||[]).forEach((dv,di)=>{const T=D[di];if(!T)return;if(dv.name)T.name=dv.name;const cur=T.teams.slice(),tl=(dv.teams||[]).filter(t=>t&&t.name);
+  for(const[c0,cd]of Object.entries(AC)){const c=target(c0),D=c&&_allClsDivs[c];if(!D||used.has(c)){const m=missName(c0);if(!miss.includes(m))miss.push(m);continue;}used.add(c);
+    (cd.divisions||[]).forEach((dv,d0)=>{const over=d0>=D.length,di=over?D.length-1:d0,T=D[di];if(!T)return;if(dv.name&&!over)T.name=wsClean(dv.name)||T.name;const cur=over?[]:T.teams.slice(),tl=(dv.teams||[]).filter(t=>t&&t.name);
       tl.forEach((t,ti)=>{const f=F(t,c,di);const x=cur[ti];if(x&&['name','mascot','city','c1','c2'].every(k=>(x[k]||'')===(f[k]||''))&&!f.customLogo&&!f.logoKey&&!f.mash&&!f.c3){same++;return;}if(x){const ok=tbOk(x);Object.assign(x,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr||x.abbr,c1:f.c1||x.c1,c2:f.c2||x.c2,prestige:f.prestige,customLogo:f.customLogo});for(const k of['c3','logoKey','mash','offS','defS'])if(f[k])x[k]=f[k];
           const a=d.add.find(z=>z.ok===ok);if(a)Object.assign(a,f);else d.ed[ok]=f;ed++;}
         else{const ok='add|'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);d.add.push(Object.assign({ok},f));T.teams.push({id:_sId++,_ok:ok,name:f.name,mascot:f.mascot,city:f.city,cls:c,dIdx:di,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,wins:0,losses:0,isP:false,offS:f.offS||pick(OFF_SCH),defS:f.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:f.customLogo,logoKey:f.logoKey,mash:f.mash,c3:f.c3});ad++;}});
@@ -15441,7 +15455,7 @@ function tbImportV3(pack){if(!_allClsDivs)initAllClsDivs();const d=tbDraft();let
   tbDraftPut(d);let col='';
   if(pack.colleges||pack.colMeta||pack.pro){try{const W=Object.assign({},worldLoad());if(pack.colleges)W.colleges=pack.colleges;if(pack.colMeta)W.colMeta=pack.colMeta;if(pack.pro)W.pro=pack.pro;const S=worldSanitize(W);W.colleges=S.colleges;W.colMeta=S.colMeta;W.pro=S.pro;worldStore(W);worldApply(W);col=' Colleges and pro teams are in your League Setup too.';}catch(e){console.error('college import',e);}}
   try{const dsel=document.getElementById('s-div');if(dsel&&_setupDivs)onDiv();}catch(e){}
-  tbStatus(`✓ ${ed} teams updated${same?` (${same} already matched)`:''}${ad?`, ${ad} added`:''}${dl?`, ${dl} removed`:''}.${miss.length?` ${miss.length} classification${miss.length>1?'s':''} from that save are not in this world (pick the same states to bring them in).`:''}${col} Your next career uses them.`);
+  tbStatus(`✓ ${ed} teams updated${same?` (${same} already matched)`:''}${ad?`, ${ad} added`:''}${dl?`, ${dl} removed`:''}.${miss.length?` Not in this world: ${miss.slice(0,6).join(', ')}${miss.length>6?' and more':''} (add those states in League Setup, then load the file again).`:''}${col} Your next career uses them.`);
   try{tbTab('browse');}catch(e){}}
 function tbImportFromTab(){
   const inp=document.createElement('input');inp.type='file';inp.accept='.json';
@@ -21430,7 +21444,7 @@ function setRoute(e,name,out,col){
 }
 const RCOL=['#ffd23f','#4fd1ff','#ff7ad9','#b6ff6a','#ff9f43'];
 function setupScrimmage(offCall,defCall){
-  G.lastPos={};for(const e of G.ents)if(e.pl)G.lastPos[e.pl.id]=[e.x,e.y];
+  G.dAdj=null;G.lastPos={};for(const e of G.ents)if(e.pl)G.lastPos[e.pl.id]=[e.x,e.y];
   const _r=setupScrimmage0(offCall,defCall);if(SEVENS())gpSevensSetup();else if(GP&&GP.fmt&&GP.fmt<11)gpSmallSetup(GP.fmt);gpAfterSetup();return _r;
 }
 /* ===================== v2.16 7-on-7: the summer passing league ===================== */
@@ -21748,7 +21762,11 @@ function eyeDrift(z,e){
 }
 function coverBrain(e){
   const ly=G.linesW.los,C=e.cover,PD=(G.play&&G.play.off&&G.play.off.data)||{};
-  if(!C||C.type==='rush'||C.type==='blitz')return desire(e,G.qb.x,G.qb.y,e.spd);
+  if(!C||C.type==='rush'||C.type==='blitz'){const A=G.dAdj;
+    // contain: the two edge rushers keep the quarterback inside them instead of running past him
+    if(A&&A.con&&e.role==='DL'&&Math.abs(e.hx-CX)>4){const sd=Math.sign(e.hx-CX);return desire(e,G.qb.x+sd*2.4,Math.max(G.qb.y,ly-1.5),e.spd);}
+    return desire(e,G.qb.x,G.qb.y,e.spd);}
+  if(C.type==='spy')return desire(e,clamp(G.qb.x,CX-9,CX+9),ly+4.5,e.spd*0.95); // mirror the quarterback from 4-5 yards
   if(PD.pa&&G.t<0.75&&(e.role==='LB'||(e.role==='S'&&C.type==='zone'&&!C.deep)))return desire(e,lerp(e.x,G.rb.x,0.4),ly+2,e.spd*0.8);
   if(C.kind==='robber'){
     // sit in the middle hole, read the quarterback and jump crossers
@@ -21814,7 +21832,7 @@ function defBrain(e){
     if(_os&&(e.role==='DL'||(e.cover&&(e.cover.type==='rush'||e.cover.type==='blitz')))&&G.t<0.75&&!e.engWith)return desire(e,e.x+(e.x-CX)*0.05,e.y-2.2*attackDir(G.carrier),e.spd*0.9);
     const _jet=G.play.off&&G.play.off.data&&(G.play.off.data.jet||G.play.off.data.touch);
     const reading=G.play.kind==='scrimmage'&&(G.play.off.kind==='run'||_jet)&&G.t<e.read+(_os&&e.role!=='DL'?0.6:0)+(_jet&&e.role!=='DL'?0.25:0)&&e.cover&&e.cover.type!=='rush'&&e.cover.type!=='blitz';
-    if(gpScrambling()&&e.cover&&e.cover.type!=='rush'&&e.cover.type!=='blitz'){if(e.bite==null)e.bite=gpBite(e);if(!e.bite&&dist(e,G.carrier)>3.5)return coverBrain(e);}
+    if(gpScrambling()&&e.cover&&e.cover.type!=='rush'&&e.cover.type!=='blitz'){if(e.bite==null)e.bite=e.cover.type==='spy'||gpBite(e);if(!e.bite&&dist(e,G.carrier)>3.5)return coverBrain(e);}
     return reading?coverBrain(e):pursuit(e,G.carrier);
   }
   if(st==='air'){
@@ -21897,8 +21915,9 @@ function snapScrimmage(){
     G.rb.block=G.rb.route===null||(Math.random()<(P.def.id==='C0'||P.def.id==='FZ'?0.55:0.25)&&G.rb.route&&G.rb.route.name==='check');
     if(G.rb.block)G.rb.route=null;
     G.recv=[G.X,G.Z,G.SL,G.te,G.rb].filter(e=>e&&e.route&&!e.block&&G.ents.includes(e));
-    for(const d of G.ents)if(d.press&&d.cover&&d.cover.type==='man'&&dist(d,d.cover.man)<2.2){
-      const r=d.cover.man;if(Math.random()<clamp(((r.pl?(r.pl.rte?(r.pl.agi+r.pl.rte)/2:r.pl.agi):75)-(d.pl.prs||d.pl.cov))*0.02+0.25,0.05,0.7)){d.slip=0.35;}else r.jam=rnd(0.15,0.4);}
+    for(const d of G.ents){if(!d.press||!d.cover||d.side!=='d')continue;let r=d.cover.type==='man'?d.cover.man:null;
+      if(!r&&d.cover.type==='zone'){let bd=2.2;for(const o of G.recv){const k=dist(d,o);if(k<bd){bd=k;r=o;}}}
+      if(!r||dist(d,r)>=2.2)continue;if(Math.random()<clamp(((r.pl?(r.pl.rte?(r.pl.agi+r.pl.rte)/2:r.pl.agi):75)-(d.pl.prs||d.pl.cov))*0.02+0.25,0.05,0.7)){d.slip=0.35;}else r.jam=rnd(0.15,0.4);}
     if(O.data&&O.data.screen)for(const d of G.ents)if(d.role==='DL')d.engDur=rnd(0.5,0.9);
     if(Math.random()<0.022)G.pendingFoul={t:rnd(1.2,2.6),team:G.offTeam,kind:'Holding',yds:10};
     else if(Math.random()<0.01)G.pendingFoul={t:rnd(1.0,2.2),team:1-G.offTeam,kind:'Defensive holding',yds:10,afd:true};
@@ -23359,7 +23378,9 @@ function setTray(mode){
       G.hint=me?`Coach's call: ${(G.pbp&&G.pbp.call)||'—'}. You are #${me.pl.num}, the ringed player${uOff&&!pcAIQB()?'. Snap when ready.':'. The ball is snapped for you.'}`:'Coach has you on the sideline for this play.';
     }else if(P.kind==='scrimmage'){
       if(uOff){btn(box,'Snap','go',doSnap,'enter');if(!ON&&!G.conv)btn(box,'Audible','alt',gpPlayAudOpen);G.hint='Routes and names show before the snap. Tap Snap when ready, or Audible to change the play.';}
-      else{btn(box,'Switch player','alt',switchUser);G.hint=ON?'Tap a linebacker or defensive back to control him. Your opponent snaps the ball.':'Tap a linebacker or defensive back to control him. The offense will snap soon.';}
+      else{btn(box,'Switch player','alt',switchUser);
+        if(gpDAdjOK()){const A=G.dAdj||{};btn(box,DADJ_COV[A.cov||0],A.cov?'go':'alt',()=>gpDAdj('cov'),'v');btn(box,A.spy?'QB spy: on':'QB spy: off',A.spy?'go':'alt',()=>gpDAdj('spy'),'y');btn(box,A.con?'Contain: on':'Contain: off',A.con?'go':'alt',()=>gpDAdj('con'),'n');}
+        G.hint=ON?'Tap a linebacker or defensive back to control him. Your opponent snaps the ball.':'Tap a linebacker or defensive back to control him. The offense will snap soon.';}
       if(G.to[G.me]>0)btn(box,`Timeout (${G.to[G.me]})`,'alt',()=>{if(callTimeout(G.me))setTray('presnap');},'t');
     }else if(P.fake&&!isAI(G.me)&&(P.kind==='punt'?P.puntTeam:G.offTeam)===G.me){btn(box,'Snap','go',doSnap,'enter');G.hintS='Fake! Snap it: your '+(P.kind==='punt'?'punter':'holder')+' keeps the ball.';}
     else if(G.meter){G.hint='Tap the field or press Space to stop the meter.';}
@@ -23423,6 +23444,22 @@ function switchUser(){
   if(cur&&cur!==nx){cur.idle=0;}
   G.uctl=nx;if(!live||['LB','CB','NB','S'].includes(nx.role)){G.uSlot=nx.slot;G.uSlotT[G.act]=nx.slot;}setCtl();
 }
+/* the user's pre-snap defensive adjustments: press or soft corners, a linebacker spying the quarterback, contain on the edges.
+   They last for one play. */
+function gpDAdjOK(){return!!(G.play&&G.play.kind==='scrimmage'&&G.phase==='presnap'&&!G.client&&!pcOn()&&G.offTeam!==G.me&&!isAI(G.me)&&!SEVENS()&&G.ents.some(d=>d.side==='d'&&d.role==='LB'));}
+function gpDAdj(k){if(!gpDAdjOK())return;const A=G.dAdj=G.dAdj||{cov:0,spy:0,con:0};
+  if(k==='cov')A.cov=(A.cov+1)%3;else A[k]=A[k]?0:1;gpDAdjApply();setTray('presnap');}
+function gpDAdjApply(){const A=G.dAdj;if(!A)return;const ly=G.linesW.los;
+  for(const d of G.ents){if(d.side!=='d'||!d.pl||!d.cover)continue;
+    if(!d._adj0)d._adj0={y:d.hy,press:d.press,cush0:d.cush0,cover:d.cover};
+    const o=d._adj0;d.press=o.press;d.cush0=o.cush0;d.cover=o.cover;let y=o.y;
+    if((d.role==='CB'||d.role==='NB')&&o.cover.type!=='blitz'){
+      if(A.cov===1){d.press=true;y=ly+1.4;d.cush0=1.2;}
+      else if(A.cov===2){d.press=false;y=Math.max(o.y,ly+8);d.cush0=Math.max(o.cush0||1.5,y-ly);}}
+    d.y=d.hy=Math.min(119,y);}
+  if(A.spy){const lb=G.ents.filter(d=>d.side==='d'&&d.role==='LB'&&d._adj0&&d._adj0.cover.type!=='blitz').sort((a,b)=>Math.abs(a.x-CX)-Math.abs(b.x-CX))[0];
+    if(lb){lb.cover={type:'spy'};lb.press=false;lb.y=lb.hy=ly+4.5;}}}
+const DADJ_COV=['Coverage: normal','Coverage: press','Coverage: soft'];
 function userTackle(){
   if(G.client){olCmd('tackle');return;}
   const u=G.uctl,c=G.carrier;if(!u||u.down||u.lunge>0||!c||c.side===u.side)return;
@@ -24943,6 +24980,7 @@ addEventListener('keydown',ev=>{
   if(G.paused)return;
   if(G.celebPick&&G.celebPick.team===G.me&&!G.celebPick.celeb&&/^[0-9]$/.test(k)){const c=TD_CELEBS[(+k||10)-1];if(c){startCeleb(G.celebPick,c[0]);setTray('dead');ev.preventDefault();return;}}
   if(k==='t'&&G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.to[G.me]>0&&!isAI(G.me)){if(callTimeout(G.me))setTray('presnap');return;}
+  if((k==='v'||k==='y'||k==='n')&&gpDAdjOK()){gpDAdj(k==='v'?'cov':k==='y'?'spy':'con');return;}
   if(KB.wait){return;}
   if(k==='b'&&pcOn()){pcCallBall();ev.preventDefault();return;}
   if(G.phase==='live'&&passingUser()){if(/^[1-5]$/.test(k)&&gpKeyThrow(+k-1)){ev.preventDefault();return;}if(k===kb('scramble')){scramble();ev.preventDefault();return;}
