@@ -964,7 +964,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
   <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:1200px;gap:10px;padding:16px;">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;">
       <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;text-transform:uppercase;letter-spacing:2px;margin:0"><span class="r">GRIDIRON</span>&nbsp;<span class="b">27</span></h1>
-      <p style="color:var(--mu);font-size:13px;margin:0">Build a dynasty. Develop players. Win State.</p>
+      <p style="color:var(--mu);font-size:13px;margin:0">Pick your states, take a job offer from the map and build your program.</p>
     </div>
     <div style="display:flex;gap:16px;width:100%;flex-wrap:wrap;justify-content:center;align-items:flex-start;">
       <!-- LEFT: County Map -->
@@ -1016,6 +1016,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
         <div class="sbox" style="width:100%;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div style="flex:1;min-width:160px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;color:var(--mu)">Your World</div><div id="usa-info" style="font-size:13px;margin-top:2px">Real USA</div></div>
           <button class="btn" onclick="usaPickOpen()">Choose states</button>
+          <button class="bgh bsm" onclick="showTutorial();setTimeout(()=>{const i=TUT_PAGES.findIndex(p=>p.tab==='States &amp; conferences'||p.tab==='States & conferences');if(i>=0)goTutTab(i);},50)">How it works</button>
         </div>
         <!-- v2.14 Player Career: create your own player and follow him through high school, college and the pros -->
         <div class="sbox" style="width:100%;padding:14px 16px;" id="pc-box">
@@ -15278,7 +15279,7 @@ function tbEditTeam(dIdx,tIdx){
   tbOk(t);const allClsOptions=clsOfSt(clsSt(_tbCls)).map(cls=>`<optgroup label="${clsName(cls)}">${(tbGetDivs(cls)||[]).map((d,i)=>`<option value="${cls}|${i}"${cls===_tbCls&&i===dIdx?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</optgroup>`).join('');
   // Set active tab to browse context but show edit form inline
   body.innerHTML=`<div style="max-width:520px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;text-transform:uppercase;"> Edit team: ${t.name} ${t.mascot} <span style="color:var(--te)">[${_tbCls}]</span></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;text-transform:uppercase;"> Edit team: ${t.name} ${t.mascot} <span style="color:var(--te)">(${clsName(_tbCls)})</span></div>
     <div class="g2" style="gap:10px;margin-bottom:10px;">
       <div class="fg"><label>School Name</label><input class="ei" id="tb-edit-name" value="${t.name}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-edit-mascot" value="${t.mascot}" oninput="tbPreviewLogo('edit')"></div>
@@ -17900,17 +17901,18 @@ const TUT_PAGES=[
       <li><strong>Colleges</strong>: every college has a mascot, colors and a logo. Edit any of them (name, mascot, colors, logo icon, uploaded logo, state, prestige, conference) from its profile or in League Setup.</li>
     </ul>
   `},
-  {tab:'New this update',icon:'',title:'Small Schools, Awards, Media and Coaching Jobs',body:`
+  {tab:'New this update',icon:'',title:'Combined states, Huddle, defense adjustments and more',body:`
     <ul>
-      <li><strong>Six-man and eight-man</strong>: classes like Texas 1A Six-Man really play six (or eight, or nine) a side on Game Day, and they only schedule teams that play the same way. Move up a class and you switch to that class's format (8-man or 11-man) and can play everyone in it again. Your home state keeps all of its real classes.</li>
-      <li><strong>Awards</strong>: Player of the Week and Play of the Week every week; state and national Player of the Year and Freshman of the Year for every position, not just quarterbacks. Big games can bring a postgame interview.</li>
-      <li><strong>Media</strong> (League → Media): PrepWire 365 rankings, The Rival Board top 15 and Friday Night Insider awards.</li>
-      <li><strong>Showcase your players</strong> (top of Recruiting): host your own combine and invite college staffs, or invite up to 3 coaches to watch your next game.</li>
-      <li><strong>Coaching jobs</strong>: head coach, offensive coordinator and defensive coordinator offers. Schools you created or edited call too. As a coordinator you only call your side of the ball.</li>
-      <li><strong>Rivalry week</strong>: rivalry trophies with a series record; winning lifts morale, prestige and boosters, losing hurts.</li>
-      <li><strong>State final</strong>: played at the state's big college stadium (a neutral site).</li>
-      <li><strong>Game Day</strong>: tipped passes can be caught, fewer cheap penalties, real audibles (Audible before the snap: change the pass or switch to a run), max QB–WR chemistry gets you the ball as soon as you call for it, corners celebrate breakups and picks, a small scorebug in Player Career, and 2 players on one device (Free Practice → 2 players).</li>
-      <li><strong>Player Career</strong>: in the playoffs you still play only your own player. Drives you aren't on the field for are simulated without crediting you stats.</li>
+      <li><strong>Combine states</strong>: team packs remember which state each school belongs to. Load a Michigan pack and an Indiana pack into one world and both stay (see States &amp; conferences).</li>
+      <li><strong>Mixed conferences</strong>: <b>Bring in a school</b> in the Team Builder puts any school in the state into a division, whatever its classification.</li>
+      <li><strong>Defense</strong>: before the snap pick press or soft coverage, a QB spy and contain on the edges (keys V, Y and N on a keyboard).</li>
+      <li><strong>Player Career</strong>: playing time follows coach trust, so a trusted backup plays most series instead of being benched at random. Career linebackers keep running their assignment on a blitz until you move them. Receivers can tap <b>Flip side</b> before the snap.</li>
+      <li><strong>Huddle</strong>: a social feed for your player career. Big games, awards, offers and your commitment get posts and followers, and followers raise your NIL value.</li>
+      <li><strong>Celebrations</strong>: ten new touchdown celebrations (shoulder rock, bow and arrow, moonwalk, the worm and more). Tap <b>More celebrations</b> for the second page.</li>
+      <li><strong>Looks</strong>: new hairstyles, including lineups, waves and cornrow styles.</li>
+      <li><strong>Diving catches</strong> now end on the ground.</li>
+      <li><strong>Crashes</strong>: if the game closed unexpectedly you will see a note. <b>Settings, Copy problem report</b> copies details you can send so the problem can be fixed.</li>
+      <li><strong>Easier to read</strong>: team-colored text adjusts to stay readable in dark and light mode, and Privacy policy and Terms of use are on the title screen.</li>
     </ul>
   `},
   {tab:'Offseason',icon:'',title:'Offseason: Training & Development',body:`
@@ -18075,6 +18077,18 @@ const TUT_PAGES=[
     <p><b>Transfer meetings</b>: open another school's player and tap <b>Set up a meeting</b>. Four meetings per season, $1,500 each. Prestige, your record, playing time and the right pitch decide it.</p>
     <p><b>Practice</b>: the JV plays the scout team against your starters and earns practice XP too.</p>
     <p><b>Playbooks</b>: every standard playbook has new plays (shallow cross, bench, double post, play action from the I and split backs, stretch, wham, power read, speed option and more) and four new defenses (Cover 3 Buzz, Cover 1 Spy, Cover 2 Invert, Sim Pressure).</p>
+  `},
+  {tab:'States & conferences',icon:'',title:'Choose your states and build your own conferences',body:`
+    <ol style="padding-left:20px">
+      <li><b>Pick the states.</b> Tap <b>Start New Game</b>, then <b>Choose states</b> under Your World. Tap states on the map or tick them in the list, or use a preset (Every state, The South, Only my home state and more). Set your <b>Home state</b>: it is gold on the map. Dark blue states get full detail (every school has a full roster); the others still play every game, playoff and top prospect. Tap <b>Use these states</b>.</li>
+      <li><b>Open the Team Builder.</b> Tap <b>Teams</b> on the setup screen. Choose a <b>State</b>, then a classification. Every division in it is listed with its schools.</li>
+      <li><b>Make real teams.</b> Tap the pencil on a school to change its name, mascot, city, abbreviation, colors, prestige and logo (upload your own picture). Tap <b>Save changes</b>.</li>
+      <li><b>Build a conference that mixes classifications.</b> On the division you want, tap <b>Bring in a school</b>, search any school in that state and tap <b>Bring here</b>. It plays its league games in that division from now on. You can also use <b>Move to Division</b> while editing a school.</li>
+      <li><b>Add or remove schools.</b> <b>Add a new team</b> creates a school in that division; the x removes one.</li>
+      <li><b>Name and size the divisions.</b> Tap <b>League Setup</b>, open <b>Divisions &amp; sizes</b>, pick the state, set teams and divisions per classification and type the division names, one per line. Tap <b>Save League Setup</b>.</li>
+      <li><b>Combine packs from different states.</b> Pick every state you need first (step 1). Then in the Team Builder open <b>Export / Import</b> and tap <b>Load team pack</b> for each file: a Michigan pack goes into Michigan and an Indiana pack into Indiana, so both stay. <b>Export all schools</b> saves your own work as a file to share.</li>
+    </ol>
+    <div class="tip">Everything you change is saved on this device right away and used for your next career. If you change your states later, your edits for a state you removed are kept and come back when you add it again. <b>Discard my changes</b> in the Team Builder starts over.</div>
   `},
   {tab:'League Setup',icon:'',title:'League Setup and Customizing',body:`
     <p>On the setup screen, <b>League Setup</b> lets you rename every state and county, edit or add colleges at every level, change the pro teams, rename and resize divisions, and set how many players get each star rating and how big recruiting classes are. New careers use your setup; each save keeps the world it started with.</p>
