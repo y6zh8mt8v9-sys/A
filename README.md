@@ -21,13 +21,37 @@ High school football career game with a playable Game Day engine.
    You can run it again safely; it keeps all data. This update adds section 9: the `community_leagues` table and the private
    `community` storage bucket for shared careers. Until you run it, Community Creations → Leagues asks for the update;
    everything else keeps working.
-3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-9`).
+3. Players get the new build the next time they open the game (the offline cache is now `g27-beta-14`).
    The home-screen app also has new Gridiron 27 icons and splash screens; iPhones may keep the old splash until the app
    is removed from the home screen and added again.
+
+## Building from source
+
+`app/index.html` is built from the files in `src/`. Edit those files, then run:
+
+```
+python3 tools/build.py            # writes app/index.html
+python3 tools/build.py --engine   # also writes app/gd_test.html (Game Day engine on its own)
+python3 tools/build.py --check    # tells you if app/index.html is out of date
+```
+
+The build joins the files in the order listed in `src/manifest.txt`. `src/README.md` explains what each folder holds.
 
 ## What's new
 
 ### Latest update
+- **New look, all of it:** every screen was redrawn in one "Friday night" style: deep navy surfaces, chalk text, stadium-lamp amber for numbers, and your team's colors on buttons, tabs and the club bar. Headings use Big Shoulders Display and body text uses Barlow. Text is in sentence case everywhere, and light mode got the same treatment.
+- **Game Day menus** (matchup preview, pause, play calling) use the same style.
+- **Title screen:** a short intro animation (made with GSAP) plays once per visit and is skipped when your device asks for reduced motion.
+- **Team logos:** every school and college logo is now a varsity patch: a shield, roundel, plate or crest in the team's colors with the mascot or monogram inside. They stay readable at small sizes and draw faster on pages with many logos.
+- **PC crashes:**
+  - Replays use about a third of the memory they used to, and the title screen demo keeps fewer clips.
+  - If Game Day hits repeated errors it now recovers and simulates the rest of the game instead of freezing.
+  - Unusual keyboard keys no longer cause errors.
+- **Text clean-up:** leftover emoji-style symbols and dashes were removed from the game's text.
+- **For developers:** the code is now split into small files under `src/` (see Building from source below).
+
+### Previous update
 - **Combine states from different packs:** team packs now record which state each school belongs to. A pack built with Michigan as the home state loads into Michigan in any world, so you can load a Michigan pack and an Indiana pack into one league and keep both. Team Builder edits move with their state when you change your states; edits for a state you remove are kept and come back when you add it again.
 - **Mixed-classification conferences:** Team Builder → a division → Bring in a school puts any school in the state into that division.
 - **Guide:** Help → States & conferences (or How it works next to Choose states) walks through picking states, real teams, custom conferences and loading packs.
@@ -42,7 +66,7 @@ High school football career game with a playable Game Day engine.
 - **PC crashes:** the game notices when it closed unexpectedly, and Settings → Copy problem report copies the details (device, browser, recent errors) to send in.
 - **Readability and trust:** team-colored text stays readable in dark and light mode, Privacy policy and Terms of use are on the title screen, the privacy policy covers storage and outside services, and saves, team packs and online data from other players are cleaned before they are shown.
 
-### Previous update
+### Earlier update
 - **College career (Player Career):** after high school your player goes to the college he signed with.
   - He starts 15 to 30 overall lower (less for the best players and big stat lines), and every college roster is filled with the high school players it signed, rated the same way.
   - Conferences (four power conferences at FBS), 12 games, conference title games, the 12-team playoff and bowls; playoffs at FCS, Division II, Division III, NAIA and junior colleges.
@@ -52,7 +76,7 @@ High school football career game with a playable Game Day engine.
 - **Export teams only:** Load Game → Export teams saves every school, college and pro team of a career without players or progress; Team Builder imports it into a new career.
 - **Fix:** a runner tackled inside the end zone now scores the touchdown.
 
-### Earlier update
+### Older update
 - **Six-man, eight-man and nine-man football:** those classes play that many a side on Game Day and only schedule teams of their own format. Moving up switches to the next class's format (8-man or 11-man) and opens the rest of the class again. The home state now keeps all of its real classes (for example Texas 1A Six-Man), not only five.
 - **Awards:** Player and Play of the Week, state and national Player and Freshman of the Year (every position can win), and postgame interviews.
 - **Media page** with made-up outlets: PrepWire 365, The Rival Board and Friday Night Insider.
@@ -78,7 +102,7 @@ High school football career game with a playable Game Day engine.
   - Smoother startup and menus on PC.
 - **One look everywhere:** every page now uses the dashboard's club bar and tile headers.
 
-### Older update
+### Before that
 - **AI coaches:** go for it on 4th and short (no more punting at 4th and inches), kick field goals in range, and pass when they trail late instead of running.
 - **Game Day:**
   - A stiff arm or juke on a jet sweep no longer sends your runner back to the old sweep path.
@@ -95,7 +119,7 @@ High school football career game with a playable Game Day engine.
 - **New dashboard:** a club bar with your crest, name and a big Continue button, a Year/Week strip, then tiles (Next game, Team management, Training, Standings, Schedule, Recruiting, Seniors, News, Scouting, Top players, Program, League) that open their page. ☰ opens the full menu.
 - **Compact menu:** the Dashboard lists every section with its pages and gold dots for things to do; pages open on their own with a Home button. Settings → Menu layout switches back to the classic tabs.
 
-### Before that
+### Even earlier
 - **New look on the home screen:** Gridiron 27 splash screens, app icons and loading screen (the old ones still said Gridiron Prep GM).
 - **Player Career:**
   - A ring shows where every pass and kick will come down.

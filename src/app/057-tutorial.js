@@ -111,18 +111,14 @@ const TUT_PAGES=[
       <li><strong>Colleges</strong>: every college has a mascot, colors and a logo. Edit any of them (name, mascot, colors, logo icon, uploaded logo, state, prestige, conference) from its profile or in League Setup.</li>
     </ul>
   `},
-  {tab:'New this update',icon:'',title:'Combined states, Huddle, defense adjustments and more',body:`
+  {tab:'New this update',icon:'',title:'A new look, new team logos and fewer crashes',body:`
     <ul>
-      <li><strong>Combine states</strong>: team packs remember which state each school belongs to. Load a Michigan pack and an Indiana pack into one world and both stay (see States &amp; conferences).</li>
-      <li><strong>Mixed conferences</strong>: <b>Bring in a school</b> in the Team Builder puts any school in the state into a division, whatever its classification.</li>
-      <li><strong>Defense</strong>: before the snap pick press or soft coverage, a QB spy and contain on the edges (keys V, Y and N on a keyboard).</li>
-      <li><strong>Player Career</strong>: playing time follows coach trust, so a trusted backup plays most series instead of being benched at random. Career linebackers keep running their assignment on a blitz until you move them. Receivers can tap <b>Flip side</b> before the snap.</li>
-      <li><strong>Huddle</strong>: a social feed for your player career. Big games, awards, offers and your commitment get posts and followers, and followers raise your NIL value.</li>
-      <li><strong>Celebrations</strong>: ten new touchdown celebrations (shoulder rock, bow and arrow, moonwalk, the worm and more). Tap <b>More celebrations</b> for the second page.</li>
-      <li><strong>Looks</strong>: new hairstyles, including lineups, waves and cornrow styles.</li>
-      <li><strong>Diving catches</strong> now end on the ground.</li>
-      <li><strong>Crashes</strong>: if the game closed unexpectedly you will see a note. <b>Settings, Copy problem report</b> copies details you can send so the problem can be fixed.</li>
-      <li><strong>Easier to read</strong>: team-colored text adjusts to stay readable in dark and light mode, and Privacy policy and Terms of use are on the title screen.</li>
+      <li><strong>New look</strong>: every screen uses one Friday night style, with your team's colors on buttons, tabs and the club bar. Light mode got the same treatment.</li>
+      <li><strong>Game Day menus</strong>: the matchup preview, pause menu and play calling match the new style.</li>
+      <li><strong>Team logos</strong>: every school and college has a new patch logo in its colors, with the mascot or a monogram inside. They stay clear at small sizes.</li>
+      <li><strong>Title screen</strong>: a short intro plays once per visit. It is skipped if your device asks for reduced motion.</li>
+      <li><strong>Fewer crashes on PC</strong>: replays use much less memory, and if Game Day runs into repeated errors it now finishes the game by simulation instead of freezing.</li>
+      <li><strong>Earlier this beta</strong>: combined state packs, mixed conferences, defensive adjustments (keys V, Y and N), the Huddle feed, new celebrations and hairstyles.</li>
     </ul>
   `},
   {tab:'Offseason',icon:'',title:'Offseason: Training & Development',body:`

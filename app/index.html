@@ -3017,7 +3017,7 @@ function sLogo(s,sz=28){
   if(!s)return'';
   if(s.customLogo)return`<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><image href="${s.customLogo}" x="0" y="0" width="${sz}" height="${sz}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   if(s.intl&&s.intl!=='US'&&INTL_LOGO[s.id]){const L=intlLogoSvg(s,sz);if(L)return L;}
-  const ck=[s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0,s.logoKey||'',s.mash||''].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
+  const ck=['p1',s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0,s.logoKey||'',s.mash||''].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
   let _st='CF';try{_st=s.cls?clsSt(s.cls):'CF';}catch(e){}_LGcur=_ST_GLYPHS[_st]||null;
   try{return _sLogoBody(s,sz,ck);}finally{_LGcur=null;}
 }
@@ -3053,19 +3053,24 @@ function _sLogoBody(s,sz,ck){
   if(sty==='block')body=_gt(ini,50,92,96,94,c1);
   else if(sty==='outline')body=_gt(ini,50,92,96,94,c1,30)+_gt(ini,50,92,96,94,tc,4);
   else if(sty==='stack')body=_gt(sw1,50,40,24,94,c1,8)+_gt(word||ini,50,84,36,96,c1,9)+`<path d="M8,51 L92,51" stroke="${c1}" stroke-width="5" stroke-linecap="round"/>`;
-  else if(sty==='tag')body=`<g transform="translate(2 0) scale(.8)">${mas}</g>`+_gt(two,78,96,24,36,tc,8);
+  else if(sty==='tag')body=`<g transform="translate(2 0) scale(.8)">${mas}</g>`+_gt(two,78,96,24,36,c1,8);
   else if(sty==='inter'){const g2=_gt(two[1],63,95,70,60,c1);body=_gt(two[0],38,80,82,70,c1)+ol(g2)+g2;}
   else if(sty==='word')body=`<g transform="translate(19 0) scale(.62)">${mas}</g>`+_gt(word,50,98,22,94,c1,8);
   else if(sty==='script')body=`<text class="scr" x="50" y="62" text-anchor="middle" font-size="44" fill="${c1}" textLength="90" lengthAdjust="spacingAndGlyphs" transform="rotate(-7 50 55)">${scr}</text><path d="M10,78 C36,90 68,86 94,66" fill="none" stroke="${c1}" stroke-width="5.5" stroke-linecap="round"/>`;
-  else if(sty==='letter')body=_gt(ini,50,94,104,96,tc)+`<g transform="translate(15 4) scale(.72)">${mas}</g>`;
+  else if(sty==='letter')body=_gt(ini,50,94,104,96,_mx(c2,c1,.3))+`<g transform="translate(15 4) scale(.72)">${mas}</g>`;
   else body=`<g transform="translate(8 7) scale(.84)">${mas}</g>`;
   // v2.16 mascot mashup: a second icon as a badge on the logo
-  if(s.mash&&_LGO[s.mash]){try{const P2=Object.assign({},P,{F:c2,L:_mx(c2,'#ffffff',.42),D:_mx(c2,'#000000',.4),K:_lm(c2)>.45?_mx(c2,'#000000',.7):'#f4f6f8'});body+=`<g transform="translate(56 56) scale(.46)">${_LGO[s.mash](P2,'')}</g>`;}catch(e){}}
+  let badge='';
+  if(s.mash&&_LGO[s.mash]){try{const P2=Object.assign({},P,{F:c2,L:_mx(c2,'#ffffff',.42),D:_mx(c2,'#000000',.4),K:_lm(c2)>.45?_mx(c2,'#000000',.7):'#f4f6f8'});badge=`<circle cx="78" cy="78" r="17" fill="${c1}" stroke="${P.O}" stroke-width="3"/><g transform="translate(66 66) scale(.24)">${_LGO[s.mash](P2,'')}</g>`;}catch(e){}}
   if(rm==='shade')body=body.split(`fill="${c1}"`).join(`fill="url(#${_lgG(c1)})"`);
-  const big=sz>44,id=_lgf(c2,big);
+  // Varsity patch: ink silhouette, team-color band, contrasting field, emblem fitted inside
+  const FR=['M50 4 L90 14 L90 50 C90 74 72 88 50 97 C28 88 10 74 10 50 L10 14 Z','M50 4 A46 46 0 1 1 49.99 4 Z','M22 6 H78 L94 22 V78 L78 94 H22 L6 78 V22 Z','M10 10 H36 L50 4 L64 10 H90 V52 C90 76 72 89 50 97 C28 89 10 76 10 52 Z'];
+  const fi=(h>>>17)%4,fd=FR[fi],cy=fi===0||fi===3?47:50,sIn=small?.88:.85,box=small?62:56;
+  const sc_=(k_)=>`transform="translate(50 50) scale(${k_}) translate(-50 -50)"`;
   const bb=_lgm(body);let tf='';
-  if(bb){const SK={anchor:10,cyclone:11,buck:8,axes:7,wheel:9,swords:9,pirate:7,ram:8,hornet:5,tractor:4,stingray:4,dolphin:3,marlin:3,shark:3};const pad=Math.max(sty==='outline'?15:['block','inter','stack','letter','tag','word'].includes(sty)?4:0,SK[k]||0);const sc=Math.min(1.2,(84-2*pad)/Math.max(bb.width,bb.height,1));tf=`translate(${(50-(bb.x+bb.width/2)*sc).toFixed(2)} ${(50-(bb.y+bb.height/2)*sc).toFixed(2)}) scale(${sc.toFixed(3)})`;}
-  const out=`<svg width="__SZ__" height="__SZ__" viewBox="0 0 100 100" class="lg" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;overflow:visible"><g filter="url(#${id})"><g transform="${tf}">${body}</g></g></svg>`;
+  if(bb){const SK={anchor:10,cyclone:11,buck:8,axes:7,wheel:9,swords:9,pirate:7,ram:8,hornet:5,tractor:4,stingray:4,dolphin:3,marlin:3,shark:3};const pad=Math.max(sty==='outline'?6:0,(SK[k]||0)*.6);const sc=Math.min(1.1,(box-2*pad)/Math.max(bb.width,bb.height,1));tf=`translate(${(50-(bb.x+bb.width/2)*sc).toFixed(2)} ${(cy-(bb.y+bb.height/2)*sc).toFixed(2)}) scale(${sc.toFixed(3)})`;}
+  const frame=`<path d="${fd}" fill="${P.O}" stroke="${P.O}" stroke-width="${small?5:6}" stroke-linejoin="round"/><path d="${fd}" fill="${c1}"/><path d="${fd}" fill="${c2}" ${sc_(sIn)}/>`+(small?'':`<path d="${fd}" fill="none" stroke="${c1}" stroke-width="1.6" ${sc_(sIn-.06)}/>`);
+  const out=`<svg width="__SZ__" height="__SZ__" viewBox="0 0 100 100" class="lg" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;overflow:visible">${frame}<g transform="${tf}">${body}</g>${badge}</svg>`;
   _LGC.set(ck,out);return out.split('__SZ__').join(sz);
 }
 
@@ -17918,18 +17923,14 @@ const TUT_PAGES=[
       <li><strong>Colleges</strong>: every college has a mascot, colors and a logo. Edit any of them (name, mascot, colors, logo icon, uploaded logo, state, prestige, conference) from its profile or in League Setup.</li>
     </ul>
   `},
-  {tab:'New this update',icon:'',title:'Combined states, Huddle, defense adjustments and more',body:`
+  {tab:'New this update',icon:'',title:'A new look, new team logos and fewer crashes',body:`
     <ul>
-      <li><strong>Combine states</strong>: team packs remember which state each school belongs to. Load a Michigan pack and an Indiana pack into one world and both stay (see States &amp; conferences).</li>
-      <li><strong>Mixed conferences</strong>: <b>Bring in a school</b> in the Team Builder puts any school in the state into a division, whatever its classification.</li>
-      <li><strong>Defense</strong>: before the snap pick press or soft coverage, a QB spy and contain on the edges (keys V, Y and N on a keyboard).</li>
-      <li><strong>Player Career</strong>: playing time follows coach trust, so a trusted backup plays most series instead of being benched at random. Career linebackers keep running their assignment on a blitz until you move them. Receivers can tap <b>Flip side</b> before the snap.</li>
-      <li><strong>Huddle</strong>: a social feed for your player career. Big games, awards, offers and your commitment get posts and followers, and followers raise your NIL value.</li>
-      <li><strong>Celebrations</strong>: ten new touchdown celebrations (shoulder rock, bow and arrow, moonwalk, the worm and more). Tap <b>More celebrations</b> for the second page.</li>
-      <li><strong>Looks</strong>: new hairstyles, including lineups, waves and cornrow styles.</li>
-      <li><strong>Diving catches</strong> now end on the ground.</li>
-      <li><strong>Crashes</strong>: if the game closed unexpectedly you will see a note. <b>Settings, Copy problem report</b> copies details you can send so the problem can be fixed.</li>
-      <li><strong>Easier to read</strong>: team-colored text adjusts to stay readable in dark and light mode, and Privacy policy and Terms of use are on the title screen.</li>
+      <li><strong>New look</strong>: every screen uses one Friday night style, with your team's colors on buttons, tabs and the club bar. Light mode got the same treatment.</li>
+      <li><strong>Game Day menus</strong>: the matchup preview, pause menu and play calling match the new style.</li>
+      <li><strong>Team logos</strong>: every school and college has a new patch logo in its colors, with the mascot or a monogram inside. They stay clear at small sizes.</li>
+      <li><strong>Title screen</strong>: a short intro plays once per visit. It is skipped if your device asks for reduced motion.</li>
+      <li><strong>Fewer crashes on PC</strong>: replays use much less memory, and if Game Day runs into repeated errors it now finishes the game by simulation instead of freezing.</li>
+      <li><strong>Earlier this beta</strong>: combined state packs, mixed conferences, defensive adjustments (keys V, Y and N), the Huddle feed, new celebrations and hairstyles.</li>
     </ul>
   `},
   {tab:'Offseason',icon:'',title:'Offseason: Training & Development',body:`
