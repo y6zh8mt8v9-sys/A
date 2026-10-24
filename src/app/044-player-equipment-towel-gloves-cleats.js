@@ -209,6 +209,14 @@ window.jobDecline=function(sid){const J=jobOffersLive();if(!J)return;J.list=J.li
 function teamIsCustom(t){if(!t)return false;if(t.customLogo||t.userEdited)return true;try{const W=G.world&&G.world.tb;if(!W)return false;
   if(!G._custNames){G._custNames=new Set([...Object.values(W.ed||{}).map(v=>v&&v.name),...(W.add||[]).map(v=>v&&v.name)].filter(Boolean));Object.defineProperty(G,'_custNames',{enumerable:false,writable:true,configurable:true,value:G._custNames});}
   return G._custNames.has(t.name);}catch(e){return false;}}
+// ── homecoming: one home game a season, on the rivalry game when it is at home, else a home game near midseason ──
+function hcHome(g){return!!g&&g.type==='regular'&&g.oppId!=null&&!g._empty&&((g.wk|0)+G.myId)%2===0;}
+function hcWk(){if(typeof G==='undefined'||!G||!G.sched)return null;const H=G.hc,started=G.sched.some(g=>g.type==='regular'&&g.result);
+  if(H&&H.yr===G.yr&&started)return H.wk;const R=G.sched.filter(hcHome);
+  const rv=R.find(g=>g.isRivalry||isRivalry(G.myId,g.oppId)),mid=R.filter(g=>g.wk>1).sort((a,b)=>Math.abs(a.wk-5)-Math.abs(b.wk-5))[0]||R[0],g=rv||mid;
+  G.hc={yr:G.yr,wk:g?g.wk:null};return G.hc.wk;}
+function hcIs(wk){return wk!=null&&hcWk()===wk;}
+function hcTag(g){return g&&g.type==='regular'&&hcIs(g.wk)?' <span style="font-size:10px;font-weight:800;color:var(--gd)">Homecoming</span>':'';}
 // ── rivalry week ──
 const RIV_TROPHY=['Old Bell','Iron Skillet','Golden Helmet','Victory Bell','County Cup','Bronze Boot','Little Brown Jug','Rail Spike','Old Oaken Bucket','Silver Saddle','Paint Bucket','Brass Lantern','Steel Spur','Hatchet','Old Anvil','Milk Can'];
 function rivTrophy(oppId){G.rivT=G.rivT||{};const k=Math.min(G.myId,oppId)+'-'+Math.max(G.myId,oppId);if(!G.rivT[k])G.rivT[k]={name:'The '+RIV_TROPHY[(G.myId*7+oppId*13)%RIV_TROPHY.length],w:0,l:0,holder:null};return G.rivT[k];}

@@ -78,6 +78,9 @@ function gdTeam(s,kind,kitOv,opt){
 }
 function gdOppKind(opp,myKind,me){const mj=uniOf(me||myS(),myKind).jersey,h=uniOf(opp,'home').jersey,a=uniOf(opp,'away').jersey;return Math.abs(_gdLum(h)-_gdLum(mj))>=Math.abs(_gdLum(a)-_gdLum(mj))?'home':'away';}
 function gdPickUni(k){window._gdUni=k;document.querySelectorAll('.gd-uni').forEach(b=>b.classList.toggle('on',b.dataset.k===k));}
+// the score bug shows a ranked team's national rank, or its rank in its state classification when not nationally ranked
+function hcLine(){return`<div style="font-size:12px;margin-top:6px;color:var(--gd);font-weight:800;text-align:center">Homecoming week: a packed house, the parade and the court at halftime</div>`;}
+function gdRankOf(s){const k=rkOf(s.id);return k.n&&k.n<=25?k.n:k.c&&k.c<=25?k.c:0;}
 let _gdCtx=null;
 function gdChoose(kind,info,simFn){
   if(ccOn()){notify('Your player is in college now: the high school season plays out in the background.','w');return;}
@@ -89,7 +92,7 @@ function gdChoose(kind,info,simFn){
       <div style="text-align:center">${sLogo(me,64)}<div style="font-weight:800;margin-top:4px">${me.mascot}</div></div>
       <div style="font-weight:900;font-size:22px;color:var(--mu)">VS</div>
       <div style="text-align:center">${sLogo(opp,64)}<div style="font-weight:800;margin-top:4px">${opp.mascot}</div></div></div>
-    ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;if(kind==='po'&&info.slot&&poRoundName(info.slot.playoffRound)==='State Final')return`<div style="font-size:12px;color:var(--gd);font-weight:800;margin:-6px 0 12px">State Final · neutral site · ${stateFinalVenue()}</div>`;if(kind==='reg'&&G.sched[info.idx]&&G.sched[info.idx].isRivalry)return rivalryWeekHtml(opp)+`<div style="height:8px"></div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
+    ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;if(kind==='po'&&info.slot&&poRoundName(info.slot.playoffRound)==='State Final')return`<div style="font-size:12px;color:var(--gd);font-weight:800;margin:-6px 0 12px">State Final · neutral site · ${stateFinalVenue()}</div>`;if(kind==='reg'&&G.sched[info.idx]&&G.sched[info.idx].isRivalry)return rivalryWeekHtml(opp)+(hcIs(G.sched[info.idx].wk)?hcLine():'')+`<div style="height:8px"></div>`;if(kind==='reg'&&G.sched[info.idx]&&hcIs(G.sched[info.idx].wk))return hcLine()+`<div style="height:8px"></div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
     ${(()=>{const w=gdWxFor(kind,info);return w?`<div class="gd-wx">${wxIcon(w,22)}<div><b>${wxLine(w)}</b><div>${wxEffects(w)}</div></div></div>`:'';})()}
     <div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">Your uniform</div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">${[['home','Home'],['away','Away'],['alt','Alternate']].map(([k,l])=>`<button class="gd-uni${(window._gdUni||'home')===k?' on':''}" data-k="${k}" onclick="gdPickUni('${k}')">${uniSvg(uniOf(me,k),(myP()[0]||{}).num,54)}<span>${l}</span></button>`).join('')}</div>
@@ -111,13 +114,16 @@ function gdStart(){
   // team strength on top of individual ratings: every player of the better team gets a bump, the weaker team a drop
   _gdTAdj=Math.round((_o1-_gdAnchor)*0.5+clamp(progEdge()*0.6,-3,3));const _t1=Object.assign(gdTeam(me,mk),{ovr:Math.round(_o1)});
   _gdTAdj=Math.round((_o2-_gdAnchor)*0.5);const _t2=Object.assign(gdTeam(opp,gdOppKind(opp,mk)),{ovr:Math.round(_o2)});_gdTAdj=0;
+  try{_t1.rk=gdRankOf(me);_t2.rk=gdRankOf(opp);}catch(e){}
+  const _mer=(()=>{try{return mercyOn()?35:0;}catch(e){return 0;}})();
   if(G.role==='OC')window._gdMode='off';else if(G.role==='DC')window._gdMode='def';
   const _fmt=ctx.kind==='s7'?11:clsFmt(me.cls||G.cls);
-  window.__GP={mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
+  window.__GP={mercy:_mer,mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
   if(_fmt<11){window.__GP.fmt=_fmt;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">${fmtName(_fmt)[0].toUpperCase()+fmtName(_fmt).slice(1)} football: ${_fmt} players a side</div>`;}
   try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v});window.__GP.neutral=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
   try{if(window.__GP.rival)window.__GP.previewHtml=(window.__GP.previewHtml||'')+rivalryWeekHtml(opp);}catch(e){}
+  try{if(ctx.kind==='reg'&&hcIs(G.sched[ctx.info.idx].wk)){window.__GP.big=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+hcLine();}}catch(e){}
   if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.s7q=G.s7.qn===1?1:2;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
   try{pcGP(ctx);}catch(e){console.error('player career',e);}
   gdLaunch();

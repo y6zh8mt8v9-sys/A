@@ -923,6 +923,33 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 
 /* copyright line on the title screen */
 #title .tt-copy{margin-top:6px;text-align:center;font:500 11px var(--font);color:var(--mute);opacity:.8}
+
+/* playoff bracket: rounds as columns on the field, chalk connectors; scrolls sideways on phones */
+.pob{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.pob-g{display:flex;gap:28px;min-width:max-content}
+.pob-col{display:flex;flex-direction:column;width:186px;flex:0 0 186px}
+.pob-h{font:800 17px/1 var(--hd);color:var(--mu);text-align:center;margin-bottom:8px;white-space:nowrap}
+.pob-b{flex:1;display:flex;flex-direction:column;justify-content:space-around;min-height:calc(var(--pob-n,8) * 70px)}
+.pob-pr{flex:1;display:flex;flex-direction:column;justify-content:space-around;position:relative}
+.pob-pr::after{content:'';position:absolute;right:-15px;top:25%;bottom:25%;border-right:2px solid var(--line2)}
+.pob-m{position:relative;background:var(--s2);border:1px solid var(--line2);border-radius:var(--rad,4px);margin:4px 0}
+.pob-col:not(.pob-ch) .pob-m::after{content:'';position:absolute;right:-15px;top:50%;width:14px;border-top:2px solid var(--line2)}
+.pob-in .pob-m::before{content:'';position:absolute;left:-15px;top:50%;width:14px;border-top:2px solid var(--line2)}
+.pob-t{display:flex;align-items:center;gap:6px;height:30px;padding:0 8px;font-size:12.5px;color:var(--tx);cursor:pointer}
+.pob-t+.pob-t{border-top:1px solid var(--line)}
+.pob-sd{width:16px;flex:0 0 16px;font-size:10.5px;color:var(--mu);text-align:right}
+.pob-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pob-sc{font-weight:800;min-width:18px;text-align:right}
+.pob-w .pob-nm,.pob-w .pob-sc{font-weight:800}.pob-w .pob-sc{color:var(--post)}
+.pob-l{opacity:.55}
+.pob-tbd{color:var(--mu);cursor:default;font-style:italic}
+.pob-me{background:color-mix(in srgb,var(--ac) 22%,transparent);box-shadow:inset 3px 0 0 var(--ac)}
+.pob-me .pob-nm{color:var(--tx);font-weight:800}
+.pob-nx{border-color:var(--ac)}
+.pob-cm{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;text-align:center;background:var(--s1);border:2px solid var(--post)}
+.pob-cm b{font:800 18px/1.05 var(--hd)}.pob-cm small{font-size:11px;color:var(--mu)}
+.pob-cm.pob-me{box-shadow:none;border-color:var(--post)}
+@media (max-width:600px){.pob-col{width:158px;flex-basis:158px}.pob-g{gap:24px}.pob-pr::after,.pob-col:not(.pob-ch) .pob-m::after{right:-13px}.pob-in .pob-m::before{left:-13px}.pob-col:not(.pob-ch) .pob-m::after,.pob-in .pob-m::before{width:12px}}
 </style>
 </head>
 <body>
@@ -1474,6 +1501,7 @@ function renderLeagueRules(){const el=document.getElementById('set-league');if(!
   el.innerHTML=`<div style="font-size:12px;font-weight:800;color:var(--mu);margin:4px 0 8px;letter-spacing:.06em">League rules (this career)</div>`
     +row('Playoff teams',later?`This season keeps ${G.poN} teams; ${R.n} from next season.`:'Teams in your classification\'s state playoffs.',seg('poN',R.n,[[4,'4'],[8,'8'],[16,'16'],[32,'32']]))
     +row('Who qualifies','Division winners first: every division champion is in, then the best records.',seg('poQ',R.q,[['record','Best records'],['div','Division winners first']]))
+    +row('Mercy rule','A 35-point lead in the second half starts a running clock, on Game Day and in simulated games.',seg('mercy',cur.mercy!==false,[[true,'On'],[false,'Off']]))
     +row('Earned progression','On: ratings can\'t be typed in. Players earn them in practice, games, position battles and with SP.',seg('earned',!!cur.earned,[[false,'Off'],[true,'On']]));}
 window.ruleSet=function(k,v){if(typeof G==='undefined'||!G)return;G.rules=G.rules||{};G.rules[k]=v;
   if(k==='poN'&&poApplyNow())notify(`This season's playoffs now take ${v} teams.`);
@@ -5404,14 +5432,16 @@ function gateAfter(opp,kind,wk,my,op){
     const home=kind==='reg'?(((wk|0)+G.myId)%2===0):kind==='po'?((G.wins||0)>=(opp.wins||0)):true;
     if(!home&&kind==='reg')return;
     const cap=stadBase(stadOf(s)).cap,T=TICKET[G.ticket||'normal']||TICKET.normal,gp=(G.wins||0)+(G.losses||0),wp=gp?(G.wins||0)/gp:0.5;
-    const rival=(typeof isRivalry==='function'&&isRivalry(G.myId,opp.id))?0.18:0;
-    let demand=0.42+0.07*((G.prestige||1)-1)+0.3*(wp-0.5)+rival+0.04*((opp.prestige||1)-2)+(kind==='po'?0.3:0)+(kind==='nat'?0.5:0)+T[1];
+    const rival=(typeof isRivalry==='function'&&isRivalry(G.myId,opp.id))?0.18:0,hc=kind==='reg'&&hcIs(wk);
+    let demand=(hc?0.2:0)+0.42+0.07*((G.prestige||1)-1)+0.3*(wp-0.5)+rival+0.04*((opp.prestige||1)-2)+(kind==='po'?0.3:0)+(kind==='nat'?0.5:0)+T[1];
     const att=Math.min(cap,Math.round(cap*clamp(demand,0.12,1)*(0.95+Math.random()*0.1)));
     let rev=Math.round(att*(T[0]+1.5));if(kind==='po')rev=Math.round(rev*0.6);if(kind==='nat')rev=Math.round(rev*0.5);
     G.budget+=rev;
     if(!G.gate||G.gate.yr!==G.yr)G.gate={yr:G.yr,n:0,att:0,rev:0};
     G.gate.n++;G.gate.att+=att;G.gate.rev+=rev;G.gate.last={att,cap,rev,opp:opp.mascot||opp.name,kind};
-    addLog(`<span style="color:var(--gn)">Gate vs ${opp.mascot||opp.name}: ${att.toLocaleString()} fans (${Math.round(att/cap*100)}% full) · +$${rev.toLocaleString()}${kind==='po'?' (playoff share)':kind==='nat'?' (neutral-site share)':''}</span>`);
+    if(hc){const g=G.sched.find(x=>x.type==='regular'&&x.wk===wk),r=g&&g.result?` ${g.result==='W'?'beat':'fell to'} ${opp.name} ${g.my}-${g.opp}`:` hosted ${opp.name}`;
+      try{addNews('myteam',`Homecoming: ${s.mascot}${r}`,`${att.toLocaleString()} fans packed the stands for homecoming week: the parade, the court at halftime and alumni back in town.`);}catch(e){}}
+    addLog(`<span style="color:var(--gn)">${hc?'Homecoming gate':'Gate'} vs ${opp.mascot||opp.name}: ${att.toLocaleString()} fans (${Math.round(att/cap*100)}% full) · +$${rev.toLocaleString()}${kind==='po'?' (playoff share)':kind==='nat'?' (neutral-site share)':''}</span>`);
   }catch(e){console.error('gate',e);}
 }
 function trophySvg(col,big){const w=big?64:46;return`<svg viewBox="0 0 64 72" width="${w}" height="${Math.round(w*72/64)}"><defs><linearGradient id="tg${col.slice(1)}" x1="0" x2="1"><stop offset="0" stop-color="${col}"/><stop offset=".45" stop-color="#fff8dc"/><stop offset="1" stop-color="${col}"/></linearGradient></defs>
@@ -5526,7 +5556,7 @@ function moneyAfterGame(opp,kind,wk){
     const home=kind==='reg'?(((wk|0)+G.myId)%2===0):kind==='po'?((G.wins||0)>=(opp.wins||0)):true;
     const rival=typeof isRivalry==='function'&&isRivalry(G.myId,opp.id);
     finAdd('boost',(pr*500+wp*2200)*(rival?1.4:1)*(kind==='po'?1.5:1)*(0.85+Math.random()*0.3),null);
-    if(home){const cap=stadBase(stadOf(s)).cap;finAdd('merch',cap*(0.18+0.05*pr)*(0.6+wp*0.8)*(rival?1.3:1)*(0.85+Math.random()*0.3),null);}
+    if(home){const cap=stadBase(stadOf(s)).cap;finAdd('merch',cap*(0.18+0.05*pr)*(0.6+wp*0.8)*(rival?1.3:1)*(kind==='reg'&&hcIs(wk)?1.3:1)*(0.85+Math.random()*0.3),null);}
     if(kind==='po'||kind==='nat'||rival)finAdd('tv',kind==='nat'?40000:kind==='po'?6000+pr*1500:2500+pr*700,kind==='po'?'Playoff broadcast rights':kind==='nat'?'National title broadcast':'Rivalry game streaming deal');
   }catch(e){console.error('money',e);}
 }
@@ -6076,11 +6106,11 @@ function pcOfferSpread(p,pops){
   const pickIn=(lo,hi,f)=>{const A=colRange(lo,hi).filter(c=>ok(c)&&(!f||f(c)));return A.length?A[Math.floor(Math.random()*A.length)]:null;};
   const Lc=Math.max(2,L),nUp=O.filter(o=>colPr(o)>Lc+9).length,nDn=O.filter(o=>colPr(o)<Lc-12).length,nOut=O.filter(o=>{const c=COL_BY[o.school+'|'+o.lvl];return c&&c.st!==st;}).length;
   // reach: rare, and the bigger the jump the rarer (a 2-star sees an FBS offer or two at most)
-  if(nUp<2&&Math.random()<0.035*jr){const c=pickIn(Lc+8,Lc+18);if(c)addOffer(p,c,pops,'reach offer');}
+  if(nUp<2&&Math.random()<0.045*jr){const c=pickIn(Lc+8,Lc+18);if(c)addOffer(p,c,pops,'reach offer');}
   // a level or two down: steady interest from schools where he would start early (blue-chip recruits rarely hear from them)
-  if(nDn<4&&Math.random()<(sg>=4?0.015:sg>=3?0.06:0.1)*jr){const c=pickIn(Math.max(0,Lc-32),Lc-13);if(c)addOffer(p,c,pops,'');}
+  if(nDn<4&&Math.random()<(sg>=4?0.02:sg>=3?0.08:0.14)*jr){const c=pickIn(Math.max(0,Lc-32),Lc-13);if(c)addOffer(p,c,pops,'');}
   // out of state: staffs from other states recruit him at his level
-  if(st&&O.length>=2&&nOut<O.length*0.45&&Math.random()<0.12*jr){const c=pickIn(Lc-9,Lc+7,x=>x.st!==st);if(c)addOffer(p,c,pops,'out-of-state staff');}
+  if(st&&O.length>=2&&nOut<O.length*0.45&&Math.random()<0.15*jr){const c=pickIn(Lc-9,Lc+7,x=>x.st!==st);if(c)addOffer(p,c,pops,'out-of-state staff');}
 }
 // where a player sits on the college ladder (0 = D3 bottom, 100 = blue blood)
 function recLevel(p){const T=starThr(p.yr),sc=recScore(p);
@@ -6523,8 +6553,26 @@ function calcSOS(schId){
 function poRules(){const R=(typeof G!=='undefined'&&G&&G.rules)||{};return{n:[4,8,16,32].includes(R.poN)?R.poN:16,q:R.poQ==='div'?'div':'record'};}
 function poSeasonN(){return[4,8,16,32].includes(G.poN)?G.poN:16;}
 function poRoundsN(n){return Math.round(Math.log2(n||poSeasonN()));}
-function poRoundName(r){const k=poRoundsN()-r;return k<=0?'State Final':k===1?'Regional Championship':k===2?'Quarterfinals':`Round of ${Math.pow(2,k+1)}`;}
+function poRoundName(r,n){const k=poRoundsN(n)-r;return k<=0?'State Final':k===1?'Regional Championship':k===2?'Quarterfinals':`Round of ${Math.pow(2,k+1)}`;}
 function poOrder(n){let o=[1];while(o.length<n){const m=o.length*2+1;o=o.flatMap(x=>[x,m-x]);}return o;} // 1 v n, 8 v 9, … so the top seeds meet last
+// the bracket as columns: round 1 from the seeds, later rounds from the winners; unplayed games show TBD
+function poBracket(pl){pl=pl||G.playoff;if(!pl||!pl.field||pl.field.length<2)return null;const F=pl.field,n=1<<Math.round(Math.log2(F.length)),R=Math.round(Math.log2(n)),seed={};F.forEach((id,i)=>{seed[id]=i+1;});
+  let slots=poOrder(n).map(i=>F[i-1]!=null?F[i-1]:null);const cols=[];
+  for(let r=1;r<=R;r++){const rr=(pl.rounds||[]).find(x=>x.round===r)||(pl.rounds||[])[r-1],res=rr?rr.results||[]:[],M=[];
+    for(let j=0;j<slots.length;j+=2){const a=slots[j],b=slots[j+1];const x=res.find(q=>a!=null&&(q.a===a||q.b===a)||b!=null&&(q.a===b||q.b===b))||null;M.push({a,b,x});}
+    cols.push({r,name:poRoundName(r,n),M});slots=M.map(m=>m.x?m.x.winner:m.a!=null&&m.b==null&&rr?m.a:null);}
+  const fin=cols[cols.length-1].M[0],champ=fin&&fin.x?fin.x.winner:(pl.stateChampId||null);return{cols,seed,champ,n};}
+function poBracketHtml(pl){const B=poBracket(pl);if(!B)return'';const me=G.myId;
+  const nextM=(()=>{const g=G.sched&&G.sched.find(x=>x.type==='playoff'&&!x.result);return g?g.oppId:null;})();
+  const row=(id,m)=>{if(id==null)return`<div class="pob-t pob-tbd"><span class="pob-sd"></span><span class="pob-nm">${m&&m.x&&m.x.b==null?'Bye':'TBD'}</span></div>`;const s=getS(id);if(!s)return`<div class="pob-t pob-tbd"><span class="pob-nm">TBD</span></div>`;
+    const x=m.x,won=x&&x.winner===id,lost=x&&x.b!=null&&x.winner!==id,sc=x&&x.b!=null?(won?x.wScore:x.lScore):'';
+    return`<div class="pob-t${won?' pob-w':''}${lost?' pob-l':''}${id===me?' pob-me':''}" onclick="viewSchool(${id})"><span class="pob-sd">${B.seed[id]||''}</span>${sLogo(s,22)}<span class="pob-nm">${s.name}</span><span class="pob-sc">${sc}</span></div>`;};
+  const box=m=>`<div class="pob-m${(m.a===me||m.b===me)&&!m.x&&(m.a===nextM||m.b===nextM)?' pob-nx':''}">${row(m.a,m)}${row(m.b,m)}</div>`;
+  const cols=B.cols.map((c,ci)=>{const last=ci===B.cols.length-1;let inner='';if(c.M.length>1){for(let j=0;j<c.M.length;j+=2)inner+=`<div class="pob-pr">${box(c.M[j])}${c.M[j+1]?box(c.M[j+1]):''}</div>`;}else inner=box(c.M[0]);
+    return`<div class="pob-col${ci?' pob-in':''}${last?' pob-fin':''}"><div class="pob-h">${c.name}</div><div class="pob-b">${inner}</div></div>`;}).join('');
+  const ch=B.champ!=null?getS(B.champ):null;
+  const chHtml=`<div class="pob-col pob-in pob-ch"><div class="pob-h">Champion</div><div class="pob-b"><div class="pob-m pob-cm${ch&&ch.id===me?' pob-me':''}">${ch?`${sLogo(ch,44)}<b>${ch.name}</b><small>${ch.mascot} · #${B.seed[ch.id]||''} seed</small>`:'<small>To be decided</small>'}</div></div></div>`;
+  return`<div class="pob" data-norank><div class="pob-g" style="--pob-n:${B.cols[0].M.length}">${cols}${chHtml}</div></div>`;}
 // a new field size before the playoffs start: this season's playoff weeks are added or removed to match
 function poApplyNow(){if(G.playoff||['playoffs','postseason','offseason'].includes(G.phase))return false;
   const n=poRules().n,want=poRoundsN(n),slots=G.sched.filter(g=>g.playoffRound).sort((a,b)=>a.playoffRound-b.playoffRound);if(!slots.length)return false;
@@ -8336,7 +8384,7 @@ function pgDash(){
     const favStr=myOvr>oppOvr?`<span style="color:var(--gn);font-size:11px">▲ Favored +${myOvr-oppOvr}</span>`:myOvr<oppOvr?`<span style="color:var(--te);font-size:11px">▼ Underdog −${oppOvr-myOvr}</span>`:`<span style="color:var(--mu);font-size:11px">Even matchup</span>`;
     nextGameBlock=`<div class="dash-next-game${nextUnplayed.isRivalry?' rivalry':''}">
       <div class="dash-ng-header">
-        <span class="dash-ng-title">${nextUnplayed.isRivalry?' Rivalry week, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
+        <span class="dash-ng-title">${nextUnplayed.isRivalry?' Rivalry week, ':''}${hcIs(nextUnplayed.wk)?'Homecoming, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
         ${favStr}
       </div>
       ${(()=>{const w=gdWxFor('reg',{idx:G.sched.indexOf(nextUnplayed),opp:no});return w?`<div class="dash-ng-wx" title="${wxEffects(w)}">${wxIcon(w,16)}<span><b>Forecast:</b> ${wxLine(w)}</span></div>`:'';})()}
@@ -9118,7 +9166,7 @@ function pgSched(){
         <td>${isRiv?`<strong style="color:var(--gd)">${g.wk}</strong>`:g.wk}</td>
         <td style="color:var(--mu)">${g.date||'–'}</td>
         <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--te)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--mu)">Open</span>':'<span style="font-size:10px;font-weight:700;color:var(--mu)">BYE</span>'}</td>
-        <td>${isEmpty?`<span style="color:var(--mu);font-style:italic">open slot –</span>`:opp?`<div style="display:flex;align-items:center;gap:6px">${sLogo(opp,32)} ${isRiv?`<strong style="color:var(--gd)">${opp.name} ${opp.mascot}</strong>`:opp.name+' '+opp.mascot}</div>`:isBye?`<span style="color:var(--mu)">Bye Week –</span>`:'–'}</td>
+        <td>${isEmpty?`<span style="color:var(--mu);font-style:italic">open slot –</span>`:opp?`<div style="display:flex;align-items:center;gap:6px">${sLogo(opp,32)} ${isRiv?`<strong style="color:var(--gd)">${opp.name} ${opp.mascot}</strong>`:opp.name+' '+opp.mascot}${hcTag(g)}</div>`:isBye?`<span style="color:var(--mu)">Bye Week –</span>`:'–'}</td>
         <td>${opp?`<span style="font-family:var(--hd);font-size:11px;font-weight:700;color:${oppCls===G.cls?'var(--te)':clsNum(oppCls)>clsNum(G.cls)?'var(--rd)':'var(--gn)'}" title="${clsName(oppCls)}">${oppCls}</span>`:'–'}</td>
         <td>${opp?rb(teamOvr(opp.id)):'–'}</td>
         <td>${g.result&&g.result!=='bye'?`<strong style="color:${g.result==='W'?'var(--gn)':'var(--te)'}">${g.result}</strong>`:g.result==='bye'?'<span style="color:var(--mu)">BYE</span>':'<span style="color:var(--mu)">–</span>'}</td>
@@ -9198,29 +9246,12 @@ function pgStand(){
 
 function pgPlayoff(){
   const pl=G.playoff;const curYear=2026+(G.yr-1);
-  if(!pl)return`<div class="pnl"><div class="ph"> State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. Top 16 teams by win% qualify. Complete your schedule first.</div></div></div>`;
-  const field=pl.field||[];
-  return`<div class="pnl"><div class="ph"> State Playoffs, ${curYear} ${pl.stateChamp?'<span style="color:var(--gd)"> State champs!</span>':''}</div><div class="pb">
-    <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Top 16 qualifiers from ${clsL(G.cls)} classification:</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">${field.map((sid,i)=>{const s=getS(sid);if(!s)return'';const isMe=sid===G.myId;const elim=pl.rounds&&pl.rounds.some(r=>r.results&&r.results.find(res=>res.loser===sid));return`<div style="background:${isMe?'rgba(204,34,34,.1)':'var(--s2)'};border:1px solid ${isMe?'var(--ac)':elim?'var(--bd)':'var(--bd)'};border-radius:5px;padding:5px 10px;display:flex;align-items:center;gap:5px;opacity:${elim&&!isMe?.5:1}"><span style="color:var(--mu);font-size:10px">#${i+1}</span>${sLogo(s,29)}<span style="font-size:12px;font-weight:${isMe?700:400}">${s.name}</span></div>`;}).join('')}
-    </div>
-    ${pl.rounds&&pl.rounds.length?pl.rounds.map(r=>{
-      const roundName=poRoundName(r.round)||`Round ${r.round}`;
-      return`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:10px;margin-bottom:8px">
-        <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;">${roundName}</div>
-        <table style="font-size:12px"><tbody>${r.results.map(res=>{
-          const a=getS(res.a),b=res.b?getS(res.b):null;const w=getS(res.winner);
-          const isMyGame=res.a===G.myId||res.b===G.myId;
-          return`<tr><td style="padding:3px 8px">${a?`${sLogo(a,26)} ${a.name}`:''}</td>
-            <td style="padding:3px 8px;font-weight:700;color:${res.winner===res.a?'var(--gn)':'var(--mu)'}">${res.b?(res.winner===res.a?res.wScore:res.lScore):''}</td>
-            <td style="padding:3px 8px;color:var(--mu)">vs</td>
-            <td style="padding:3px 8px">${b?`${sLogo(b,26)} ${b.name}`:'-'}</td>
-            <td style="padding:3px 8px;font-weight:700;color:${res.winner===res.b?'var(--gn)':'var(--mu)'}">${res.b?(res.winner===res.b?res.wScore:res.lScore):''}</td>
-            ${isMyGame?`<td style="padding:3px 8px;color:${res.winner===G.myId?'var(--gn)':'var(--ac);font-weight:700'}">${res.winner===G.myId?'✓ WIN':' Loss'}</td>`:''}</tr>`;
-        }).join('')}</tbody></table>
-      </div>`;
-    }).join(''):''}
-    ${pl.myElim&&!pl.stateChamp?`<div style="background:rgba(204,34,34,.1);border:1px solid var(--ac);border-radius:5px;padding:10px;font-size:13px;color:var(--te)">Your team was eliminated from the playoffs. Better luck next season.</div>`:''}
+  if(!pl)return`<div class="pnl"><div class="ph">State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. The top ${poSeasonN()} teams in ${clsL(G.cls)} qualify${poRules().q==='div'?', division winners first':''}. Complete your schedule first.</div></div></div>`;
+  const field=pl.field||[],inF=field.includes(G.myId),sd=field.indexOf(G.myId)+1;
+  const st=pl.stateChamp?'<span style="color:var(--gd)">State champions!</span>':!inF?'Your team did not qualify.':pl.myElim?'Your team was eliminated.':pl.stateChampId?'':`You are the #${sd} seed and still alive.`;
+  return`<div class="pnl"><div class="ph">State Playoffs, ${curYear} <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${clsName(G.cls)} · ${field.length} teams</span></div><div class="pb">
+    <div style="font-size:13px;margin-bottom:10px">${st}</div>${poBracketHtml(pl)}
+    <div style="font-size:11px;color:var(--mu);margin-top:8px">Seeds by record, strength of schedule and prestige. The top seeds meet as late as possible. Tap a team to see the school.</div>
   </div></div>`;
 }
 
@@ -10681,10 +10712,15 @@ function rkCompute(){
   divs.forEach(d=>{const t=d.teams||[],sum=t.reduce((x,s)=>x+(zOf[s.id]||0),0),sn=t.reduce((x,s)=>x+(znOf[s.id]||0),0);t.forEach(s=>{dOf[s.id]=t.length>1?(sum-(zOf[s.id]||0))/(t.length-1):0;dnOf[s.id]=t.length>1?(sn-(znOf[s.id]||0))/(t.length-1):0;});});
   const CF={'1A':-.2,'2A':-.1,'3A':0,'4A':.1,'5A':.2};
   const natC=G.natl&&G.natl.yr===G.yr&&G.natl.done?G.natl.w:null;
+  // national poll like the real prep rankings: the biggest classifications in the strongest states fill it, a small-school
+  // record counts for less on the national stage, and a tough schedule counts for more
+  const CN={5:.45,4:.15,3:-.3,2:-.85,1:-1.4},RW={5:1,4:.9,3:.7,2:.5,1:.4},stTop={};
+  for(const k of ST_ORDER){const a=rows.filter(r=>r.st===k).map(r=>r.zn).sort((x,y)=>y-x).slice(0,10);if(a.length)stTop[k]=a.reduce((x,v)=>x+v,0)/a.length;}
+  const stV=Object.values(stTop),stAvg=stV.length?stV.reduce((x,v)=>x+v,0)/stV.length:0;
   rows.forEach(r=>{const pg=Math.min(1,r.g/8),tw=.75-.45*pg,rw=.55*pg,rec=(r.wpa-.5)*4,sos=(dOf[r.id]||0),
-    qual=r.g>=5&&r.l===0?.35:r.g>=6&&r.l===1?.12:0,pres=.05*(r.pr-3);
+    qual=r.g>=5&&r.l===0?.35:r.g>=6&&r.l===1?.12:0,pres=.05*(r.pr-3),cn=clsNum(r.s.cls),cw=RW[cn]||.7;
     r.sos=sos;r.sc=tw*r.z+rw*rec+.3*pg*sos+qual+pres;r.as=r.sc+(CF[clsEq(r.s.cls)]||0);
-    r.ns=tw*r.zn+rw*rec+.3*pg*(dnOf[r.id]||0)+qual+pres+(r.id===natC?5:0);});
+    r.ns=tw*r.zn+rw*rec*cw+.45*pg*(dnOf[r.id]||0)+qual*cw+pres+(CN[cn]||0)+.25*clamp((stTop[r.st]||stAvg)-stAvg,-1.5,1.5)+(r.id===natC?5:0);});
   const cMap={},aMap={},nMap={},cls={},st={};
   for(const c in byC){const a=byC[c].slice().sort((x,y)=>y.sc-x.sc||y.ov-x.ov);a.forEach((r,i)=>{cMap[r.id]=i+1;});cls[c]=a;}
   for(const k of ST_ORDER){const a=rows.filter(r=>r.st===k).sort((x,y)=>y.as-x.as||y.ov-x.ov);a.forEach((r,i)=>{aMap[r.id]=i+1;});st[k]=a;}
@@ -10694,13 +10730,13 @@ function rkCompute(){
   _rkNames=null;return _RK;
 }
 function rkOf(id){const R=rkCompute();if(!R)return{c:0,a:0,n:0};return{c:R.cMap[id]||0,a:R.aMap[id]||0,n:R.nMap[id]||0};}
-// badge modes: n = national (blue), a = the team's state (gold); tap to cycle (v2.06: no classification rankings)
+// badge modes: n = national (blue), a = the team's state (gold), c = its classification in the state (red, top 10); tap to cycle
 function rkMode(el,m){const c=+el.dataset.c,a=+el.dataset.a,n=+el.dataset.n,cl=el.dataset.cls,stn=el.dataset.st;el.dataset.m=m;
   if(m==='n'){el.className='rkb rk-n';el.textContent='#'+n;el.title=`National #${n} (tap for more ranks)`;}
   else if(m==='a'){el.className='rkb rk-a';el.textContent='#'+a;el.title=`All-${stn} #${a} (tap for more ranks)`;}
   else{el.className='rkb rk-c';el.textContent='#'+c;el.title=`${cl} #${c} (tap for more ranks)`;}}
 function rkBadge(id){
-  const k=rkOf(id),modes=[];if(k.n&&k.n<=25)modes.push('n');if(k.a&&k.a<=25)modes.push('a');if(!modes.length)return null;
+  const k=rkOf(id),modes=[];if(k.n&&k.n<=25)modes.push('n');if(k.a&&k.a<=25)modes.push('a');if(k.c&&k.c<=10)modes.push('c');if(!modes.length)return null;
   const s=getS(id)||{};const b=document.createElement('span');b.dataset.c=k.c;b.dataset.a=k.a;b.dataset.n=k.n;b.dataset.cls=s.cls?clsName(s.cls):'';b.dataset.st=stName(stOf(s));b.dataset.ms=modes.join('');b.setAttribute('role','button');b.tabIndex=0;
   rkMode(b,modes[0]);
   const flip=e=>{e.stopPropagation();e.preventDefault();const ms=b.dataset.ms.split('');rkMode(b,ms[(ms.indexOf(b.dataset.m)+1)%ms.length]);};
@@ -10729,7 +10765,7 @@ window._rkCls=null;
 window.rkView=function(v){window._rkCls=v;nav('rank');};
 function pgRank(){
   const R=rkCompute();if(!R)return'';const myK=stOf(myS()||{}),defV=myK&&myK!=='CF'?'ST:'+myK:'ALL';
-  let v=window._rkCls||defV;if(v!=='NAT'&&v!=='ALL'&&!v.startsWith('ST:'))v=defV;
+  let v=window._rkCls||defV;if(v!=='NAT'&&v!=='ALL'&&!v.startsWith('ST:')&&!R.cls[v])v=defV;
   const stK=v==='NAT'?null:v==='ALL'?'CF':v.startsWith('ST:')?v.slice(3):clsSt(v);
   const kind=v==='NAT'?'n':(v==='ALL'||v.startsWith('ST:'))?'a':'c';
   const list=kind==='n'?R.nat:kind==='a'?(R.st[stK]||[]):(R.cls[v]||[]);
@@ -10742,13 +10778,13 @@ function pgRank(){
     <td style="font-weight:700">${r.w}-${r.l}</td><td>${rb(Math.round(r.ov))}</td><td style="color:var(--gd)">${'★'.repeat(Math.max(1,Math.round(r.pr)))}</td><td style="color:var(--mu)">${Math.max(0,Math.round((pts(r)+3)*100))}</td></tr>`;};
   const top=list.slice(0,25).map(row).join(''),others=list.slice(25,30).map(r=>`${r.s.name} ${r.s.mascot} (${r.w}-${r.l})`).join(', ');
   const title=kind==='n'?`National Top 25 · all ${ST_ORDER.length} states`:kind==='a'?`All-${stName(stK)} Top 25, every classification`:clsName(v)+' Top 25';
-  const clsBtns='';
+  const clsBtns=kind==='n'?'':`<span style="font-size:12px;color:var(--mu);margin-right:6px">${stName(stK)} by class:</span>`+clsOfSt(stK).filter(c=>R.cls[c]&&R.cls[c].length).map(c=>btn(c,clsL(c))).join('');
   const nl=G.natl&&G.natl.yr===G.yr?G.natl:null,nA=nl?getS(nl.a):null,nB=nl?getS(nl.b):null;
   const natBox=kind==='n'&&nA&&nB?`<div style="background:var(--s2);border:1px solid var(--gd);border-radius:8px;padding:10px 12px;margin:4px 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><b style="color:var(--gd)">National Championship</b> ${sLogo(nA,28)} ${nA.name} ${nA.mascot} <span style="color:var(--mu)">vs</span> ${sLogo(nB,28)} ${nB.name} ${nB.mascot} <span style="margin-left:auto;font-weight:800">${nl.done?`${(getS(nl.w)||{}).mascot} win ${Math.max(nl.sa,nl.sb)}-${Math.min(nl.sa,nl.sb)}`:'to be played'}</span></div>`:'';
   return`<div data-norank><div class="pnl"><div class="ph">Rankings <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${title} · ${G.phase==='offseason'?'preseason':'week '+(G.week||0)}</span></div><div class="pb">
     <div>${btn('NAT','National')}${ST_ORDER.map(k=>btn(k==='CF'?'ALL':'ST:'+k,'All-'+stName(k))).join('')}</div>
     ${clsBtns?`<div>${clsBtns}</div>`:''}
-    <div style="font-size:12px;color:var(--mu);margin:4px 0 4px">Next to team names, <span class="rkb rk-n" style="cursor:default">#2</span> in blue is the national rank and <span class="rkb rk-a" style="cursor:default">#3</span> in gold the rank in the team's own state. The national rank is shown first; tap a badge to switch.</div><div style="font-size:12px;color:var(--mu);margin:0 0 10px">Like the national prep rankings and media polls, rankings are driven by results: record, strength of schedule and unbeaten or one-loss seasons, with team talent weighing most in the preseason and early weeks. The national poll measures every team on one scale, so the stronger Crestfield classes carry more weight than the neighbor states. The top two teams in the final national poll play for the National Championship.</div>
+    <div style="font-size:12px;color:var(--mu);margin:4px 0 4px">Next to team names, <span class="rkb rk-n" style="cursor:default">#2</span> in blue is the national rank and <span class="rkb rk-a" style="cursor:default">#3</span> in gold the rank in the team's own state, <span class="rkb rk-c" style="cursor:default">#4</span> in red the rank in its classification (top 10). The national rank is shown first; tap a badge to switch.</div><div style="font-size:12px;color:var(--mu);margin:0 0 10px">Like the national prep rankings and media polls, rankings are driven by results: record, strength of schedule and unbeaten or one-loss seasons, with team talent weighing most in the preseason and early weeks. The national poll measures every team on one scale like the real national prep rankings: the biggest classifications in the strongest football states fill it, schedule strength counts more, and a small-school team needs a dominant season to crack it. The top two teams in the final national poll play for the National Championship.</div>
     ${natBox}
     <div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>Rk</th><th></th><th>Team</th><th>Record</th><th>Rating</th><th>Prestige</th><th>Pts</th></tr></thead><tbody>${top}</tbody></table></div>
     ${others?`<div style="font-size:11px;color:var(--mu);margin-top:10px"><b>Also considered:</b> ${others}</div>`:''}</div></div></div>`;
@@ -11014,9 +11050,12 @@ window.errReport=function(){let L=[];try{L=JSON.parse(localStorage.getItem('gpgm
 function lgDrive(off,def,r){const d=off-def,pTD=clamp(.3+.012*d,.05,.72),pFG=clamp(.1+.002*d,.04,.14),x=r();
   if(x<pTD){const y=r();return y<.03?6:y<.07?8:7;}if(x<pTD+pFG)return 3;if(x<pTD+pFG+.006)return 2;return 0;}
 // Realistic final score. aWins: true/false forces the winner, undefined lets it fall naturally. Returns [a,b,ot]
+function mercyOn(){try{return!(typeof G!=='undefined'&&G&&G.rules&&G.rules.mercy===false);}catch(e){return true;}}
 function lgScore(oa,ob,aWins,r){
   r=r||Math.random;
-  const one=(x,y)=>{let a=0,b=0;const n=10+Math.floor(r()*3);for(let i=0;i<n;i++){a+=lgDrive(x,y,r);b+=lgDrive(y,x,r);}if(r()<.05)a+=7;if(r()<.05)b+=7;
+  // mercy rule: a 35-point lead in the second half starts a running clock, so the rest of the game has far fewer drives
+  const mer=mercyOn();
+  const one=(x,y)=>{let a=0,b=0;const n=10+Math.floor(r()*3);for(let i=0;i<n;i++){if(mer&&i>=n/2&&Math.abs(a-b)>=35&&r()<.6)continue;a+=lgDrive(x,y,r);b+=lgDrive(y,x,r);}if(r()<.05)a+=7;if(r()<.05)b+=7;
     if(a-b>49)a=b+42+Math.floor(r()*2)*7;if(b-a>49)b=a+42+Math.floor(r()*2)*7;return[Math.min(a,70),Math.min(b,70)];};
   const ot=(a,b,aw)=>{if(r()<.4){a+=7;b+=7;}const w=r()<.6?7:r()<.6?3:8;if(aw)a+=w;else b+=w;return[a,b,true];};
   for(let t=0;t<12;t++){const s=one(oa,ob);
@@ -11162,6 +11201,9 @@ function gdTeam(s,kind,kitOv,opt){
 }
 function gdOppKind(opp,myKind,me){const mj=uniOf(me||myS(),myKind).jersey,h=uniOf(opp,'home').jersey,a=uniOf(opp,'away').jersey;return Math.abs(_gdLum(h)-_gdLum(mj))>=Math.abs(_gdLum(a)-_gdLum(mj))?'home':'away';}
 function gdPickUni(k){window._gdUni=k;document.querySelectorAll('.gd-uni').forEach(b=>b.classList.toggle('on',b.dataset.k===k));}
+// the score bug shows a ranked team's national rank, or its rank in its state classification when not nationally ranked
+function hcLine(){return`<div style="font-size:12px;margin-top:6px;color:var(--gd);font-weight:800;text-align:center">Homecoming week: a packed house, the parade and the court at halftime</div>`;}
+function gdRankOf(s){const k=rkOf(s.id);return k.n&&k.n<=25?k.n:k.c&&k.c<=25?k.c:0;}
 let _gdCtx=null;
 function gdChoose(kind,info,simFn){
   if(ccOn()){notify('Your player is in college now: the high school season plays out in the background.','w');return;}
@@ -11173,7 +11215,7 @@ function gdChoose(kind,info,simFn){
       <div style="text-align:center">${sLogo(me,64)}<div style="font-weight:800;margin-top:4px">${me.mascot}</div></div>
       <div style="font-weight:900;font-size:22px;color:var(--mu)">VS</div>
       <div style="text-align:center">${sLogo(opp,64)}<div style="font-weight:800;margin-top:4px">${opp.mascot}</div></div></div>
-    ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;if(kind==='po'&&info.slot&&poRoundName(info.slot.playoffRound)==='State Final')return`<div style="font-size:12px;color:var(--gd);font-weight:800;margin:-6px 0 12px">State Final · neutral site · ${stateFinalVenue()}</div>`;if(kind==='reg'&&G.sched[info.idx]&&G.sched[info.idx].isRivalry)return rivalryWeekHtml(opp)+`<div style="height:8px"></div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
+    ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;if(kind==='po'&&info.slot&&poRoundName(info.slot.playoffRound)==='State Final')return`<div style="font-size:12px;color:var(--gd);font-weight:800;margin:-6px 0 12px">State Final · neutral site · ${stateFinalVenue()}</div>`;if(kind==='reg'&&G.sched[info.idx]&&G.sched[info.idx].isRivalry)return rivalryWeekHtml(opp)+(hcIs(G.sched[info.idx].wk)?hcLine():'')+`<div style="height:8px"></div>`;if(kind==='reg'&&G.sched[info.idx]&&hcIs(G.sched[info.idx].wk))return hcLine()+`<div style="height:8px"></div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
     ${(()=>{const w=gdWxFor(kind,info);return w?`<div class="gd-wx">${wxIcon(w,22)}<div><b>${wxLine(w)}</b><div>${wxEffects(w)}</div></div></div>`:'';})()}
     <div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">Your uniform</div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">${[['home','Home'],['away','Away'],['alt','Alternate']].map(([k,l])=>`<button class="gd-uni${(window._gdUni||'home')===k?' on':''}" data-k="${k}" onclick="gdPickUni('${k}')">${uniSvg(uniOf(me,k),(myP()[0]||{}).num,54)}<span>${l}</span></button>`).join('')}</div>
@@ -11195,13 +11237,16 @@ function gdStart(){
   // team strength on top of individual ratings: every player of the better team gets a bump, the weaker team a drop
   _gdTAdj=Math.round((_o1-_gdAnchor)*0.5+clamp(progEdge()*0.6,-3,3));const _t1=Object.assign(gdTeam(me,mk),{ovr:Math.round(_o1)});
   _gdTAdj=Math.round((_o2-_gdAnchor)*0.5);const _t2=Object.assign(gdTeam(opp,gdOppKind(opp,mk)),{ovr:Math.round(_o2)});_gdTAdj=0;
+  try{_t1.rk=gdRankOf(me);_t2.rk=gdRankOf(opp);}catch(e){}
+  const _mer=(()=>{try{return mercyOn()?35:0;}catch(e){return 0;}})();
   if(G.role==='OC')window._gdMode='off';else if(G.role==='DC')window._gdMode='def';
   const _fmt=ctx.kind==='s7'?11:clsFmt(me.cls||G.cls);
-  window.__GP={mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
+  window.__GP={mercy:_mer,mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
   if(_fmt<11){window.__GP.fmt=_fmt;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">${fmtName(_fmt)[0].toUpperCase()+fmtName(_fmt).slice(1)} football: ${_fmt} players a side</div>`;}
   try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v});window.__GP.neutral=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
   try{if(window.__GP.rival)window.__GP.previewHtml=(window.__GP.previewHtml||'')+rivalryWeekHtml(opp);}catch(e){}
+  try{if(ctx.kind==='reg'&&hcIs(G.sched[ctx.info.idx].wk)){window.__GP.big=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+hcLine();}}catch(e){}
   if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.s7q=G.s7.qn===1?1:2;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
   try{pcGP(ctx);}catch(e){console.error('player career',e);}
   gdLaunch();
@@ -14752,6 +14797,14 @@ window.jobDecline=function(sid){const J=jobOffersLive();if(!J)return;J.list=J.li
 function teamIsCustom(t){if(!t)return false;if(t.customLogo||t.userEdited)return true;try{const W=G.world&&G.world.tb;if(!W)return false;
   if(!G._custNames){G._custNames=new Set([...Object.values(W.ed||{}).map(v=>v&&v.name),...(W.add||[]).map(v=>v&&v.name)].filter(Boolean));Object.defineProperty(G,'_custNames',{enumerable:false,writable:true,configurable:true,value:G._custNames});}
   return G._custNames.has(t.name);}catch(e){return false;}}
+// ── homecoming: one home game a season, on the rivalry game when it is at home, else a home game near midseason ──
+function hcHome(g){return!!g&&g.type==='regular'&&g.oppId!=null&&!g._empty&&((g.wk|0)+G.myId)%2===0;}
+function hcWk(){if(typeof G==='undefined'||!G||!G.sched)return null;const H=G.hc,started=G.sched.some(g=>g.type==='regular'&&g.result);
+  if(H&&H.yr===G.yr&&started)return H.wk;const R=G.sched.filter(hcHome);
+  const rv=R.find(g=>g.isRivalry||isRivalry(G.myId,g.oppId)),mid=R.filter(g=>g.wk>1).sort((a,b)=>Math.abs(a.wk-5)-Math.abs(b.wk-5))[0]||R[0],g=rv||mid;
+  G.hc={yr:G.yr,wk:g?g.wk:null};return G.hc.wk;}
+function hcIs(wk){return wk!=null&&hcWk()===wk;}
+function hcTag(g){return g&&g.type==='regular'&&hcIs(g.wk)?' <span style="font-size:10px;font-weight:800;color:var(--gd)">Homecoming</span>':'';}
 // ── rivalry week ──
 const RIV_TROPHY=['Old Bell','Iron Skillet','Golden Helmet','Victory Bell','County Cup','Bronze Boot','Little Brown Jug','Rail Spike','Old Oaken Bucket','Silver Saddle','Paint Bucket','Brass Lantern','Steel Spur','Hatchet','Old Anvil','Milk Can'];
 function rivTrophy(oppId){G.rivT=G.rivT||{};const k=Math.min(G.myId,oppId)+'-'+Math.max(G.myId,oppId);if(!G.rivT[k])G.rivT[k]={name:'The '+RIV_TROPHY[(G.myId*7+oppId*13)%RIV_TROPHY.length],w:0,l:0,holder:null};return G.rivT[k];}
@@ -18599,6 +18652,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;border-radius:calc
 .nm small{display:block;font-size:max(9px,calc(var(--s)*5px));font-weight:800;letter-spacing:.09em;opacity:.85}
 .nm b{display:block;font-size:max(13px,calc(var(--s)*8.5px));font-weight:900;letter-spacing:.03em}
 .home .nm b{color:#ffd76a}
+.nm b .rkn{font-size:.62em;font-weight:800;opacity:.85;margin-right:.28em;vertical-align:.18em;letter-spacing:0}
 .sc{font-size:max(21px,calc(var(--s)*15px));font-weight:900;min-width:1.35em;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .mid{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 max(10px,calc(var(--s)*9px));min-width:max(118px,calc(var(--s)*92px))}
 .clk{font-size:max(14px,calc(var(--s)*9.5px));font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -23479,6 +23533,7 @@ function commit(S,r){
   G.conv=S.conv;
   if(S.stop==='snap'){G.clockRun=false;G.restartReady=false;}
   else if(S.stop==='ready'){G.clockRun=false;G.restartReady=true;}
+  try{gpMercy(S);}catch(e){}
   if(G.q>4)G.clockRun=false;
   if(S.td!=null){G.cele=S.td;G.cheer=S.td===gpHomeTeam()?3:0.5;}
   else if(S.msg==='Interception'||S.msg==='Turnover')G.cele=1-G.offTeam;
@@ -23539,6 +23594,9 @@ function aiTimeout(){
     const diff=G.score[t]-G.score[1-t];
     if(G.to[t]>0&&(diff<0||(diff===0&&G.q===4))&&G.poss===t||(G.to[t]>0&&diff<0&&G.poss!==t&&G.clock<40)){callTimeout(t);return;}}
 }
+// mercy rule (high school): a lead of GP.mercy points in the second half keeps the clock running except after scores
+function gpMercy(S){if(!GP||!GP.mercy||GP.practice||G.ot||G.q<3||G.q>4||S.td!=null||G.conv)return;if(Math.abs(G.score[0]-G.score[1])<GP.mercy)return;
+  if(G.clockRun||G.restartReady){if(!G.mercyOn){G.mercyOn=true;setTimeout(()=>{try{flash('Mercy rule: running clock');}catch(e){}},1200);}G.clockRun=true;G.restartReady=false;}}
 function callTimeout(t){
   if(G.to[t]<=0)return false;
   if(G.client){olCmd('to');return false;}
@@ -25946,14 +26004,14 @@ if(GP){try{
   const L0=document.getElementById('gull'),L1=document.getElementById('elk');
   if(L0){L0.setAttribute('viewBox','0 0 100 100');L0.innerHTML=GP.teams[0].logoInner;}
   if(L1){L1.setAttribute('viewBox','0 0 100 100');L1.innerHTML=GP.teams[1].logoInner;}
-  for(const i of[0,1]){const c=document.getElementById('gpC'+i),n=document.getElementById('gpN'+i);if(c)c.textContent=GP.teams[i].city.toUpperCase()+(GP.teams[i].ovr?' · '+GP.teams[i].ovr+' OVR':'');if(n){n.textContent=GP.teams[i].name.toUpperCase();n.dataset.full=n.textContent;n.dataset.abbr=(GP.teams[i].abbr||n.textContent.slice(0,4)).toUpperCase();n.dataset.rec=GP.teams[i].rec||'';}}
+  for(const i of[0,1]){const c=document.getElementById('gpC'+i),n=document.getElementById('gpN'+i);if(c)c.textContent=GP.teams[i].city.toUpperCase()+(GP.teams[i].ovr?' · '+GP.teams[i].ovr+' OVR':'');if(n){n.textContent=GP.teams[i].name.toUpperCase();n.dataset.full=n.textContent;n.dataset.abbr=(GP.teams[i].abbr||n.textContent.slice(0,4)).toUpperCase();n.dataset.rec=GP.teams[i].rec||'';n.dataset.rk=GP.teams[i].rk||'';}}
   if(GP.teams[GP.home||0].logoUrl)logoImg.gull.src=GP.teams[GP.home||0].logoUrl;
   const h0=document.querySelector('.tm.home'),h1=document.querySelector('.tm.away');if(h0&&GP.teams[0].hud)h0.style.background=GP.teams[0].hud;if(h1&&GP.teams[1].hud)h1.style.background=GP.teams[1].hud;
   document.title=GP.teams[0].name+' vs '+GP.teams[1].name;
 }catch(e){console.error(e);}}
 // v2.15 TV-style scorebug (Settings → Scorebug): abbreviations, records and a yellow down-and-distance tag
 function gpBugStyle(){const tv=GDS.bug!=='classic';document.body.classList.toggle('bugtv',tv);try{document.body.classList.toggle('pcbug',pcOn());}catch(e){}for(const k of['slab','tower','mini'])document.body.classList.toggle('bug-'+k,GDS.bug===k);
-  for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;
+  for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;if(n.dataset.rk){const k=document.createElement('span');k.className='rkn';k.textContent=n.dataset.rk;n.prepend(k);} // national or state class rank before the name
     let r=n.parentNode.querySelector('.rec');if(n.dataset.rec&&!r){r=document.createElement('span');r.className='rec';n.after(r);}if(r)r.textContent=n.dataset.rec||'';}}
 try{gpBugStyle();}catch(e){}
 new ResizeObserver(fit).observe($('stage'));

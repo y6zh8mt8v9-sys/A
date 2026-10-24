@@ -142,9 +142,12 @@ window.errReport=function(){let L=[];try{L=JSON.parse(localStorage.getItem('gpgm
 function lgDrive(off,def,r){const d=off-def,pTD=clamp(.3+.012*d,.05,.72),pFG=clamp(.1+.002*d,.04,.14),x=r();
   if(x<pTD){const y=r();return y<.03?6:y<.07?8:7;}if(x<pTD+pFG)return 3;if(x<pTD+pFG+.006)return 2;return 0;}
 // Realistic final score. aWins: true/false forces the winner, undefined lets it fall naturally. Returns [a,b,ot]
+function mercyOn(){try{return!(typeof G!=='undefined'&&G&&G.rules&&G.rules.mercy===false);}catch(e){return true;}}
 function lgScore(oa,ob,aWins,r){
   r=r||Math.random;
-  const one=(x,y)=>{let a=0,b=0;const n=10+Math.floor(r()*3);for(let i=0;i<n;i++){a+=lgDrive(x,y,r);b+=lgDrive(y,x,r);}if(r()<.05)a+=7;if(r()<.05)b+=7;
+  // mercy rule: a 35-point lead in the second half starts a running clock, so the rest of the game has far fewer drives
+  const mer=mercyOn();
+  const one=(x,y)=>{let a=0,b=0;const n=10+Math.floor(r()*3);for(let i=0;i<n;i++){if(mer&&i>=n/2&&Math.abs(a-b)>=35&&r()<.6)continue;a+=lgDrive(x,y,r);b+=lgDrive(y,x,r);}if(r()<.05)a+=7;if(r()<.05)b+=7;
     if(a-b>49)a=b+42+Math.floor(r()*2)*7;if(b-a>49)b=a+42+Math.floor(r()*2)*7;return[Math.min(a,70),Math.min(b,70)];};
   const ot=(a,b,aw)=>{if(r()<.4){a+=7;b+=7;}const w=r()<.6?7:r()<.6?3:8;if(aw)a+=w;else b+=w;return[a,b,true];};
   for(let t=0;t<12;t++){const s=one(oa,ob);
