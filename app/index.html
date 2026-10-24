@@ -7503,7 +7503,7 @@ window.callUpToVarsity=function(pid){
   const varsity=myP(); // excludes JV
   if(varsity.length>=MAX_VARSITY){
     // Find the weakest player at the same position on varsity
-    const samePos=varsity.filter(v=>v.pos===p.pos).sort((a,b)=>a.rat-b.rat);
+    const samePos=varsity.filter(v=>v.pos===p.pos&&v.id!==G.myPlayerId).sort((a,b)=>a.rat-b.rat); // your own player is never cut or sent down
     const bump=samePos.length?samePos[0]:null;
     if(bump&&bump.rat<p.rat){
       // Bump the weaker player, send to JV if eligible, cut if not
@@ -7633,7 +7633,7 @@ function promoteJVAgeUp(){
       addLog(`<span style="color:var(--gn)"> ${p.fn} ${p.ln} (${p.pos}) promoted from JV, now a ${p.yr===11?'Junior':'Senior'} on Varsity!</span>`);
     } else {
       // Roster full, find weakest same-pos player on varsity
-      const samePos=varsity.filter(v=>v.pos===p.pos).sort((a,b)=>a.rat-b.rat);
+      const samePos=varsity.filter(v=>v.pos===p.pos&&v.id!==G.myPlayerId).sort((a,b)=>a.rat-b.rat); // your own player is never cut or sent down
       const bump=samePos.length?samePos[0]:null;
       if(bump&&bump.rat<p.rat){
         if(canBeOnJV(bump)){
