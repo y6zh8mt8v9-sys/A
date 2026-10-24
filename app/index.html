@@ -1414,7 +1414,7 @@ setTimeout(()=>{if(padAny())padStart(padMainStep);},800);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
 // ── SETTINGS MODAL ──
 // v2.14 Game Day settings shared with the game (stored on this device)
-const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true,cnav:true};
+const GDS_MAIN_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,gfx:'auto',crowdV:'full',bug:'tv',autosave:true,moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true,cnav:true,mixAudio:true,crowdVol:1};
 const SL_KEYS_M=[['spd','Speed'],['acc','Acceleration'],['str','Strength'],['iq','Awareness (IQ)'],['thr','Throwing accuracy'],['bsp','Ball speed'],['cat','Catching'],['int','Interceptions'],['man','Man coverage'],['zone','Zone coverage'],['fum','Fumbles'],['juk','Juke ability']];
 function slOpen(){try{closeSettings();}catch(e){}const o=gdsMain(),S=o.sl||{u:{},c:{}},v=(w,k)=>{const x=S[w]&&S[w][k];return x==null?50:x;};
   openMo(`<h2>Difficulty sliders</h2><p style="font-size:13px;color:var(--mu);margin:4px 0 10px">How your team and the CPU play in Game Day. 50 is normal; higher means better at it (for Fumbles, higher means more fumbles). Online games always use 50.</p>
@@ -1430,11 +1430,13 @@ function slPreset(n){const o=gdsMain(),u={},c={},lv={easy:[65,35],normal:[50,50]
   for(const[k]of SL_KEYS_M){u[k]=k==='fum'?100-lv[0]:lv[0];c[k]=k==='fum'?100-lv[1]:lv[1];}
   o.sl={u,c};try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}slOpen();}
 function gdsMain(){let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}return Object.assign({},GDS_MAIN_DEF,o);}
-function gdsMainSet(k,v){const o=gdsMain();o[k]=v;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}renderGdSettings();if(k==='cnav')try{if(typeof G!=='undefined'&&G&&G.myId)nav(G._page||'dash',G._arg);}catch(e){}}
+function gdsMainSet(k,v){const o=gdsMain();o[k]=v;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}renderGdSettings();if(k==='mixAudio')try{gpAudioMode();}catch(e){}if(k==='cnav')try{if(typeof G!=='undefined'&&G&&G.myId)nav(G._page||'dash',G._arg);}catch(e){}}
 function renderGdSettings(){const el=document.getElementById('set-gd');if(!el)return;const S=gdsMain();
   const seg=(k,opts)=>`<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${opts.map(([v,l])=>`<button class="${S[k]===v?'btn':'bgh'} bxs" style="min-height:30px;padding:4px 10px" onclick='gdsMainSet(${JSON.stringify(k)},${JSON.stringify(v)})'>${l}</button>`).join('')}</div>`;
   const row=(l,h)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700">${l}</span>${h}</div>`;
-  el.innerHTML=row('Sound effects',seg('sound',[[true,'On'],[false,'Off']]))+row('Volume',`<input type="range" min="0" max="1" step="0.05" value="${S.vol}" oninput="gdsMainSet('vol',+this.value)" style="width:140px">`)
+  el.innerHTML=row('Sound effects',seg('sound',[[true,'On'],[false,'Off']]))+row('Volume',`<input type="range" min="0" max="1" step="0.05" value="${S.vol}" oninput="gdsMainPut('vol',+this.value)" style="width:140px">`)
+    +row('Let other apps keep playing music',seg('mixAudio',[[true,'On'],[false,'Off']]))+(S.mixAudio!==false?`<div style="font-size:11px;color:var(--mu);margin:-4px 0 8px">Spotify, Apple Music or a video keep playing under the game. On iPhone, game sound follows the ringer switch.</div>`:'')
+    +row('Crowd and band volume',`<input type="range" min="0" max="1" step="0.05" value="${S.crowdVol!=null?S.crowdVol:1}" oninput="gdsMainPut('crowdVol',+this.value)" style="width:140px" aria-label="Crowd and band volume">`)
     +row('Crowd noise',seg('crowd',[[true,'On'],[false,'Off']]))+row('Marching band',seg('band',[[true,'On'],[false,'Off']]))+row('Gameplay tips',seg('tips',[[false,'Hidden'],[true,'Shown']]))
     +row('Ball size',seg('ball',[[0.85,'S'],[1,'M'],[1.25,'L'],[1.5,'XL']]))+row('Your offense drives',seg('dir',[['right','Right'],['left','Left'],['real','Switch each quarter']]))
     +row('Vibration',seg('haptics',[[true,'On'],[false,'Off']]))+row('Kick returns',seg('kr',[[true,'Play them'],[false,'Skip']]))+row('Auto-save',seg('autosave',[[true,'On'],[false,'Off']]))+row('Menu layout',seg('cnav',[[true,'Compact hub'],[false,'Classic tabs']]))+row('Difficulty',`<button class="bgh bxs" onclick="slOpen()">Sliders…</button>`)+row('Scorebug',seg('bug',[['tv','TV'],['slab','Slab'],['tower','Tower'],['mini','Mini'],['classic','Classic']]))+row('Camera',seg('cam',[['wide','Wide'],['broadcast','Broadcast'],['tight','Tight']]))+row('Crowd noise meter',seg('noiseM',[[true,'On'],[false,'Off']]))+row('Move buttons',seg('moveUI',[['row','Row'],['wheel','Wheel']]))+row('Career camera',seg('pcCam',[['close','Close'],['mid','Normal'],['wide','Wide']]))+row('Landing marker',seg('land',[['pc','Player Career'],['all','Always'],['off','Off']]))+row('Mouse: click to tackle',seg('clickTk',[[true,'On'],[false,'Off']]))
@@ -11162,9 +11164,11 @@ function gdStart(){
 // v2.16: closing Game Day frees the whole engine first (blank frame, no references), so a phone low on memory does not reload the page
 function gdTeardown(){try{clearInterval(window._gdWatch);}catch(e){}try{const f=document.getElementById('gd-if');if(f&&f.contentWindow&&f.contentWindow.__gpSndStop)f.contentWindow.__gpSndStop();}catch(e){}const ov=document.getElementById('gd-ov');if(!ov)return;const f=ov.querySelector('iframe');
   try{if(f&&f.contentWindow){try{f.contentWindow.__G=null;}catch(e){}f.src='about:blank';}}catch(e){}try{if(f)f.remove();}catch(e){}ov.remove();window.__GP=null;}
-// v2.16 sound: the audio starts from the tap or click that opens Game Day, and iOS plays it through the speaker even with the
-// ringer switch on silent (media playback instead of the ambient category)
+// v2.16 sound: the audio starts from the tap or click that opens Game Day. By default the game's sound mixes with the player's own
+// music (Spotify, Apple Music, a video): the ambient audio session, no media element. With "Let other apps keep playing music" off,
+// iOS plays it through the speaker even with the ringer switch on silent (media playback, which pauses other apps)
 function gpAudioUnlock(){
+  if(gpAudioMode())return;
   try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback';}catch(e){}
   try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!window.__GPAC)window.__GPAC=new AC({latencyHint:'interactive'});if(window.__GPAC.state!=='running')window.__GPAC.resume().catch(()=>{});}catch(e){}
   // older iOS: a silent media element in a loop moves the page to the playback audio session
@@ -18463,6 +18467,20 @@ function tutNav(dir){
 // loading a save or playing Free Practice never needs it
 try{worldApply(worldLoad());}catch(e){console.error('league setup',e);}
 function setupEnsure(){if(!_allClsDivs){try{initCountyMap();}catch(e){console.error('setup',e);}}}
+// ═══════════ AUDIO MIX: the game's sound plays under the player's own music ═══════════
+// "Let other apps keep playing music" (Settings, on by default): the page uses the ambient audio session (Safari 17+),
+// sound effects are Web Audio only and nothing claims the media session, so Spotify, Apple Music or a video keep playing.
+// Returns true when mixing is on (gpAudioUnlock then only starts the shared audio context).
+function gpAudioMode(){const mix=gdsMain().mixAudio!==false;
+  try{if(navigator.audioSession){const t=mix?'ambient':'playback';if(navigator.audioSession.type!==t)navigator.audioSession.type=t;}}catch(e){}
+  if(!mix)return false;
+  try{if(window.__GPSIL){window.__GPSIL.pause();window.__GPSIL.removeAttribute('src');window.__GPSIL=null;}}catch(e){}  // the old silent loop would take over other apps' audio
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){if(!window.__GPAC)window.__GPAC=new AC({latencyHint:'interactive'});if(window.__GPAC.state==='suspended')window.__GPAC.resume().catch(()=>{});}}catch(e){}
+  try{const f=document.getElementById('gd-if'),w=f&&f.contentWindow;if(w&&w.GDS){w.GDS.mixAudio=true;if(w.navigator.audioSession)w.navigator.audioSession.type='ambient';}}catch(e){}
+  return true;}
+// a slider: store the value without redrawing the settings (a redraw would drop the slider mid-drag); a running game hears it at once
+function gdsMainPut(k,v){const o=gdsMain();o[k]=v;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}
+  try{const f=document.getElementById('gd-if'),w=f&&f.contentWindow;if(w&&w.GDS)w.GDS[k]=v;}catch(e){}}
 </script>
 <script type="text/x-gameday" id="gd-src"><!DOCTYPE html>
 <html lang="en">
@@ -24820,7 +24838,7 @@ function sndInit(){
   if(SND.ctx||DEMO||!GDS.sound)return;
   try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
     let c=null;try{const P=window.parent&&window.parent!==window?window.parent.__GPAC:null;if(P&&P.state!=='closed')c=P;}catch(e){}
-    if(!c)c=new AC({latencyHint:'interactive'});SND.ctx=c;try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    if(!c)c=new AC({latencyHint:'interactive'});SND.ctx=c;try{if(navigator.audioSession)navigator.audioSession.type=GDS.mixAudio===false?'playback':'ambient';}catch(e){}  // ambient mixes with the player's own music
     // v2.16 speaker chain: cut the rumble small speakers can't play, lift the presence range, compress and make up the level
     const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=70;
     const pres=c.createBiquadFilter();pres.type='peaking';pres.frequency.value=2400;pres.Q.value=0.8;pres.gain.value=4;
@@ -24838,6 +24856,8 @@ function sndInit(){
     SND.murmur=mk(420,0.7,0);SND.crowd=mk(900,0.5,0);SND.on=true;
   }catch(e){SND.ctx=null;}
 }
+// crowd and band level (Settings), 0..1 on top of the main volume
+function sndCV(){const v=+GDS.crowdVol;return GDS.crowdVol!=null&&Number.isFinite(v)?clamp(v,0,1):1;}
 function sndUnlock(){sndInit();if(SND.ctx&&SND.ctx.state!=='running')SND.ctx.resume().catch(()=>{});}
 // a controller button counts too (the parent's click already started the audio)
 function sndPadKick(){if(!SND.ctx||SND.ctx.state!=='running')sndUnlock();}
@@ -24868,17 +24888,17 @@ const SFX={
   beat(k){if(!sndOK('beat',0.25))return;sndTone('sine',58,40,0.13,0.32*k);sndTone('sine',52,38,0.12,0.22*k,0.17);},
   click(){if(!sndOK('clk',0.03))return;sndTone('square',1800,1200,0.025,0.035);},
   // crowd one-shots: a roar swells and fades, a groan bends down, a gasp is short and sharp
-  roar(v,dur){if(!sndOK('roar',0.6)||!GDS.crowd)return;sndNoise('bandpass',1000,0.45,dur||2.6,0.3*(v||1));sndNoise('bandpass',2300,0.7,(dur||2.6)*0.8,0.14*(v||1),0.05);sndNoise('bandpass',600,0.8,(dur||2.6)*0.9,0.12*(v||1),0.08);},
-  groan(){if(!sndOK('groan',1)||!GDS.crowd)return;sndNoise('bandpass',700,1.4,1.4,0.16,0,280);},
-  gasp(){if(!sndOK('gasp',0.6)||!GDS.crowd)return;sndNoise('bandpass',1300,1.6,0.45,0.2,0,2600);},
-  boo(){if(!sndOK('boo',1)||!GDS.crowd)return;sndNoise('bandpass',260,3,1.6,0.2);sndNoise('bandpass',330,3,1.5,0.12,0.1);}
+  roar(v,dur){if(!sndOK('roar',0.6)||!GDS.crowd)return;v=(v||1)*sndCV();sndNoise('bandpass',1000,0.45,dur||2.6,0.3*(v||1));sndNoise('bandpass',2300,0.7,(dur||2.6)*0.8,0.14*(v||1),0.05);sndNoise('bandpass',600,0.8,(dur||2.6)*0.9,0.12*(v||1),0.08);},
+  groan(){if(!sndOK('groan',1)||!GDS.crowd)return;sndNoise('bandpass',700,1.4,1.4,0.16*sndCV(),0,280);},
+  gasp(){if(!sndOK('gasp',0.6)||!GDS.crowd)return;sndNoise('bandpass',1300,1.6,0.45,0.2*sndCV(),0,2600);},
+  boo(){if(!sndOK('boo',1)||!GDS.crowd)return;const k=sndCV();sndNoise('bandpass',260,3,1.6,0.2*k);sndNoise('bandpass',330,3,1.5,0.12*k,0.1);}
 };
 /* v2.16 the home band: a drumline between plays, the fight song after home touchdowns, "Charge!" and DE-FENSE claps on big home
    defensive downs. Everything is synthesized like the rest of the sound (no audio files). */
 const BAND={next:0,step:0,bar:0,on:false,lastCall:-9,lastChant:-9};
 const BAND_SN='x.x.xx.xx.x.x.xx',BAND_BD='x...x...x..xx...';
 function bandOK(){return SND.on&&GDS.sound&&GDS.band!==false&&GDS.crowd&&!G.noDraw&&!G.simming&&!G.paused&&!DEMO&&!(GP&&GP.practice)&&G.phase!=='replay';}
-function bandVol(){const tier=GP&&GP.stadium&&GP.stadium.tier?clamp(GP.stadium.tier/20,0.35,1):0.6;return 0.55*tier;}
+function bandVol(){const tier=GP&&GP.stadium&&GP.stadium.tier?clamp(GP.stadium.tier/20,0.35,1):0.6;return 0.55*tier*sndCV();}
 function bandSnare(t,v){const c=SND.ctx,src=c.createBufferSource();src.buffer=SND.noise;const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=1800;const g=c.createGain();
   src.connect(hp);hp.connect(g);g.connect(SND.master);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.09*v,t+0.003);g.gain.exponentialRampToValueAtTime(0.0001,t+0.11);src.start(t,Math.random());src.stop(t+0.15);}
 function bandBass(t,v){const c=SND.ctx,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(85,t);o.frequency.exponentialRampToValueAtTime(48,t+0.18);
@@ -24963,12 +24983,12 @@ function sndStep(dt){
   // the home crowd gets loud when its defense is on the field before the snap
   const homeD=G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.offTeam!==gpHomeTeam();
   const n=gpNerves(gpHomeTeam());
-  let bed=prac?0.01:(0.035+n*0.05)*stad,roar=prac?0:Math.max(0,Math.min(1,G.cheer/2.5))*0.3*stad+(homeD?0.03+n*0.04+(G.noise||0)*0.14:0);
+  let bed=prac?0.01:(0.035+n*0.05)*stad,roar=prac?0:Math.max(0,Math.min(1,G.cheer/2.5))*0.3*stad+(homeD?0.03+n*0.04+(G.noise||0)*0.14:0);bed*=sndCV();roar*=sndCV();
   SND.murmur.gn.gain.setTargetAtTime(bed,c.currentTime,0.4);SND.crowd.gn.gain.setTargetAtTime(roar,c.currentTime,0.25);
   SND.crowd.bp.frequency.setTargetAtTime(800+roar*1400,c.currentTime,0.3);
   // v2.16 a livelier crowd: the bed breathes, and now and then someone yells or whistles
   if(!prac){SND.murmur.bp.frequency.setTargetAtTime(380+Math.sin(G.time*0.37)*70+Math.sin(G.time*1.3)*25,c.currentTime,0.5);
-    if(Math.random()<dt*0.12*stad)sndNoise('bandpass',900+Math.random()*900,6,0.25+Math.random()*0.3,0.05*stad);
+    if(Math.random()<dt*0.12*stad)sndNoise('bandpass',900+Math.random()*900,6,0.25+Math.random()*0.3,0.05*stad*sndCV());
     if(Math.random()<dt*0.04*stad)sndTone('sine',2400+Math.random()*600,2900+Math.random()*500,0.35,0.025*stad);}
   try{bandStep();}catch(e){}
 }

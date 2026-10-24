@@ -34,7 +34,7 @@ function sndInit(){
   if(SND.ctx||DEMO||!GDS.sound)return;
   try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
     let c=null;try{const P=window.parent&&window.parent!==window?window.parent.__GPAC:null;if(P&&P.state!=='closed')c=P;}catch(e){}
-    if(!c)c=new AC({latencyHint:'interactive'});SND.ctx=c;try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    if(!c)c=new AC({latencyHint:'interactive'});SND.ctx=c;try{if(navigator.audioSession)navigator.audioSession.type=GDS.mixAudio===false?'playback':'ambient';}catch(e){}  // ambient mixes with the player's own music
     // v2.16 speaker chain: cut the rumble small speakers can't play, lift the presence range, compress and make up the level
     const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=70;
     const pres=c.createBiquadFilter();pres.type='peaking';pres.frequency.value=2400;pres.Q.value=0.8;pres.gain.value=4;
@@ -52,6 +52,8 @@ function sndInit(){
     SND.murmur=mk(420,0.7,0);SND.crowd=mk(900,0.5,0);SND.on=true;
   }catch(e){SND.ctx=null;}
 }
+// crowd and band level (Settings), 0..1 on top of the main volume
+function sndCV(){const v=+GDS.crowdVol;return GDS.crowdVol!=null&&Number.isFinite(v)?clamp(v,0,1):1;}
 function sndUnlock(){sndInit();if(SND.ctx&&SND.ctx.state!=='running')SND.ctx.resume().catch(()=>{});}
 // a controller button counts too (the parent's click already started the audio)
 function sndPadKick(){if(!SND.ctx||SND.ctx.state!=='running')sndUnlock();}
@@ -82,17 +84,17 @@ const SFX={
   beat(k){if(!sndOK('beat',0.25))return;sndTone('sine',58,40,0.13,0.32*k);sndTone('sine',52,38,0.12,0.22*k,0.17);},
   click(){if(!sndOK('clk',0.03))return;sndTone('square',1800,1200,0.025,0.035);},
   // crowd one-shots: a roar swells and fades, a groan bends down, a gasp is short and sharp
-  roar(v,dur){if(!sndOK('roar',0.6)||!GDS.crowd)return;sndNoise('bandpass',1000,0.45,dur||2.6,0.3*(v||1));sndNoise('bandpass',2300,0.7,(dur||2.6)*0.8,0.14*(v||1),0.05);sndNoise('bandpass',600,0.8,(dur||2.6)*0.9,0.12*(v||1),0.08);},
-  groan(){if(!sndOK('groan',1)||!GDS.crowd)return;sndNoise('bandpass',700,1.4,1.4,0.16,0,280);},
-  gasp(){if(!sndOK('gasp',0.6)||!GDS.crowd)return;sndNoise('bandpass',1300,1.6,0.45,0.2,0,2600);},
-  boo(){if(!sndOK('boo',1)||!GDS.crowd)return;sndNoise('bandpass',260,3,1.6,0.2);sndNoise('bandpass',330,3,1.5,0.12,0.1);}
+  roar(v,dur){if(!sndOK('roar',0.6)||!GDS.crowd)return;v=(v||1)*sndCV();sndNoise('bandpass',1000,0.45,dur||2.6,0.3*(v||1));sndNoise('bandpass',2300,0.7,(dur||2.6)*0.8,0.14*(v||1),0.05);sndNoise('bandpass',600,0.8,(dur||2.6)*0.9,0.12*(v||1),0.08);},
+  groan(){if(!sndOK('groan',1)||!GDS.crowd)return;sndNoise('bandpass',700,1.4,1.4,0.16*sndCV(),0,280);},
+  gasp(){if(!sndOK('gasp',0.6)||!GDS.crowd)return;sndNoise('bandpass',1300,1.6,0.45,0.2*sndCV(),0,2600);},
+  boo(){if(!sndOK('boo',1)||!GDS.crowd)return;const k=sndCV();sndNoise('bandpass',260,3,1.6,0.2*k);sndNoise('bandpass',330,3,1.5,0.12*k,0.1);}
 };
 /* v2.16 the home band: a drumline between plays, the fight song after home touchdowns, "Charge!" and DE-FENSE claps on big home
    defensive downs. Everything is synthesized like the rest of the sound (no audio files). */
 const BAND={next:0,step:0,bar:0,on:false,lastCall:-9,lastChant:-9};
 const BAND_SN='x.x.xx.xx.x.x.xx',BAND_BD='x...x...x..xx...';
 function bandOK(){return SND.on&&GDS.sound&&GDS.band!==false&&GDS.crowd&&!G.noDraw&&!G.simming&&!G.paused&&!DEMO&&!(GP&&GP.practice)&&G.phase!=='replay';}
-function bandVol(){const tier=GP&&GP.stadium&&GP.stadium.tier?clamp(GP.stadium.tier/20,0.35,1):0.6;return 0.55*tier;}
+function bandVol(){const tier=GP&&GP.stadium&&GP.stadium.tier?clamp(GP.stadium.tier/20,0.35,1):0.6;return 0.55*tier*sndCV();}
 function bandSnare(t,v){const c=SND.ctx,src=c.createBufferSource();src.buffer=SND.noise;const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=1800;const g=c.createGain();
   src.connect(hp);hp.connect(g);g.connect(SND.master);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.09*v,t+0.003);g.gain.exponentialRampToValueAtTime(0.0001,t+0.11);src.start(t,Math.random());src.stop(t+0.15);}
 function bandBass(t,v){const c=SND.ctx,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(85,t);o.frequency.exponentialRampToValueAtTime(48,t+0.18);
@@ -177,12 +179,12 @@ function sndStep(dt){
   // the home crowd gets loud when its defense is on the field before the snap
   const homeD=G.phase==='presnap'&&G.play&&G.play.kind==='scrimmage'&&G.offTeam!==gpHomeTeam();
   const n=gpNerves(gpHomeTeam());
-  let bed=prac?0.01:(0.035+n*0.05)*stad,roar=prac?0:Math.max(0,Math.min(1,G.cheer/2.5))*0.3*stad+(homeD?0.03+n*0.04+(G.noise||0)*0.14:0);
+  let bed=prac?0.01:(0.035+n*0.05)*stad,roar=prac?0:Math.max(0,Math.min(1,G.cheer/2.5))*0.3*stad+(homeD?0.03+n*0.04+(G.noise||0)*0.14:0);bed*=sndCV();roar*=sndCV();
   SND.murmur.gn.gain.setTargetAtTime(bed,c.currentTime,0.4);SND.crowd.gn.gain.setTargetAtTime(roar,c.currentTime,0.25);
   SND.crowd.bp.frequency.setTargetAtTime(800+roar*1400,c.currentTime,0.3);
   // v2.16 a livelier crowd: the bed breathes, and now and then someone yells or whistles
   if(!prac){SND.murmur.bp.frequency.setTargetAtTime(380+Math.sin(G.time*0.37)*70+Math.sin(G.time*1.3)*25,c.currentTime,0.5);
-    if(Math.random()<dt*0.12*stad)sndNoise('bandpass',900+Math.random()*900,6,0.25+Math.random()*0.3,0.05*stad);
+    if(Math.random()<dt*0.12*stad)sndNoise('bandpass',900+Math.random()*900,6,0.25+Math.random()*0.3,0.05*stad*sndCV());
     if(Math.random()<dt*0.04*stad)sndTone('sine',2400+Math.random()*600,2900+Math.random()*500,0.35,0.025*stad);}
   try{bandStep();}catch(e){}
 }

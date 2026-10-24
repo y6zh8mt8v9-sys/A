@@ -125,9 +125,11 @@ function gdStart(){
 // v2.16: closing Game Day frees the whole engine first (blank frame, no references), so a phone low on memory does not reload the page
 function gdTeardown(){try{clearInterval(window._gdWatch);}catch(e){}try{const f=document.getElementById('gd-if');if(f&&f.contentWindow&&f.contentWindow.__gpSndStop)f.contentWindow.__gpSndStop();}catch(e){}const ov=document.getElementById('gd-ov');if(!ov)return;const f=ov.querySelector('iframe');
   try{if(f&&f.contentWindow){try{f.contentWindow.__G=null;}catch(e){}f.src='about:blank';}}catch(e){}try{if(f)f.remove();}catch(e){}ov.remove();window.__GP=null;}
-// v2.16 sound: the audio starts from the tap or click that opens Game Day, and iOS plays it through the speaker even with the
-// ringer switch on silent (media playback instead of the ambient category)
+// v2.16 sound: the audio starts from the tap or click that opens Game Day. By default the game's sound mixes with the player's own
+// music (Spotify, Apple Music, a video): the ambient audio session, no media element. With "Let other apps keep playing music" off,
+// iOS plays it through the speaker even with the ringer switch on silent (media playback, which pauses other apps)
 function gpAudioUnlock(){
+  if(gpAudioMode())return;
   try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback';}catch(e){}
   try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!window.__GPAC)window.__GPAC=new AC({latencyHint:'interactive'});if(window.__GPAC.state!=='running')window.__GPAC.resume().catch(()=>{});}catch(e){}
   // older iOS: a silent media element in a loop moves the page to the playback audio session

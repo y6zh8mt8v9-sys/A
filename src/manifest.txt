@@ -71,6 +71,7 @@ app/054-loading-screen.js
 app/055-player-career-your-own-player.js
 app/056-huddle-the-career-s-social.js
 app/057-tutorial.js
+app/058-audio-mix.js
 shell/20-app-end-engine-start.html
 engine/shell/00-page.html
 engine/sprites/00-sprite-library.js
