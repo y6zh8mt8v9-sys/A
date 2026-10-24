@@ -249,3 +249,6 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 .vs-h div{min-width:0}.vs-h b{display:block;font:800 19px/1 var(--hd);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vs-h small{display:block;font-size:11px;opacity:.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vs-x{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;font:900 13px/1 var(--hd);text-transform:uppercase;background:#081710;color:#f2c230;padding:4px 6px}
+/* Free Practice and Online Play screens */
+html body #fp,html body #ol{background:var(--mow),var(--bg)}
+#fp .fp-head h2,#ol .fp-head h2{font:900 28px/1 var(--hd)}
