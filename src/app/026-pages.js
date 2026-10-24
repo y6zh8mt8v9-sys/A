@@ -44,7 +44,7 @@ function pgDash(){
     const favStr=myOvr>oppOvr?`<span style="color:var(--gn);font-size:11px">▲ Favored +${myOvr-oppOvr}</span>`:myOvr<oppOvr?`<span style="color:var(--te);font-size:11px">▼ Underdog −${oppOvr-myOvr}</span>`:`<span style="color:var(--mu);font-size:11px">Even matchup</span>`;
     nextGameBlock=`<div class="dash-next-game${nextUnplayed.isRivalry?' rivalry':''}">
       <div class="dash-ng-header">
-        <span class="dash-ng-title">${nextUnplayed.isRivalry?' Rivalry week, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
+        <span class="dash-ng-title">${nextUnplayed.isRivalry?' Rivalry week, ':''}${hcIs(nextUnplayed.wk)?'Homecoming, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
         ${favStr}
       </div>
       ${(()=>{const w=gdWxFor('reg',{idx:G.sched.indexOf(nextUnplayed),opp:no});return w?`<div class="dash-ng-wx" title="${wxEffects(w)}">${wxIcon(w,16)}<span><b>Forecast:</b> ${wxLine(w)}</span></div>`:'';})()}

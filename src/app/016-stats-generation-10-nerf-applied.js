@@ -37,6 +37,8 @@ function genStats(players,teamScore,won,offScheme,defScheme,schId,oppId){
     const bo=b.depth&&b.depth[pos]!==undefined?b.depth[pos]:999;
     if(ao!==bo)return ao-bo;return b.rat-a.rat;
   });
+  // Player Career two-way player: he also lines up at his second position (a starter there when he starts, else by rating)
+  for(const p of players){if(!pcOwnPick(p)||!pcTwo(p))continue;const L=byPos[p.pos2]||(byPos[p.pos2]=[]);let i=L.findIndex(q=>q.rat<p.rat-4);try{if(pcRole(p).start)i=0;}catch(e){}L.splice(i<0?L.length:i,0,p);}
   const starter=(pos,n=0)=>byPos[pos]&&byPos[pos][n]?byPos[pos][n]:null;
   function sc(p,base,spread){if(!p)return 0;const r=(p.rat-55)/50;const sb=p.traits&&p.traits.includes('showboat')&&Math.random()<.35?1.25:1;return Math.max(0,Math.round((base+r*spread+rng(-Math.round(spread*.22),Math.round(spread*.22)))*sb*STAT_NERF));}
 
@@ -294,14 +296,16 @@ function gateAfter(opp,kind,wk,my,op){
     const home=kind==='reg'?(((wk|0)+G.myId)%2===0):kind==='po'?((G.wins||0)>=(opp.wins||0)):true;
     if(!home&&kind==='reg')return;
     const cap=stadBase(stadOf(s)).cap,T=TICKET[G.ticket||'normal']||TICKET.normal,gp=(G.wins||0)+(G.losses||0),wp=gp?(G.wins||0)/gp:0.5;
-    const rival=(typeof isRivalry==='function'&&isRivalry(G.myId,opp.id))?0.18:0;
-    let demand=0.42+0.07*((G.prestige||1)-1)+0.3*(wp-0.5)+rival+0.04*((opp.prestige||1)-2)+(kind==='po'?0.3:0)+(kind==='nat'?0.5:0)+T[1];
+    const rival=(typeof isRivalry==='function'&&isRivalry(G.myId,opp.id))?0.18:0,hc=kind==='reg'&&hcIs(wk);
+    let demand=(hc?0.2:0)+0.42+0.07*((G.prestige||1)-1)+0.3*(wp-0.5)+rival+0.04*((opp.prestige||1)-2)+(kind==='po'?0.3:0)+(kind==='nat'?0.5:0)+T[1];
     const att=Math.min(cap,Math.round(cap*clamp(demand,0.12,1)*(0.95+Math.random()*0.1)));
     let rev=Math.round(att*(T[0]+1.5));if(kind==='po')rev=Math.round(rev*0.6);if(kind==='nat')rev=Math.round(rev*0.5);
     G.budget+=rev;
     if(!G.gate||G.gate.yr!==G.yr)G.gate={yr:G.yr,n:0,att:0,rev:0};
     G.gate.n++;G.gate.att+=att;G.gate.rev+=rev;G.gate.last={att,cap,rev,opp:opp.mascot||opp.name,kind};
-    addLog(`<span style="color:var(--gn)">Gate vs ${opp.mascot||opp.name}: ${att.toLocaleString()} fans (${Math.round(att/cap*100)}% full) · +$${rev.toLocaleString()}${kind==='po'?' (playoff share)':kind==='nat'?' (neutral-site share)':''}</span>`);
+    if(hc){const g=G.sched.find(x=>x.type==='regular'&&x.wk===wk),r=g&&g.result?` ${g.result==='W'?'beat':'fell to'} ${opp.name} ${g.my}-${g.opp}`:` hosted ${opp.name}`;
+      try{addNews('myteam',`Homecoming: ${s.mascot}${r}`,`${att.toLocaleString()} fans packed the stands for homecoming week: the parade, the court at halftime and alumni back in town.`);}catch(e){}}
+    addLog(`<span style="color:var(--gn)">${hc?'Homecoming gate':'Gate'} vs ${opp.mascot||opp.name}: ${att.toLocaleString()} fans (${Math.round(att/cap*100)}% full) · +$${rev.toLocaleString()}${kind==='po'?' (playoff share)':kind==='nat'?' (neutral-site share)':''}</span>`);
   }catch(e){console.error('gate',e);}
 }
 function trophySvg(col,big){const w=big?64:46;return`<svg viewBox="0 0 64 72" width="${w}" height="${Math.round(w*72/64)}"><defs><linearGradient id="tg${col.slice(1)}" x1="0" x2="1"><stop offset="0" stop-color="${col}"/><stop offset=".45" stop-color="#fff8dc"/><stop offset="1" stop-color="${col}"/></linearGradient></defs>

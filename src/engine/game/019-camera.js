@@ -173,7 +173,7 @@ function packSprite(pk){
 }
 function drawPack(S,p,z){
   const pk=S.pk,sp=packSprite(pk);
-  if(pk.bare&&S.look){const q=S.look.eq||{};S={...S,look:{...S.look,eq:{...q,visor:null,mouth:null,mouth2:null,helm:null,ski:null,gcap:null,...(pk.slim?{pants:'short',socks:'low'}:{})}}};}
+  if(pk.bare&&S.look){const q=S.look.eq||{};S={...S,look:{...S.look,eq:{...q,visor:null,mouth:null,mouth2:null,helm:null,ski:null,gcap:null,...(pk.slim?{pants:'short',socks:'low',tank:true,under:null,crop:false,shoulder:null}:{})}}};}
   const s=98*z*(S.body?S.body.hs:1)/48,sx=s*clamp(Math.sqrt((S.body?S.body.ws:1)/BUILD_WS[pk.build]),0.9,1.12);
   const hb=S.qbBall?gpHeldBall(sp,pk,S.dir<0,sx,s):null;
   if(S.rot||(S.sq&&S.sq!==1)){ctx.save();ctx.translate(p.sx,p.sy-S.jz*p.k);ctx.rotate(S.rot||0);ctx.scale(1,S.sq||1);sp.draw(ctx,pk.anim,pk.frame,0,0,sx,s,S.dir<0,S.ref?null:S.num,S.ref?null:S.look&&S.look.eq);if(hb)gpDrawHeld(hb,0,0,s);ctx.restore();}

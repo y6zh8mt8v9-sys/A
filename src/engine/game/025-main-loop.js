@@ -105,7 +105,7 @@ function newGame(){
   try{gpSliderBake();}catch(e){}
   if(GP&&!ON&&GP.mode){const m=GP.mode;G.playMode=m==='off'||m==='def'?m:'all';if(m==='coach')gpSetCoach(true);}
   if(ON){gpIntro(()=>olToss());return;}
-  gpIntro(()=>showModal(G.teams[0].name===G.teams[1].name?(G.teams[0].city+' '+G.teams[0].name+' vs '+G.teams[1].city+' '+G.teams[1].name):(G.teams[0].name+' vs '+G.teams[1].name),'Two-minute quarters, eleven on eleven. Call the coin toss.',[['Heads','go',()=>toss(0)],['Tails','alt',()=>toss(1)]]));
+  gpIntro(()=>showModal(G.teams[0].name===G.teams[1].name?(G.teams[0].city+' '+G.teams[0].name+' vs '+G.teams[1].city+' '+G.teams[1].name):(G.teams[0].name+' vs '+G.teams[1].name),'Two-minute quarters, '+({6:'six on six',7:'seven on seven',8:'eight on eight',9:'nine on nine'}[SEVENS()?7:gpPer()]||'eleven on eleven')+'. Call the coin toss.',[['Heads','go',()=>toss(0)],['Tails','alt',()=>toss(1)]]));
 }
 function gpSliderBake(){if(ON||G.test||G.demo||DEMO)return;
   for(const T of G.teams)for(const p of T.roster){const ds=sla(T.id,'str',15),di=sla(T.id,'iq',15);if(ds)p.str=clamp(Math.round((p.str||70)+ds),25,99);if(di)p.awr=clamp(Math.round((p.awr||70)+di),25,99);}}
@@ -448,14 +448,14 @@ if(GP){try{
   const L0=document.getElementById('gull'),L1=document.getElementById('elk');
   if(L0){L0.setAttribute('viewBox','0 0 100 100');L0.innerHTML=GP.teams[0].logoInner;}
   if(L1){L1.setAttribute('viewBox','0 0 100 100');L1.innerHTML=GP.teams[1].logoInner;}
-  for(const i of[0,1]){const c=document.getElementById('gpC'+i),n=document.getElementById('gpN'+i);if(c)c.textContent=GP.teams[i].city.toUpperCase()+(GP.teams[i].ovr?' · '+GP.teams[i].ovr+' OVR':'');if(n){n.textContent=GP.teams[i].name.toUpperCase();n.dataset.full=n.textContent;n.dataset.abbr=(GP.teams[i].abbr||n.textContent.slice(0,4)).toUpperCase();n.dataset.rec=GP.teams[i].rec||'';}}
-  if(GP.teams[GP.home||0].logoUrl)logoImg.gull.src=GP.teams[GP.home||0].logoUrl;
+  for(const i of[0,1]){const c=document.getElementById('gpC'+i),n=document.getElementById('gpN'+i);if(c)c.textContent=GP.teams[i].city.toUpperCase()+(GP.teams[i].ovr?' · '+GP.teams[i].ovr+' OVR':'');if(n){n.textContent=GP.teams[i].name.toUpperCase();n.dataset.full=n.textContent;n.dataset.abbr=(GP.teams[i].abbr||n.textContent.slice(0,4)).toUpperCase();n.dataset.rec=GP.teams[i].rec||'';n.dataset.rk=GP.teams[i].rk||'';}}
+  if(GP.midLogoUrl||GP.teams[GP.home||0].logoUrl)logoImg.gull.src=GP.midLogoUrl||GP.teams[GP.home||0].logoUrl; // a neutral-site final shows the host college at midfield
   const h0=document.querySelector('.tm.home'),h1=document.querySelector('.tm.away');if(h0&&GP.teams[0].hud)h0.style.background=GP.teams[0].hud;if(h1&&GP.teams[1].hud)h1.style.background=GP.teams[1].hud;
   document.title=GP.teams[0].name+' vs '+GP.teams[1].name;
 }catch(e){console.error(e);}}
 // v2.15 TV-style scorebug (Settings → Scorebug): abbreviations, records and a yellow down-and-distance tag
 function gpBugStyle(){const tv=GDS.bug!=='classic';document.body.classList.toggle('bugtv',tv);try{document.body.classList.toggle('pcbug',pcOn());}catch(e){}for(const k of['slab','tower','mini'])document.body.classList.toggle('bug-'+k,GDS.bug===k);
-  for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;
+  for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;if(n.dataset.rk){const k=document.createElement('span');k.className='rkn';k.textContent=n.dataset.rk;n.prepend(k);} // national or state class rank before the name
     let r=n.parentNode.querySelector('.rec');if(n.dataset.rec&&!r){r=document.createElement('span');r.className='rec';n.after(r);}if(r)r.textContent=n.dataset.rec||'';}}
 try{gpBugStyle();}catch(e){}
 new ResizeObserver(fit).observe($('stage'));

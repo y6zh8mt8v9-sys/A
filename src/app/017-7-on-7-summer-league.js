@@ -18,7 +18,12 @@ function s7Start(){
   const sd=[0,7,3,4,1,6,2,5].filter(i=>i<field.length).map(i=>field[i]);const pairs=[];for(let i=0;i+1<sd.length;i+=2)pairs.push([sd[i],sd[i+1]]);
   G.s7={yr:G.yr,picks:G.s7&&G.s7.yr===G.yr?G.s7.picks:[],field,round:0,rounds:[pairs.map(([a,b])=>({a,b,w:null,sc:null}))],series:null,done:false,res:[]};}
 window.s7Open=function(){
-  if(!G.s7||G.s7.yr!==G.yr||!G.s7.paid){s7Signup();return;}s7Render();};
+  if(!G.s7||G.s7.yr!==G.yr||!G.s7.paid){if(pcAuto()){s7AutoEnter();return;}s7Signup();return;}s7Render();};
+// Player Career: the coach enters the league with his best 14
+function s7AutoEnter(){if(!G.unlimitedMoney&&G.budget<S7_FEE){notify('The program can\'t afford the 7-on-7 entry fee this year','w');return;}
+  const ids=s7AutoPick();s7Start();if(!G.s7||G.s7.yr!==G.yr||!G.s7.rounds)return;if(!G.unlimitedMoney)G.budget-=S7_FEE;G.s7.picks=ids;G.s7.paid=true;addLog(`<span style="color:var(--gd)">The coach entered the 7-on-7 Summer League (-$${S7_FEE.toLocaleString()})</span>`);s7Render();}
+// Player Career: you play the 7-on-7 games only when the coach picked your player
+function s7MineIn(){const p=pcActive();return!!(p&&!(p.inj>0)&&G.s7&&G.s7.picks.includes(p.id));}
 function s7Signup(){
   const pl=myP().filter(p=>!(p.inj>0)),O=['QB','WR','TE','RB'],D=['CB','S','LB'],sel=new Set((G.s7&&G.s7.yr===G.yr&&G.s7.picks)||s7AutoPick());
   const row=p=>`<label style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:13px"><input type="checkbox" class="s7-ck" value="${p.id}" style="width:auto;min-height:0" ${sel.has(p.id)?'checked':''} onchange="s7Count()"><b style="width:30px">${p.pos}</b>${p.fn} ${p.ln}<span style="margin-left:auto;color:var(--mu)">${p.rat} · ${['','','','','','','','','','Fr','So','Jr','Sr'][p.yr]||''}</span></label>`;
@@ -47,8 +52,8 @@ function s7Render(){const S=G.s7;if(!S)return;const my=s7MyGame(),rn=['Quarterfi
   const rows=S.rounds.map((R,i)=>`<div style="margin-bottom:8px"><div style="font-weight:800;font-size:12px;color:var(--mu)">${rn[i]||'Round '+(i+1)}</div>${R.map(g=>`<div class="dr"><span>${g.a===G.myId?'<b>':''}${s7Name(g.a)}${g.a===G.myId?'</b>':''} vs ${g.b===G.myId?'<b>':''}${s7Name(g.b)}${g.b===G.myId?'</b>':''}</span><span>${g.sc?g.sc.join('-'):'–'}</span></div>`).join('')}</div>`).join('')
     +(S.series?`<div style="font-weight:800;font-size:12px;color:var(--mu)">League final · best of five</div><div class="dr"><span>${s7Name(S.series.a)} vs ${s7Name(S.series.b)}</span><span>${S.series.wa}-${S.series.wb}</span></div>${S.series.games.map((g,i)=>`<div style="font-size:12px;color:var(--mu)">Game ${i+1}: ${g.join('-')}</div>`).join('')}`:'');
   openMo(`<h2>7-on-7 Summer League</h2><div style="font-size:13px;margin-bottom:10px">${S.done?(S.champ===G.myId?'<b style="color:var(--gd)">League champions!</b>':`Your run is over. Champion: <b>${s7Name(S.champ)}</b>`):my?`Next: <b>${s7Name(my.opp)}</b>${my.kind==='series'?` · league final, game ${S.series.games.length+1}`:''}`:'Waiting on the other games…'}</div>
-    ${rows}<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:10px;flex-wrap:wrap">${my?`<label style="font-size:12px;display:flex;gap:6px;align-items:center;margin-right:auto">Game length <select style="width:auto;min-height:0" onchange="G.s7.qn=+this.value"><option value="1"${S.qn===1?' selected':''}>1 quarter</option><option value="2"${S.qn!==1?' selected':''}>2 quarters</option></select></label><button class="btn bgn" onclick="s7Play()">Play it</button><button class="bgh" onclick="s7Sim()">Simulate</button>`:''}<button class="bgh" onclick="clo()">Close</button></div>`);}
-window.s7Play=function(){const my=s7MyGame();if(!my)return;const opp=getS(my.opp);clo();window._gdMode='all';window._gdInfo={kind:'s7',info:{opp,label:'7-on-7 Summer League'}};gdStart();};
+    ${rows}<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:10px;flex-wrap:wrap">${my?`<label style="font-size:12px;display:flex;gap:6px;align-items:center;margin-right:auto">Game length <select style="width:auto;min-height:0" onchange="G.s7.qn=+this.value"><option value="1"${S.qn===1?' selected':''}>1 quarter</option><option value="2"${S.qn!==1?' selected':''}>2 quarters</option></select></label>${!pcAuto()||s7MineIn()?`<button class="btn bgn" onclick="s7Play()">Play it</button>`:''}<button class="bgh" onclick="s7Sim()">Simulate</button>`:''}<button class="bgh" onclick="clo()">Close</button></div>`);}
+window.s7Play=function(){const my=s7MyGame();if(!my)return;if(pcAuto()&&!s7MineIn()){s7Sim();return;}const opp=getS(my.opp);clo();window._gdMode='all';window._gdInfo={kind:'s7',info:{opp,label:'7-on-7 Summer League'}};gdStart();};
 window.s7Sim=function(){const my=s7MyGame();if(!my)return;const[a,b]=s7SimGame(G.myId,my.opp);s7Record(a,b);};
 // a result for your game; the other games of the round are simulated, then the bracket moves on
 function s7Record(my,op){const S=G.s7,g=s7MyGame();if(!g)return;
@@ -76,7 +81,8 @@ function s7Finish(champ){const S=G.s7;S.done=true;S.champ=champ;
   addLog(`<span style="color:var(--gd)">7-on-7 league ${me?'champions':'finished'} · ${won} win${won===1?'':'s'}${n?` · ${n} new offer${n===1?'':'s'}`:''}</span>`);}
 function s7Panel(){if(!G||G.phase!=='postseason')return'';const S=G.s7&&G.s7.yr===G.yr?G.s7:null;
   if(S&&S.done)return'';
-  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">7-on-7 Summer League</div><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:13px;color:var(--mu)">${S&&S.paid?'Your passing league team is in the bracket.':'Optional: pick 7 on offense and 7 on defense and play the best programs of your class. Best-of-five final; standouts get college looks. Entry $'+S7_FEE.toLocaleString()+'.'}</div><button class="btn" onclick="s7Open()">${S&&S.paid?'Open bracket':'Enter the league'}</button></div></div>`;}
+  if(pcAuto()&&!(S&&S.paid)&&!G.unlimitedMoney&&G.budget<S7_FEE)return'';
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">7-on-7 Summer League</div><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:13px;color:var(--mu)">${S&&S.paid?'Your passing league team is in the bracket.':pcAuto()?'The coach takes his best 7 on offense and 7 on defense to the passing league. Best-of-five final; standouts get college looks.':'Optional: pick 7 on offense and 7 on defense and play the best programs of your class. Best-of-five final; standouts get college looks. Entry $'+S7_FEE.toLocaleString()+'.'}</div><button class="btn" onclick="s7Open()">${S&&S.paid?'Open bracket':pcAuto()?'See the bracket':'Enter the league'}</button></div></div>`;}
 const _pgDash0=pgDash;pgDash=function(){if(gdsMain().cnav!==false)return _pgDash0();let x='';try{x=jobPanel()+s7Panel();}catch(e){}try{x=pcPanel()+x;}catch(e){}return x+_pgDash0();};
 // ═══════════ v2.16 PROGRAM MONEY: boosters, merchandise, broadcasts, sponsors, fundraisers, summer camps ═══════════
 function finYr(){if(!G.fin||G.fin.yr!==G.yr)G.fin={yr:G.yr,boost:0,merch:0,tv:0,spons:0,fund:0,camp:0,sign:0,fundDone:false,sponsDone:false,campDone:false};return G.fin;}
@@ -87,7 +93,7 @@ function moneyAfterGame(opp,kind,wk){
     const home=kind==='reg'?(((wk|0)+G.myId)%2===0):kind==='po'?((G.wins||0)>=(opp.wins||0)):true;
     const rival=typeof isRivalry==='function'&&isRivalry(G.myId,opp.id);
     finAdd('boost',(pr*500+wp*2200)*(rival?1.4:1)*(kind==='po'?1.5:1)*(0.85+Math.random()*0.3),null);
-    if(home){const cap=stadBase(stadOf(s)).cap;finAdd('merch',cap*(0.18+0.05*pr)*(0.6+wp*0.8)*(rival?1.3:1)*(0.85+Math.random()*0.3),null);}
+    if(home){const cap=stadBase(stadOf(s)).cap;finAdd('merch',cap*(0.18+0.05*pr)*(0.6+wp*0.8)*(rival?1.3:1)*(kind==='reg'&&hcIs(wk)?1.3:1)*(0.85+Math.random()*0.3),null);}
     if(kind==='po'||kind==='nat'||rival)finAdd('tv',kind==='nat'?40000:kind==='po'?6000+pr*1500:2500+pr*700,kind==='po'?'Playoff broadcast rights':kind==='nat'?'National title broadcast':'Rivalry game streaming deal');
   }catch(e){console.error('money',e);}
 }
