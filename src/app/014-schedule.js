@@ -96,7 +96,7 @@ let _sbStep=0; // 0 = pick rivalry, 1 = pick custom games
 let _sbTargetWk=null; // which week slot is currently selected for filling
 
 function openScheduleBuilder(){
-  if(pcAuto()){pcAutoSched();return;} // Player Career: the coaching staff builds it
+  if(pcAuto()||window._pcNewCareer){pcAutoSched();return;} // Player Career: the coaching staff builds it
   G.customSchedPending=false;
   _sbCls=G.cls; // default to own classification
   _sbSearch='';window._sbShow=60;
