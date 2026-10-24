@@ -156,7 +156,7 @@ function gdLaunch(){
   // v2.16: a career game saves first, so a crash or reload during or right after the game never costs more than that game
   // the frame is only built once that save is written, so the save and the game never use memory at the same time
   let sv=null;try{if(_gdCtx&&!['prac','free','online'].includes(_gdCtx.kind)&&typeof G!=='undefined'&&G&&G.myId&&gdsMain().autosave!==false)sv=_svBusy&&_svP?_svP.then(()=>saveGame(true)):saveGame(true);}catch(e){}  // a running autosave is waited for, then this one is written
-  if(sv&&sv.then){const ld=document.getElementById('loading-screen');try{if(ld){document.getElementById('loading-label').textContent='Saving before kickoff…';ld.classList.add('active');}}catch(e){}
+  if(sv&&sv.then){let ld=null;try{ld=loadingHold('Saving before kickoff…',typeof G!=='undefined'&&G&&G.myId?myS():null);}catch(e){}
     let done=false;const go=()=>{if(done)return;done=true;try{if(ld)ld.classList.remove('active');}catch(e){}gdLaunchFrame();};sv.then(go,go);setTimeout(go,10000);return;}
   gdLaunchFrame();
 }

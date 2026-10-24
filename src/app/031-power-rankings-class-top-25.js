@@ -53,8 +53,9 @@ function rkBadge(id){
   return b;}
 function rkTag(id){const b=rkBadge(id);return b?b.outerHTML:'';}
 let _rkNames=null;
+// rebuilt once per task, so a team renamed anywhere (its page, Team Builder, Customize) keeps its rank badge
 function rkNames(){
-  if(_rkNames&&_rkNames.G===G)return _rkNames;const full={},nm={},dup={};
+  if(_rkNames&&_rkNames.G===G)return _rkNames;const full={},nm={},dup={};setTimeout(()=>{_rkNames=null;},0);
   for(const s of allSchoolsAll()){full[`${s.name} ${s.mascot}`]=s.id;if(nm[s.name]!==undefined)dup[s.name]=1;nm[s.name]=s.id;}
   for(const d in dup)delete nm[d];_rkNames={G,full,nm};return _rkNames;
 }

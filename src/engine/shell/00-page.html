@@ -336,6 +336,19 @@ html.g27 .mbar{border-radius:3px}
 html.g27 #bug .sc,html.g27 #bug #clock{font-family:var(--hd)!important;font-weight:900!important}
 html.g27 #flash{font-family:var(--hd)!important;font-weight:900!important}
 html.g27 #t2{background:var(--cs);color:var(--ink);border:0;border-left:3px solid var(--post);border-radius:4px;font-family:var(--bf)}
+/* catch, sack and penalty call-outs, the big touchdown line and the drive / quarter sim summary */
+html.g27 #flash{background:var(--cs)!important;color:var(--ink)!important;border:0!important;border-left:4px solid var(--post)!important;border-radius:0!important;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);box-shadow:0 8px 24px rgba(0,0,0,.45)!important;backdrop-filter:none!important;
+  font:900 max(17px,calc(var(--s)*10.5px))/1 var(--hd)!important;padding:.42em 1.1em .38em!important}
+html.g27 #t1{font-family:var(--hd);font-weight:900;letter-spacing:.01em;text-shadow:0 3px 0 var(--post),0 8px 24px rgba(0,0,0,.6)}
+html.g27 #simBox{background:var(--cs)!important;color:var(--ink);border:1px solid var(--cb)!important;border-top:3px solid var(--post)!important;border-radius:0!important;
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%);box-shadow:0 20px 60px rgba(0,0,0,.55)!important;backdrop-filter:none!important}
+html.g27 body:has(#simBox:not([hidden])) #c{filter:brightness(.32) saturate(.6)}
+html.g27 #simTitle,html.g27 #simSum,html.g27 #simList{color:var(--ink)}
+html.g27 #simList{font-family:var(--bf)}
+html.g27 .simRow{background:var(--cs2);border:0;border-left:3px solid var(--cb);border-radius:0;padding:5px 9px}
+html.g27 .simRow:last-child{border-left-color:var(--post)}
+html.g27 #simSum{font-family:var(--bf);font-weight:700;border-top:1px solid var(--cb);padding-top:8px}
 <\/style>
 <main id="stage">
   <div id="wrap">

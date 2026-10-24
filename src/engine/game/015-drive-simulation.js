@@ -23,8 +23,8 @@ function simChunk(){
 }
 function logPlay(S,r){
   const p=G.pbp||{},dn=['','1st','2nd','3rd','4th'][p.d]||'';
-  const pre=p.conv?'Conversion':`${dn} & ${p.tg>=100-p.los?'Goal':p.tg}`;
-  const txt=`${G.teams[p.team!=null?p.team:G.offTeam].abbr} · ${pre} · ${p.call||''}: ${S.msg}${S.sub?''+S.sub:''}`;
+  const pre=p.conv?'Conversion':`${dn} & ${gpTgTxt(p.los,p.tg)}`;
+  const txt=`${G.teams[p.team!=null?p.team:G.offTeam].abbr} · ${pre} · ${p.call||''}: ${S.msg}${S.sub?'. '+S.sub:''}`;
   G.simLog.push(txt);const li=document.createElement('div');li.className='simRow';li.textContent=txt;$('simList').appendChild(li);$('simList').scrollTop=1e6;
 }
 function endSim(){

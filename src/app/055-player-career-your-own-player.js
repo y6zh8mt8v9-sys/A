@@ -447,7 +447,9 @@ function ccDealOpen(){const C=G.cc,offs=C.dealOffer||[];
    ${offs.map((o,i)=>`<button class="bgh" style="display:flex;justify-content:space-between;width:100%;text-align:left;margin-bottom:6px;padding:10px 12px" onclick="ccDeal(${i})"><span><b>${o.d[0]}</b><br><small style="color:var(--mu)">${o.d[1]}</small></span><span style="text-align:right"><b>${ccMoney(o.cash)}</b>${o.sp?`<br><small style="color:var(--gd)">+${o.sp} skill points</small>`:''}${o.xp?`<br><small style="color:var(--gd)">+${o.xp} XP</small>`:''}</span></button>`).join('')}`);}
 window.ccDeal=function(i){const C=G.cc,o=(C.dealOffer||[])[i];if(!o)return;C.nil.cash+=o.cash;C.nil.deals.push({y:ccYear(),n:o.d[0],cash:o.cash});if(o.sp)C.p.pcSP=(C.p.pcSP||0)+o.sp;if(o.xp)try{pcGainXP(C.p,o.xp);}catch(e){}
   C.dealOffer=null;C.os=3;clo();notify(`Signed with ${o.d[0]}`);ccSave();nav('dash');};
-function ccSummer(){const C=G.cc;const ld=document.getElementById('loading-screen');try{if(ld){document.getElementById('loading-label').textContent='The high school season plays out and the new recruits arrive…';ld.classList.add('active');}}catch(e){}
+// the player's current team for the loading screen: his college in college, his high school before that
+function ccLoadTeam(){const C=G.cc;return C&&C.k&&C.stage==='college'?colTeamObj(C.k):myS();}
+function ccSummer(){const C=G.cc;let ld=null;try{ld=loadingHold('The high school season plays out and the new recruits arrive…',ccLoadTeam());}catch(e){}
   setTimeout(()=>{try{ccHsYear();}catch(e){console.error('high school year',e);}try{if(ld)ld.classList.remove('active');}catch(e){}
     if(ccEligLeft()<=0){ccDraftRun();return;}ccBegin();ccSave();nav('dash');notify(`${ccYear()} season: the new signing classes are on campus`);},60);}
 // the high school world plays its year in the background so the colleges get their next signing classes
@@ -480,7 +482,7 @@ function ccProStart(res,hl){const C=G.cc,p=C.p;C.stage=res?'pro':'done';ccSave()
     Object.assign(a,{stage:'pro',lvl:C.lvl,school:ccName(C.k),dy:ccYear()+1,team:res.team,pick:res.pick,rd:res.rd,und:res.und,lg:res.lg,py:0,cYrs:res.pick?4:res.lg==='NGL'?3:2,aav:res.pick?aiRookieDeal(res.pick)/4:res.lg==='NGL'?.9:.08,optn:res.rd===1,ovr:clamp(Math.round(p.rat-4+gaussR()*2),35,99),last:G.yr});
     a.entries=[{y:ccYear()+1,age:18+(G.yr-a.gy),st:'pro',hl,tx:[hl+'.'],stl:'',aw:[],tg:['Draft'],nw:true,ovr:a.ovr,team:res.team}];g.alumni[C.pid]=a;}catch(e){console.error('pro start',e);}}
 function ccProNext(){const C=G.cc;if(C.stage==='done'){openMo(`<div style="text-align:center;padding:8px"><h2>Career complete</h2><div style="font-size:13px;color:var(--mu);margin-bottom:12px">${C.p.fn} ${C.p.ln}'s football story is written. You can keep the save and go back to the high school.</div><button class="btn" onclick="clo();ccBackToHs()">Back to the high school</button></div>`);return;}
-  const ld=document.getElementById('loading-screen');try{if(ld){document.getElementById('loading-label').textContent='A year goes by…';ld.classList.add('active');}}catch(e){}
+  let ld=null;try{ld=loadingHold('A year goes by…',ccLoadTeam());}catch(e){}
   setTimeout(()=>{try{ccHsYear();}catch(e){console.error(e);}try{const g=aiG(),a=g.alumni[C.pid],src=(G.hofArchive||[]).find(x=>x.id===C.pid)||C.p;if(a&&!a.done&&a.last<G.yr)aiAdvance(a,src,G.yr,true);const e=a&&a.entries[a.entries.length-1];if(a&&a.done)C.stage='done';
       if(e)openMo(`<div style="padding:6px"><h2>${e.y}</h2><div style="font-weight:800;margin-bottom:6px">${e.hl||''}</div>${(e.tx||[]).map(t=>`<div style="font-size:13px;margin-bottom:4px">${t}</div>`).join('')}<div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo()">Continue</button></div></div>`);}catch(e){console.error(e);}
     try{if(ld)ld.classList.remove('active');}catch(e){}ccSave();nav('dash');},60);}

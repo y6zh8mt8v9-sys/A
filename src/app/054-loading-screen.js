@@ -1,17 +1,19 @@
 // ═══════════ LOADING SCREEN ═══════════
+// the team on the loading screen is always drawn from the team as it is now, so an edited name, logo or colors show
+function loadingIdentity(team,label){
+  const logoW=document.getElementById('loading-logo-wrap'),nameEl=document.getElementById('loading-team-name'),subEl=document.getElementById('loading-team-sub');
+  if(logoW)logoW.innerHTML=team?sLogo(team,110):'';
+  if(nameEl)nameEl.textContent=team?`${team.name} ${team.mascot}`:'';
+  if(subEl)subEl.textContent=team?[team.city,team.cls?clsL(team.cls):'',team.conf].filter(Boolean).join(' · '):'';
+  const lb=document.getElementById('loading-label');if(lb)lb.textContent=label||'Loading…';
+}
+// the loading screen without a progress bar run, for waits like a save before kickoff
+function loadingHold(label,team){const ld=document.getElementById('loading-screen');if(!ld)return null;loadingIdentity(team,label);ld.classList.add('active');return ld;}
 function showLoading(label,team,steps,cb){
   const scr=document.getElementById('loading-screen');
-  const logoW=document.getElementById('loading-logo-wrap');
-  const nameEl=document.getElementById('loading-team-name');
-  const subEl=document.getElementById('loading-team-sub');
-  const lblEl=document.getElementById('loading-label');
   const fill=document.getElementById('loading-bar-fill');
   const pctEl=document.getElementById('loading-pct');
-  // Set team identity
-  logoW.innerHTML=team?sLogo(team,110):'';
-  nameEl.textContent=team?`${team.name} ${team.mascot}`:'';
-  subEl.textContent=team?`${team.city||''} · ${team.cls?clsL(team.cls):''} · ${team.conf||''}`:'';
-  lblEl.textContent=label||'Loading…';
+  loadingIdentity(team,label);
   fill.style.width='0%';
   fill.style.transition='none';
   pctEl.textContent='0%';
