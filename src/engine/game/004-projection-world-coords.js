@@ -44,7 +44,7 @@ function endzoneText(s,y,yards,col,rev){
     const sc=F.k==='script',t=sc?s.toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()):s;let w=0;for(const c of t)w+=(F.g[c]||F.g[' '])[0];
     const k=Math.min((sc?4.4:3.7)/100,(FW-7)/Math.max(1,w));ctx.scale(k,k);ctx.translate(-w/2,sc?34:50);ctx.lineJoin='round';
     for(const c of t){const g=F.g[c]||F.g[' '];if(g[1]){const p=ezGlyph(g[1]);
-      if(F.k==='outline'){ctx.fillStyle='rgba(10,16,24,.22)';ctx.fill(p);ctx.lineWidth=0.5/k;ctx.strokeStyle=col;ctx.stroke(p);}
+      if(F.k==='outline'){ctx.fillStyle='rgba(10,16,24,.3)';ctx.fill(p);ctx.lineWidth=0.17/k;ctx.strokeStyle=col;ctx.stroke(p);}
       else{ctx.lineWidth=0.35/k;ctx.strokeStyle='rgba(10,16,24,.55)';ctx.stroke(p);ctx.fillStyle=col;ctx.fill(p);}}
       ctx.translate(g[0],0);}
     ctx.setTransform(m);return;}

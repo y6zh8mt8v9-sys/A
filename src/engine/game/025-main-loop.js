@@ -105,7 +105,7 @@ function newGame(){
   try{gpSliderBake();}catch(e){}
   if(GP&&!ON&&GP.mode){const m=GP.mode;G.playMode=m==='off'||m==='def'?m:'all';if(m==='coach')gpSetCoach(true);}
   if(ON){gpIntro(()=>olToss());return;}
-  gpIntro(()=>showModal(G.teams[0].name===G.teams[1].name?(G.teams[0].city+' '+G.teams[0].name+' vs '+G.teams[1].city+' '+G.teams[1].name):(G.teams[0].name+' vs '+G.teams[1].name),'Two-minute quarters, eleven on eleven. Call the coin toss.',[['Heads','go',()=>toss(0)],['Tails','alt',()=>toss(1)]]));
+  gpIntro(()=>showModal(G.teams[0].name===G.teams[1].name?(G.teams[0].city+' '+G.teams[0].name+' vs '+G.teams[1].city+' '+G.teams[1].name):(G.teams[0].name+' vs '+G.teams[1].name),'Two-minute quarters, '+({6:'six on six',7:'seven on seven',8:'eight on eight',9:'nine on nine'}[SEVENS()?7:gpPer()]||'eleven on eleven')+'. Call the coin toss.',[['Heads','go',()=>toss(0)],['Tails','alt',()=>toss(1)]]));
 }
 function gpSliderBake(){if(ON||G.test||G.demo||DEMO)return;
   for(const T of G.teams)for(const p of T.roster){const ds=sla(T.id,'str',15),di=sla(T.id,'iq',15);if(ds)p.str=clamp(Math.round((p.str||70)+ds),25,99);if(di)p.awr=clamp(Math.round((p.awr||70)+di),25,99);}}
