@@ -65,7 +65,7 @@ function setCtl(){
   const c=G.carrier,P=G.play;
   if(pcOn()&&G.phase==='live'&&!pcMe(c)&&!passingUser()&&!(G.ballState==='air'&&(G.cm&&G.cm.target&&pcMe(G.cm.target)||G.im&&G.im.def&&pcMe(G.im.def)))){
     if(G.offTeam===G.me&&G.ballState==='qb'&&!pcMe(G.qb)&&GP.pc.pos!=='OL'){btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');padLegend(box,[[3,'Call for ball']]);G.hint='Run your route: drag, use the stick or the arrow keys to move him, or let go and he runs the play as drawn. Call for the ball when you are open.';}
-    else if(G.uctl&&G.uctl.team===G.me&&!G.uctl.down&&gpDefending(G.me)){btn(box,'Tackle','go',userTackle,kb('tackle'));padLegend(box,[[0,'Tackle']]);G.hint='Drag anywhere to move your player. Tackle near the ball carrier.';}
+    else if(G.uctl&&G.uctl.team===G.me&&!G.uctl.down&&gpDefending(G.me)){gpDefCtl(box,false);G.hint=DEF_HINT;}
     return;}
   if(G.phase==='live'&&c&&!isAI(c.team)&&c.team===G.me){
     if(GDS.moveUI==='wheel')gpMoveWheel(box);
@@ -74,10 +74,8 @@ function setCtl(){
     if(GDS.moveUI==='wheel')padLegend(box,[[6,'Slow']]);else padLegend(box,[[4,'Juke (or flick right stick)'],[2,'Spin'],[1,'Stiff arm'],[5,'Truck'],[3,'Hurdle'],[7,'Dive'],[6,'Slow']]);
     if(P&&P.kind==='kickoff'&&(G.client?OL.kneelOK:c.y<10&&G.kneelOK>0))btn(box,'Take a knee','go',()=>olKneel(),'k');
   }else if(G.phase==='live'&&gpDefending(G.me)&&!isAI(G.me)&&!G.test){
-    if(G.uctl&&G.uctl.team===G.me&&!G.uctl.down)btn(box,'Tackle','go',userTackle,kb('tackle'));
-    btn(box,'Switch','alt',switchUser,kb('switch'));
-    padLegend(box,[[0,'Tackle'],[6,'Switch player']]);
-    if(G.phase==='live')G.hint=G.im&&G.ballState==='air'?`${G.im.def===G.uctl?'Your man':'#'+G.im.def.pl.num} can make a play on the ball: tap the screen when the marker hits green.`:'Drag anywhere to move your player. Tackle near the ball carrier. When a meter pops up over a defender, tap the screen in the green.';
+    gpDefCtl(box,true);
+    if(G.phase==='live')G.hint=G.im&&G.ballState==='air'?`${G.im.def===G.uctl?'Your man':'#'+G.im.def.pl.num} can make a play on the ball: tap the screen when the marker hits green.`:SEVENS()?'Drag anywhere to move your player. Get a hand on the ball carrier and tap Touch. When a meter pops up over a defender, tap the screen in the green.':DEF_HINT+' When a meter pops up over a defender, tap the screen in the green.';
   }else if(G.phase==='live'&&G.ballState==='air'&&G.im&&G.im.def&&G.im.def.team===G.me&&!(G.cm&&G.cm.target&&G.cm.target.team===G.me)){
     G.hint=(G.im.def===G.uctl?'Interception chance':'#'+G.im.def.pl.num+' can make a play')+': tap the screen when the marker hits green.';
   }else if(G.phase==='live'&&G.ballState==='air'&&G.cm&&G.cm.target&&G.cm.target.team===G.me){
@@ -123,13 +121,36 @@ function gpDAdjApply(){const A=G.dAdj;if(!A)return;const ly=G.linesW.los;
   if(A.spy){const lb=G.ents.filter(d=>d.side==='d'&&d.role==='LB'&&d._adj0&&d._adj0.cover.type!=='blitz').sort((a,b)=>Math.abs(a.x-CX)-Math.abs(b.x-CX))[0];
     if(lb){lb.cover={type:'spy'};lb.press=false;lb.y=lb.hy=ly+4.5;}}}
 const DADJ_COV=['Coverage: normal','Coverage: press','Coverage: soft'];
-function userTackle(){
-  if(G.client){olCmd('tackle');return;}
+// k: 'form', 'stick' (hit stick), 'bite' (ankle bite), or nothing for the classic tackle that picks its own type
+function userTackle(k){
+  if(!UTK[k])k=null;
+  if(G.client){olCmd('tackle',k?{t:k}:null);return;}
   const u=G.uctl,c=G.carrier;if(!u||u.down||u.lunge>0||!c||c.side===u.side)return;
   if(SEVENS()){if(dist(u,c)<1.5&&G.phase==='live'&&G.ballState==='carrier'){flash('Two-hand touch');endPlay({type:'tackle',spot:c.y});}return;} // 7v7: reach out and touch, no dives
-  if(dist(u,c)<2.8)startLunge(u,c,chooseTackle(u,c));
-  else{u.lunge=0.28;u.lt='dive';}
+  const dd=dist(u,c);
+  if(dd<=gpTkReach(u,k)&&!(u.stun>0)&&!(u.eng>0))gpUserLunge(u,c,k,dd);
+  else u.tkBuf={k,t:G.t+0.45};
 }
+// v2.17 defense controls: the tackle wheel (or a row of buttons), a hold-to-sprint button and Switch
+const DEF_HINT='Drag anywhere to move your player, hold Sprint to close in. Form tackle is the sure one, Hit stick can knock the ball loose, Ankle bite reaches farthest. Tackle picks for you.';
+const DEF_W=[['Tackle','',()=>userTackle()],['Form tackle','',()=>userTackle('form')],['Hit stick','',()=>userTackle('stick')],['Ankle bite','',()=>userTackle('bite')],['Switch','',()=>switchUser()]];
+const DW_IC={Tackle:'M3 12h10M9 7l5 5-5 5M18 4v16','Form tackle':'M12 4a8 8 0 1 1 0 16a8 8 0 1 1 0-16M12 9a3 3 0 1 1 0 6a3 3 0 1 1 0-6','Hit stick':'M13 2 5 13h6l-1 9 8-12h-6z',
+  'Ankle bite':'M3 20h18M5 20v-4l6-1 3 2h4a3 3 0 0 1 3 3M3 6l7 6',Switch:'M5 8h13l-3-3M19 16H6l3 3'};
+const DW_KEY={Tackle:[0,'tackle'],'Form tackle':[1,'form'],'Hit stick':[3,'stick'],'Ankle bite':[2,'bite'],Switch:[6,'switch']};
+function gpDefCtl(box,sw){
+  const on=G.uctl&&G.uctl.team===G.me&&!G.uctl.down;
+  if(SEVENS()){if(on)btn(box,'Touch','go',()=>userTackle(),kb('tackle'));gpSprintBtn(box);if(sw)btn(box,'Switch','alt',switchUser,kb('switch'));padLegend(box,[[0,'Touch'],[7,'Sprint (hold)']].concat(sw?[[6,'Switch player']]:[]));return;}
+  if(GDS.moveUI==='wheel'){gpSprintBtn(box);gpMoveWheel(box,sw?DEF_W:DEF_W.slice(0,4),DW_IC,DW_KEY,'Tackle');padLegend(box,[[7,'Sprint (hold)']]);return;}
+  if(on){btn(box,'Tackle','go',()=>userTackle(),kb('tackle'));btn(box,'Form tackle','alt',()=>userTackle('form'),kb('form'));btn(box,'Hit stick','alt',()=>userTackle('stick'),kb('stick'));btn(box,'Ankle bite','alt',()=>userTackle('bite'),kb('bite'));}
+  gpSprintBtn(box);if(sw)btn(box,'Switch','alt',switchUser,kb('switch'));
+  padLegend(box,[[0,'Tackle'],[1,'Form tackle'],[3,'Hit stick'],[2,'Ankle bite'],[7,'Sprint (hold)']].concat(sw?[[6,'Switch player']]:[]));
+}
+// hold to sprint: no cooldown. The release is caught on the whole window, so a button rebuilt mid-play never sticks on.
+function gpSprintBtn(box){const b=btn(box,'Sprint','alt spr',()=>{},kb('sprint'));
+  b.onpointerdown=e=>{e.stopPropagation();e.preventDefault();G.sprintBtn=e.pointerId;b.classList.add('on');};
+  b.oncontextmenu=e=>e.preventDefault();if(G.sprintBtn!=null)b.classList.add('on');return b;}
+function gpSprintOff(e){if(e&&G.sprintBtn!==e.pointerId)return;G.sprintBtn=null;document.querySelectorAll('#ctl .spr.on').forEach(b=>b.classList.remove('on'));}
+addEventListener('pointerup',gpSprintOff);addEventListener('pointercancel',gpSprintOff);addEventListener('blur',()=>gpSprintOff());
 /* ---- play call screen ---- */
 function diagramSVG(kind,data,hi){
   const X=x=>6+x/FW*108,Y=d=>46-d*1.55;let s=`<svg viewBox="0 0 120 64"><line x1="2" y1="46" x2="118" y2="46" stroke="#fff" stroke-opacity=".6" stroke-width=".8"/>`;

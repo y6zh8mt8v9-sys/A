@@ -22,10 +22,11 @@ function resolveTackle(f,c,type){
     const p0={low:0.84,ankle:0.8,jump:0.78}[type]+(f.pl.tkl-75)*0.005+gpTackleMod(f,c,type)-gpFat(f)*0.12+gpFat(c)*0.08;
     f.ctr=null;
     if(Math.random()<clamp(p0,0.35,0.97)){flash({low:'Low tackle!',ankle:'Ankle tackle!',jump:'Met him in the air!'}[type]);c.spin=0;c.stiff=0;c.truck=0;c.juke=0;if(type==='jump')c.hurdle=0;startSeq(c,f,type==='jump'?'hit':type==='ankle'?'shoe':'wrap');if(G.seq)G.seq.ctr=type;return;}
-    f.down=true;f.downT=0.8;f.lunge=0;f.downAnim='tackle_dive';dust(c.x,c.y,6);flash('Missed the tackle!');c.slow=0.15;return;}
+    f.down=true;f.downT=0.8;f.lunge=0;f.downAnim='tackle_dive';dust(c.x,c.y,6);c.slow=0.15;if(type!=='jump'&&gpLegGrab(f,c))return;flash('Missed the tackle!');return;}
   let p={wrap:0.87,hit:0.8,shoe:0.77,dive:0.81}[type]+(f.pl.tkl-75)*0.0065+gpTackleMod(f,c,type);
   p-=type==='shoe'||type==='dive'?(gpElu(c.pl)-80)*0.005:(gpBtk(c.pl)-70)*0.006;
   p+=-gpFat(f)*0.14+gpFat(c)*0.1;
+  if(f.tkL>2.2)p-=(f.tkL-2.2)*0.07;f.tkL=0; // the user's long dive from out of reach
   let why='Broke a tackle!';
   if(c.stiff>0&&type!=='shoe'){p-=gpMove('stiff',c,f);why='Stiff arm!';}
   if(c.truck>0&&(type==='wrap'||type==='hit')){p-=gpMove('truck',c,f);why='Trucked!';}
@@ -37,8 +38,101 @@ function resolveTackle(f,c,type){
   if(foesOf(c).some(o=>o!==f&&dist(o,c)<1.6))p+=0.15;
   if(f===G.uctl)p+=0.08;
   if(Math.random()<clamp(p,0.08,0.97)){startSeq(c,f,type);return;}
-  f.down=true;f.downT=0.9;f.lunge=0;f.downAnim=why==='Trucked!'?'tackled':'tackle_dive';if(why==='Trucked!'){f.fall='back';f.vx=c.vx*0.5;f.vy=c.vy*0.5;G.cheer=0.8;}dust(c.x,c.y,why==='Trucked!'?12:6);flash(why);c.slow=why==='Trucked!'?0.35:0.2;
+  f.down=true;f.downT=0.9;f.lunge=0;f.downAnim=why==='Trucked!'?'tackled':'tackle_dive';if(why==='Trucked!'){f.fall='back';f.vx=c.vx*0.5;f.vy=c.vy*0.5;G.cheer=0.8;}dust(c.x,c.y,why==='Trucked!'?12:6);c.slow=why==='Trucked!'?0.35:0.2;
   if(why==='Stiff arm!'){f.vx=-c.vx*0.3;f.vy=-c.vy*0.3;}
+  if((type==='dive'||type==='shoe')&&why!=='Hurdled him!'&&why!=='Trucked!'&&gpLegGrab(f,c))return;
+  flash(why);
+}
+/* ===================== v2.17 the user's tackle types ===================== */
+// form tackle: short reach, the surest way down, little gained after contact
+// hit stick: launches through the runner, knocks him back and can jar the ball loose; whiffs and bounces off more often
+// ankle bite: a long dive at the legs, the farthest reach and good against fast runners, but it often only trips him up
+const UTK={form:{reach:2.1,v:6.7,r:0.85,dur:0.42},stick:{reach:2.6,v:7.6,r:0.85,dur:0.42},bite:{reach:3.7,v:7.3,r:1.05,dur:0.56}};
+function gpTkReach(u,k){const p=u.pl,b=((p.spd||75)-75)*0.012+((p.tkl||70)-75)*0.006;return k?UTK[k].reach+b*(k==='bite'?1.4:1):4.2+b;}
+// launch at where the runner will be: a long dive takes longer to get there
+function gpUserLunge(u,c,k,dd){
+  u.tkL=dd;u.tkSpr=gpSprintOn();u.tkBuf=null;
+  if(!k){if(dd<2.8)startLunge(u,c,chooseTackle(u,c));else{startLunge(u,c,'dive');u.lunge=u.lungeDur=clamp(dd/6.6,0.3,0.62);}return;}
+  u.lt=k;u.lunge=u.lungeDur=clamp((dd+0.4)/UTK[k].v,0.24,UTK[k].dur);u.dir=Math.sign((c.y-u.y)*(G.flip?-1:1))||u.dir;
+  if(k==='stick')dust(u.x,u.y,3);
+}
+// a press while the runner is out of reach (or while shedding a block) waits a moment and fires once he comes into range
+function gpTkBufStep(){
+  const u=G.uctl,c=G.carrier,B=u&&u.tkBuf;if(!B)return;
+  if(G.t>B.t||!c||u.down||u.lunge>0){u.tkBuf=null;if(G.t>B.t&&c&&!u.down&&!(u.lunge>0))flash('Out of reach');return;}
+  const dd=dist(u,c);if(dd<=gpTkReach(u,B.k)&&!(u.stun>0)&&!(u.eng>0))gpUserLunge(u,c,B.k,dd);
+}
+// the odds for each type: tackling, hit power, speed and strength against the runner's balance, elusiveness, speed and
+// strength, plus the angle, how far he had to launch, the runner's move, archetypes, traits and fatigue
+function gpTkP(f,c,k){
+  const p=f.pl,q=c.pl,dm=gpDefMods(p),tk=p.tkl||70,hp=p.hpw||p.str||70,el=gpElu(q),bt=gpBtk(q),csp=q.spd||75;
+  const cv=Math.hypot(c.vx,c.vy),ux=f.x-c.x,uy=f.y-c.y,ul=Math.hypot(ux,uy)||1,face=cv>1?(c.vx*ux+c.vy*uy)/(cv*ul):0; // 1: he runs right at you, -1: you chase him
+  const L=Math.max(0,(f.tkL||0)-1.2),spr=f.tkSpr?1:0;let P,why='Broke a tackle!';
+  if(k==='form')P=0.86+(tk-75)*0.008+((p.awr||70)-70)*0.002-(bt-70)*0.004-(el-80)*0.003-L*0.06+face*0.03-spr*0.04+gpTackleMod(f,c,'wrap');
+  else if(k==='stick')P=0.62+(hp-75)*0.008+(tk-75)*0.003+((p.str||70)-(q.str||70))*0.003-(bt-70)*0.004-(el-80)*0.005-L*0.08+face*0.1+dm.hit*0.6+spr*0.04+gpTackleMod(f,c,'hit');
+  else P=0.47+(tk-75)*0.006+((p.spd||75)-80)*0.003+(csp-80)*0.004-(bt-70)*0.006-(el-80)*0.002-L*0.035+gpTackleMod(f,c,'shoe');
+  P+=-gpFat(f)*0.14+gpFat(c)*0.1;
+  const m={form:{stiff:0.8,truck:1,spin:0.7,juke:0.8},stick:{stiff:1,truck:1.2,spin:1.2,juke:1.3},bite:{stiff:0,truck:0,spin:0.6,juke:0.7}}[k];
+  if(c.stiff>0&&m.stiff){P-=gpMove('stiff',c,f)*m.stiff;why='Stiff arm!';}
+  if(c.truck>0){if(m.truck){P-=gpMove('truck',c,f)*m.truck;why='Trucked!';}else P+=0.12;}
+  if(c.hurdle>0&&(c.jz||0)>0.2){if(k==='bite'){P=gpHurdleP(c,f);why='Hurdled him!';}else P+=0.1;}
+  if(c.spin>0){P-=gpMove('spin',c,f)*m.spin;why='Spin move!';}
+  if(G.t-c.jukeT<0.3){P-=gpMove('juke',c,f)*m.juke;why='Juked him!';}
+  if(foesOf(c).some(o=>o!==f&&!o.down&&dist(o,c)<1.6))P+=0.12;
+  return{P:clamp(P,k==='form'?0.3:0.08,k==='form'?0.97:k==='stick'?0.9:0.8),why};
+}
+function gpResolveUser(f,c,k){
+  const{P,why}=gpTkP(f,c,k),r=Math.random();f.lunge=0;f.jz=0;G.tkLast={k,P,r,f,c};
+  if(r<P){c.spin=0;c.stiff=0;c.truck=0;c.juke=0;if(k==='bite'){c.hurdle=0;flash('Ankle bite!');}startSeq(c,f,k==='form'?'wrap':k==='stick'?'hit':'shoe',k);G.tkLast.res=G.seq?'tackle':G.phase!=='live'?'out':'tackle';return;}
+  if(k==='bite'){const pt=clamp(0.34+((f.pl.tkl||70)-75)*0.004+((c.pl.spd||75)-80)*0.004-(gpBtk(c.pl)-70)*0.004+gpFat(c)*0.1,0.15,0.5);
+    f.down=true;f.downT=0.9;f.downAnim='tackle_dive';dust(c.x,c.y,6);
+    if(why!=='Hurdled him!'&&r<P+pt){gpTrip(c,f,'trip');flash('Tripped him up!');G.tkLast.res='trip';return;}
+    c.slow=0.12;flash(why==='Broke a tackle!'?'Missed the ankles!':why);G.tkLast.res='miss';return;}
+  if(k==='stick'&&r<P+0.12&&why!=='Juked him!'){f.down=true;f.downT=0.8;f.downAnim='tackled';f.fall='back';f.vx=-c.vx*0.3;f.vy=-c.vy*0.3;dust(c.x,c.y,10);gpTrip(c,f,'bounce');try{SFX.hit(true);}catch(e){}flash('Bounced off the hit!');G.cheer=Math.max(G.cheer,0.5);G.tkLast.res='bounce';return;}
+  if(k==='form'&&r<P+0.15){f.stun=0.4;f.vx*=0.3;f.vy*=0.3;c.slow=0.3;dust(c.x,c.y,4);flash('Slipped off the tackle');G.tkLast.res='slip';return;}
+  f.down=true;f.downT=k==='stick'?1.1:0.7;f.downAnim=k==='form'?'tackle':'tackle_dive';dust(c.x,c.y,6);c.slow=k==='stick'?0.08:0.18;
+  flash(k==='stick'&&why==='Broke a tackle!'?'Whiffed on the big hit!':why);G.tkLast.res='miss';
+}
+// a runner tripped (or held by the leg) stumbles: slower and no moves for a moment. Break-tackle, agility and strength
+// shake it off sooner; a defender who keeps hold of the leg can still finish the tackle.
+function gpTrip(c,f,kind){
+  const q=c.pl,p=f.pl,brk=clamp(0.5+(gpBtk(q)-70)*0.008+((q.agi||75)-75)*0.006+((q.str||70)-(p.str||70))*0.004-((p.tkl||70)-75)*0.005-gpFat(c)*0.2,0.15,0.85);
+  const d=(kind==='grab'?0.6:kind==='bounce'?0.42:0.62)*(1.3-brk*0.6);
+  c.trip=d;c.tripD=d;c.tripK=kind;c.tripBy=f;c.tripFin=kind==='grab'&&Math.random()>brk;c.slow=Math.max(c.slow||0,d);c.moveCD=Math.max(c.moveCD||0,d);c.juke=0;c.spin=0;c.truck=0;
+  dust(c.x,c.y,7);G.tripN=(G.tripN||0)+1;
+}
+function gpTripStep(c,dt){
+  if(!(c.trip>0))return false;c.trip-=dt;const f=c.tripBy;
+  if(c.tripK==='grab'&&f&&!f.hurt){const k=Math.exp(-dt*12),ad=attackDir(c);c.vx*=k;c.vy*=k;f.x=lerp(f.x,c.x,0.25);f.y=lerp(f.y,c.y-ad*0.75,0.25);f.vx=c.vx;f.vy=c.vy;f.down=true;f.downT=Math.max(f.downT||0,0.4);}
+  if(c.trip<=0){c.trip=0;if(c.tripK==='grab'){if(c.tripFin&&f&&!f.hurt){startSeq(c,f,'shoe');return true;}flash('Broke free!');}}
+  return false;
+}
+// an AI defender's missed dive at a human ball carrier can still get a hand on a leg: he holds on, or trips him up
+function gpLegGrab(f,c){
+  if(SEVENS()||G.test||isAI(c.team)||pcAI(c)||f===G.uctl&&!isAI(f.team)||c.trip>0||c.dive>0)return false;
+  const pg=clamp(0.38+((f.pl.tkl||70)-75)*0.008-(gpBtk(c.pl)-70)*0.005-(gpElu(c.pl)-80)*0.003-gpFat(f)*0.1,0.15,0.6);
+  if(Math.random()>=pg)return false;
+  const grab=Math.random()<0.45;gpTrip(c,f,grab?'grab':'trip');flash(grab?'He grabs the leg!':'Tripped up!');return true;
+}
+// sprint: hold it to close faster (no cooldown); a sprinting man turns wider
+const SPRINT=1.09;
+function gpSprintOn(){const u=G.uctl;if(!u)return false;if(ON&&u.team!==G.me)return!!(G.rjoy&&G.rjoy.sp&&G.time-G.rjoy.t<1.5);
+  return G.sprintBtn!=null||keys.has(kb('sprint'))||G.time-(G.padSprT||-9)<0.2;}
+// tackle-type animation: the sprite and a lean / dip on top of it
+function gpTkAnim(e,A){
+  const S=G.seq;
+  if(S&&S.v&&S.fs[0]===e){const u=S.t/S.dur;if(S.v==='stick')return u<0.35?A('truck',0.5+u):A('tackle',0.3+0.7*u);if(S.v==='form')return A('tackle',0.25+0.75*u);return A('tackle_dive',0.4+0.6*u);}
+  if(e.lunge>0&&UTK[e.lt]){const u=1-e.lunge/(e.lungeDur||0.4);return e.lt==='stick'?A('truck',u):e.lt==='form'?A('tackle',0.05+0.45*u):A('tackle_dive',0.1+0.8*u);}
+  if(e.trip>0&&e===G.carrier&&!e.down){const u=1-e.trip/(e.tripD||0.6);return A('tackled',0.04+0.22*Math.sin(Math.PI*u));}
+  return null;
+}
+function gpTkFx(e,dir){
+  const o={rot:0,sq:1,jz:0},d=dir||1,S=G.seq;
+  if(e.lunge>0&&UTK[e.lt]){const u=clamp(1-e.lunge/(e.lungeDur||0.4),0,1),s=Math.sin(Math.PI*u);
+    if(e.lt==='stick'){o.rot=0.3*d*Math.min(1,u*2);o.jz=0.14*s;}else if(e.lt==='form')o.rot=0.1*d*s;else{o.rot=0.22*d*u;o.sq=1-0.08*u;}}
+  else if(S&&S.v==='stick'&&S.fs[0]===e){const u=S.t/S.dur;o.rot=0.28*d*Math.sin(Math.PI*Math.min(1,u*1.4));}
+  else if(e.trip>0&&e===G.carrier&&!e.down){const u=clamp(1-e.trip/(e.tripD||0.6),0,1),s=Math.sin(Math.PI*u);o.rot=0.42*d*s;o.sq=1-0.08*s;}
+  return o;
 }
 // a defender coming from the inside can shove a carrier near the sideline out of bounds instead of tackling him
 function gpPushOut(c,f){
@@ -52,20 +146,22 @@ function gpPushOut(c,f){
   c.vx=out*Math.max(6.5+((f.pl.str||70)-60)*0.04,edge/0.45);c.vy=c.vy*0.55;f.vx=out*4;dust(c.x,c.y,8);flash('Knocked out of bounds!');G.cheer=0.3;
   return true;
 }
-function startSeq(c,f,type){if(c&&c.dive>0)c.dive=0;
+// v: the user's tackle type ('form', 'stick', 'bite') on top of the base type, for its own push, fumble odds and animation
+function startSeq(c,f,type,v){if(c&&c.dive>0)c.dive=0;c.trip=0;
   if(type!=='hit'&&c===G.carrier&&G.ballState==='carrier'&&!(c===G.qb&&c.tkType==='sack')&&gpPushOut(c,f))return;
   G.gpTk=f.pl;
   const ad=attackDir(c);
-  G.seq={c,fs:[f],type,t:0,dur:{wrap:0.6,hit:0.45,shoe:0.5,dive:0.45}[type],spot0:c.y,ad};
+  G.seq={c,fs:[f],type,v:v||null,t:0,dur:v==='form'?0.5:{wrap:0.6,hit:0.45,shoe:0.5,dive:0.45}[type],spot0:c.y,ad};
   c.seqLock=true;c.tk=type;f.tk=type;f.lunge=0;
   try{gpTackleStyle(c,f,type);}catch(e){}
   try{SFX.hit(type==='hit');if(type==='hit')SFX.gasp();}catch(e){}
   if(type==='hit')try{gpHelmetPop(c,f);}catch(e){}
-  if(type==='hit'){c.vx=-ad*3.2;c.vy*=0.2;c.vy=-ad*3.2;flash('Big hit!');G.cheer=0.6;}
+  if(type==='hit'){c.vx=-ad*3.2;c.vy*=0.2;c.vy=-ad*(v==='stick'?4.4:3.2);flash(v==='stick'?'Hit stick!':'Big hit!');G.cheer=v==='stick'?1:0.6;}
   else if(type==='shoe'){c.vy=ad*3;}
-  else{c.vy=ad*1.9;c.vx*=0.4;}
-  dust(c.x,c.y,10);
-  if((type==='hit'&&Math.random()<0.055*WX.fum*((f.pl.hpw||f.pl.str)/80)*(85/Math.max(50,c.pl.car||c.pl.str))*slf(c.team,'fum',0.7))||(type!=='hit'&&c===G.carrier&&G.ballState==='carrier'&&!(c===G.qb&&c.tkType==='sack')&&Math.random()<WX.wrapFum*slf(c.team,'fum',0.7))){
+  else{c.vy=ad*(v==='form'?1.1:1.9);c.vx*=0.4;}
+  dust(c.x,c.y,v==='stick'?14:10);
+  const fm=v==='stick'?1.8*(1+gpDefMods(f.pl).hit*2):1,wm=v==='form'?0.5:1;
+  if((type==='hit'&&Math.random()<0.055*fm*WX.fum*((f.pl.hpw||f.pl.str)/80)*(85/Math.max(50,c.pl.car||c.pl.str))*slf(c.team,'fum',0.7))||(type!=='hit'&&c===G.carrier&&G.ballState==='carrier'&&!(c===G.qb&&c.tkType==='sack')&&Math.random()<WX.wrapFum*wm*slf(c.team,'fum',0.7))){
     G.prevCarrierSide=c.side;G.loose={x:c.x,y:c.y,h:1.2,vx:rnd(-3,3),vy:-ad*rnd(1,4),vh:3,kind:'fumble',t:0};
     G.carrier=null;G.ballState='loose';flash('FUMBLE!');G.fumbleBy=c;
   }
@@ -176,8 +272,9 @@ function updateLive(dt){
     if(e===c){controlCarrier(e,dt);if(G.phase!=='live')return;continue;}
     if(e.down||e.hurt||(G.seq&&G.seq.fs.includes(e))){accel(e,0,0,dt,40);continue;}
     if(e.lunge>0&&c){
-      e.lunge-=dt;if(e.lt==='jump')e.jz=Math.max(0,Math.sin(Math.PI*clamp(1-e.lunge/(e.lungeDur||0.26),0,1))*0.9);const dx=c.x-e.x,dy=c.y-e.y,l=Math.hypot(dx,dy)||1,s=e.lt==='hit'?7:6.6;e.vx=dx/l*s;e.vy=dy/l*s;
-      if(e.lunge<=0){e.down=true;e.downT=0.8;e.downAnim='tackle_dive';dust(e.x,e.y,4);}
+      e.lunge-=dt;if(e.lt==='jump')e.jz=Math.max(0,Math.sin(Math.PI*clamp(1-e.lunge/(e.lungeDur||0.26),0,1))*0.9);
+      const K=UTK[e.lt],ld=K||e.tkL>2.8?Math.min(0.3,e.lunge):0,dx=c.x+c.vx*ld-e.x,dy=c.y+c.vy*ld-e.y,l=Math.hypot(dx,dy)||1,s=K?K.v*(e.tkSpr?1.05:1):e.lt==='hit'?7:6.6;e.vx=dx/l*s;e.vy=dy/l*s;
+      if(e.lunge<=0){if(e.lt==='form'){e.stun=0.35;e.vx*=0.4;e.vy*=0.4;}else{e.down=true;e.downT=e.lt==='bite'?0.9:0.8;e.downAnim='tackle_dive';dust(e.x,e.y,4);}e.tkL=0;}
       continue;
     }
     if(gpGodPickStep(e,dt))continue;
@@ -201,7 +298,7 @@ function updateLive(dt){
     let px=0,py=0;
     const runPush=P.kind==='scrimmage'&&P.off.kind==='run'||G.ballState==='carrier';
     if(e.eng>0&&e.blockedBy&&runPush&&e.blockedBy.pl){const b=e.blockedBy,dx=e.x-b.x,dy=e.y-b.y,l=Math.hypot(dx,dy)||1,m=1.5*clamp(b.pl.str/e.pl.str,0.7,1.35);px=dx/l*m;py=dy/l*m;}
-    accel(e,v[0]*f+px,v[1]*f+py,dt);
+    accel(e,v[0]*f+px,v[1]*f+py,dt,e===G.uctl&&G.joyV&&gpSprintOn()?e.acc*0.72:0);
   }
   for(const e of G.ents){
     e.x+=e.vx*dt;e.y+=e.vy*dt;const sp=Math.hypot(e.vx,e.vy);e.anim+=sp*dt*2.1;e.run+=sp*dt;if(e.pl&&!e.spd0)e.spd0=e.spd;if(e.spd0)e.spd=e.spd0*(1-Math.min(0.07,Math.max(0,e.run-25)*0.0014*(0.6+gpFat(e))));
@@ -257,6 +354,8 @@ function updateLive(dt){
       if(d.lunge>0&&d.lt==='hit'&&Math.random()<0.12){G.fouls.push({team:1-G.offTeam,kind:'Unnecessary roughness',yds:15,afd:true});throwFlag(nearestRef(c));}
       endPlay({type:'tackle',spot:c.slideSpot});return;}}
     const air=c.dive>0||(c.ca&&c.ca.type==='dive');
+    if(gpTripStep(c,dt)&&(G.seq||G.phase!=='live'))return;
+    gpTkBufStep();
     if(gpStiffStep(c)&&(G.seq||G.phase!=='live'))return;
     for(const d of G.ents){
       if(d.side===c.side||d.down||d.eng>0||d.stun>0||d.hurt)continue;
@@ -265,7 +364,7 @@ function updateLive(dt){
       // airborne over the top: a clean leap clears the man in front; a bad one gets met in the air
       if(c.dive>0&&c.diveK==='over'){const u=1-c.dive/(c.diveT||0.5);if(c.diveClear&&u>0.1&&u<0.9&&!(d.lt==='jump'&&d.lunge>0))continue;if(!c.diveClear&&dd<0.75&&u>0.15){startSeq(c,d,'hit');return;}}
       if(SEVENS()&&d.lunge>0&&dd<1.0){d.lunge=0;d.jz=0;flash('Two-hand touch');endPlay({type:'tackle',spot:c.y});return;}
-      if(d.lunge>0){if(dd<(d.lt==='jump'?1.0:0.8)){const t=d.lt||'wrap';d.lunge=0;d.jz=0;if(air){startSeq(c,d,'wrap');return;}resolveTackle(d,c,t);if(G.seq||G.phase!=='live')return;}continue;}
+      if(d.lunge>0){if(dd<(UTK[d.lt]?UTK[d.lt].r:d.lt==='jump'?1.0:0.8)){const t=d.lt||'wrap';d.lunge=0;d.jz=0;if(air){startSeq(c,d,'wrap');return;}if(UTK[t])gpResolveUser(d,c,t);else resolveTackle(d,c,t);if(G.seq||G.phase!=='live')return;}continue;}
       if(c.juke>0&&!(d.ctrRead>G.t))continue;
       if(dd<0.62&&!air&&(d!==G.uctl||!G.joyV||dd<0.5)){if(c.spin>0||c.stiff>0||c.truck>0||c.hurdle>0){resolveTackle(d,c,c.hurdle>0?'dive':'wrap');if(G.seq)return;continue;}startSeq(c,d,'wrap');return;}
       const isUser=d===G.uctl&&!isAI(d.team)&&!G.test;
