@@ -1802,8 +1802,10 @@ function effPot(p){
     if(p.pot){p.potLo=Math.max(p.rat,p.pot-rng(5,12));p.potHi=clamp(p.pot+rng(0,8),p.potLo,99);}
     else{p.potLo=p.rat;p.potHi=p.rat;}
   }
+  // a player who grew past his ceiling keeps his rating: the ceiling rises to meet him, it never pulls him down
+  const r=Math.min(99,p.rat||0);if(r>p.potHi)p.potHi=r;
   const tf=trainFactor();
-  return clamp(Math.round(p.potLo+(p.potHi-p.potLo)*tf),p.potLo,p.potHi);
+  return Math.max(r,clamp(Math.round(p.potLo+(p.potHi-p.potLo)*tf),p.potLo,p.potHi));
 }
 // Sync p.pot to effective value (called after training upgrades or season updates)
 function syncPot(p){p.pot=effPot(p);}
@@ -6827,7 +6829,7 @@ function applyPhaseTrain(phase){
     else if(foc==='strength'){p.str=clamp(p.str+rng(0,1+wF)+(p.traits&&p.traits.includes('gym-rat')?1:0),1,99);}
     else if(foc==='conditioning'){ovrSync(p);p.at.sta=clamp(p.at.sta+rng(2,4)+(p.traits&&p.traits.includes('workhorse')?1:0),1,99);p.at.acl=clamp(p.at.acl+rng(0,1),1,99);}
     else if(foc==='technique'){ovrSync(p);base*=0.85;const W=OVR_W[p.pos]||{};for(const k of keyAttrs(p.pos))if(!ATOP.has(k))p.at[k]=clamp(p.at[k]+rng(0,2),1,99);}
-    p.rat=clamp(Math.round(p.rat+base),1,p.pot);
+    p.rat=clamp(Math.round(p.rat+base),1,Math.max(p.pot,p.rat));
     if(foc==='strength'||foc==='balanced')p.str=clamp(p.str+rng(0,1+(p.traits&&p.traits.includes('gym-rat')?1:0)),1,99);
     if(phase===1){const awB=p.traits&&p.traits.includes('film-junkie')?rng(1,3):rng(0,1);p.awr=clamp(p.awr+awB,1,99);}
     const isA=p.traits&&p.traits.includes('academic');
@@ -6954,7 +6956,7 @@ function finalizeOffseason(){
     const minFr=Math.max(aiSeniors,5)+rng(0,3);
     const aiFrCnt=clamp(Math.max(minFr,deficit+rng(-1,3)),5,22);
     const n2=cNeeds(s.id);for(let i=0;i<aiFrCnt;i++){const p2=genPlayer(s.id,9,s.cls,n2);adjDev(p2,s);G.players.push(p2);}
-    for(const p of G.players.filter(p=>p.sId===s.id)){const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);updDev(p);}
+    for(const p of G.players.filter(p=>p.sId===s.id)){const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,Math.max(p.pot,p.rat));updDev(p);}
     // AI SEASON PERFORMANCE: OVR gains/losses scale with win ratio.
     // Good seasons → bigger OVR boost (prestige-scaled). Bad seasons → slight OVR erosion.
     (function(){
@@ -6981,7 +6983,7 @@ function finalizeOffseason(){
       }
       for(const p of G.players.filter(p=>p.sId===s.id)){
         if(ovrDelta>0){
-          p.rat=clamp(p.rat+ovrDelta,1,p.pot);
+          p.rat=clamp(p.rat+ovrDelta,1,Math.max(p.pot,p.rat));
           // Attribute side-effects proportional to OVR gain
           _attrBoostForOvr(p,ovrDelta);
         } else if(ovrDelta<0){
@@ -7222,7 +7224,7 @@ function finalizeOffseason(){
         const aiFrCnt=clamp(tgt-cur,3,Math.max(5,(srCnt[s.id]||0)+3));
         const n2=cNeeds(s.id);for(let i=0;i<aiFrCnt;i++){const p2=genPlayer(s.id,9,s.cls||cls,n2);G.players.push(p2);}
       }
-      for(const p of G.players){if(!lgIds.has(p.sId))continue;const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);
+      for(const p of G.players){if(!lgIds.has(p.sId))continue;const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,Math.max(p.pot,p.rat));
         // Reset season stats
         p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
     }
@@ -12233,7 +12235,7 @@ function sPlayersAny(teams){for(const s of teams)if(sPlayers(s.id).length)return
 function liteOffseason(){const by=liteStates();if(!Object.keys(by).length)return;liteYrCalib();G.liteOfs=null;liteCalib();
   const ids=new Set();for(const st in by)for(const s of by[st])ids.add(s.id);
   G.players=G.players.filter(p=>!(p.lt&&ids.has(p.sId)&&p.yr>=12));
-  for(const p of G.players){if(!p.lt||!ids.has(p.sId))continue;p.yr++;try{bodyGrow(p);}catch(e){}const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
+  for(const p of G.players){if(!p.lt||!ids.has(p.sId))continue;p.yr++;try{bodyGrow(p);}catch(e){}const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,Math.max(p.pot,p.rat));p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
   const byS={};for(const p of G.players)if(p.lt&&ids.has(p.sId))(byS[p.sId]=byS[p.sId]||[]).push(p);
   const drop=new Set(),fresh=[];
   for(const st in by){const T0=by[st],ab=USA.ab[st]||st;for(const s of T0)s.str=liteStr(s);
@@ -14651,7 +14653,7 @@ function bulkApply(){
   const how=document.getElementById('bk-how').value,n=parseInt(document.getElementById('bk-n').value,10),ks=[...document.querySelectorAll('.bk-k:checked')].map(i=>i.value),L=bulkGroup();
   if(!Number.isFinite(n)){notify('Enter a number','e');return;}if(!ks.length){notify('Pick at least one rating','e');return;}if(!L.length){notify('No players in that group','e');return;}
   for(const p of L){ovrSync(p,true);const f=v=>clamp(Math.round(how==='add'?v+n:how==='set'?n:Math.max(v,n)),1,99);for(const k of ks){if(k==='sta')p.at.sta=f(p.at.sta);else if(k==='skills'){for(const a in(OVR_W[p.pos]||{}))if(!ATOP.has(a)&&a!=='sta')p.at[a]=f(p.at[a]);}else{const v=p[k]||0;p[k]=f(v);}}if(ks.includes('rat')&&!ks.includes('skills')){}else if(!ks.includes('rat'))p._rc=p.rat;ovrSync(p);
-    if(p.pot<p.rat)p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}
+    if(p.pot<p.rat)p.pot=p.rat;if(ks.includes('pot')){p.potLo=p.pot;p.potHi=p.pot;}if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}
   try{updateRats();}catch(e){}clo();nav(G._page,G._arg);notify(`${L.length} player${L.length===1?'':'s'} updated`);}
 // job offers: a good season gets your name around. Other schools in your league call after the season;
 // the offers stand through the offseason, until the first game of the new season.
@@ -14755,7 +14757,7 @@ function coachTakeOver(sid,quiet){
   try{addNews('myteam',`New head coach at ${ns.name}`,`You left ${os.name} to take over the ${ns.mascot}.`);}catch(e){}
   try{updateTb();}catch(e){}clo();nav('dash');notify(quiet?`Welcome to ${ns.name}!`:`Welcome to ${ns.name}! Build your schedule to start the season.`);
 }
-function savePlayer(pid){const p=getP(pid);if(!p)return;p.fn=document.getElementById('ef').value||p.fn;p.ln=document.getElementById('el').value||p.ln;{const nv=parseInt(document.getElementById('en').value,10);p.num=Number.isFinite(nv)?clamp(nv,0,99):p.num;}{const p2=(document.getElementById('ep2')||{}).value||'';p.pos2=p2&&p2!==document.getElementById('ep').value?p2:null;}const newPos=document.getElementById('ep').value;if(newPos!==p.pos){p.pos=newPos;const sch=getS(p.sId);p.arch=pickArchetype(newPos,sch?sch.offS:'Pro Style',sch?sch.defS:'4-3');}if(!earnedOn()){const r0=p.rat,rIn=clamp(parseInt(document.getElementById('er').value)||p.rat,1,99);ovrSync(p,true);document.querySelectorAll('.at-in').forEach(i=>{const k=i.dataset.k,v=clamp(parseInt(i.value)||1,1,99);if(ATOP.has(k))p[k]=v;else p.at[k]=v;});if(rIn!==r0)attrShift(p,rIn);p.rat=ovrCalc(p);p._rc=p.rat;p.pot=clamp(parseInt(document.getElementById('ept').value)||p.pot,p.rat,99);}p.gpa=clamp(parseFloat(document.getElementById('eg').value)||p.gpa,1.5,4.0);if(!earnedOn()){p.dev=document.getElementById('ed').value;p.traits=Array.from(document.getElementById('et').selectedOptions).map(o=>o.value);}const eintEl=document.getElementById('eint');if(eintEl)p.interests=Array.from(eintEl.selectedOptions).map(o=>o.value);{const eq=eqRead();if(eq)p.eq=eq;}
+function savePlayer(pid){const p=getP(pid);if(!p)return;p.fn=document.getElementById('ef').value||p.fn;p.ln=document.getElementById('el').value||p.ln;{const nv=parseInt(document.getElementById('en').value,10);p.num=Number.isFinite(nv)?clamp(nv,0,99):p.num;}{const p2=(document.getElementById('ep2')||{}).value||'';p.pos2=p2&&p2!==document.getElementById('ep').value?p2:null;}const newPos=document.getElementById('ep').value;if(newPos!==p.pos){p.pos=newPos;const sch=getS(p.sId);p.arch=pickArchetype(newPos,sch?sch.offS:'Pro Style',sch?sch.defS:'4-3');}if(!earnedOn()){const r0=p.rat,rIn=clamp(parseInt(document.getElementById('er').value)||p.rat,1,99);ovrSync(p,true);document.querySelectorAll('.at-in').forEach(i=>{const k=i.dataset.k,v=clamp(parseInt(i.value)||1,1,99);if(ATOP.has(k))p[k]=v;else p.at[k]=v;});if(rIn!==r0)attrShift(p,rIn);p.rat=ovrCalc(p);p._rc=p.rat;{const p0=p.pot,pIn=parseInt(document.getElementById('ept').value);p.pot=clamp(pIn||p.pot,p.rat,99);if(pIn&&pIn!==p0){p.potLo=p.pot;p.potHi=p.pot;}else{if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}}}p.gpa=clamp(parseFloat(document.getElementById('eg').value)||p.gpa,1.5,4.0);if(!earnedOn()){p.dev=document.getElementById('ed').value;p.traits=Array.from(document.getElementById('et').selectedOptions).map(o=>o.value);}const eintEl=document.getElementById('eint');if(eintEl)p.interests=Array.from(eintEl.selectedOptions).map(o=>o.value);{const eq=eqRead();if(eq)p.eq=eq;}
   {const ft=parseInt(document.getElementById('eht-ft').value,10),inch=parseInt(document.getElementById('eht-in').value,10),w=parseInt(document.getElementById('ewt').value,10);
    if(Number.isFinite(ft)&&Number.isFinite(inch))p.ht=clamp(ft*12+clamp(inch,0,11),54,90);if(Number.isFinite(w))p.wt=clamp(w,90,420);
    const ye=document.getElementById('eyr');if(ye){const y=parseInt(ye.value,10);if(y>=9&&y<=12)p.yr=y;}
