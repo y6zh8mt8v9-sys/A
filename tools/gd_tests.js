@@ -9,6 +9,10 @@ const T=[];const test=(name,fn,opt)=>T.push({name,fn,opt:opt||{}});
 // a fresh engine page, coin toss skipped, both teams on the computer unless a test says otherwise
 async function fresh(ctx,opt){
   let p=await ctx.newPage();p.errs=[];p.on('pageerror',e=>p.errs.push(String(e&&e.message||e)));
+  // the touchdown card needs the app's face(): a wrapper page loads it next to the engine frame (served from the repo, no extra server)
+  if(opt&&opt.wrap){const fs=require('fs'),path=require('path'),src=path.join(__dirname,'..','src','app','008-international-team-crests-one-hand.js');
+    await p.route('**/__wrap.html',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><html><body style="margin:0;background:#000"><script src="__face.js"></script><iframe id="gd" src="gd_test.html" style="border:0;width:100vw;height:100vh"></iframe></body></html>'}));
+    await p.route('**/__face.js',r=>r.fulfill({contentType:'application/javascript',body:fs.readFileSync(src,'utf8')}));opt=Object.assign({},opt,{url:`http://localhost:${PORT}/__wrap.html`});}
   if(opt&&opt.init)await p.addInitScript(opt.init);
   await p.goto(opt&&opt.url||URL);let f=p;if(opt&&opt.url){await p.waitForSelector('iframe');f=p.frames()[1];f.errs=p.errs;}else{const pg=p;p.page=()=>pg;}
   await f.waitForFunction(()=>window.__G&&window.__G.phase==='modal',null,{timeout:20000});p=f;
@@ -127,7 +131,7 @@ test('play designer: a QB option run saves as an option and plays as one',async 
   await pg.close();ok(!errs.length,'app errors '+errs.join('|'));ok(d.car==='OPT'&&d.keepPts>=2,'designer lost the option: '+JSON.stringify(d).slice(0,200));
   ok(d.res&&d.res.option&&d.res.keep&&!d.res.qb,'saved play is not an option: '+JSON.stringify(d.res));
   const r=await p.evaluate(play=>{G.ai=[true,true];G.los=40;G.down=1;G.toGo=10;G.poss=G.offTeam=0;applyCall({kind:'run',data:play},DCALLS[8]);G.phase='presnap';doSnap();
-    const R=Math.random;Math.random=()=>0.5;let out=null;try{for(let i=0;i<60&&G.phase==='live';i++){const de=G.ents.find(e=>e.slot==='DE2');if(de){de.x=CX+2;de.hx=de.x;}step(1/30);if(G.carrier&&!out)out={qb:G.carrier===G.qb,end:G.qb.path?G.qb.path.slice(-1)[0][0]-CX:null};}}finally{Math.random=R;}return out;},d.res);
+    const R=Math.random;Math.random=()=>0.5;let out=null;try{for(let i=0;i<60&&G.phase==='live';i++){const de=G.ents.find(e=>e.slot==='DE1');if(de){de.x=CX-2;de.hx=de.x;}step(1/30);if(G.carrier&&!out)out={qb:G.carrier===G.qb,end:G.qb.path?G.qb.path.slice(-1)[0][0]-CX:null};}}finally{Math.random=R;}return out;},d.res);
   ok(r&&r.qb&&Math.abs(r.end+8)<0.01,'QB did not keep it on the custom path: '+JSON.stringify(r));});
 
 /* 7. the move wheel mirrors with the drive direction */
@@ -154,7 +158,7 @@ test('touchdown card: face, name, number, position and his game line, no taps bl
     const pl=G.rb.pl;G.gs={[pl.id]:{rushAtt:6,rushYds:41}};endPlay({type:'td'});await new Promise(r=>setTimeout(r,1300));const el=$('tdCard');
     return{vis:!!el&&!el.hidden&&getComputedStyle(el).opacity>0.5,txt:el&&el.textContent,pe:el&&getComputedStyle(el).pointerEvents,face:!!(el&&el.querySelector('.tf svg')),real:!!(el&&/fc\d/.test(el.innerHTML)),name:`#${pl.num} ${pl.first} ${pl.last}`};});
   ok(r.vis,'card not shown');ok(r.txt.includes(r.name)&&/RB/.test(r.txt)&&/7 car, \d+ yds, 1 TD/.test(r.txt),'card text: '+r.txt);ok(r.pe==='none'&&r.face&&r.real,'card: '+JSON.stringify(r));
-  await shot(p,'touchdown-card');},{url:'http://localhost:8797/wrap.html'});
+  await shot(p,'touchdown-card');},{wrap:true});
 test('touchdown card respects reduced motion and goes away by itself',async p=>{
   const r=await p.evaluate(async()=>{G.poss=G.offTeam=0;applyCall({kind:'run',data:RUNS[0]},DCALLS[3]);G.phase='live';G.ballState='carrier';G.carrier=G.rb;endPlay({type:'td'});
     await new Promise(r=>setTimeout(r,1000));const a=getComputedStyle($('tdCard')).animationName;await new Promise(r=>setTimeout(r,4700));return{a,gone:$('tdCard').hidden};});
