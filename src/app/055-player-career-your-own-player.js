@@ -409,7 +409,7 @@ function ccHsYear(){const all=allSchoolsAll();for(const s of all){const w=clamp(
   showPop=function(){_popQ=[];_popI=0;_popCb=null;const pu=document.getElementById('pu');if(pu)pu.classList.remove('open');};nav=function(){};openMo=function(){};openScheduleBuilder=function(){};
   try{G.phase='offseason';finalizeOffseason();}finally{showPop=sp;nav=nv;openMo=om;openScheduleBuilder=osb;_popQ=[];_popCb=null;G.customSchedPending=false;}}
 // ── the draft: combine, then the 7 rounds; or undrafted free agency, a spring league, or the end of the road
-window.ccDraftRun=function(){const C=G.cc,p=C.p,cmb=ccCombine(p),ds=ccDraftScore(cmb),pk=ccPickOf(ds+gaussR()*1.5),r=Math.random();let res;
+window.ccDraftRun=function(){const C=G.cc,p=C.p,cmb=window._ccCmb||ccCombine(p);window._ccCmb=null;const ds=ccDraftScore(cmb),pk=ccPickOf(ds+gaussR()*1.5),r=Math.random();let res;
   if(pk<=257){const rd=pk<=32?1:pk<=64?2:pk<=100?3:pk<=135?4:pk<=176?5:pk<=220?6:7;res={lg:'NGL',team:AI_NGL[Math.floor(r*AI_NGL.length)],pick:pk,rd,und:false};}
   else if(ds>=70&&r<0.8)res={lg:'NGL',team:AI_NGL[Math.floor(Math.random()*AI_NGL.length)],pick:0,rd:0,und:true};
   else if(ds>=63)res={lg:Math.random()<0.6?'SFL':'MGL',pick:0,rd:0,und:true};else res=null;

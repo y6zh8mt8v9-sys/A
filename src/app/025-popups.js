@@ -183,6 +183,7 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
   updateSbCard();
   try{aiBadge();}catch(e){}
   navSync(page);
+  try{storyNav(page);}catch(e){console.error('story',e);}  // queued career scenes show on the dashboard
   // Clear news badge when visiting news
   if(page==='news'){const b=document.getElementById('news-badge');if(b)b.style.display='none';}
 }

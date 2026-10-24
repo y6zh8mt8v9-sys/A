@@ -109,6 +109,7 @@ function simGame(idx,silent=false,forced=null){
   glSet(game.wk,opp,myScore,oppScore,'reg');try{applyStats(sm);}finally{_glCtx=null;}gateAfter(opp,'reg',game.wk);
   checkStreaks(sm,silent?[]:weekPops,silent);
   checkRecs(sm,game.wk);
+  try{storyGame(iWin,{opp:opp.name,my:myScore,op:oppScore,rival:rivalGame,sm,wk:game.wk});}catch(e){console.error('story',e);}
   try{progAfterGame(iWin,{rival:rivalGame,sm,margin:myScore-oppScore});progBattles(game.wk);}catch(e){console.error('program',e);}
 
   for(const p of pl){

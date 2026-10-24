@@ -7,6 +7,7 @@ styles/03-schedule-builder-layout.css
 styles/04-title-screen.css
 styles/05-coach-creator.css
 styles/06-design.css
+styles/07-story-scenes.css
 shell/10-style-end-body.html
 vendor/gsap-3.13.0.min.js
 shell/11-vendor-end-app-start.html
@@ -73,6 +74,7 @@ app/055-player-career-your-own-player.js
 app/056-huddle-the-career-s-social.js
 app/057-tutorial.js
 app/058-audio-mix.js
+app/059-story-scenes.js
 shell/20-app-end-engine-start.html
 engine/shell/00-page.html
 engine/sprites/00-sprite-library.js

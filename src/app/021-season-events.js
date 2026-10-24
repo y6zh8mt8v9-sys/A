@@ -236,6 +236,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
   window._wxPass=_wf.pass;let sm;try{sm=forced&&forced.sm?forced.sm:genStats(pl,myScore,iWin,G.offS,G.defS,G.myId,opp.id);}finally{window._wxPass=1;}
   glSet(slot.wk,opp,myScore,oppScore,'po');try{applyStats(sm);}finally{_glCtx=null;}gateAfter(opp,'po',slot.wk);
   try{progAfterGame(iWin,{playoff:true,sm,margin:myScore-oppScore});}catch(e){console.error('program',e);}
+  try{storyGame(iWin,{opp:opp.name,my:myScore,op:oppScore,playoff:true,sm,wk:slot.wk});}catch(e){console.error('story',e);}
 
   const pops=[];
   try{checkStreaks(sm,pops,false);}catch(e){console.error(e);}
