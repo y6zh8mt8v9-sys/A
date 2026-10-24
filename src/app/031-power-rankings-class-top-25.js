@@ -18,10 +18,15 @@ function rkCompute(){
   divs.forEach(d=>{const t=d.teams||[],sum=t.reduce((x,s)=>x+(zOf[s.id]||0),0),sn=t.reduce((x,s)=>x+(znOf[s.id]||0),0);t.forEach(s=>{dOf[s.id]=t.length>1?(sum-(zOf[s.id]||0))/(t.length-1):0;dnOf[s.id]=t.length>1?(sn-(znOf[s.id]||0))/(t.length-1):0;});});
   const CF={'1A':-.2,'2A':-.1,'3A':0,'4A':.1,'5A':.2};
   const natC=G.natl&&G.natl.yr===G.yr&&G.natl.done?G.natl.w:null;
+  // national poll like the real prep rankings: the biggest classifications in the strongest states fill it, a small-school
+  // record counts for less on the national stage, and a tough schedule counts for more
+  const CN={5:.45,4:.15,3:-.3,2:-.85,1:-1.4},RW={5:1,4:.9,3:.7,2:.5,1:.4},stTop={};
+  for(const k of ST_ORDER){const a=rows.filter(r=>r.st===k).map(r=>r.zn).sort((x,y)=>y-x).slice(0,10);if(a.length)stTop[k]=a.reduce((x,v)=>x+v,0)/a.length;}
+  const stV=Object.values(stTop),stAvg=stV.length?stV.reduce((x,v)=>x+v,0)/stV.length:0;
   rows.forEach(r=>{const pg=Math.min(1,r.g/8),tw=.75-.45*pg,rw=.55*pg,rec=(r.wpa-.5)*4,sos=(dOf[r.id]||0),
-    qual=r.g>=5&&r.l===0?.35:r.g>=6&&r.l===1?.12:0,pres=.05*(r.pr-3);
+    qual=r.g>=5&&r.l===0?.35:r.g>=6&&r.l===1?.12:0,pres=.05*(r.pr-3),cn=clsNum(r.s.cls),cw=RW[cn]||.7;
     r.sos=sos;r.sc=tw*r.z+rw*rec+.3*pg*sos+qual+pres;r.as=r.sc+(CF[clsEq(r.s.cls)]||0);
-    r.ns=tw*r.zn+rw*rec+.3*pg*(dnOf[r.id]||0)+qual+pres+(r.id===natC?5:0);});
+    r.ns=tw*r.zn+rw*rec*cw+.45*pg*(dnOf[r.id]||0)+qual*cw+pres+(CN[cn]||0)+.25*clamp((stTop[r.st]||stAvg)-stAvg,-1.5,1.5)+(r.id===natC?5:0);});
   const cMap={},aMap={},nMap={},cls={},st={};
   for(const c in byC){const a=byC[c].slice().sort((x,y)=>y.sc-x.sc||y.ov-x.ov);a.forEach((r,i)=>{cMap[r.id]=i+1;});cls[c]=a;}
   for(const k of ST_ORDER){const a=rows.filter(r=>r.st===k).sort((x,y)=>y.as-x.as||y.ov-x.ov);a.forEach((r,i)=>{aMap[r.id]=i+1;});st[k]=a;}
@@ -31,13 +36,13 @@ function rkCompute(){
   _rkNames=null;return _RK;
 }
 function rkOf(id){const R=rkCompute();if(!R)return{c:0,a:0,n:0};return{c:R.cMap[id]||0,a:R.aMap[id]||0,n:R.nMap[id]||0};}
-// badge modes: n = national (blue), a = the team's state (gold); tap to cycle (v2.06: no classification rankings)
+// badge modes: n = national (blue), a = the team's state (gold), c = its classification in the state (red, top 10); tap to cycle
 function rkMode(el,m){const c=+el.dataset.c,a=+el.dataset.a,n=+el.dataset.n,cl=el.dataset.cls,stn=el.dataset.st;el.dataset.m=m;
   if(m==='n'){el.className='rkb rk-n';el.textContent='#'+n;el.title=`National #${n} (tap for more ranks)`;}
   else if(m==='a'){el.className='rkb rk-a';el.textContent='#'+a;el.title=`All-${stn} #${a} (tap for more ranks)`;}
   else{el.className='rkb rk-c';el.textContent='#'+c;el.title=`${cl} #${c} (tap for more ranks)`;}}
 function rkBadge(id){
-  const k=rkOf(id),modes=[];if(k.n&&k.n<=25)modes.push('n');if(k.a&&k.a<=25)modes.push('a');if(!modes.length)return null;
+  const k=rkOf(id),modes=[];if(k.n&&k.n<=25)modes.push('n');if(k.a&&k.a<=25)modes.push('a');if(k.c&&k.c<=10)modes.push('c');if(!modes.length)return null;
   const s=getS(id)||{};const b=document.createElement('span');b.dataset.c=k.c;b.dataset.a=k.a;b.dataset.n=k.n;b.dataset.cls=s.cls?clsName(s.cls):'';b.dataset.st=stName(stOf(s));b.dataset.ms=modes.join('');b.setAttribute('role','button');b.tabIndex=0;
   rkMode(b,modes[0]);
   const flip=e=>{e.stopPropagation();e.preventDefault();const ms=b.dataset.ms.split('');rkMode(b,ms[(ms.indexOf(b.dataset.m)+1)%ms.length]);};
@@ -66,7 +71,7 @@ window._rkCls=null;
 window.rkView=function(v){window._rkCls=v;nav('rank');};
 function pgRank(){
   const R=rkCompute();if(!R)return'';const myK=stOf(myS()||{}),defV=myK&&myK!=='CF'?'ST:'+myK:'ALL';
-  let v=window._rkCls||defV;if(v!=='NAT'&&v!=='ALL'&&!v.startsWith('ST:'))v=defV;
+  let v=window._rkCls||defV;if(v!=='NAT'&&v!=='ALL'&&!v.startsWith('ST:')&&!R.cls[v])v=defV;
   const stK=v==='NAT'?null:v==='ALL'?'CF':v.startsWith('ST:')?v.slice(3):clsSt(v);
   const kind=v==='NAT'?'n':(v==='ALL'||v.startsWith('ST:'))?'a':'c';
   const list=kind==='n'?R.nat:kind==='a'?(R.st[stK]||[]):(R.cls[v]||[]);
@@ -79,13 +84,13 @@ function pgRank(){
     <td style="font-weight:700">${r.w}-${r.l}</td><td>${rb(Math.round(r.ov))}</td><td style="color:var(--gd)">${'★'.repeat(Math.max(1,Math.round(r.pr)))}</td><td style="color:var(--mu)">${Math.max(0,Math.round((pts(r)+3)*100))}</td></tr>`;};
   const top=list.slice(0,25).map(row).join(''),others=list.slice(25,30).map(r=>`${r.s.name} ${r.s.mascot} (${r.w}-${r.l})`).join(', ');
   const title=kind==='n'?`National Top 25 · all ${ST_ORDER.length} states`:kind==='a'?`All-${stName(stK)} Top 25, every classification`:clsName(v)+' Top 25';
-  const clsBtns='';
+  const clsBtns=kind==='n'?'':`<span style="font-size:12px;color:var(--mu);margin-right:6px">${stName(stK)} by class:</span>`+clsOfSt(stK).filter(c=>R.cls[c]&&R.cls[c].length).map(c=>btn(c,clsL(c))).join('');
   const nl=G.natl&&G.natl.yr===G.yr?G.natl:null,nA=nl?getS(nl.a):null,nB=nl?getS(nl.b):null;
   const natBox=kind==='n'&&nA&&nB?`<div style="background:var(--s2);border:1px solid var(--gd);border-radius:8px;padding:10px 12px;margin:4px 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><b style="color:var(--gd)">National Championship</b> ${sLogo(nA,28)} ${nA.name} ${nA.mascot} <span style="color:var(--mu)">vs</span> ${sLogo(nB,28)} ${nB.name} ${nB.mascot} <span style="margin-left:auto;font-weight:800">${nl.done?`${(getS(nl.w)||{}).mascot} win ${Math.max(nl.sa,nl.sb)}-${Math.min(nl.sa,nl.sb)}`:'to be played'}</span></div>`:'';
   return`<div data-norank><div class="pnl"><div class="ph">Rankings <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${title} · ${G.phase==='offseason'?'preseason':'week '+(G.week||0)}</span></div><div class="pb">
     <div>${btn('NAT','National')}${ST_ORDER.map(k=>btn(k==='CF'?'ALL':'ST:'+k,'All-'+stName(k))).join('')}</div>
     ${clsBtns?`<div>${clsBtns}</div>`:''}
-    <div style="font-size:12px;color:var(--mu);margin:4px 0 4px">Next to team names, <span class="rkb rk-n" style="cursor:default">#2</span> in blue is the national rank and <span class="rkb rk-a" style="cursor:default">#3</span> in gold the rank in the team's own state. The national rank is shown first; tap a badge to switch.</div><div style="font-size:12px;color:var(--mu);margin:0 0 10px">Like the national prep rankings and media polls, rankings are driven by results: record, strength of schedule and unbeaten or one-loss seasons, with team talent weighing most in the preseason and early weeks. The national poll measures every team on one scale, so the stronger Crestfield classes carry more weight than the neighbor states. The top two teams in the final national poll play for the National Championship.</div>
+    <div style="font-size:12px;color:var(--mu);margin:4px 0 4px">Next to team names, <span class="rkb rk-n" style="cursor:default">#2</span> in blue is the national rank and <span class="rkb rk-a" style="cursor:default">#3</span> in gold the rank in the team's own state, <span class="rkb rk-c" style="cursor:default">#4</span> in red the rank in its classification (top 10). The national rank is shown first; tap a badge to switch.</div><div style="font-size:12px;color:var(--mu);margin:0 0 10px">Like the national prep rankings and media polls, rankings are driven by results: record, strength of schedule and unbeaten or one-loss seasons, with team talent weighing most in the preseason and early weeks. The national poll measures every team on one scale like the real national prep rankings: the biggest classifications in the strongest football states fill it, schedule strength counts more, and a small-school team needs a dominant season to crack it. The top two teams in the final national poll play for the National Championship.</div>
     ${natBox}
     <div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>Rk</th><th></th><th>Team</th><th>Record</th><th>Rating</th><th>Prestige</th><th>Pts</th></tr></thead><tbody>${top}</tbody></table></div>
     ${others?`<div style="font-size:11px;color:var(--mu);margin-top:10px"><b>Also considered:</b> ${others}</div>`:''}</div></div></div>`;

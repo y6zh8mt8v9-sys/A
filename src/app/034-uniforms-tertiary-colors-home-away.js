@@ -92,6 +92,7 @@ const STAD_SEATS=[['silver','Aluminum silver'],['team','Team color'],['alt','Sec
 const STAD_LOGO=[['logo','Team logo'],['initial','Big letter'],['none','No logo']];
 const STAD_TRACK=[['red','Red'],['blue','Blue'],['black','Black'],['team','Team color']];
 const STAD_EZTXT=[['mascot','Mascot'],['name','School name'],['none','Blank']];
+const STAD_EZFONT=[['std','Bold'],['block','Varsity block'],['outline','Block outline'],['script','Script']]; // end zone lettering
 function _stHex(h){h=String(h||'#777').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;return[n>>16&255,n>>8&255,n&255];}
 function _stMix(a,b,t){const A=_stHex(a),B=_stHex(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');}
 function stadOf(s){
@@ -137,7 +138,7 @@ function stadApply(i,cust,s){
   i.logo=(STAD_LOGO.find(x=>x[0]===c.logo)||[i.logoDef])[0];
   const trK=(STAD_TRACK.find(x=>x[0]===c.track)||STAD_TRACK[0])[0];i.trackK=trK;
   i.trackCol=trK==='blue'?['#2a4f8c','#3e67ad']:trK==='black'?['#24262b','#3a3d44']:trK==='team'?[_gdDark(c1,.2),_gdDark(c1,.02)]:['#8c3b2f','#b8574a'];
-  i.ezTxtK=i.ezText?(STAD_EZTXT.find(x=>x[0]===c.eztxt)||STAD_EZTXT[0])[0]:'none';
+  i.ezTxtK=i.ezText?(STAD_EZTXT.find(x=>x[0]===c.eztxt)||STAD_EZTXT[0])[0]:'none';i.ezFont=(STAD_EZFONT.find(x=>x[0]===c.ezfont)||STAD_EZFONT[0])[0];
   i.wall=_gdDark(c1,.15);i.wall2=c2;i.c1=c1;i.c2=c2;
   return i;
 }
@@ -308,9 +309,9 @@ function stadPreviewSvg(i,w){
   return`<svg viewBox="0 0 300 ${H}" width="${w}" height="${Math.round(w*H/300)}" style="display:block;border-radius:10px;max-width:100%">${o}</svg>`;
 }
 function stadCustHtml(cust,i,set){
-  const cur={turf:i.turfK,ez:i.ezK,eztxt:i.ezTxtK,logo:i.logo,seats:i.seatK,track:i.trackK};
+  const cur={turf:i.turfK,ez:i.ezK,eztxt:i.ezTxtK,ezfont:i.ezFont,logo:i.logo,seats:i.seatK,track:i.trackK};
   const sel=(k,list,lab,dis)=>`<label style="font-size:12px;color:var(--mu)">${lab}<br><select ${dis?'disabled':''} onchange="${set}('${k}',this.value)">${list.map(([v,l,art])=>`<option value="${v}"${cur[k]===v?' selected':''}${art&&i.turf!=='turf'?' disabled':''}>${l}${art&&i.turf!=='turf'?' (turf only)':''}</option>`).join('')}</select></label>`;
-  return`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${sel('turf',STAD_TURF,'Field color')}${sel('ez',STAD_EZ,'End zones',!i.ezColor)}${sel('eztxt',STAD_EZTXT,'End zone text',!i.ezText)}${sel('logo',STAD_LOGO,'Midfield')}
+  return`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${sel('turf',STAD_TURF,'Field color')}${sel('ez',STAD_EZ,'End zones',!i.ezColor)}${sel('eztxt',STAD_EZTXT,'End zone text',!i.ezText)}${sel('ezfont',STAD_EZFONT,'End zone font',!i.ezText||i.ezTxtK==='none')}${sel('logo',STAD_LOGO,'Midfield')}
     ${sel('seats',STAD_SEATS,'Seats',i.stands==='none'||i.stands==='wood')}${sel('track',STAD_TRACK,'Track',!i.track)}</div>`;
 }
 function stadCost(t){return Math.round(12000*Math.pow(t,1.35)/1000)*1000;}

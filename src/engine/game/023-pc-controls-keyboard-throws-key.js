@@ -31,7 +31,8 @@ function gpControlsHtml(){
     <div>${B('spin')} spin · ${B('stiff')} stiff arm<\/div><div>${B('truck')} truck · ${B('hurdle')} hurdle · ${K('K')} take a knee (kickoff)<\/div>
     <div>Touch: the skill-move wheel (bottom right): tap a slice, or press and slide onto one<\/div><div>Each slice shows its key or controller button (Settings → Move buttons: Row or Wheel)<\/div>
     <div class="ctlh">Defense<\/div>
-    <div>${K('W')}${K('A')}${K('S')}${K('D')} or arrows: move your player<\/div><div>${B('tackle')} tackle · ${B('switch')} switch to the man nearest the ball<\/div>
+    <div>${K('W')}${K('A')}${K('S')}${K('D')} or arrows: move your player · hold ${B('sprint')} to sprint<\/div><div>${B('tackle')} tackle (picks the type) · ${B('switch')} switch to the man nearest the ball<\/div>
+    <div>${B('form')} form tackle (sure, short gain) · ${B('stick')} hit stick (big hit, can force a fumble)<\/div><div>${B('bite')} ankle bite (longest reach, trips fast runners) · press early and he launches once in reach<\/div>
     <div>Click / tap a defender: take control of him<\/div><div>${B('play')} or ${K('Space')}: play the ball when the meter is up<\/div>
     <div class="ctlh">Player Career<\/div>
     <div>The coach calls the play: its card shows your job before the snap<\/div><div>Receivers: steer your route (drag, stick or arrows); let go and he runs it as drawn<\/div>
@@ -42,6 +43,7 @@ function gpControlsHtml(){
     <div class="ctlh">Controller<\/div>
     <div>Left stick: move · ${K('A')} snap / tackle / meters<\/div><div>${K('A')}${K('B')}${K('X')}${K('Y')}${K('RB')}: throw to receivers 1–5<\/div>
     <div>Ball carrier: ${K('X')} spin · ${K('B')} stiff arm · ${K('Y')} hurdle · ${K('RB')} truck · ${K('RT')} dive · ${K('LB')} juke<\/div><div>${K('LT')} tuck and run / switch player · ${K('Start')} pause · d-pad and ${K('A')} in menus<\/div>
+    <div>Defense: ${K('A')} tackle · ${K('B')} form tackle · ${K('Y')} hit stick · ${K('X')} ankle bite · hold ${K('RT')} sprint<\/div><div>Touch: the tackle wheel (bottom right) plus a Sprint button to hold<\/div>
   <\/div>`;
 }
 // rebinding: click an action, press a key; a key already in use swaps with it
@@ -130,7 +132,8 @@ function padGameStep(){
       else if(passingUser()){[0,1,2,3,5].forEach((k,i)=>{if(pr(k))gpKeyThrow(i);});if(pr(6))scramble();if(pr(7))gpCyclePT();}
       else if(userCarrier()){{const mi=[[2,1],[1,2],[3,4],[5,3],[7,5],[4,0]].find(([b])=>pr(b));if(mi&&G.mwMark)G.mwMark(mi[1]);}if(pr(2))trySpin();if(pr(1))tryStiff();if(pr(3))tryHurdle();if(pr(5))tryTruck();if(pr(7))tryDive();if(pr(4))gpAutoJuke();if(pr(6))trySlow();if(pr(0)&&G.kneelOK>0)olKneel();
         const ry=g.axes[3]||0,fl=ry<-0.75?-1:ry>0.75?1:0;if(fl&&fl!==PADN.flick)tryJuke(fl*(G.flip?-1:1));PADN.flick=fl;}
-      else if(G.uctl&&G.uctl.team===G.me&&gpDefending(G.me)){if(pr(0))userTackle();if(pr(6)||pr(8))switchUser();}
+      else if(G.uctl&&G.uctl.team===G.me&&gpDefending(G.me)){{const mi=[[0,0],[1,1],[3,2],[2,3],[6,4]].find(([b])=>pr(b));if(mi&&G.mwMark)G.mwMark(mi[1]);}
+        if(pr(0))userTackle();if(pr(1))userTackle('form');if(pr(3))userTackle('stick');if(pr(2))userTackle('bite');if(b[7])G.padSprT=G.time;if(pr(6)||pr(8))switchUser();}
       if(G.play&&G.play.kind==='punt'&&G.offTeam===G.me&&pr(0)&&!G.carrier)olFair();
     }}
   PADN.prev=b;

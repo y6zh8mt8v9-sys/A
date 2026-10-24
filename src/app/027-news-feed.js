@@ -652,7 +652,7 @@ function pgSched(){
         <td>${isRiv?`<strong style="color:var(--gd)">${g.wk}</strong>`:g.wk}</td>
         <td style="color:var(--mu)">${g.date||'–'}</td>
         <td>${isRiv?'<span style="font-size:10px;font-weight:900;color:var(--gd)">RIV</span>':isDiv?'<span style="font-size:10px;font-weight:700;color:var(--te)">DIV</span>':isReg&&!isEmpty?'<span style="font-size:10px;font-weight:700;color:var(--mu)">CUST</span>':isPl?'<span style="font-size:10px;font-weight:700;color:var(--gd)">PLY</span>':isEmpty?'<span style="font-size:10px;color:var(--mu)">Open</span>':'<span style="font-size:10px;font-weight:700;color:var(--mu)">BYE</span>'}</td>
-        <td>${isEmpty?`<span style="color:var(--mu);font-style:italic">open slot –</span>`:opp?`<div style="display:flex;align-items:center;gap:6px">${sLogo(opp,32)} ${isRiv?`<strong style="color:var(--gd)">${opp.name} ${opp.mascot}</strong>`:opp.name+' '+opp.mascot}</div>`:isBye?`<span style="color:var(--mu)">Bye Week –</span>`:'–'}</td>
+        <td>${isEmpty?`<span style="color:var(--mu);font-style:italic">open slot –</span>`:opp?`<div style="display:flex;align-items:center;gap:6px">${sLogo(opp,32)} ${isRiv?`<strong style="color:var(--gd)">${opp.name} ${opp.mascot}</strong>`:opp.name+' '+opp.mascot}${hcTag(g)}</div>`:isBye?`<span style="color:var(--mu)">Bye Week –</span>`:'–'}</td>
         <td>${opp?`<span style="font-family:var(--hd);font-size:11px;font-weight:700;color:${oppCls===G.cls?'var(--te)':clsNum(oppCls)>clsNum(G.cls)?'var(--rd)':'var(--gn)'}" title="${clsName(oppCls)}">${oppCls}</span>`:'–'}</td>
         <td>${opp?rb(teamOvr(opp.id)):'–'}</td>
         <td>${g.result&&g.result!=='bye'?`<strong style="color:${g.result==='W'?'var(--gn)':'var(--te)'}">${g.result}</strong>`:g.result==='bye'?'<span style="color:var(--mu)">BYE</span>':'<span style="color:var(--mu)">–</span>'}</td>
@@ -732,29 +732,12 @@ function pgStand(){
 
 function pgPlayoff(){
   const pl=G.playoff;const curYear=2026+(G.yr-1);
-  if(!pl)return`<div class="pnl"><div class="ph"> State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. Top 16 teams by win% qualify. Complete your schedule first.</div></div></div>`;
-  const field=pl.field||[];
-  return`<div class="pnl"><div class="ph"> State Playoffs, ${curYear} ${pl.stateChamp?'<span style="color:var(--gd)"> State champs!</span>':''}</div><div class="pb">
-    <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Top 16 qualifiers from ${clsL(G.cls)} classification:</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">${field.map((sid,i)=>{const s=getS(sid);if(!s)return'';const isMe=sid===G.myId;const elim=pl.rounds&&pl.rounds.some(r=>r.results&&r.results.find(res=>res.loser===sid));return`<div style="background:${isMe?'rgba(204,34,34,.1)':'var(--s2)'};border:1px solid ${isMe?'var(--ac)':elim?'var(--bd)':'var(--bd)'};border-radius:5px;padding:5px 10px;display:flex;align-items:center;gap:5px;opacity:${elim&&!isMe?.5:1}"><span style="color:var(--mu);font-size:10px">#${i+1}</span>${sLogo(s,29)}<span style="font-size:12px;font-weight:${isMe?700:400}">${s.name}</span></div>`;}).join('')}
-    </div>
-    ${pl.rounds&&pl.rounds.length?pl.rounds.map(r=>{
-      const roundName=poRoundName(r.round)||`Round ${r.round}`;
-      return`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:10px;margin-bottom:8px">
-        <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:6px;">${roundName}</div>
-        <table style="font-size:12px"><tbody>${r.results.map(res=>{
-          const a=getS(res.a),b=res.b?getS(res.b):null;const w=getS(res.winner);
-          const isMyGame=res.a===G.myId||res.b===G.myId;
-          return`<tr><td style="padding:3px 8px">${a?`${sLogo(a,26)} ${a.name}`:''}</td>
-            <td style="padding:3px 8px;font-weight:700;color:${res.winner===res.a?'var(--gn)':'var(--mu)'}">${res.b?(res.winner===res.a?res.wScore:res.lScore):''}</td>
-            <td style="padding:3px 8px;color:var(--mu)">vs</td>
-            <td style="padding:3px 8px">${b?`${sLogo(b,26)} ${b.name}`:'-'}</td>
-            <td style="padding:3px 8px;font-weight:700;color:${res.winner===res.b?'var(--gn)':'var(--mu)'}">${res.b?(res.winner===res.b?res.wScore:res.lScore):''}</td>
-            ${isMyGame?`<td style="padding:3px 8px;color:${res.winner===G.myId?'var(--gn)':'var(--ac);font-weight:700'}">${res.winner===G.myId?'✓ WIN':' Loss'}</td>`:''}</tr>`;
-        }).join('')}</tbody></table>
-      </div>`;
-    }).join(''):''}
-    ${pl.myElim&&!pl.stateChamp?`<div style="background:rgba(204,34,34,.1);border:1px solid var(--ac);border-radius:5px;padding:10px;font-size:13px;color:var(--te)">Your team was eliminated from the playoffs. Better luck next season.</div>`:''}
+  if(!pl)return`<div class="pnl"><div class="ph">State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. The top ${poSeasonN()} teams in ${clsL(G.cls)} qualify${poRules().q==='div'?', division winners first':''}. Complete your schedule first.</div></div></div>`;
+  const field=pl.field||[],inF=field.includes(G.myId),sd=field.indexOf(G.myId)+1;
+  const st=pl.stateChamp?'<span style="color:var(--gd)">State champions!</span>':!inF?'Your team did not qualify.':pl.myElim?'Your team was eliminated.':pl.stateChampId?'':`You are the #${sd} seed and still alive.`;
+  return`<div class="pnl"><div class="ph">State Playoffs, ${curYear} <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${clsName(G.cls)} · ${field.length} teams</span></div><div class="pb">
+    <div style="font-size:13px;margin-bottom:10px">${st}</div>${poBracketHtml(pl)}
+    <div style="font-size:11px;color:var(--mu);margin-top:8px">Seeds by record, strength of schedule and prestige. The top seeds meet as late as possible. Tap a team to see the school.</div>
   </div></div>`;
 }
 
@@ -848,7 +831,7 @@ function _pgRecrMine(){
       <div style="font-size:11px;color:var(--mu)">Watching: ${v.camp.schools.map(s=>s.school).join(', ')}</div></div>
       <button class="btn bsm bgn" ${used||p.committed?'disabled style="opacity:.45"':''} onclick="campAttend('${v.id}')">${used?'No camps left':'Attend'}</button><button class="bgh bsm" onclick="campDecline('${v.id}')">Decline</button></div>`;}).join(''):'<div style="font-size:13px;color:var(--mu)">No invites right now. Players earn invites with good games, stars, the right size for their position and steady performances. Bigger classifications and a more prestigious program get noticed more.</div>';
   const hostHtml=`<div class="pnl" style="margin-bottom:14px"><div class="ph">Showcase your players</div><div class="pb" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <div style="flex:1 1 260px;font-size:13px;color:var(--mu)">Host your own combine and invite college staffs to test your players, or invite coaches to watch your next game. Big performances in front of them can earn offers.</div>
+    <div style="flex:1 1 260px;font-size:13px;color:var(--mu)">Host your own combine and invite college staffs to test your players, or invite coaches to watch your next game. Big performances in front of them can earn offers.${(()=>{try{const T=invTier();return` <b style="color:var(--tx)">Your reach: up to ${T.comb} staffs at a combine, ${T.game} at a game${T.lv.includes('FBS')?', FBS included':''}${T.oos?', other states too':''}.</b>`;}catch(e){return'';}})()}</div>
     <button class="btn" ${combineAvail()?'':'disabled style="opacity:.5"'} onclick="combineOpen()">${combineAvail()?'Host a combine':'Combine hosted this year'}</button><button class="bgh" onclick="gameInviteOpen()">Invite coaches to a game${G.gameInv&&G.gameInv.yr===G.yr?` (Week ${G.gameInv.wk} set)`:''}</button></div></div>`;
   return hostHtml+ncampHtml()+`<div class="pnl" style="margin-bottom:14px"><div class="ph">Camp invites <span style="font-size:12px;color:var(--mu);font-weight:600">${cap} camp${cap>1?'s':''} per player this year (1 per star of program prestige)</span></div><div class="pb">
     ${invHtml}

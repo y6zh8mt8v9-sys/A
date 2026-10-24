@@ -36,8 +36,26 @@ function calcSOS(schId){
 function poRules(){const R=(typeof G!=='undefined'&&G&&G.rules)||{};return{n:[4,8,16,32].includes(R.poN)?R.poN:16,q:R.poQ==='div'?'div':'record'};}
 function poSeasonN(){return[4,8,16,32].includes(G.poN)?G.poN:16;}
 function poRoundsN(n){return Math.round(Math.log2(n||poSeasonN()));}
-function poRoundName(r){const k=poRoundsN()-r;return k<=0?'State Final':k===1?'Regional Championship':k===2?'Quarterfinals':`Round of ${Math.pow(2,k+1)}`;}
+function poRoundName(r,n){const k=poRoundsN(n)-r;return k<=0?'State Final':k===1?'Regional Championship':k===2?'Quarterfinals':`Round of ${Math.pow(2,k+1)}`;}
 function poOrder(n){let o=[1];while(o.length<n){const m=o.length*2+1;o=o.flatMap(x=>[x,m-x]);}return o;} // 1 v n, 8 v 9, … so the top seeds meet last
+// the bracket as columns: round 1 from the seeds, later rounds from the winners; unplayed games show TBD
+function poBracket(pl){pl=pl||G.playoff;if(!pl||!pl.field||pl.field.length<2)return null;const F=pl.field,n=1<<Math.round(Math.log2(F.length)),R=Math.round(Math.log2(n)),seed={};F.forEach((id,i)=>{seed[id]=i+1;});
+  let slots=poOrder(n).map(i=>F[i-1]!=null?F[i-1]:null);const cols=[];
+  for(let r=1;r<=R;r++){const rr=(pl.rounds||[]).find(x=>x.round===r)||(pl.rounds||[])[r-1],res=rr?rr.results||[]:[],M=[];
+    for(let j=0;j<slots.length;j+=2){const a=slots[j],b=slots[j+1];const x=res.find(q=>a!=null&&(q.a===a||q.b===a)||b!=null&&(q.a===b||q.b===b))||null;M.push({a,b,x});}
+    cols.push({r,name:poRoundName(r,n),M});slots=M.map(m=>m.x?m.x.winner:m.a!=null&&m.b==null&&rr?m.a:null);}
+  const fin=cols[cols.length-1].M[0],champ=fin&&fin.x?fin.x.winner:(pl.stateChampId||null);return{cols,seed,champ,n};}
+function poBracketHtml(pl){const B=poBracket(pl);if(!B)return'';const me=G.myId;
+  const nextM=(()=>{const g=G.sched&&G.sched.find(x=>x.type==='playoff'&&!x.result);return g?g.oppId:null;})();
+  const row=(id,m)=>{if(id==null)return`<div class="pob-t pob-tbd"><span class="pob-sd"></span><span class="pob-nm">${m&&m.x&&m.x.b==null?'Bye':'TBD'}</span></div>`;const s=getS(id);if(!s)return`<div class="pob-t pob-tbd"><span class="pob-nm">TBD</span></div>`;
+    const x=m.x,won=x&&x.winner===id,lost=x&&x.b!=null&&x.winner!==id,sc=x&&x.b!=null?(won?x.wScore:x.lScore):'';
+    return`<div class="pob-t${won?' pob-w':''}${lost?' pob-l':''}${id===me?' pob-me':''}" onclick="viewSchool(${id})"><span class="pob-sd">${B.seed[id]||''}</span>${sLogo(s,22)}<span class="pob-nm">${s.name}</span><span class="pob-sc">${sc}</span></div>`;};
+  const box=m=>`<div class="pob-m${(m.a===me||m.b===me)&&!m.x&&(m.a===nextM||m.b===nextM)?' pob-nx':''}">${row(m.a,m)}${row(m.b,m)}</div>`;
+  const cols=B.cols.map((c,ci)=>{const last=ci===B.cols.length-1;let inner='';if(c.M.length>1){for(let j=0;j<c.M.length;j+=2)inner+=`<div class="pob-pr">${box(c.M[j])}${c.M[j+1]?box(c.M[j+1]):''}</div>`;}else inner=box(c.M[0]);
+    return`<div class="pob-col${ci?' pob-in':''}${last?' pob-fin':''}"><div class="pob-h">${c.name}</div><div class="pob-b">${inner}</div></div>`;}).join('');
+  const ch=B.champ!=null?getS(B.champ):null;
+  const chHtml=`<div class="pob-col pob-in pob-ch"><div class="pob-h">Champion</div><div class="pob-b"><div class="pob-m pob-cm${ch&&ch.id===me?' pob-me':''}">${ch?`${sLogo(ch,44)}<b>${ch.name}</b><small>${ch.mascot} · #${B.seed[ch.id]||''} seed</small>`:'<small>To be decided</small>'}</div></div></div>`;
+  return`<div class="pob" data-norank><div class="pob-g" style="--pob-n:${B.cols[0].M.length}">${cols}${chHtml}</div></div>`;}
 // a new field size before the playoffs start: this season's playoff weeks are added or removed to match
 function poApplyNow(){if(G.playoff||['playoffs','postseason','offseason'].includes(G.phase))return false;
   const n=poRules().n,want=poRoundsN(n),slots=G.sched.filter(g=>g.playoffRound).sort((a,b)=>a.playoffRound-b.playoffRound);if(!slots.length)return false;

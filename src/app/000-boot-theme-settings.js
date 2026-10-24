@@ -168,6 +168,7 @@ function renderLeagueRules(){const el=document.getElementById('set-league');if(!
   el.innerHTML=`<div style="font-size:12px;font-weight:800;color:var(--mu);margin:4px 0 8px;letter-spacing:.06em">League rules (this career)</div>`
     +row('Playoff teams',later?`This season keeps ${G.poN} teams; ${R.n} from next season.`:'Teams in your classification\'s state playoffs.',seg('poN',R.n,[[4,'4'],[8,'8'],[16,'16'],[32,'32']]))
     +row('Who qualifies','Division winners first: every division champion is in, then the best records.',seg('poQ',R.q,[['record','Best records'],['div','Division winners first']]))
+    +row('Mercy rule','A 35-point lead in the second half starts a running clock, on Game Day and in simulated games.',seg('mercy',cur.mercy!==false,[[true,'On'],[false,'Off']]))
     +row('Earned progression','On: ratings can\'t be typed in. Players earn them in practice, games, position battles and with SP.',seg('earned',!!cur.earned,[[false,'Off'],[true,'On']]));}
 window.ruleSet=function(k,v){if(typeof G==='undefined'||!G)return;G.rules=G.rules||{};G.rules[k]=v;
   if(k==='poN'&&poApplyNow())notify(`This season's playoffs now take ${v} teams.`);

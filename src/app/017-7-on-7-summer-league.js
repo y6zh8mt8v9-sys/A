@@ -93,7 +93,7 @@ function moneyAfterGame(opp,kind,wk){
     const home=kind==='reg'?(((wk|0)+G.myId)%2===0):kind==='po'?((G.wins||0)>=(opp.wins||0)):true;
     const rival=typeof isRivalry==='function'&&isRivalry(G.myId,opp.id);
     finAdd('boost',(pr*500+wp*2200)*(rival?1.4:1)*(kind==='po'?1.5:1)*(0.85+Math.random()*0.3),null);
-    if(home){const cap=stadBase(stadOf(s)).cap;finAdd('merch',cap*(0.18+0.05*pr)*(0.6+wp*0.8)*(rival?1.3:1)*(0.85+Math.random()*0.3),null);}
+    if(home){const cap=stadBase(stadOf(s)).cap;finAdd('merch',cap*(0.18+0.05*pr)*(0.6+wp*0.8)*(rival?1.3:1)*(kind==='reg'&&hcIs(wk)?1.3:1)*(0.85+Math.random()*0.3),null);}
     if(kind==='po'||kind==='nat'||rival)finAdd('tv',kind==='nat'?40000:kind==='po'?6000+pr*1500:2500+pr*700,kind==='po'?'Playoff broadcast rights':kind==='nat'?'National title broadcast':'Rivalry game streaming deal');
   }catch(e){console.error('money',e);}
 }
