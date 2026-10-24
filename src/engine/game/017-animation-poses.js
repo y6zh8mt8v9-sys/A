@@ -33,7 +33,9 @@ function poseFor(e){
   if(S&&S.c===e){const u=S.t/S.dur;let Q;
     if(S.type==='hit')Q={...FALLB};else if(S.type==='shoe')Q={...STUMBLE};else Q=u<0.5?{...STAND,...runPose(e,2),...DRAG}:{...STUMBLE};
     Q.ball=S.type==='hit'?[0,-66]:[20,-44];return Q;}
+  if(S&&S.v&&S.fs[0]===e)return{...(S.v==='form'?WRAP:S.v==='stick'?(S.t<S.dur*0.35?STICKT:HIT):BITET)};
   if(S&&S.fs.includes(e))return{...(S.type==='hit'?HIT:S.type==='shoe'?SHOE:S.type==='dive'?DIVE:WRAP)};
+  if(e.lunge>0&&UTK[e.lt])return{...(e.lt==='form'?FORMT:e.lt==='stick'?STICKT:BITET)};
   if(e.lunge>0)return{...(e.lt==='shoe'?SHOE:e.lt==='hit'?HIT:DIVE)};
   if((ca&&ca.type==='dive')||e.dive>0){const Q={...DIVE};if(hb&&!(ca&&ca.drop))Q.ball=[44,-30];return Q;}
   if(e.kickT>0)return{...KICKP};
@@ -59,7 +61,8 @@ function poseFor(e){
   if(e.relT>0)Object.assign(Q,REL);
   if(e.plant>0&&!hb)Object.assign(Q,PLANT);
   if(hb&&e===G.carrier){
-    if(e.juke>0)Object.assign(Q,CUT,{ball:[6,-62]});
+    if(e.trip>0)Object.assign(Q,TRIPP);
+    else if(e.juke>0)Object.assign(Q,CUT,{ball:[6,-62]});
     else if(e.spin>0)Object.assign(Q,SPIN);
     else if(e.stiff>0)Object.assign(Q,STIFF);
     else if(e.truck>0)Object.assign(Q,HIT,{ball:CARRY.ball,ne:CARRY.ne,nh:CARRY.nh});

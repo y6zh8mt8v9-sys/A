@@ -112,7 +112,8 @@ addEventListener('keydown',ev=>{
   if(k===kb('switch')&&gpDefending(G.me)){switchUser();ev.preventDefault();return;}
   if(G.uctl&&G.uctl.team===G.me){
     if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){keys.add(k);ev.preventDefault();}
-    else if(k===kb('tackle'))userTackle();else if(k===kb('play')){intMeterTap();}
+    else if(k===kb('tackle'))userTackle();else if(k===kb('form'))userTackle('form');else if(k===kb('stick'))userTackle('stick');else if(k===kb('bite'))userTackle('bite');
+    else if(k===kb('sprint')){keys.add(k);ev.preventDefault();}else if(k===kb('play')){intMeterTap();}
   }
 });
 addEventListener('keyup',ev=>keys.delete(String(ev.key||'').toLowerCase()));
@@ -132,7 +133,7 @@ function userJoyStep(){
   G.joyV=null;const u=G.uctl;if(!u||G.phase!=='live'||u.down||u===G.carrier)return;
   if(ON&&u.team!==G.me){ // the guest steers this defender: its stick arrives as a direction in field coordinates
     const J=G.rjoy;if(!J||J.m<0.15||G.time-J.t>1.5){u.idle=(u.idle||0)+1/60;if(u.idle<0.7)G.joyV=[u.vx*0.9,u.vy*0.9];return;}
-    u.idle=0;G.joyV=[J.v[0]*u.spd*J.m,J.v[1]*u.spd*J.m];return;}
+    u.idle=0;const sp=gpSprintOn()?SPRINT:1;G.joyV=[J.v[0]*u.spd*J.m*sp,J.v[1]*u.spd*J.m*sp];return;}
   let sx=0,sy=0;
   const kd=['arrowleft','arrowright','arrowup','arrowdown','w','a','s','d'].some(k=>keys.has(k));
   if(G.joy){sx=G.joy.x-G.joy.ox;sy=G.joy.y-G.joy.oy;}
@@ -142,6 +143,6 @@ function userJoyStep(){
   if(m<4){u.idle=(u.idle||0)+1/60;if(u.pcRan&&u.side==='o'){G.joyV=[u.vx,u.vy];return;}if(u.idle<0.7&&!G.joy)G.joyV=[u.vx*0.9,u.vy*0.9];return;}
   if(pcOn()&&u.side==='o')u.pcRan=true;
   u.idle=0;const[fx,fy]=screenToSimDir(u,sx,sy),mag=Math.min(1,m/26);
-  G.joyV=[fx*u.spd*mag,fy*u.spd*mag];
+  const sp=u.side==='d'&&gpSprintOn()?SPRINT:1;G.joyV=[fx*u.spd*mag*sp,fy*u.spd*mag*sp];
 }
 

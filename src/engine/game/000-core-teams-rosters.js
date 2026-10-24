@@ -20,7 +20,7 @@ const cv=$('c'),MAINCTX=cv.getContext('2d');let ctx=MAINCTX;
 const GDS_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,keys:{},gfx:'auto',crowdV:'full',bug:'tv',moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true};
 // v2.15 rebindable keys: [action, label, default key]. W A S D and the arrows always move your defender.
 const KB_ACT=[['jukeU','Juke up','w'],['jukeD','Juke down','s'],['dive','Dive','d'],['slow','Slow down','a'],['spin','Spin','e'],['stiff','Stiff arm','q'],['truck','Truck','r'],['hurdle','Hurdle','h'],
-  ['tackle','Tackle','j'],['switch','Switch player','tab'],['play','Play the ball','k'],['scramble','QB tuck and run','c'],['fair','Fair catch','f']];
+  ['tackle','Tackle','j'],['form','Form tackle','u'],['stick','Hit stick','i'],['bite','Ankle bite','o'],['sprint','Sprint (hold)','shift'],['switch','Switch player','tab'],['play','Play the ball','k'],['scramble','QB tuck and run','c'],['fair','Fair catch','f']];
 // v2.15 difficulty sliders: 0-100 per team (you / CPU), 50 is normal. Online games always play at 50.
 const SL_KEYS=[['spd','Speed'],['acc','Acceleration'],['str','Strength'],['iq','Awareness (IQ)'],['thr','Throwing accuracy'],['bsp','Ball speed'],['cat','Catching'],['int','Interceptions'],['man','Man coverage'],['zone','Zone coverage'],['fum','Fumbles'],['juk','Juke ability']];
 function slv(t,k){if(ON||G.test||G.demo||DEMO)return 50;const S=GDS.sl&&GDS.sl[t===G.me?'u':'c'],v=S&&S[k];return v==null||isNaN(+v)?50:Math.max(0,Math.min(100,+v));}
@@ -28,7 +28,7 @@ function slf(t,k,span){return 1+(slv(t,k)-50)/50*span;}
 function sla(t,k,span){return(slv(t,k)-50)/50*span;}
 function gspd(){if(ON||G.test||G.demo||DEMO)return 1;const v=+GDS.gspd;return v>0?Math.max(0.75,Math.min(1.25,v)):1;}
 function kb(a){const d=KB_ACT.find(x=>x[0]===a);return((GDS.keys&&GDS.keys[a])||(d?d[2]:'')).toLowerCase();}
-function kbLabel(k){return{tab:'Tab',' ':'Space',enter:'Enter',arrowup:'↑',arrowdown:'↓',arrowleft:'←',arrowright:'→',escape:'Esc'}[k]||k.toUpperCase();}
+function kbLabel(k){return{tab:'Tab',' ':'Space',enter:'Enter',arrowup:'↑',arrowdown:'↓',arrowleft:'←',arrowright:'→',escape:'Esc',shift:'Shift'}[k]||k.toUpperCase();}
 const GDS=(()=>{let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}if(!o.mw2){o.moveUI='wheel';o.mw2=true;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}}return Object.assign({},GDS_DEF,o);})();
 try{camSet(GDS.cam);}catch(e){}
 function gdsSave(){try{localStorage.setItem('gpgm_gd',JSON.stringify(GDS));}catch(e){}}

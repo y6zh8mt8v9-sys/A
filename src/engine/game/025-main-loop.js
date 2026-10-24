@@ -205,12 +205,12 @@ function olRemote(m){
       case 'repass':if(gpScrambling()&&G.offTeam===R){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}return;
       case 'mv':{if(!userCarrier())return;const f={juke:()=>tryJuke(Math.sign(num(m.d,1))||1),spin:trySpin,stiff:tryStiff,truck:tryTruck,hurdle:tryHurdle,dive:tryDive,slow:trySlow}[m.mv];
         if(f)f();return;}
-      case 'tackle':if(G.uctl&&G.uctl.team===R)userTackle();return;
+      case 'tackle':if(G.uctl&&G.uctl.team===R)userTackle(typeof m.t==='string'?m.t:null);return;
       case 'switch':if(gpDefending(R))switchUser();return;
       case 'pick':{const live=G.phase==='live'&&gpDefending(R);if(!live&&(G.phase!=='presnap'||!G.play||G.play.kind!=='scrimmage'||G.offTeam===R))return;
         const e=G.ents.find(x=>x.nk===m.n&&x.team===R&&!x.down&&(live?!['K','P','H'].includes(x.role):['LB','CB','NB','S'].includes(x.role)));if(e){G.uctl=e;if(['LB','CB','NB','S'].includes(e.role))G.uSlotT[R]=e.slot;setCtl();}return;}
       case 'joy':{const v=Array.isArray(m.v)?m.v:[0,0],x=num(v[0],0),y=num(v[1],0),l=Math.hypot(x,y);
-        G.rjoy={v:l>0.001?[x/l,y/l]:[0,0],m:clamp(num(m.m,0),0,1),t:G.time};return;}
+        G.rjoy={v:l>0.001?[x/l,y/l]:[0,0],m:clamp(num(m.m,0),0,1),sp:!!m.sp,t:G.time};return;}
       case 'cm':{const M=G.cm,a=G.air;if(!M||!M.target||M.target.team!==R||M.tapped!=null||G.ballState!=='air'||!a)return;
         const u=clamp(num(m.u,0),0,1);M.tapped=u;M.result=u>=M.g0&&u<=M.g1?'PERFECT':(u>=M.g0-M.yw&&u<=M.g1+M.yw)?'GOOD':u<M.g0?'EARLY':'LATE';return;}
       case 'im':{const M=G.im,a=G.air,U=M&&M.def;if(!M||!U||U.team!==R||M.tapped!=null||G.ballState!=='air'||!a)return;
@@ -363,16 +363,16 @@ function olSync(F){
   if(key!==OL.uiKey){OL.uiKey=key;if(G.phase!=='replay'){setTray(G.phase==='presnap'?'presnap':G.phase==='dead'?(G.celebPick?'celebrate':'dead'):'none');setCtl();}}
 }
 function olJoySend(){
-  const u=G.uctl;let v=[0,0],m=0;
+  const u=G.uctl;let v=[0,0],m=0;const sp=gpSprintOn()?1:0;
   if(u&&u.team===G.me&&G.phase==='live'){let sx=0,sy=0;
     if(G.joy){sx=G.joy.x-G.joy.ox;sy=G.joy.y-G.joy.oy;}
     else if(G.pad){sx=G.pad.x*30;sy=G.pad.y*30;}
   else{if(keys.has('arrowleft')||keys.has('a'))sx-=30;if(keys.has('arrowright')||keys.has('d'))sx+=30;if(keys.has('arrowup')||keys.has('w'))sy-=30;if(keys.has('arrowdown')||keys.has('s'))sy+=30;}
     const l=Math.hypot(sx,sy);if(l>=4){const[fx,fy]=screenToSimDir(u,sx,sy);v=[Math.round(fx*100)/100,Math.round(fy*100)/100];m=Math.round(Math.min(1,l/26)*100)/100;}}
-  const now=performance.now(),L=OL.joyLast,same=L&&L.m===m&&Math.abs(L.v[0]-v[0])<0.06&&Math.abs(L.v[1]-v[1])<0.06;
+  const now=performance.now(),L=OL.joyLast,same=L&&L.m===m&&L.sp===sp&&Math.abs(L.v[0]-v[0])<0.06&&Math.abs(L.v[1]-v[1])<0.06;
   if(m===0&&(!L||L.m===0))return;
   if(same&&now-OL.joyAt<(m?250:1e9))return;if(!same&&now-OL.joyAt<60)return;
-  OL.joyLast={v,m};OL.joyAt=now;olCmd('joy',{v,m});
+  OL.joyLast={v,m,sp};OL.joyAt=now;olCmd('joy',{v,m,sp});
 }
 function olDrawRoutes(){
   if(G.phase!=='presnap'||!G.play||G.play.kind!=='scrimmage'||G.offTeam!==G.me||!OL.routes)return;

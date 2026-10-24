@@ -36,6 +36,11 @@ const STUMBLE={hip:[-4,-36],sh:[12,-52],hd:[20,-58],nk:[4,-20],nf:[-2,0],fk:[-14
 const HIT={hip:[-4,-44],sh:[10,-62],hd:[18,-68],nk:[8,-24],nf:[14,-2],fk:[-10,-26],ff:[-20,-8],ne:[16,-58],nh:[14,-48],fe:[12,-60],fh:[10,-50]};
 const WRAP={hip:[-2,-46],sh:[10,-68],hd:[16,-76],nk:[8,-24],nf:[10,0],fk:[-8,-24],ff:[-14,-4],ne:[20,-60],nh:[26,-52],fe:[20,-62],fh:[26,-56]};
 const SHOE={hip:[-14,-14],sh:[14,-13],hd:[25,-15],nk:[-28,-14],nf:[-42,-18],fk:[-28,-10],ff:[-42,-8],ne:[28,-10],nh:[40,-4],fe:[28,-8],fh:[40,-3],flat:1};
+// v2.17 the user's tackle types and a tripped runner
+const FORMT={hip:[-2,-48],sh:[9,-70],hd:[15,-79],nk:[8,-24],nf:[12,0],fk:[-8,-24],ff:[-14,-2],ne:[18,-64],nh:[27,-60],fe:[18,-66],fh:[27,-63]}; // square, eyes up, arms ready to wrap
+const STICKT={hip:[-6,-40],sh:[12,-56],hd:[21,-60],nk:[6,-22],nf:[16,-6],fk:[-14,-26],ff:[-26,-10],ne:[22,-58],nh:[20,-46],fe:[8,-54],fh:[2,-44]}; // shoulder down, launching off the back foot
+const BITET={hip:[-16,-10],sh:[12,-9],hd:[23,-10],nk:[-30,-12],nf:[-44,-16],fk:[-30,-8],ff:[-44,-6],ne:[30,-6],nh:[43,-2],fe:[30,-5],fh:[42,-1],flat:1}; // flat out, hands at the shoes
+const TRIPP={hip:[-2,-38],sh:[14,-54],hd:[22,-60],nk:[6,-18],nf:[2,0],fk:[-12,-28],ff:[-24,-30],ne:[6,-60],nh:[12,-62],fe:[22,-48],fh:[30,-40],ball:[12,-62]}; // stumbling, one foot clipped
 const DRAG={hip:[0,-46],sh:[12,-70],hd:[18,-79],ne:[4,-64],nh:[10,-66],ball:[12,-66]};
 const STIFF={ne:[18,-74],nh:[32,-76],fe:[4,-64],fh:[10,-66],ball:[12,-66]};
 const SPIN={ne:[14,-72],nh:[25,-70],fe:[-10,-72],fh:[-21,-70],ball:[8,-66],sh:[2,-78],hd:[5,-89]};

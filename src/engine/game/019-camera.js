@@ -95,6 +95,7 @@ function animFor(e,sheet){
   if(e.hurt&&e.down)return A('tackled',1);
   {const cb=e.celeb&&G.phase!=='live'?celebAnim(e,A,Lp):null;if(cb)return cb;}
   if(S&&S.c===e)return gpTackledFrame(e,S,A);
+  {const ta=gpTkAnim(e,A);if(ta)return ta;} // the user's tackle types and a tripped runner
   if(S&&S.fs.includes(e))return A(S.type==='dive'||S.type==='shoe'?'tackle_dive':'tackle',S.t/S.dur);
   if(e.down){
     if(e.slid&&M('qb_slide')){if(e.downT>0&&e.downT<0.3)return A('getup',0.7+0.29*(1-e.downT/0.3));return A('qb_slide',0.99);}

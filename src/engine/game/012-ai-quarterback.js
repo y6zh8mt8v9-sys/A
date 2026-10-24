@@ -92,23 +92,24 @@ const MOVE_W=[['Juke','',()=>gpAutoJuke()],['Spin','',()=>trySpin()],['Stiff arm
 const MW_IC={Juke:'M5 19 12 12 8 8 15 3M11 3h4v4',Spin:'M18.5 12a6.5 6.5 0 1 1-2.6-5.2M17 3v4h-4','Stiff arm':'M8 20v-6l-2.5-3M8 14V6a1.4 1.4 0 0 1 2.8 0v5M10.8 11V4.5a1.4 1.4 0 0 1 2.8 0V11M13.6 11V5.5a1.4 1.4 0 0 1 2.8 0V12M16.4 12V9a1.4 1.4 0 0 1 2.8 0v5c0 4-3 6.5-6.6 6.5',
   Truck:'M5 6l6 6-6 6M12 6l6 6-6 6',Hurdle:'M3 20h18M8 20v-5M16 20v-5M7 15h10M4 12c3-8 13-8 16 0M17 9l3 3 1-4',Dive:'M4 5l12 10M11 16h6v-6M3 20h18'};
 const MW_KEY={Juke:[4,'jukeU'],Spin:[2,'spin'],'Stiff arm':[1,'stiff'],Truck:[5,'truck'],Hurdle:[3,'hurdle'],Dive:[7,'dive']};
-function gpMoveWheel(box){
-  const N=MOVE_W.length,C=100,R=97,r=50,gap=0.03,K=padKind(),P=K?PADG[K]:null;
+// W / IC / KM / lbl: the slices, icons and key map (the defense passes its own tackle wheel)
+function gpMoveWheel(box,W,IC,KM,lbl){W=W||MOVE_W;IC=IC||MW_IC;KM=KM||MW_KEY;lbl=lbl||'Moves';
+  const N=W.length,C=100,R=97,r=50,gap=0.03,K=padKind(),P=K?PADG[K]:null;
   const pt=(rad,a)=>(C+rad*Math.cos(a)).toFixed(1)+','+(C+rad*Math.sin(a)).toFixed(1);
-  const segs=MOVE_W.map(([l],i)=>{const a0=-Math.PI/2+(i-0.5)*2*Math.PI/N+gap,a1=-Math.PI/2+(i+0.5)*2*Math.PI/N-gap,am=-Math.PI/2+i*2*Math.PI/N,mr=(R+r)/2;
-    const[ix,iy]=pt(mr-3,am).split(','),[kx,ky]=pt(R-9,am).split(','),mk=MW_KEY[l];
+  const segs=W.map(([l],i)=>{const a0=-Math.PI/2+(i-0.5)*2*Math.PI/N+gap,a1=-Math.PI/2+(i+0.5)*2*Math.PI/N-gap,am=-Math.PI/2+i*2*Math.PI/N,mr=(R+r)/2;
+    const[ix,iy]=pt(mr-3,am).split(','),[kx,ky]=pt(R-9,am).split(','),mk=KM[l];
     const key=P&&mk?P.l[mk[0]]:(GPC&&mk?(mk[1]==='jukeU'?kb('jukeU')+'/'+kb('jukeD'):kb(mk[1])).toUpperCase():'');
     return`<path class="mw-s" data-i="${i}" d="M${pt(R,a0)}A${R},${R} 0 0 1 ${pt(R,a1)}L${pt(r,a1)}A${r},${r} 0 0 0 ${pt(r,a0)}Z"/>`+
-      `<path class="mw-ic" data-c="${i}" transform="translate(${(+ix-13.2).toFixed(1)},${(+iy-15).toFixed(1)}) scale(1.1)" d="${MW_IC[l]||''}"/>`+
+      `<path class="mw-ic" data-c="${i}" transform="translate(${(+ix-13.2).toFixed(1)},${(+iy-15).toFixed(1)}) scale(1.1)" d="${IC[l]||''}"/>`+
       (key?`<text class="mw-k" x="${kx}" y="${(+ky+(Math.sin(am)>0.5?-2:2)).toFixed(1)}" ${P&&mk?`style="fill:${P.c[mk[0]]}"`:''}>${key}<\/text>`:'');}).join('');
   const w=document.createElement('div');w.className='mwheel';
-  w.innerHTML=`<svg viewBox="0 0 200 200" aria-label="Skill moves">${segs}<circle class="mw-c" cx="${C}" cy="${C}" r="${r-6}"/><\/svg><div class="mw-lbl">Moves<\/div>`;
-  box.appendChild(w);const lbl=w.querySelector('.mw-lbl');let sel=-1,down=false;
+  w.innerHTML=`<svg viewBox="0 0 200 200" aria-label="${lbl}">${segs}<circle class="mw-c" cx="${C}" cy="${C}" r="${r-6}"/><\/svg><div class="mw-lbl">${lbl}<\/div>`;
+  box.appendChild(w);const lb=w.querySelector('.mw-lbl');let sel=-1,down=false;
   const pickAt=ev=>{const b=w.getBoundingClientRect(),sc=b.width/200,dx=ev.clientX-(b.left+b.width/2),dy=ev.clientY-(b.top+b.height/2),d=Math.hypot(dx,dy)/sc;if(d<r*0.55||d>R+30)return-1;
     let a=Math.atan2(dy,dx)+Math.PI/2;if(a<0)a+=Math.PI*2;return Math.round(a/(Math.PI*2/N))%N;};
   const mark=i=>{sel=i;w.querySelectorAll('.mw-s').forEach(p=>p.classList.toggle('on',+p.dataset.i===i));
-    const lt=document.documentElement.classList.contains('g27l');w.querySelectorAll('.mw-ic').forEach(p=>{p.style.stroke=+p.dataset.c===i?'var(--tOn,#fff)':'';});lbl.textContent=i>=0?MOVE_W[i][0]:'Moves';};
-  const fire=i=>{if(i<0)return;MOVE_W[i][2]();mark(i);setTimeout(()=>{if(!down)mark(-1);},260);};
+    const lt=document.documentElement.classList.contains('g27l');w.querySelectorAll('.mw-ic').forEach(p=>{p.style.stroke=+p.dataset.c===i?'var(--tOn,#fff)':'';});lb.textContent=i>=0?W[i][0]:lbl;};
+  const fire=i=>{if(i<0)return;W[i][2]();mark(i);setTimeout(()=>{if(!down)mark(-1);},260);};
   w.onpointerdown=ev=>{ev.stopPropagation();ev.preventDefault();down=true;try{w.setPointerCapture(ev.pointerId);}catch(e){}mark(pickAt(ev));};
   w.onpointermove=ev=>{if(down||ev.pointerType==='mouse')mark(pickAt(ev));};
   w.onpointerup=ev=>{ev.stopPropagation();down=false;fire(pickAt(ev));};

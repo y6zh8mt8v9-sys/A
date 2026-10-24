@@ -225,7 +225,7 @@ const TUT_PAGES=[
       <li><strong>Passing</strong>: press and pull back like a slingshot, release to throw; a quick tap switches between a bullet and a lob, the QB run button scrambles</li>
       <li><strong>Catch meters</strong>: tap while the marker is in the green</li>
       <li><strong>Running</strong>: swipe up or down to juke, forward to dive, back to slow down, plus the Spin, Stiff arm, Truck and Hurdle buttons</li>
-      <li><strong>Defense</strong>: pick your defender, drag to move, tap Tackle</li>
+      <li><strong>Defense</strong>: pick your defender, drag to move, hold Sprint, and pick a tackle on the tackle wheel: Form tackle, Hit stick, Ankle bite or Tackle</li>
       <li><strong>Kicking</strong>: stop the power and accuracy meters in the green</li>
     </ul>
     <p>Nothing counts on your record, every player who takes a rep earns 2 XP, and your weekly practice stays available.</p>
@@ -261,11 +261,11 @@ const TUT_PAGES=[
       <li><b>Snap</b>: Enter or Space · <b>Timeout</b>: T · <b>Pause</b>: P or Esc</li>
       <li><b>Pass</b>: 1–5 throw to that receiver (the numbers float over them), Space switches bullet / lob, C to run with the QB, or pull back with the mouse like a slingshot</li>
       <li><b>Ball carrier</b>: W/S or ↑/↓ juke, D or → dive, A or ← slow down, E spin, Q stiff arm, R truck, H hurdle</li>
-      <li><b>Defense</b>: WASD or arrows move, J tackle, Tab switch, click a player to control him, K or Space when the ball meter is up</li>
+      <li><b>Defense</b>: WASD or arrows move, Shift (hold) sprint, J tackle, U form tackle, I hit stick, O ankle bite, Tab switch, click a player to control him, K or Space when the ball meter is up</li>
       <li><b>Kicks and catches</b>: Space or click to stop the meters · F fair catch · 1–9 pick a celebration</li>
     </ul>
     <p><b>Change any key</b>: Pause → Settings → Change keys. Click an action, press the new key.</p>
-    <p><b>Controllers</b> (Xbox, PlayStation and most others) work too. Left stick moves your player, flick it up or down to juke. Passing: A, B, X, Y and RB throw to receivers 1–5, LT tucks and runs. Ball carrier: X spin, B stiff arm, Y hurdle, RB truck, RT dive, LB juke. Defense: A tackle, LT switch player. Start pauses; in menus the d-pad moves, A selects, B goes back, and LB/RB switch sections.</p>
+    <p><b>Controllers</b> (Xbox, PlayStation and most others) work too. Left stick moves your player, flick it up or down to juke. Passing: A, B, X, Y and RB throw to receivers 1–5, LT tucks and runs. Ball carrier: X spin, B stiff arm, Y hurdle, RB truck, RT dive, LB juke. Defense: A tackle, B form tackle, Y hit stick, X ankle bite, hold RT to sprint, LT switch player. Start pauses; in menus the d-pad moves, A selects, B goes back, and LB/RB switch sections.</p>
   `},
   {tab:'Stats & careers',icon:'',title:'Stats, Game Logs and Careers',body:`
     <p>Every player card has a <b>Game Log</b> (each game this season) and a <b>Career</b> tab (season by season, career totals, awards and college).</p>
