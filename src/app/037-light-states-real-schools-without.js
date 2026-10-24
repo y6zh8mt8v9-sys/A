@@ -68,7 +68,7 @@ function sPlayersAny(teams){for(const s of teams)if(sPlayers(s.id).length)return
 function liteOffseason(){const by=liteStates();if(!Object.keys(by).length)return;liteYrCalib();G.liteOfs=null;liteCalib();
   const ids=new Set();for(const st in by)for(const s of by[st])ids.add(s.id);
   G.players=G.players.filter(p=>!(p.lt&&ids.has(p.sId)&&p.yr>=12));
-  for(const p of G.players){if(!p.lt||!ids.has(p.sId))continue;p.yr++;try{bodyGrow(p);}catch(e){}const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
+  for(const p of G.players){if(!p.lt||!ids.has(p.sId))continue;p.yr++;try{bodyGrow(p);}catch(e){}const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,Math.max(p.pot,p.rat));p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
   const byS={};for(const p of G.players)if(p.lt&&ids.has(p.sId))(byS[p.sId]=byS[p.sId]||[]).push(p);
   const drop=new Set(),fresh=[];
   for(const st in by){const T0=by[st],ab=USA.ab[st]||st;for(const s of T0)s.str=liteStr(s);

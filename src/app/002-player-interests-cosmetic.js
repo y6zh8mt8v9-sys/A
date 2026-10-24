@@ -93,8 +93,10 @@ function effPot(p){
     if(p.pot){p.potLo=Math.max(p.rat,p.pot-rng(5,12));p.potHi=clamp(p.pot+rng(0,8),p.potLo,99);}
     else{p.potLo=p.rat;p.potHi=p.rat;}
   }
+  // a player who grew past his ceiling keeps his rating: the ceiling rises to meet him, it never pulls him down
+  const r=Math.min(99,p.rat||0);if(r>p.potHi)p.potHi=r;
   const tf=trainFactor();
-  return clamp(Math.round(p.potLo+(p.potHi-p.potLo)*tf),p.potLo,p.potHi);
+  return Math.max(r,clamp(Math.round(p.potLo+(p.potHi-p.potLo)*tf),p.potLo,p.potHi));
 }
 // Sync p.pot to effective value (called after training upgrades or season updates)
 function syncPot(p){p.pot=effPot(p);}

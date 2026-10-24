@@ -57,7 +57,7 @@ function applyPhaseTrain(phase){
     else if(foc==='strength'){p.str=clamp(p.str+rng(0,1+wF)+(p.traits&&p.traits.includes('gym-rat')?1:0),1,99);}
     else if(foc==='conditioning'){ovrSync(p);p.at.sta=clamp(p.at.sta+rng(2,4)+(p.traits&&p.traits.includes('workhorse')?1:0),1,99);p.at.acl=clamp(p.at.acl+rng(0,1),1,99);}
     else if(foc==='technique'){ovrSync(p);base*=0.85;const W=OVR_W[p.pos]||{};for(const k of keyAttrs(p.pos))if(!ATOP.has(k))p.at[k]=clamp(p.at[k]+rng(0,2),1,99);}
-    p.rat=clamp(Math.round(p.rat+base),1,p.pot);
+    p.rat=clamp(Math.round(p.rat+base),1,Math.max(p.pot,p.rat));
     if(foc==='strength'||foc==='balanced')p.str=clamp(p.str+rng(0,1+(p.traits&&p.traits.includes('gym-rat')?1:0)),1,99);
     if(phase===1){const awB=p.traits&&p.traits.includes('film-junkie')?rng(1,3):rng(0,1);p.awr=clamp(p.awr+awB,1,99);}
     const isA=p.traits&&p.traits.includes('academic');
@@ -184,7 +184,7 @@ function finalizeOffseason(){
     const minFr=Math.max(aiSeniors,5)+rng(0,3);
     const aiFrCnt=clamp(Math.max(minFr,deficit+rng(-1,3)),5,22);
     const n2=cNeeds(s.id);for(let i=0;i<aiFrCnt;i++){const p2=genPlayer(s.id,9,s.cls,n2);adjDev(p2,s);G.players.push(p2);}
-    for(const p of G.players.filter(p=>p.sId===s.id)){const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);updDev(p);}
+    for(const p of G.players.filter(p=>p.sId===s.id)){const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,Math.max(p.pot,p.rat));updDev(p);}
     // AI SEASON PERFORMANCE: OVR gains/losses scale with win ratio.
     // Good seasons → bigger OVR boost (prestige-scaled). Bad seasons → slight OVR erosion.
     (function(){
@@ -211,7 +211,7 @@ function finalizeOffseason(){
       }
       for(const p of G.players.filter(p=>p.sId===s.id)){
         if(ovrDelta>0){
-          p.rat=clamp(p.rat+ovrDelta,1,p.pot);
+          p.rat=clamp(p.rat+ovrDelta,1,Math.max(p.pot,p.rat));
           // Attribute side-effects proportional to OVR gain
           _attrBoostForOvr(p,ovrDelta);
         } else if(ovrDelta<0){
@@ -452,7 +452,7 @@ function finalizeOffseason(){
         const aiFrCnt=clamp(tgt-cur,3,Math.max(5,(srCnt[s.id]||0)+3));
         const n2=cNeeds(s.id);for(let i=0;i<aiFrCnt;i++){const p2=genPlayer(s.id,9,s.cls||cls,n2);G.players.push(p2);}
       }
-      for(const p of G.players){if(!lgIds.has(p.sId))continue;const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,p.pot);
+      for(const p of G.players){if(!lgIds.has(p.sId))continue;const g=p.pot-p.rat;p.rat=clamp(Math.round(p.rat+Math.max(0,g*.1+rngF(-1,3))),1,Math.max(p.pot,p.rat));
         // Reset season stats
         p.seasStats=emS();p.inj=0;p.injName=null;p.injSeason=false;}
     }
