@@ -1,0 +1,1862 @@
+{
+ "eagle": {
+  "names": [
+   "Eagles",
+   "Golden Eagles"
+  ],
+  "subject": "bald eagle head in profile"
+ },
+ "catside": {
+  "names": [
+   "Panthers",
+   "Cougars",
+   "Jaguars"
+  ],
+  "subject": "black panther head, three-quarter view"
+ },
+ "bulldog": {
+  "names": [
+   "Bulldogs"
+  ],
+  "subject": "English bulldog head with spiked collar, front view"
+ },
+ "viking": {
+  "names": [
+   "Vikings"
+  ],
+  "subject": "viking warrior with horned helmet and beard, front view"
+ },
+ "cat-lynx": {
+  "names": [
+   "Wildcats",
+   "Wampus Cats",
+   "Bobcats",
+   "Lynx"
+  ],
+  "subject": "wildcat (bobcat) head, front view, ear tufts"
+ },
+ "cat-tiger": {
+  "names": [
+   "Tigers",
+   "Bengals"
+  ],
+  "subject": "tiger head, front view"
+ },
+ "cat-lion": {
+  "names": [
+   "Lions"
+  ],
+  "subject": "male lion head with full mane, front view"
+ },
+ "pirate": {
+  "names": [
+   "Pirates",
+   "Raiders",
+   "Marauders"
+  ],
+  "subject": "pirate skull with bandana and crossed cutlasses"
+ },
+ "devil": {
+  "names": [
+   "Red Devils",
+   "Blue Devils"
+  ],
+  "subject": "devil head with horns and goatee"
+ },
+ "hawk": {
+  "names": [
+   "Redhawks",
+   "Seahawks",
+   "Hawks",
+   "Nighthawks",
+   "Ospreys"
+  ],
+  "subject": "red-tailed hawk head in profile"
+ },
+ "husky": {
+  "names": [
+   "Huskies"
+  ],
+  "subject": "Siberian husky head, front view"
+ },
+ "shark": {
+  "names": [
+   "Sharks"
+  ],
+  "subject": "great white shark bursting forward"
+ },
+ "dolphin": {
+  "names": [
+   "Dolphins"
+  ],
+  "subject": "leaping dolphin"
+ },
+ "cyclone": {
+  "names": [
+   "Hurricanes",
+   "Storm",
+   "Cyclones"
+  ],
+  "subject": "swirling hurricane storm symbol with lightning"
+ },
+ "marlin": {
+  "names": [
+   "Marlins"
+  ],
+  "subject": "leaping blue marlin"
+ },
+ "axes": {
+  "names": [
+   "Loggers"
+  ],
+  "subject": "lumberjack with crossed axes"
+ },
+ "buck": {
+  "names": [
+   "Bucks"
+  ],
+  "subject": "white-tailed deer buck head with antlers"
+ },
+ "bear": {
+  "names": [
+   "Golden Bears",
+   "Cubs",
+   "Bears",
+   "Grizzlies"
+  ],
+  "subject": "grizzly bear head, front view"
+ },
+ "anchor": {
+  "names": [
+   "Mariners"
+  ],
+  "subject": "ship anchor with rope, mariner emblem"
+ },
+ "horse": {
+  "names": [
+   "Bronchos",
+   "Mustangs",
+   "Stallions",
+   "Broncos",
+   "Colts"
+  ],
+  "subject": "wild mustang horse head with flowing mane in profile"
+ },
+ "snake": {
+  "names": [
+   "Rattlers",
+   "Cobras",
+   "Vipers"
+  ],
+  "subject": "coiled rattlesnake ready to strike"
+ },
+ "horse-zebra": {
+  "names": [
+   "Zebras"
+  ],
+  "subject": "zebra head in profile"
+ },
+ "bear-polar": {
+  "names": [
+   "Polar Bears"
+  ],
+  "subject": "polar bear head, front view"
+ },
+ "tractor": {
+  "names": [
+   "Tractors"
+  ],
+  "subject": "vintage farm tractor, front three-quarter view"
+ },
+ "hat": {
+  "names": [
+   "Rough Riders",
+   "Outlaws",
+   "Wranglers",
+   "Desperados",
+   "Gunslingers"
+  ],
+  "subject": "cowboy outlaw with bandana mask and cowboy hat"
+ },
+ "stingray": {
+  "names": [
+   "Stingrays"
+  ],
+  "subject": "stingray from above"
+ },
+ "hornet": {
+  "names": [
+   "Yellowjackets",
+   "Hornets",
+   "Sting"
+  ],
+  "subject": "yellowjacket hornet with stinger, side view"
+ },
+ "falcon-raven": {
+  "names": [
+   "Ravens"
+  ],
+  "subject": "raven head in profile"
+ },
+ "wings": {
+  "names": [
+   "Thunderbirds",
+   "Thunderhawks"
+  ],
+  "subject": "thunderbird with spread wings"
+ },
+ "falcon": {
+  "names": [
+   "Falcons",
+   "Raptors"
+  ],
+  "subject": "peregrine falcon head in profile"
+ },
+ "star": {
+  "names": [
+   "Warriors",
+   "Patriots",
+   "Rebels",
+   "Mavericks"
+  ],
+  "subject": "colonial patriot soldier with tricorn hat"
+ },
+ "helm": {
+  "names": [
+   "Spartans",
+   "Trojans",
+   "Gladiators",
+   "Centurions"
+  ],
+  "subject": "Spartan warrior helmet with crest in profile"
+ },
+ "knight": {
+  "names": [
+   "Knights",
+   "Sentinels",
+   "Crusaders",
+   "Lancers",
+   "Cavaliers"
+  ],
+  "subject": "medieval knight helmet with visor and plume"
+ },
+ "wolf": {
+  "names": [
+   "Wolves",
+   "Wolfpack",
+   "Greyhounds",
+   "Timberwolves"
+  ],
+  "subject": "gray wolf head, front view"
+ },
+ "ram": {
+  "names": [
+   "Rams"
+  ],
+  "subject": "bighorn ram head with curled horns, front view"
+ },
+ "cardinal": {
+  "names": [
+   "Cardinals"
+  ],
+  "subject": "northern cardinal bird head in profile with crest"
+ },
+ "bolt": {
+  "names": [
+   "Chargers",
+   "Thunder",
+   "Thunderbolts",
+   "Surge"
+  ],
+  "subject": "charging lightning bolt"
+ },
+ "flame": {
+  "names": [
+   "Blazers",
+   "Inferno",
+   "Blaze",
+   "Fury"
+  ],
+  "subject": "blazing flame"
+ },
+ "rocket": {
+  "names": [
+   "Rockets"
+  ],
+  "subject": "rocket ship launching"
+ },
+ "gator": {
+  "names": [
+   "Gators"
+  ],
+  "subject": "alligator head with open jaws"
+ },
+ "bull-bison": {
+  "names": [
+   "Bison"
+  ],
+  "subject": "American bison head, front view"
+ },
+ "griffin": {
+  "names": [
+   "Griffins"
+  ],
+  "subject": "griffin head (eagle head, lion mane)"
+ },
+ "fbhelmet": {
+  "names": [
+   "Titans",
+   "Force"
+  ],
+  "subject": "titan warrior, Greek god with laurel and helmet"
+ },
+ "coyote": {
+  "names": [
+   "Coyotes"
+  ],
+  "subject": "coyote head"
+ },
+ "crown": {
+  "names": [
+   "Monarchs"
+  ],
+  "subject": "royal crown"
+ },
+ "ghost": {
+  "names": [
+   "Phantoms"
+  ],
+  "subject": "phantom ghost with hood"
+ },
+ "comet": {
+  "names": [
+   "Comets"
+  ],
+  "subject": "blazing comet"
+ },
+ "dragon": {
+  "names": [
+   "Dragons"
+  ],
+  "subject": "dragon head"
+ },
+ "anvil": {
+  "names": [
+   "Ironmen",
+   "Blacksmiths"
+  ],
+  "subject": "blacksmith anvil with hammer"
+ },
+ "minuteman": {
+  "names": [
+   "Minutemen"
+  ],
+  "subject": "revolutionary war minuteman with musket"
+ },
+ "wheel": {
+  "names": [
+   "Pioneers"
+  ],
+  "subject": "pioneer covered wagon"
+ },
+ "hardhat": {
+  "names": [
+   "Roughnecks"
+  ],
+  "subject": "oil roughneck worker with hard hat"
+ },
+ "bull-long": {
+  "names": [
+   "Longhorns"
+  ],
+  "subject": "Texas longhorn steer head, front view"
+ },
+ "bull": {
+  "names": [
+   "Steers"
+  ],
+  "subject": "charging bull head"
+ },
+ "wolverine": {
+  "names": [
+   "Wolverines"
+  ],
+  "subject": "wolverine head snarling"
+ },
+ "fox": {
+  "names": [
+   "Foxes"
+  ],
+  "subject": "red fox head"
+ },
+ "badger": {
+  "names": [
+   "Badgers"
+  ],
+  "subject": "badger head snarling"
+ },
+ "otter": {
+  "names": [
+   "Otters"
+  ],
+  "subject": "river otter"
+ },
+ "owl": {
+  "names": [
+   "Owls"
+  ],
+  "subject": "great horned owl head, front view"
+ },
+ "condor": {
+  "names": [
+   "Condors"
+  ],
+  "subject": "condor head in profile"
+ },
+ "phoenix": {
+  "names": [
+   "Firebirds",
+   "Phoenixes"
+  ],
+  "subject": "phoenix rising from flames"
+ },
+ "beaver": {
+  "names": [
+   "Beavers"
+  ],
+  "subject": "beaver"
+ },
+ "gopher": {
+  "names": [
+   "Gophers"
+  ],
+  "subject": "gopher"
+ },
+ "duck": {
+  "names": [
+   "Ducks"
+  ],
+  "subject": "mallard duck head"
+ },
+ "penguin": {
+  "names": [
+   "Penguins"
+  ],
+  "subject": "emperor penguin"
+ },
+ "bee": {
+  "names": [
+   "Bees"
+  ],
+  "subject": "honey bee"
+ },
+ "admiral": {
+  "names": [
+   "Admirals"
+  ],
+  "subject": "navy admiral"
+ },
+ "cadet": {
+  "names": [
+   "Cadets"
+  ],
+  "subject": "military cadet with shako hat"
+ },
+ "highlander": {
+  "names": [
+   "Highlanders"
+  ],
+  "subject": "Scottish highlander with kilt and claymore"
+ },
+ "shamrock": {
+  "names": [
+   "Shamrocks"
+  ],
+  "subject": "shamrock"
+ },
+ "windmill": {
+  "names": [
+   "Dutchmen"
+  ],
+  "subject": "Dutch windmill"
+ },
+ "friar": {
+  "names": [
+   "Friars"
+  ],
+  "subject": "friar in robes"
+ },
+ "angel": {
+  "names": [
+   "Angels"
+  ],
+  "subject": "angel with wings"
+ },
+ "demon": {
+  "names": [
+   "Demons"
+  ],
+  "subject": "demon head with horns"
+ },
+ "wizard": {
+  "names": [
+   "Wizards"
+  ],
+  "subject": "wizard with staff"
+ },
+ "jet": {
+  "names": [
+   "Jets"
+  ],
+  "subject": "fighter jet"
+ },
+ "aviator": {
+  "names": [
+   "Aviators"
+  ],
+  "subject": "vintage aviator pilot with goggles"
+ },
+ "hammer": {
+  "names": [
+   "Hammers"
+  ],
+  "subject": "sledgehammer"
+ },
+ "shield": {
+  "names": [
+   "Defenders"
+  ],
+  "subject": "defender shield with sword"
+ },
+ "steelbeam": {
+  "names": [
+   "Steelers"
+  ],
+  "subject": "steelworker with steel beam"
+ },
+ "torch": {
+  "names": [
+   "Torchbearers"
+  ],
+  "subject": "flaming torch"
+ },
+ "trident": {
+  "names": [
+   "Tritons"
+  ],
+  "subject": "trident"
+ },
+ "compass": {
+  "names": [
+   "Explorers",
+   "Navigators"
+  ],
+  "subject": "explorer compass"
+ },
+ "atom": {
+  "names": [
+   "Atoms"
+  ],
+  "subject": "atom symbol"
+ },
+ "scholar": {
+  "names": [
+   "Scholars"
+  ],
+  "subject": "scholar owl with graduation cap"
+ },
+ "rook": {
+  "names": [
+   "Rooks"
+  ],
+  "subject": "chess rook tower"
+ },
+ "glove": {
+  "names": [
+   "Boxers"
+  ],
+  "subject": "boxing glove"
+ },
+ "oak": {
+  "names": [
+   "Oaks"
+  ],
+  "subject": "oak tree"
+ },
+ "acorn": {
+  "names": [
+   "Acorns"
+  ],
+  "subject": "acorn"
+ },
+ "tornado": {
+  "names": [
+   "Tornadoes",
+   "Twisters"
+  ],
+  "subject": "tornado funnel"
+ },
+ "meteor": {
+  "names": [
+   "Meteors"
+  ],
+  "subject": "meteor"
+ },
+ "pilgrim": {
+  "names": [
+   "Pilgrims"
+  ],
+  "subject": "pilgrim with buckle hat"
+ },
+ "quaker": {
+  "names": [
+   "Quakers"
+  ],
+  "subject": "Quaker man with wide brim hat"
+ },
+ "bell": {
+  "names": [
+   "Bells"
+  ],
+  "subject": "liberty bell"
+ },
+ "hilltop": {
+  "names": [
+   "Hilltoppers"
+  ],
+  "subject": "hilltop with pine trees"
+ },
+ "squirrel": {
+  "names": [
+   "Squirrels"
+  ],
+  "subject": "squirrel"
+ },
+ "bat": {
+  "names": [
+   "Bats"
+  ],
+  "subject": "bat with spread wings"
+ },
+ "kangaroo": {
+  "names": [
+   "Kangaroos"
+  ],
+  "subject": "kangaroo"
+ },
+ "elephant": {
+  "names": [
+   "Elephants",
+   "Red Elephants"
+  ],
+  "subject": "elephant head charging"
+ },
+ "gorilla": {
+  "names": [
+   "Gorillas"
+  ],
+  "subject": "gorilla head"
+ },
+ "leopard": {
+  "names": [
+   "Leopards"
+  ],
+  "subject": "leopard head"
+ },
+ "goat": {
+  "names": [
+   "Goats"
+  ],
+  "subject": "mountain goat head"
+ },
+ "mule": {
+  "names": [
+   "Mules"
+  ],
+  "subject": "mule head"
+ },
+ "boar": {
+  "names": [
+   "Razorbacks"
+  ],
+  "subject": "wild razorback hog charging"
+ },
+ "stag": {
+  "names": [
+   "Stags",
+   "Elks",
+   "Elk"
+  ],
+  "subject": "elk stag head with antlers"
+ },
+ "hound": {
+  "names": [
+   "Hounds"
+  ],
+  "subject": "bloodhound head"
+ },
+ "terrier": {
+  "names": [
+   "Terriers"
+  ],
+  "subject": "terrier dog head"
+ },
+ "swan": {
+  "names": [
+   "Swans"
+  ],
+  "subject": "swan"
+ },
+ "crane": {
+  "names": [
+   "Cranes"
+  ],
+  "subject": "crane bird"
+ },
+ "turkey": {
+  "names": [
+   "Turkeys"
+  ],
+  "subject": "wild turkey"
+ },
+ "crow": {
+  "names": [
+   "Crows"
+  ],
+  "subject": "crow head"
+ },
+ "robin": {
+  "names": [
+   "Robins"
+  ],
+  "subject": "robin bird"
+ },
+ "oriole": {
+  "names": [
+   "Orioles"
+  ],
+  "subject": "oriole bird"
+ },
+ "parrot": {
+  "names": [
+   "Parrots"
+  ],
+  "subject": "parrot head"
+ },
+ "spider": {
+  "names": [
+   "Spiders"
+  ],
+  "subject": "spider"
+ },
+ "ant": {
+  "names": [
+   "Ants"
+  ],
+  "subject": "ant warrior"
+ },
+ "frog": {
+  "names": [
+   "Frogs",
+   "Bullfrogs"
+  ],
+  "subject": "bullfrog"
+ },
+ "lizard": {
+  "names": [
+   "Lizards"
+  ],
+  "subject": "lizard"
+ },
+ "terrapin": {
+  "names": [
+   "Terrapins"
+  ],
+  "subject": "terrapin turtle"
+ },
+ "unicorn": {
+  "names": [
+   "Unicorns"
+  ],
+  "subject": "unicorn head"
+ },
+ "gargoyle": {
+  "names": [
+   "Gargoyles"
+  ],
+  "subject": "gargoyle"
+ },
+ "cyclops": {
+  "names": [
+   "Cyclops"
+  ],
+  "subject": "cyclops giant"
+ },
+ "saber": {
+  "names": [
+   "Sabers"
+  ],
+  "subject": "crossed cavalry sabers"
+ },
+ "cannon": {
+  "names": [
+   "Gunners"
+  ],
+  "subject": "artillery cannon"
+ },
+ "drill": {
+  "names": [
+   "Drillers"
+  ],
+  "subject": "oil drilling rig"
+ },
+ "fireman": {
+  "names": [
+   "Firemen"
+  ],
+  "subject": "firefighter with helmet"
+ },
+ "locomotive": {
+  "names": [
+   "Railroaders"
+  ],
+  "subject": "steam locomotive"
+ },
+ "lantern": {
+  "names": [
+   "Lamplighters"
+  ],
+  "subject": "lamplighter lantern"
+ },
+ "sun": {
+  "names": [
+   "Suns",
+   "Sunrays"
+  ],
+  "subject": "blazing sun"
+ },
+ "moon": {
+  "names": [
+   "Crescents"
+  ],
+  "subject": "crescent moon"
+ },
+ "snowflake": {
+  "names": [
+   "Snowflakes"
+  ],
+  "subject": "snowflake"
+ },
+ "mapleleaf": {
+  "names": [
+   "Maples"
+  ],
+  "subject": "maple leaf"
+ },
+ "apple": {
+  "names": [
+   "Apples"
+  ],
+  "subject": "apple"
+ },
+ "sunflower": {
+  "names": [
+   "Sunflowers"
+  ],
+  "subject": "sunflower"
+ },
+ "rose": {
+  "names": [
+   "Roses"
+  ],
+  "subject": "rose"
+ },
+ "bigfoot": {
+  "names": [
+   "Bigfoot",
+   "Sasquatch"
+  ],
+  "subject": "bigfoot sasquatch"
+ },
+ "captain": {
+  "names": [
+   "Captains"
+  ],
+  "subject": "sea captain"
+ },
+ "musketeer": {
+  "names": [
+   "Musketeers"
+  ],
+  "subject": "musketeer with plumed hat"
+ },
+ "witch": {
+  "names": [
+   "Witches"
+  ],
+  "subject": "witch on broom"
+ },
+ "leprechaun": {
+  "names": [
+   "Leprechauns"
+  ],
+  "subject": "leprechaun"
+ },
+ "pharaoh": {
+  "names": [
+   "Pharaohs"
+  ],
+  "subject": "Egyptian pharaoh head"
+ },
+ "sphinx": {
+  "names": [
+   "Sphinx"
+  ],
+  "subject": "sphinx"
+ },
+ "kraken": {
+  "names": [
+   "Kraken"
+  ],
+  "subject": "kraken sea monster"
+ },
+ "pegasus": {
+  "names": [
+   "Pegasus"
+  ],
+  "subject": "pegasus winged horse"
+ },
+ "clipper": {
+  "names": [
+   "Clippers"
+  ],
+  "subject": "clipper sailing ship"
+ },
+ "gear": {
+  "names": [
+   "Gearheads"
+  ],
+  "subject": "machine gear"
+ },
+ "conch": {
+  "names": [
+   "Conchs"
+  ],
+  "subject": "conch shell"
+ },
+ "cherries": {
+  "names": [
+   "Cherries"
+  ],
+  "subject": "cherries"
+ },
+ "n-threshers": {
+  "names": [
+   "Threshers"
+  ],
+  "subject": "farmer with threshing scythe"
+ },
+ "n-harvesters": {
+  "names": [
+   "Harvesters"
+  ],
+  "subject": "harvester farmer with wheat"
+ },
+ "pheasant": {
+  "names": [
+   "Pheasants"
+  ],
+  "subject": "ring-necked pheasant"
+ },
+ "n-blizzard": {
+  "names": [
+   "Blizzard"
+  ],
+  "subject": "blizzard snowstorm"
+ },
+ "n-northmen": {
+  "names": [
+   "Northmen"
+  ],
+  "subject": "Norse warrior"
+ },
+ "n-lumberjacks": {
+  "names": [
+   "Lumberjacks"
+  ],
+  "subject": "lumberjack with axe"
+ },
+ "n-rivermen": {
+  "names": [
+   "Rivermen"
+  ],
+  "subject": "riverboat man"
+ },
+ "n-plainsmen": {
+  "names": [
+   "Plainsmen"
+  ],
+  "subject": "plains frontiersman"
+ },
+ "pike": {
+  "names": [
+   "Muskies",
+   "Walleyes"
+  ],
+  "subject": "muskie fish leaping"
+ },
+ "n-prairie-dogs": {
+  "names": [
+   "Prairie Dogs"
+  ],
+  "subject": "prairie dog"
+ },
+ "n-farmers": {
+  "names": [
+   "Farmers"
+  ],
+  "subject": "farmer with pitchfork"
+ },
+ "bluejay": {
+  "names": [
+   "Bluejays"
+  ],
+  "subject": "blue jay head in profile"
+ },
+ "n-royals": {
+  "names": [
+   "Royals"
+  ],
+  "subject": "royal lion with crown"
+ },
+ "corn": {
+  "names": [
+   "Cornhuskers"
+  ],
+  "subject": "ear of corn"
+ },
+ "potato": {
+  "names": [
+   "Spuds"
+  ],
+  "subject": "potato farmer"
+ },
+ "n-javelinas": {
+  "names": [
+   "Javelinas"
+  ],
+  "subject": "javelina (collared peccary) head"
+ },
+ "roadrunner": {
+  "names": [
+   "Roadrunners"
+  ],
+  "subject": "roadrunner running"
+ },
+ "scorpion": {
+  "names": [
+   "Scorpions"
+  ],
+  "subject": "scorpion"
+ },
+ "n-diablos": {
+  "names": [
+   "Diablos"
+  ],
+  "subject": "devil head with horns"
+ },
+ "n-toros": {
+  "names": [
+   "Toros"
+  ],
+  "subject": "charging bull head"
+ },
+ "n-lobos": {
+  "names": [
+   "Lobos"
+  ],
+  "subject": "gray wolf head"
+ },
+ "n-halcones": {
+  "names": [
+   "Halcones"
+  ],
+  "subject": "falcon head in profile"
+ },
+ "n-aguilas": {
+  "names": [
+   "Águilas"
+  ],
+  "subject": "golden eagle head in profile"
+ },
+ "n-jaguares": {
+  "names": [
+   "Jaguares"
+  ],
+  "subject": "jaguar head, front view"
+ },
+ "n-conquistadores": {
+  "names": [
+   "Conquistadores"
+  ],
+  "subject": "conquistador helmet"
+ },
+ "n-vaqueros": {
+  "names": [
+   "Vaqueros"
+  ],
+  "subject": "vaquero cowboy"
+ },
+ "n-sidewinders": {
+  "names": [
+   "Sidewinders"
+  ],
+  "subject": "sidewinder rattlesnake"
+ },
+ "n-gila-monsters": {
+  "names": [
+   "Gila Monsters"
+  ],
+  "subject": "gila monster lizard"
+ },
+ "n-dust-devils": {
+  "names": [
+   "Dust Devils"
+  ],
+  "subject": "dust devil whirlwind"
+ },
+ "n-pumas": {
+  "names": [
+   "Pumas"
+  ],
+  "subject": "puma head"
+ },
+ "n-osos": {
+  "names": [
+   "Osos"
+  ],
+  "subject": "bear head"
+ },
+ "n-cardenales": {
+  "names": [
+   "Cardenales"
+  ],
+  "subject": "cardinal bird head"
+ },
+ "n-matadors": {
+  "names": [
+   "Matadors"
+  ],
+  "subject": "matador with cape"
+ },
+ "n-bandits": {
+  "names": [
+   "Bandits"
+  ],
+  "subject": "masked bandit"
+ },
+ "n-rangers": {
+  "names": [
+   "Rangers"
+  ],
+  "subject": "Texas ranger with hat and badge"
+ },
+ "cactus": {
+  "names": [
+   "Cactus",
+   "Saguaros"
+  ],
+  "subject": "saguaro cactus"
+ },
+ "tumbleweed": {
+  "names": [
+   "Tumbleweeds"
+  ],
+  "subject": "tumbleweed"
+ },
+ "goldpan": {
+  "names": [
+   "Prospectors"
+  ],
+  "subject": "gold prospector with pan"
+ },
+ "n-oilers": {
+  "names": [
+   "Oilers"
+  ],
+  "subject": "oil derrick gusher"
+ },
+ "n-armadillos": {
+  "names": [
+   "Armadillos"
+  ],
+  "subject": "armadillo"
+ },
+ "n-cowboys": {
+  "names": [
+   "Cowboys"
+  ],
+  "subject": "cowboy with hat"
+ },
+ "n-bearkats": {
+  "names": [
+   "Bearkats"
+  ],
+  "subject": "bearkat (binturong) head"
+ },
+ "n-buffaloes": {
+  "names": [
+   "Buffaloes"
+  ],
+  "subject": "buffalo head"
+ },
+ "n-bluebonnets": {
+  "names": [
+   "Bluebonnets"
+  ],
+  "subject": "bluebonnet flower"
+ },
+ "n-riverhawks": {
+  "names": [
+   "Riverhawks"
+  ],
+  "subject": "osprey hawk head"
+ },
+ "n-big-reds": {
+  "names": [
+   "Big Reds"
+  ],
+  "subject": "big red bull head"
+ },
+ "jackrabbit": {
+  "names": [
+   "Jackrabbits"
+  ],
+  "subject": "jackrabbit"
+ },
+ "hornedtoad": {
+  "names": [
+   "Horned Frogs"
+  ],
+  "subject": "horned frog lizard"
+ },
+ "boot": {
+  "names": [
+   "Buckaroos"
+  ],
+  "subject": "cowboy boot with spur"
+ },
+ "brand": {
+  "names": [
+   "Ranchers"
+  ],
+  "subject": "rancher with branding iron"
+ },
+ "n-pelicans": {
+  "names": [
+   "Pelicans"
+  ],
+  "subject": "pelican"
+ },
+ "n-manatees": {
+  "names": [
+   "Manatees"
+  ],
+  "subject": "manatee"
+ },
+ "flamingo": {
+  "names": [
+   "Flamingos"
+  ],
+  "subject": "flamingo"
+ },
+ "barracuda": {
+  "names": [
+   "Barracudas"
+  ],
+  "subject": "barracuda"
+ },
+ "n-tarpons": {
+  "names": [
+   "Tarpons"
+  ],
+  "subject": "tarpon fish leaping"
+ },
+ "n-herons": {
+  "names": [
+   "Herons"
+  ],
+  "subject": "great blue heron"
+ },
+ "n-buccaneers": {
+  "names": [
+   "Buccaneers"
+  ],
+  "subject": "buccaneer pirate captain"
+ },
+ "n-sailfish": {
+  "names": [
+   "Sailfish"
+  ],
+  "subject": "sailfish leaping"
+ },
+ "n-waves": {
+  "names": [
+   "Waves"
+  ],
+  "subject": "ocean wave"
+ },
+ "n-surf": {
+  "names": [
+   "Surf"
+  ],
+  "subject": "surfer on a wave"
+ },
+ "n-tides": {
+  "names": [
+   "Tides"
+  ],
+  "subject": "crashing tide wave"
+ },
+ "n-lightning": {
+  "names": [
+   "Lightning"
+  ],
+  "subject": "lightning bolt"
+ },
+ "n-astronauts": {
+  "names": [
+   "Astronauts"
+  ],
+  "subject": "astronaut helmet"
+ },
+ "n-orange-devils": {
+  "names": [
+   "Orange Devils"
+  ],
+  "subject": "devil head with horns"
+ },
+ "n-citrus-kings": {
+  "names": [
+   "Citrus Kings"
+  ],
+  "subject": "orange with a crown"
+ },
+ "n-commodores": {
+  "names": [
+   "Commodores"
+  ],
+  "subject": "naval commodore"
+ },
+ "n-sea-turtles": {
+  "names": [
+   "Sea Turtles"
+  ],
+  "subject": "sea turtle"
+ },
+ "n-crocs": {
+  "names": [
+   "Crocs"
+  ],
+  "subject": "crocodile head"
+ },
+ "crab": {
+  "names": [
+   "Crabs"
+  ],
+  "subject": "crab"
+ },
+ "lobster": {
+  "names": [
+   "Lobsters"
+  ],
+  "subject": "lobster"
+ },
+ "seahorse": {
+  "names": [
+   "Seahorses"
+  ],
+  "subject": "seahorse"
+ },
+ "palm": {
+  "names": [
+   "Palms"
+  ],
+  "subject": "palm tree"
+ },
+ "orange": {
+  "names": [
+   "Orangemen"
+  ],
+  "subject": "orange fruit"
+ },
+ "hummingbird": {
+  "names": [
+   "Hummingbirds"
+  ],
+  "subject": "hummingbird"
+ },
+ "n-crimson-wave": {
+  "names": [
+   "Crimson Wave"
+  ],
+  "subject": "crashing wave"
+ },
+ "rooster": {
+  "names": [
+   "Gamecocks"
+  ],
+  "subject": "fighting gamecock rooster"
+ },
+ "weevil": {
+  "names": [
+   "Boll Weevils"
+  ],
+  "subject": "boll weevil"
+ },
+ "catfish": {
+  "names": [
+   "Catfish"
+  ],
+  "subject": "catfish"
+ },
+ "n-generals": {
+  "names": [
+   "Generals"
+  ],
+  "subject": "army general"
+ },
+ "n-colonels": {
+  "names": [
+   "Colonels"
+  ],
+  "subject": "cavalry colonel"
+ },
+ "n-magnolias": {
+  "names": [
+   "Magnolias"
+  ],
+  "subject": "magnolia flower"
+ },
+ "n-pine-knots": {
+  "names": [
+   "Pine Knots"
+  ],
+  "subject": "pine tree"
+ },
+ "n-sawmillers": {
+  "names": [
+   "Sawmillers"
+  ],
+  "subject": "sawmill worker with saw"
+ },
+ "n-golden-tigers": {
+  "names": [
+   "Golden Tigers"
+  ],
+  "subject": "tiger head, front view"
+ },
+ "opossum": {
+  "names": [
+   "Possums"
+  ],
+  "subject": "opossum"
+ },
+ "peach": {
+  "names": [
+   "Peaches"
+  ],
+  "subject": "peach"
+ },
+ "n-crawdads": {
+  "names": [
+   "Crawdads"
+  ],
+  "subject": "crawfish"
+ },
+ "n-bayou-bengals": {
+  "names": [
+   "Bayou Bengals"
+  ],
+  "subject": "tiger head, front view"
+ },
+ "n-cajuns": {
+  "names": [
+   "Cajuns"
+  ],
+  "subject": "Cajun fisherman"
+ },
+ "n-ragin-gators": {
+  "names": [
+   "Ragin Gators"
+  ],
+  "subject": "alligator head with open jaws"
+ },
+ "n-garfish": {
+  "names": [
+   "Garfish"
+  ],
+  "subject": "alligator gar fish"
+ },
+ "n-mudbugs": {
+  "names": [
+   "Mudbugs"
+  ],
+  "subject": "crawfish"
+ },
+ "n-egrets": {
+  "names": [
+   "Egrets"
+  ],
+  "subject": "egret bird"
+ },
+ "n-saints": {
+  "names": [
+   "Saints"
+  ],
+  "subject": "fleur-de-lis"
+ },
+ "firefly": {
+  "names": [
+   "Fireflies"
+  ],
+  "subject": "firefly"
+ },
+ "n-mountaineers": {
+  "names": [
+   "Mountaineers"
+  ],
+  "subject": "mountaineer with rifle"
+ },
+ "n-moonshiners": {
+  "names": [
+   "Moonshiners"
+  ],
+  "subject": "moonshine jug"
+ },
+ "n-coal-miners": {
+  "names": [
+   "Coal Miners"
+  ],
+  "subject": "coal miner with headlamp helmet"
+ },
+ "n-hillcats": {
+  "names": [
+   "Hillcats"
+  ],
+  "subject": "mountain bobcat head"
+ },
+ "n-black-bears": {
+  "names": [
+   "Black Bears"
+  ],
+  "subject": "black bear head"
+ },
+ "n-volunteers": {
+  "names": [
+   "Volunteers"
+  ],
+  "subject": "frontier volunteer with coonskin cap"
+ },
+ "n-rifles": {
+  "names": [
+   "Rifles"
+  ],
+  "subject": "crossed rifles"
+ },
+ "n-frontiersmen": {
+  "names": [
+   "Frontiersmen"
+  ],
+  "subject": "frontiersman with coonskin cap"
+ },
+ "n-ridgerunners": {
+  "names": [
+   "Ridgerunners"
+  ],
+  "subject": "mountain ridge runner"
+ },
+ "lighthouse": {
+  "names": [
+   "Lighthouse Keepers"
+  ],
+  "subject": "lighthouse"
+ },
+ "raccoon": {
+  "names": [
+   "Raccoons"
+  ],
+  "subject": "raccoon head"
+ },
+ "anchorchain": {
+  "names": [
+   "Sailors"
+  ],
+  "subject": "sailor with anchor"
+ },
+ "n-bighorns": {
+  "names": [
+   "Bighorns"
+  ],
+  "subject": "bighorn sheep head"
+ },
+ "n-avalanche": {
+  "names": [
+   "Avalanche"
+  ],
+  "subject": "avalanche on a mountain"
+ },
+ "n-miners": {
+  "names": [
+   "Miners"
+  ],
+  "subject": "gold miner with pickaxe"
+ },
+ "n-mountain-lions": {
+  "names": [
+   "Mountain Lions"
+  ],
+  "subject": "mountain lion head"
+ },
+ "n-peaks": {
+  "names": [
+   "Peaks"
+  ],
+  "subject": "mountain peaks"
+ },
+ "n-summit-kings": {
+  "names": [
+   "Summit Kings"
+  ],
+  "subject": "mountain summit with crown"
+ },
+ "n-yeti": {
+  "names": [
+   "Yeti"
+  ],
+  "subject": "yeti"
+ },
+ "n-trailblazers": {
+  "names": [
+   "Trailblazers"
+  ],
+  "subject": "trailblazer pioneer"
+ },
+ "antelope": {
+  "names": [
+   "Pronghorns",
+   "Antelope"
+  ],
+  "subject": "pronghorn antelope head"
+ },
+ "n-broncs": {
+  "names": [
+   "Broncs"
+  ],
+  "subject": "bucking bronco horse"
+ },
+ "n-rustlers": {
+  "names": [
+   "Rustlers"
+  ],
+  "subject": "cattle rustler cowboy"
+ },
+ "wagon": {
+  "names": [
+   "Wagoneers"
+  ],
+  "subject": "covered wagon"
+ },
+ "n-orcas": {
+  "names": [
+   "Orcas"
+  ],
+  "subject": "orca killer whale"
+ },
+ "n-steelheads": {
+  "names": [
+   "Steelheads"
+  ],
+  "subject": "steelhead trout leaping"
+ },
+ "n-salmon-kings": {
+  "names": [
+   "Salmon Kings"
+  ],
+  "subject": "king salmon leaping"
+ },
+ "n-evergreens": {
+  "names": [
+   "Evergreens"
+  ],
+  "subject": "evergreen tree"
+ },
+ "cloud": {
+  "names": [
+   "Rain"
+  ],
+  "subject": "rain cloud with lightning"
+ },
+ "n-sea-kings": {
+  "names": [
+   "Sea Kings"
+  ],
+  "subject": "sea king with trident"
+ },
+ "seal": {
+  "names": [
+   "Seals"
+  ],
+  "subject": "seal"
+ },
+ "whale": {
+  "names": [
+   "Whales"
+  ],
+  "subject": "humpback whale"
+ },
+ "n-kodiaks": {
+  "names": [
+   "Kodiaks"
+  ],
+  "subject": "kodiak bear head"
+ },
+ "n-moose": {
+  "names": [
+   "Moose"
+  ],
+  "subject": "moose head"
+ },
+ "n-mushers": {
+  "names": [
+   "Mushers"
+  ],
+  "subject": "sled dog musher"
+ },
+ "n-ice-dogs": {
+  "names": [
+   "Ice Dogs"
+  ],
+  "subject": "husky sled dog head"
+ },
+ "n-caribou": {
+  "names": [
+   "Caribou"
+  ],
+  "subject": "caribou head"
+ },
+ "n-glaciers": {
+  "names": [
+   "Glaciers"
+  ],
+  "subject": "glacier"
+ },
+ "n-northstars": {
+  "names": [
+   "Northstars"
+  ],
+  "subject": "north star"
+ },
+ "n-auroras": {
+  "names": [
+   "Auroras"
+  ],
+  "subject": "aurora borealis"
+ },
+ "n-seawolves": {
+  "names": [
+   "Seawolves"
+  ],
+  "subject": "sea wolf"
+ },
+ "walrus": {
+  "names": [
+   "Walruses"
+  ],
+  "subject": "walrus head"
+ },
+ "iceberg": {
+  "names": [
+   "Icebergs"
+  ],
+  "subject": "iceberg"
+ },
+ "n-volcanoes": {
+  "names": [
+   "Volcanoes"
+  ],
+  "subject": "erupting volcano"
+ },
+ "n-na-koa": {
+  "names": [
+   "Na Koa"
+  ],
+  "subject": "Hawaiian warrior with helmet"
+ },
+ "n-menehune": {
+  "names": [
+   "Menehune"
+  ],
+  "subject": "Menehune warrior"
+ },
+ "n-honu": {
+  "names": [
+   "Honu"
+  ],
+  "subject": "Hawaiian green sea turtle"
+ },
+ "rainbow": {
+  "names": [
+   "Rainbows"
+  ],
+  "subject": "rainbow"
+ },
+ "n-mauna-kings": {
+  "names": [
+   "Mauna Kings"
+  ],
+  "subject": "volcano mountain with crown"
+ },
+ "n-tradewinds": {
+  "names": [
+   "Tradewinds"
+  ],
+  "subject": "sailboat in the wind"
+ },
+ "n-sea-riders": {
+  "names": [
+   "Sea Riders"
+  ],
+  "subject": "surfer"
+ },
+ "n-voyagers": {
+  "names": [
+   "Voyagers"
+  ],
+  "subject": "Polynesian voyaging canoe"
+ },
+ "n-seasiders": {
+  "names": [
+   "Seasiders"
+  ],
+  "subject": "seagull at the shore"
+ },
+ "n-red-raiders": {
+  "names": [
+   "Red Raiders"
+  ],
+  "subject": "masked raider rider"
+ },
+ "octopus": {
+  "names": [
+   "Octopi"
+  ],
+  "subject": "octopus"
+ },
+ "n-bearcats": {
+  "names": [
+   "Bearcats"
+  ],
+  "subject": "bearcat (binturong) head, front view, snarling"
+ }
+}

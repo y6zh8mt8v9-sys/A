@@ -13,7 +13,7 @@ function gdKit(s,home){
   const j='#f4f4f2',t=lite?c2:c1;return{helmet:c1,hstripe:c2,mask:_gdLum(c2)>.5?c2:'#9aa3ad',jersey:j,trim:t,num:numOn(j,t),pants:lite?'#d9dde2':c1,pstripe:t,sock:t,cleat:'#f4f4f4',glove:t,sleeve:j};
 }
 function sLogoStandalone(s,sz){
-  let svg=sLogo(s,sz);const ids=[...new Set([...svg.matchAll(/url\(#([\w-]+)\)/g)].map(m=>m[1]))];
+  let svg=sLogo(s,sz);const ids=[...new Set([...svg.matchAll(/(?:url\(#|href="#)([\w-]+)/g)].map(m=>m[1]))];
   let defs='';ids.forEach(id=>{const el=document.getElementById(id);if(el)defs+=el.outerHTML;});
   const i=svg.indexOf('>')+1;svg=svg.slice(0,i)+'<defs>'+defs+'</defs>'+svg.slice(i);
   if(!/xmlns=/.test(svg.slice(0,i)))svg=svg.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');

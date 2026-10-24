@@ -141,7 +141,7 @@ function makeDivisions(cls){
     for(let t=0;t<perDiv;t++){
       let nm,city,msc,cnty=null,c1,c2,abbr;const U=USA.on?usaTake('CF'):null;
       if(U){({nm,city,cnty}=U);msc=U.mascot;c1=U.c1;c2=U.c2;abbr=U.abbr;_usedSchoolNames.add(nm);}
-      else{({nm,city,cnty}=USA.on?usaSchoolName('CF',CLS_ORDER.indexOf(cls)/4,_usedSchoolNames):_genSchoolName());msc=pick(MCTS);const ci=(_sId-1)%LCOLS.length;[c1,c2]=LCOLS[ci];abbr=abbr3(nm,_abbrUsed);}
+      else{({nm,city,cnty}=USA.on?usaSchoolName('CF',CLS_ORDER.indexOf(cls)/4,_usedSchoolNames):_genSchoolName());msc=mascPick(Math.random,MCTS);const ci=(_sId-1)%LCOLS.length;[c1,c2]=LCOLS[ci];abbr=abbr3(nm,_abbrUsed);}
       teams.push({id:_sId++,name:nm,city,cnty,mascot:msc,cls,dIdx:d,abbr,c1,c2,prestige:rng(1,5),wins:0,losses:0,isP:false,offS:pick(OFF_SCH),defS:pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1});
     }
     divs.push({name:divNames[d]||`Division ${d+1}`,teams});

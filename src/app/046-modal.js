@@ -165,6 +165,8 @@ function applySaveText(txt){
         try{colMigrate();}catch(e){console.error('colleges',e);}
         try{proMigrate();}catch(e){console.error('pro names',e);}
         try{colMigrate3();}catch(e){console.error('colleges v3',e);}
+        // a dream school that is not one of this world's colleges (renamed or replaced) is picked again
+        try{for(const p of G.players)if(p.dreamSchool&&!dreamOk(p.dreamSchool))p.dreamSchool=genDreamSchool(p.dev||'Normal',p.pot||50,p.pos||'QB');}catch(e){}
         if(G.players.some(p=>p.sg===undefined)){G._thr=null;for(const p of G.players)if(p.sg===undefined){p.sg=p.stars||0;p.stars=p.grad?(p.stars||0):natTarget(p);}}
         for(const p of (G.hofArchive||[]))_migrateArchivedPlayer(p);
         for(const p of (G.wlArchive||[]))_migrateArchivedPlayer(p);

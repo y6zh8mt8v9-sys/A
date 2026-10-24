@@ -173,13 +173,12 @@ function intlLogoSvg(s,sz){const f=INTL_LOGO[s.id];if(!f)return null;
   const id=_lgf(_lm(b)>.5?b:'#f2f4f7',sz>44),out=`<svg width="__SZ__" height="__SZ__" viewBox="0 0 100 100" class="lg" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;overflow:visible"><g filter="url(#${id})"><g transform="translate(4 4) scale(.92)">${f({a,b,c})}</g></g></svg>`;
   _LGC.set(ck,out);return out.split('__SZ__').join(sz);}
 function sLogo(s,sz=28){
-  _lgFonts();
   if(!s)return'';
   if(s.customLogo)return`<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><image href="${s.customLogo}" x="0" y="0" width="${sz}" height="${sz}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   if(s.intl&&s.intl!=='US'&&INTL_LOGO[s.id]){const L=intlLogoSvg(s,sz);if(L)return L;}
-  const ck=['v3',s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0,s.logoKey||'',s.mash||''].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
-  let _st='CF';try{_st=s.cls?clsSt(s.cls):'CF';}catch(e){}_LGcur=_ST_GLYPHS[_st]||null;
-  try{return _sLogoBody(s,sz,ck);}finally{_LGcur=null;}
+  _lgEnsureUnique();
+  const ck=['v4',s.name,s.mascot,s.c1,s.c2,s.cls||'',sz>44?1:0,s.logoKey||'',s.mash||''].join('|'),hit=_LGC.get(ck);if(hit)return hit.split('__SZ__').join(sz);
+  return _sLogoBody(s,sz,ck);
 }
 
 function fmtDate(idx){if(!GAME_DATES[idx])return'';const d=GAME_DATES[idx];const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${mn[d.getMonth()]} ${d.getDate()}`;}

@@ -300,7 +300,7 @@ function usaPool(ab){
       if(nm.length>34||used.has(nm))continue;used.add(nm);made={nm,town,ckey:c.key};}
     if(!made){const nm=`${st.name} Prep ${i+1}`;used.add(nm);made={nm,town:st.name,ckey:null};}
     // mascot and colors: no two schools in a state share both, and neighbors don't share a mascot
-    let m,ci,g=0;do{m=pk(masc);ci=Math.floor(rnd()*LCOLS.length);g++;}while(g<60&&(combo.has(m+'|'+ci)||out.some(o=>o.ckey===made.ckey&&o.mascot===m)));combo.add(m+'|'+ci);
+    let m,ci,g=0;do{m=mascPick(rnd,masc);ci=Math.floor(rnd()*LCOLS.length);g++;}while(g<60&&(combo.has(m+'|'+ci)||out.some(o=>o.ckey===made.ckey&&o.mascot===m)));combo.add(m+'|'+ci);
     const[c1,c2]=LCOLS[ci];
     out.push({nm:made.nm,city:`${made.town}, ${st.abbr||ab}`,ckey:made.ckey,mascot:m,c1,c2,abbr:abbr3(made.nm,abu),frac,prio:rnd(),tier:rnd()<0.3?'good':rnd()<0.5?'bad':'avg',prestige:1+Math.floor(rnd()*5)});}
   return USA.poolCache[key]=out;

@@ -1,6 +1,6 @@
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Nunito+Sans:wght@400;600;700;800&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&family=Alfa+Slab+One&family=Graduate&family=Kaushan+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap');
 /* ── DARK MODE (default) ── */
 :root{--bg:#0b1119;--s1:#111a26;--s2:#172233;--s3:#1e2c40;--bd:#2b3b52;--ac:#2f6fed;--b2:#1f4fb8;--tx:#e8eef6;--mu:#8294ab;--gn:#22b870;--gd:#f5c030;--rd:#cc2222;--te:#6fa0ff;}
 /* ── LIGHT MODE ── */
