@@ -47,6 +47,7 @@ const CC_HAIR=[[0,'Buzz cut'],[1,'Short crop'],[2,'Fade'],[15,'Quiff'],[7,'Side 
 const CC_HC=['#0e0b09','#2e2119','#4a3020','#6b4a2b','#8a6a46','#b89a64','#d8c08a','#ece0b8','#9c4a22','#b5562e','#6b5a4a','#8a8a8a','#c9c9c9','#ececec'];
 const CC_EYE=['#3a2416','#5a3a22','#4a6fa5','#5b7f5a','#6e7f86'];
 const CC_FH=[['none','None'],['stubble','Stubble'],['mustache','Mustache'],['goatee','Goatee'],['beard','Beard']];
+const CC_EB=[['none','None'],['stripes','Stripes'],['smear','Smear']]; // eye black under the eyes
 const CC_BG=['Former college quarterback','Former lineman','Defensive mastermind','Offensive play-caller','Analytics guru','Player developer','Small-town motivator','Longtime assistant'];
 const CC_FN=['Mike','Dave','Tom','Ray','Darnell','Luis','Kevin','Brian','Marcus','Steve','Andre','Tony','Greg','Jason','Carlos','Terrence','Scott','Eric'];
 const CC_LN=['Harper','Coleman','Reyes','Whitfield','Brooks','Sutton','McAllister','Okafor','Delgado','Strickland','Hayes','Barlow','Kowalski','Nguyen','Fontaine','Mercer'];

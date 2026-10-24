@@ -6,7 +6,7 @@ const EQ_UNDER=[['none','None'],['long','Long sleeve'],['quarter','Quarter sleev
 function eqDefault(p){
   const id=p.id!=null?p.id:(p.fs||0),h=n=>((id*2654435761+n*40503)>>>0)%1000/1000,pos=p.pos||'WR',skill=['QB','RB','WR','TE','CB','S'].includes(pos),line=pos==='OL'||pos==='DL';
   const pick=(a,r)=>a[Math.floor(r*a.length)%a.length];
-  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:''};
+  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:'',spats:''};
   if(h(21)<(['WR','CB','S','RB','LB'].includes(pos)?0.22:pos==='QB'?0.12:0.08))e.visor=pick(['smoke','smoke','black','clear','gold','blue'],h(22));
   if(h(23)<(skill?0.14:0.05)){e.legS=h(24)<0.55?'one':'both';e.legSC=pick(['#16181d','#ffffff','c1'],h(25));}
   if(['WR','RB','CB','S','LB'].includes(pos)&&h(26)<0.14)e.crop=true;
@@ -26,11 +26,11 @@ function eqOf(p){return Object.assign(eqDefault(p),(p&&p.eq)||{});}
 const EQ_VISOR={clear:'#a9bccd',smoke:'#3a414c',black:'#14171c',gold:'#d9a520',blue:'#2f7fe0',red:'#d8452f',purple:'#7b45d8'};
 function eqCol(c,s){return c==='c1'?(s&&s.c1)||'#1d3557':c==='c2'?(s&&s.c2)||'#ffffff':c;}
 function eqResolve(e,s){if(!e)return null;const C=c=>eqCol(c,s);
-  return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,mouth2:e.mouth2?C(e.mouth2):null,ski:e.ski?C(e.ski):null,gcap:e.gcap?C(e.gcap):null,
+  return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,mouth2:e.mouth2?C(e.mouth2):null,ski:e.ski?C(e.ski):null,gcap:e.gcap?C(e.gcap):null,spats:e.spats?C(e.spats):null,
     helm:{shell:'gloss',stripe:'team',mask:''}, // the helmet is the team's (Customize → Uniforms)
     pants:e.pants||'knee',socks:e.socks||'high',visor:e.visor?EQ_VISOR[e.visor]||null:null,legS:{mode:e.legS||'none',c:C(e.legSC||'#16181d')},crop:!!e.crop,sleeve:{mode:e.sleeve||'none',c:C(e.sleeveC||'#16181d')},band:{mode:e.band||'none',c:C(e.bandC||'#ffffff')},under:{mode:e.under||'none',c:C(e.underC||'#8d939b')}};}
-function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push(e.mouth2?'two mouthpieces':'mouthpiece');if(e.ski)o.push('ski mask');if(e.gcap)o.push('guardian cap');if(e.sleeve!=='none')o.push(e.sleeve==='both'?'arm sleeves':'arm sleeve');
-  if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Baggy'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
+function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push(e.mouth2?'two mouthpieces':'mouthpiece');if(e.ski)o.push('ski mask');if(e.gcap)o.push('guardian cap');if(e.spats)o.push('spats');if(e.sleeve!=='none')o.push(e.sleeve==='both'?'arm sleeves':'arm sleeve');
+  if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Baggy'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='mid')o.push('medium socks');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
 // colour picker: presets plus any custom colour
 function eqColHtml(id,val,none){const pre=EQ_COLORS.some(c=>c[0]===val)||(none&&!val);const hex=/^#/.test(val||'')?val:'#ffffff';
   return`<span style="display:inline-flex;gap:4px;align-items:center"><select class="ei" id="${id}" onchange="eqPrev()" style="width:auto;min-width:0;padding:4px 6px">${none?`<option value=""${!val?' selected':''}>${none}</option>`:''}${EQ_COLORS.map(([v,l])=>`<option value="${v}"${v===val?' selected':''}>${l}</option>`).join('')}<option value="custom"${pre?'':' selected'}>Custom…</option></select><input type="color" id="${id}-x" value="${hex}" oninput="document.getElementById('${id}').value='custom';eqPrev()" style="width:34px;height:30px;padding:0;border:0;background:none"></span>`;}
@@ -47,13 +47,14 @@ function lookEditorHtml(p){
       <div><div style="font-size:12px;color:var(--mu);margin-bottom:3px">Eye color</div>${sw('lk-eye',CC_EYE,L.eye)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <label style="font-size:12px;color:var(--mu)">Hairstyle<br><select class="ei" id="lk-hs" onchange="lookPrev()">${opt(CC_HAIR,L.hs)}</select></label>
-        <label style="font-size:12px;color:var(--mu)">Facial hair<br><select class="ei" id="lk-fh" onchange="lookPrev()">${opt(CC_FH,L.fh)}</select></label></div>
+        <label style="font-size:12px;color:var(--mu)">Facial hair<br><select class="ei" id="lk-fh" onchange="lookPrev()">${opt(CC_FH,L.fh)}</select></label>
+        <label style="font-size:12px;color:var(--mu)">Eye black<br><select class="ei" id="lk-eb" onchange="lookPrev()">${opt(CC_EB,L.eb)}</select></label></div>
     </div></div></div>`;}
 function lookPick(id,v){const el=document.getElementById(id);if(!el)return;el.dataset.v=v;
   el.querySelectorAll('button[title]').forEach(b=>{const bv=id==='lk-ti'?String(FACE_SKIN.indexOf(b.title)):b.title;b.style.borderColor=bv===String(v)?'var(--ac)':'rgba(0,0,0,.2)';});lookPrev();}
 function lookForm(){const g=id=>{const el=document.getElementById(id);return el?(el.dataset.v!=null&&el.tagName!=='SELECT'?el.dataset.v:el.value):'';};
-  const L={},ti=g('lk-ti'),hc=g('lk-hc'),eye=g('lk-eye'),hs=g('lk-hs'),fh=g('lk-fh');
-  if(ti!=='')L.ti=+ti;if(hc)L.hc=hc;if(eye)L.eye=eye;if(hs!=='')L.hs=+hs;if(fh)L.fh=fh;return L;}
+  const L={},ti=g('lk-ti'),hc=g('lk-hc'),eye=g('lk-eye'),hs=g('lk-hs'),fh=g('lk-fh'),eb=g('lk-eb');
+  if(ti!=='')L.ti=+ti;if(hc)L.hc=hc;if(eye)L.eye=eye;if(hs!=='')L.hs=+hs;if(fh)L.fh=fh;if(eb)L.eb=eb;return L;}
 function lookPrev(){const el=document.getElementById('lk-prev');if(!el)return;
   const L=lookForm();window._lkRaw=true;try{el.innerHTML=face(window._lkSeed,84,Object.keys(L).length?L:null);}finally{window._lkRaw=false;}}
 function lookRead(p,store){if(!document.getElementById('lk-ti'))return;const L=lookForm();
@@ -71,11 +72,12 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         ${row('2nd mouthpiece',eqColHtml('eq-mo2',e.mouth2||'','None'))}
         ${row('Ski mask',eqColHtml('eq-sk',e.ski||'','None'))}
         ${row('Guardian cap',eqColHtml('eq-gc',e.gcap||'','None'))}
+        ${row('Spats',eqColHtml('eq-sp',e.spats||'','None'))}
         ${row('Arm sleeves',eqSel('eq-sl',EQ_SLEEVE,e.sleeve)+eqColHtml('eq-slc',e.sleeveC))}
         ${row('Arm bands',eqSel('eq-bd',EQ_BAND,e.band)+eqColHtml('eq-bdc',e.bandC))}
         ${row('Undershirt',eqSel('eq-un',EQ_UNDER,e.under)+eqColHtml('eq-unc',e.underC))}
         ${row('Pants',eqSel('eq-pa',[['knee','At the knee'],['short','Above the knee']],e.pants||'knee'))}
-        ${row('Socks',eqSel('eq-so',[['high','High'],['low','Low'],['none','No socks']],e.socks||'high'))}
+        ${row('Socks',eqSel('eq-so',[['high','High'],['mid','Medium (mid-calf)'],['low','Low'],['none','No socks']],e.socks||'high'))}
         ${row('Leg sleeves',eqSel('eq-ls',[['none','None'],['one','One leg (near side)'],['onefar','One leg (far side)'],['both','Both legs']],e.legS||'none')+eqColHtml('eq-lsc',e.legSC||'#16181d'))}
         ${row('Visor',eqSel('eq-vi',[['','None'],['clear','Clear'],['smoke','Smoke'],['black','Black'],['gold','Gold mirror'],['blue','Blue mirror'],['red','Red mirror'],['purple','Purple mirror']],e.visor||''))}
         ${row('Jersey',eqSel('eq-cr',[['0','Regular'],['1','Cropped (undershirt / back plate shows)']],e.crop?'1':'0'))}
@@ -86,11 +88,11 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         <div style="font-size:11px;color:var(--mu)">Shows on the field in Game Day</div></div></div></div>`;}
 function eqRead(){const g=id=>document.getElementById(id);if(!g('eq-tw'))return null;
   return{towel:g('eq-tw').value==='1',towelC:eqColRead('eq-twc')||'#ffffff',glove:eqColRead('eq-gl'),cleat:eqColRead('eq-cl'),mouth:eqColRead('eq-mo'),
-    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||'',mouth2:g('eq-mo2')?eqColRead('eq-mo2'):'',ski:g('eq-sk')?eqColRead('eq-sk'):'',gcap:g('eq-gc')?eqColRead('eq-gc'):''};}
+    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||'',mouth2:g('eq-mo2')?eqColRead('eq-mo2'):'',ski:g('eq-sk')?eqColRead('eq-sk'):'',gcap:g('eq-gc')?eqColRead('eq-gc'):'',spats:g('eq-sp')?eqColRead('eq-sp'):''};}
 function eqSetForm(e){const g=id=>document.getElementById(id),sc=(id,v)=>{const s=g(id);if(!s)return;if([...s.options].some(o=>o.value===v))s.value=v;else{s.value='custom';g(id+'-x').value=v;}};
-  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');sc('eq-mo2',e.mouth2||'');sc('eq-sk',e.ski||'');sc('eq-gc',e.gcap||'');eqPrev();}
+  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');sc('eq-mo2',e.mouth2||'');sc('eq-sk',e.ski||'');sc('eq-gc',e.gcap||'');sc('eq-sp',e.spats||'');eqPrev();}
 function eqRandom(pid){const p=window._eqPid==='pcd'&&_pcd?pccP():getP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
-function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:''});}
+function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:'',spats:''});}
 // the same pixel sprites as Game Day, loaded once from the embedded game for the preview
 let _eqLibP=null;
 function eqLib(){
@@ -277,7 +279,10 @@ function gameInviteResolve(wk,pops){const I=G.gameInv;if(!I||I.yr!==G.yr||I.wk!=
     if(Math.abs(c.pr-Lv)<=25&&colRoom(c,x.p,true)&&Math.random()<clamp(0.15+x.v*0.12,0.1,0.55)){x.p.offers=x.p.offers||[];addOffer(x.p,c,pops,'saw him live');got.push(`${x.p.fn} ${x.p.ln} → ${c.school}`);break;}}
   try{addLog(`<span style="color:var(--te)">The visiting staffs left Week ${wk} with ${got.length?got.join(', '):'no new offers'}.</span>`);}catch(e){}}
 // ── a neutral site for the state final: the flagship college stadium of your state ──
-function stateFinalVenue(){try{_colStReady();}catch(e){}const st=clsSt(G.cls),c=COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0];return c?`${c.school} Stadium`:`${stName(st)} Championship Stadium`;}
+function stateFinalCollege(){try{_colStReady();}catch(e){}const st=clsSt(G.cls);return COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0]||null;}
+function stateFinalVenue(){const c=stateFinalCollege();return c?`${c.school} Stadium`:`${stName(clsSt(G.cls))} Championship Stadium`;}
+// the host college's logo for the middle of the field (Game Day)
+function stateFinalLogoUrl(){try{const c=stateFinalCollege();if(!c)return null;const I=colInfo(c);return'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sLogoStandalone({name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,logoKey:I.logoKey,mash:I.mash,customLogo:I.customLogo},100));}catch(e){return null;}}
 // v2.16 coach any school: take over another program in the offseason, before its first game
 function coachTakeOver(sid,quiet,anyLg){
   const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return false;

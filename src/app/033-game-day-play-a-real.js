@@ -40,7 +40,7 @@ function gdPlayer(p,i){
     tkl:M('tkl',a('tak')),cov:M('cov',(a('mcv')+a('zcv'))/2*.85+awr*.15),
     dac:M('acc',a('dac')),tup:M('acc',a('tup')),car:M('hands',a('car')),elu:M('agi',a('elu')),btk:M('str',a('btk')),cit:M('hands',a('cit')),rte:M('agi',a('rte')),jmp:M('agi',a('jmp')),
     pbk:M('str',a('pbk')),rbk:M('str',a('rbk')),pmv:M('str',a('pmv')),fmv:M('agi',a('fmv')),bsh:M('tkl',a('bsh')),hpw:M('str',a('hpw')),mcv:M('cov',a('mcv')),zcv:M('cov',a('zcv')),prs:M('cov',a('prs')),end:clamp(Math.round(a('sta')),1,99),awr:Math.max(30,Math.min(99,Math.round(40+awr*0.6+_gdTAdj))),kpow:M('kpow',a('kpw')),kacc:M('kacc',a('kac')),ovr:r,stars:p.stars>=2?Math.min(5,p.stars):0,skin:sk,
-    pk:sk,hair:_ft.hc,hst:hairCat(_ft.hs),sl:h%5===3?1:h%5===4?2:0,visor:h%9===0,ls:h%2===0,band:h%7<3,eq:eqOf(p),...gdForm(p),...progGdP(p)};
+    pk:sk,hair:_ft.hc,hst:hairCat(_ft.hs),eb:_ft.eb||null,sl:h%5===3?1:h%5===4?2:0,visor:h%9===0,ls:h%2===0,band:h%7<3,eq:eqOf(p),...gdForm(p),...progGdP(p)};
 }
 // season form the engine uses: QBs trust sure-handed receivers, attack corners who give up yards, linemen who bury people keep doing it
 function gdForm(p){const s=p.seasStats||{},e=stEff(s),o={};if(e.drop!=null&&((s.rec||0)+(s.drops||0))>=6)o.dropR=+e.drop.toFixed(3);if(e.ypgA!=null&&(s.gp||0)>=2)o.ypgA=+e.ypgA.toFixed(1);if((s.gp||0)>=2){o.pbuR=+((s.pbu||0)/s.gp).toFixed(2);if(p.pos==='OL')o.pkR=+((s.pancakes||0)/s.gp).toFixed(2);}return o;}
@@ -68,7 +68,7 @@ function gdTeam(s,kind,kitOv,opt){
   // your depth chart's starters start on Game Day too (your own career player follows his playing time instead)
   if(isMe&&!scout)try{const n={};for(const p of getStarters(G.myId)){const i=n[p.pos]=(n[p.pos]||0)+1;if(p.id===_gdPc)continue;const q=roster.find(x=>x.mid===p.id&&x.pos===p.pos);if(q)q.dep=i-1;}}catch(e){}
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
-  for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}}
+  for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}if(q.eb&&q.eb!=='none'){q.eq=q.eq||{};q.eq.eb=q.eb;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);
   for(const q of roster){q.eq=q.eq||{};q.eq.helm={shell:u.hShell||'gloss',stripe:u.hStripe||'team',mask:''};}
   if(u.shoulder&&u.shoulder!=='none')for(const q of roster){q.eq=q.eq||{};q.eq.shoulder={mode:u.shoulder,c:u.shoulderC||u.trim};}
@@ -128,7 +128,7 @@ function gdStart(){
   window.__GP={mercy:_mer,mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
   if(_fmt<11){window.__GP.fmt=_fmt;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">${fmtName(_fmt)[0].toUpperCase()+fmtName(_fmt).slice(1)} football: ${_fmt} players a side</div>`;}
-  try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v});window.__GP.neutral=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
+  try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v,logo:'logo'});window.__GP.neutral=true;window.__GP.midLogoUrl=stateFinalLogoUrl();window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
   try{if(window.__GP.rival)window.__GP.previewHtml=(window.__GP.previewHtml||'')+rivalryWeekHtml(opp);}catch(e){}
   try{if(ctx.kind==='reg'&&hcIs(G.sched[ctx.info.idx].wk)){window.__GP.big=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+hcLine();}}catch(e){}
   if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.s7q=G.s7.qn===1?1:2;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
@@ -158,7 +158,12 @@ function gdLaunch(){
     let done=false;const go=()=>{if(done)return;done=true;try{if(ld)ld.classList.remove('active');}catch(e){}gdLaunchFrame();};sv.then(go,go);setTimeout(go,10000);return;}
   gdLaunchFrame();
 }
+// end zone lettering in the stadium's font: the letter outlines go to the engine with the game (they work offline)
+function gdEzGlyphs(P){if(!P)return;const k=P.stadium&&P.stadium.ezFont;delete P.ezGlyphs;if(!k||k==='std')return;
+  const T=k==='script'?_LG_S:_LG_V,H=P.teams&&P.teams[P.home||0];if(!H||!T)return;const s=String(H.name||'')+' '+String(H.city||''),g={' ':T[' ']||[30,'']};
+  for(const c of s.toUpperCase()+s.toLowerCase())if(T[c])g[c]=T[c];P.ezGlyphs={k,g};}
 function gdLaunchFrame(){
+  try{gdEzGlyphs(window.__GP);}catch(e){}
   let ov=document.getElementById('gd-ov');if(ov)gdTeardown();
   ov=document.createElement('div');ov.id='gd-ov';
   ov.innerHTML=`<iframe id="gd-if" title="Game Day" allow="autoplay; web-share; fullscreen"></iframe>`;

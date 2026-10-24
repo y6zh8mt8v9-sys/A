@@ -201,7 +201,7 @@ function updateLive(dt){
     let px=0,py=0;
     const runPush=P.kind==='scrimmage'&&P.off.kind==='run'||G.ballState==='carrier';
     if(e.eng>0&&e.blockedBy&&runPush&&e.blockedBy.pl){const b=e.blockedBy,dx=e.x-b.x,dy=e.y-b.y,l=Math.hypot(dx,dy)||1,m=1.5*clamp(b.pl.str/e.pl.str,0.7,1.35);px=dx/l*m;py=dy/l*m;}
-    accel(e,v[0]*f+px,v[1]*f+py,dt);
+    accel(e,v[0]*f+px,v[1]*f+py,dt,e.rAcc&&e.rAcc.p===P&&e.rAcc.t>G.t?e.acc*1.45:0); // quick break out of a slant
   }
   for(const e of G.ents){
     e.x+=e.vx*dt;e.y+=e.vy*dt;const sp=Math.hypot(e.vx,e.vy);e.anim+=sp*dt*2.1;e.run+=sp*dt;if(e.pl&&!e.spd0)e.spd0=e.spd;if(e.spd0)e.spd=e.spd0*(1-Math.min(0.07,Math.max(0,e.run-25)*0.0014*(0.6+gpFat(e))));
