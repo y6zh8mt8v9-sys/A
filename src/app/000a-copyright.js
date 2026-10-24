@@ -4,8 +4,8 @@
 const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'__BUILD_ID__'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
-const G27_HOSTS=[];
-const G27_HOME='';   // the official address shown on that screen, e.g. 'https://example.com'
+const G27_HOSTS=['gridiron27.neocities.org'];
+const G27_HOME='https://gridiron27.neocities.org';   // the official address shown on that screen
 function g27Official(h){h=(h||'').toLowerCase();if(!G27_HOSTS.length||!h||h==='localhost'||h==='127.0.0.1')return true;
   return G27_HOSTS.some(x=>h===x||h.endsWith('.'+x));}
 (function(){

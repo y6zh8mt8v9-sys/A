@@ -48,7 +48,7 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 
 ### Protection
 - `python3 tools/build.py --release` writes `dist/index.html`: every script is minified and its local names scrambled, comments removed except the copyright. Deploy `dist/index.html` and `sw.js` (the delivered `Gridiron27_code.txt` is this build). Needs `cd tools && npm ci` once.
-- **Domain lock:** in `src/app/000a-copyright.js` set `G27_HOSTS` to the sites you host on (for example `['mygame.com']`, subdomains count) and `G27_HOME` to your address, then rebuild. A copy on any other site, or your game framed by another site, shows an "Unofficial copy" screen with a link to yours. Empty list = no lock.
+- **Domain lock:** in `src/app/000a-copyright.js` set `G27_HOSTS` to the sites you host on (for example `['mygame.com']`, subdomains count) and `G27_HOME` to your address, then rebuild. A copy on any other site, or your game framed by another site, shows an "Unofficial copy" screen with a link to yours. Empty list = no lock. It is set to `gridiron27.neocities.org`.
 - A content security policy only lets scripts load from the game itself and the Online Play library, and blocks plugins, outside forms and base-URL tricks.
 - Honest limit: anything a browser runs can be copied by someone determined. These steps stop casual copying and re-hosting, and the watermarks prove the game is yours.
 
