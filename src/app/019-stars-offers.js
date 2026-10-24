@@ -391,7 +391,8 @@ function addOffer(p,c,pops,why){
     else if(c.lvl==='JUCO')addNews('offer',` JUCO Interest: ${p.fn} ${p.ln}`,`${c.school} wants the ${p.pos}.`);
     else addNews('offer',` ${c.lvl} Offer: ${p.fn} ${p.ln} → ${c.school}`,`${p.pos} • OVR ${p.rat}`);
     addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln} → ${c.lvl}: ${c.school}${why?''+why:''}</span>`);}
-  if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&colRoom(COL_BY[o.school+'|'+o.lvl],p,false)){p.committed=o;colTakeCommit(p,o);
+  if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&pcOwnPick(p)){try{addNews('offer',`Dream school offer: ${o.school}`,`${p.fn} ${p.ln} can commit on My Player.`);}catch(e){}} // Player Career: your choice
+  else if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&colRoom(COL_BY[o.school+'|'+o.lvl],p,false)){p.committed=o;colTakeCommit(p,o);
     if(p.sId===G.myId){if(pops)pops.push(bEvPop(' Dream School Commit!',`${p.fn} ${p.ln} instantly committed to his dream school, <strong>${o.school}</strong> (${o.lvl})!`,face(p.fs,52),'var(--gd)'));
       addNews('offer',` Dream School! ${p.fn} ${p.ln} → ${o.school}`,`Instant commit: ${p.pos} always dreamed of playing there.`);}}
   return o;
@@ -419,6 +420,7 @@ window.pushFlip=function(pid){const p=getP(pid);if(!p||p.sId!==G.myId)return;con
   if(Math.random()<ch){plFlip(p,o,true);notify(`${p.fn} flips to ${o.school}!`);}else{p.morale=clamp((p.morale||65)-4,0,100);notify(`${p.fn} is sticking with ${p.committed.school}.`,'w');}
   clo();showPlayer(pid);};
 function checkCommit(p){
+  if(pcOwnPick(p))return; // Player Career: your player commits (and flips) only when you choose
   if(p.committed){colAutoFlip(p);return;}
   if(!p.offers||!p.offers.length||p.yr<11)return;
   const isSenior=p.yr===12,wk=G.week||0,urgency=isSenior?Math.min(0.22,0.07+wk*0.015):0.04;
@@ -486,7 +488,8 @@ function campSendInvites(C,mineOut){
   const picks=[];const used=new Set();
   for(let k=0;k<C.size*4&&picks.length<C.size&&cand.length;k++){const i=Math.floor(Math.pow(Math.random(),1.6)*cand.length),p=cand[i][1];if(used.has(p.id))continue;used.add(p.id);picks.push(p);}
   for(const p of picks){C.inv++;
-    if(p.sId===G.myId){G.campInv=(G.campInv||[]).filter(v=>getP(v.pid)&&v.yr===G.yr);if(G.campInv.filter(v=>v.pid===p.id).length>=3)continue;
+    if(p.sId===G.myId&&p.id===G.myPlayerId&&pcAuto()){try{const r=campRun(p,C,true);C.att++;addNews('offer',`Camp: ${p.fn} ${p.ln} grades ${r.grade}`,`${C.name}, ${r.got.length} offer${r.got.length!==1?'s':''}.`);}catch(e){}} // Player Career: your player goes
+    else if(p.sId===G.myId&&!pcAuto()){G.campInv=(G.campInv||[]).filter(v=>getP(v.pid)&&v.yr===G.yr);if(G.campInv.filter(v=>v.pid===p.id).length>=3)continue;
       const inv={id:'c'+Date.now().toString(36)+Math.floor(Math.random()*1e6),pid:p.id,yr:G.yr,wk:G.week||0,camp:{host:C.host,lvl:C.lvl,pr:C.pr,name:C.name,schools:C.schools,size:C.size}};
       G.campInv.push(inv);if(mineOut)mineOut.push([p,C]);}
     else if(Math.random()<0.8){try{campRun(p,C,true);C.att++;}catch(e){}}}

@@ -204,7 +204,7 @@ function pgRecls(){
             <div class="dr"><span class="a">State Champ at ${clsL(G.cls)}</span><span style="color:${champAtCurrent?'var(--gn)':'var(--rd)'};font-weight:700">${champAtCurrent?'✓ Earned':' Not yet'}</span></div>
             <div class="dr"><span class="a">Budget needed</span><span style="color:${canAffordUp?'var(--gn)':'var(--rd)'};font-weight:700">$${(moveUpCost/1000).toFixed(0)}k (have $${(G.budget/1000).toFixed(0)}k)</span></div>
           </div>
-          <button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%"> Move Up to ${nextUp}</button>`
+          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%"> Move Up to ${nextUp}</button>`}`
           :`<div style="font-size:12px;color:var(--mu)">Already in the highest classification (${myClsOrder().slice(-1)[0]}).</div>`}
         </div>
       </div>
@@ -231,6 +231,8 @@ function pgRecls(){
   </div>`;
 }
 
+// at least one state championship at the current classification
+function moveUpChamp(){return G.hist.filter(h=>(h.stateChamp||h.champ)&&h.cls===G.cls).length>0||G.trophies.filter(t=>t.type==='State'&&(t.cls===G.cls||!t.cls)).length>0;}
 function buildMoveUpPop(){
   // Called at end of season, offer move-up if eligible
   const ms=myS();
@@ -239,8 +241,7 @@ function buildMoveUpPop(){
   const nextCls=myClsOrder()[clsIdx+1];
   const cost=CLS_MOVEUP_COST[clsEq(G.cls)]||0;
   // Requirement: at least one state championship at current classification
-  const champAtCurrent=G.hist.filter(h=>(h.stateChamp||h.champ)&&h.cls===G.cls).length>0
-    || G.trophies.filter(t=>t.type==='State'&&(t.cls===G.cls||!t.cls)).length>0;
+  const champAtCurrent=moveUpChamp();
   if(!champAtCurrent){
     // Show info pop, not yet eligible
     return `<div class="pc" style="border-top-color:var(--mu)">
@@ -271,13 +272,14 @@ function buildMoveUpPop(){
   </div>`;
 }
 
-window.confirmMoveUp=function(){
+window.confirmMoveUp=function(){if(moveUpDo())nxp();};
+function moveUpDo(){
   const clsIdx=myClsOrder().indexOf(G.cls);
-  if(clsIdx>=myClsOrder().length-1)return;
+  if(clsIdx>=myClsOrder().length-1)return false;
   const oldCls=G.cls;
   const nextCls=myClsOrder()[clsIdx+1];
   const cost=CLS_MOVEUP_COST[clsEq(G.cls)]||0;
-  if(!hasFunds(cost)){notify('Not enough budget!','e');return;}
+  if(!hasFunds(cost)){notify('Not enough budget!','e');return false;}
   if(!G.unlimitedMoney)G.budget-=cost;
 
   // ── 1. Find player's school object and current division ──
@@ -322,8 +324,8 @@ window.confirmMoveUp=function(){
   for(const div of G.divisions)for(const t of div.teams){t.wins=0;t.losses=0;}
 
   addLog(`<span style="color:var(--gd)"> Reclassified UP to ${nextCls}! Joined the <strong>${targetDiv.name}</strong> division. You have 3 years of demotion immunity to adjust.</span>`);
-  nxp();
-};
+  return true;
+}
 
 window.declineMoveUp=function(){
   nxp();
@@ -425,7 +427,7 @@ function updDev(p){
 
 function jucoFallback(p){if(p.rat>=48&&Math.random()<.3){const sc=jucoPick(p);if(sc){p.committed={lvl:'JUCO',school:sc};colTakeCommit(p,p.committed);}}}
 function commitPlayer(p){
-  if(p.committed)return;
+  if(p.committed||pcOwnPick(p))return; // Player Career: no signing day pick for your player
   if(!p.offers.length){jucoFallback(p);return;}
   const sorted=colOpenOffers(p).sort((a,b)=>colPr(b)-colPr(a));
   if(!sorted.length){jucoFallback(p);return;} // every program filled the spot

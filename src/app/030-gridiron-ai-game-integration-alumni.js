@@ -109,14 +109,14 @@ function aiFx(){
 }
 function aiBudgetOpts(f){
   const o=[],tl=(typeof getTrainLevel==='function')?getTrainLevel():(G.trainLevel||1),inj=f.all.filter(p=>p.inj>0).length;
-  if(tl<20)o.push({k:'Training Facility (level '+(tl+1)+')',c:Math.round(5000+tl*4000),v:10-tl*.35,page:'training',why:'It lifts development for every player, every year.'});
+  if(tl<20)o.push({k:'Training Facility (level '+(tl+1)+')',c:Math.round(5000+tl*4000),v:10-tl*.35,page:'training',id:['t'],why:'It lifts development for every player, every year.'});
   const sn={hc:'Assistant Head Coach',oc:'Offensive Coordinator',dc:'Defensive Coordinator',rc:'Recruiting Coordinator'};
   for(const k in sn){const s=G.staff&&G.staff[k];if(!s||s.lvl>=5)continue;
     let v=k==='rc'?(s.lvl<=1?9:s.lvl===2?7:4):k==='hc'?6:k==='oc'?(G.offR<=G.defR?6.5:4):(G.defR<G.offR?6.5:4);
     const why=k==='rc'?'Better incoming freshmen classes.':k==='hc'?'Adds an overall skill-point bonus.':k==='oc'?'Boosts offensive skill points.':'Boosts defensive skill points.';
-    o.push({k:sn[k]+' (level '+(s.lvl+1)+')',c:(s.lvl+1)*20000,v,page:'staff',why});}
+    o.push({k:sn[k]+' (level '+(s.lvl+1)+')',c:(s.lvl+1)*20000,v,page:'staff',id:['s',k],why});}
   const fn={weight:['Weight Room',4,'Strength gains.'],film:['Film Room',4,'Awareness gains.'],train:['Practice Field',5,'Overall training bonus.'],med:['Medical Staff',3+Math.min(4,inj),'Shorter injury recovery.']};
-  for(const k in fn){const cur=(G.fac&&G.fac[k])||1;if(cur>=5)continue;o.push({k:fn[k][0]+' (level '+(cur+1)+')',c:(cur+1)*15000,v:fn[k][1],page:'staff',why:fn[k][2]});}
+  for(const k in fn){const cur=(G.fac&&G.fac[k])||1;if(cur>=5)continue;o.push({k:fn[k][0]+' (level '+(cur+1)+')',c:(cur+1)*15000,v:fn[k][1],page:'staff',id:['f',k],why:fn[k][2]});}
   o.forEach(x=>{x.r=x.v/(x.c/10000);x.ok=hasFunds(x.c);});
   return o.sort((a,b)=>b.r-a.r);
 }

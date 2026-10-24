@@ -85,7 +85,7 @@ function pgNews(){
 
 let _rs={k:'rat',d:-1},_rpf='ALL';
 function pgRoster(sid){
-  const sch=getS(sid);const isMe=sid===G.myId;let pl=sPlayers(sid);
+  const sch=getS(sid);const isMe=sid===G.myId,ed=!pcAuto();let pl=sPlayers(sid); // ed: Player Career shows the roster read-only
   window._setRS=(k)=>{if(_rs.k===k)_rs.d*=-1;else{_rs.k=k;_rs.d=-1;}nav('roster',sid);};
   window._setPF=(p)=>{_rpf=p;nav('roster',sid);};
   if(_rpf!=='ALL')pl=pl.filter(p=>p.pos===_rpf);
@@ -101,7 +101,7 @@ function pgRoster(sid){
   const capPct=isMe?varsityRosterCount/MAX_VARSITY:null;
   const capColor=capPct===null?'':capPct>=1?'var(--rd)':capPct>=0.9?'var(--gd)':'var(--gn)';
   return`<div class="pnl"><div class="ph">${sLogo(sch,30)} &nbsp;${sch.name} ${sch.mascot} <span style="font-size:12px;font-weight:400;color:var(--mu)">${sPlayers(sid).length} players</span>${isMe?`<span style="margin-left:8px;background:${capPct>=1?'rgba(204,34,34,.18)':'rgba(34,184,112,.1)'};border:1px solid ${capColor};color:${capColor};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Varsity ${varsityRosterCount}/${MAX_VARSITY}${capPct>=1?'  AT CAP':''}</span>`:''}</div>
-    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p==='ALL'?'All':p}</button>`).join('')}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div></div>
+    <div class="pb" style="padding-bottom:6px"><div class="pfl">${['ALL',...POS].map(p=>`<button class="pfb ${_rpf===p?'on':''}" onclick="_setPF('${p}')">${p==='ALL'?'All':p}</button>`).join('')}</div>${ed?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="bgh bsm" onclick="bulkOpen(${sid})">Edit many players at once…</button>${isMe?'':`<button class="bgh bsm" onclick="openEditSch(${sid})">Edit team (name, colors, logo, schemes)</button><button class="bgh bsm" onclick="coachTakeOver(${sid})">Coach this team…</button>`}</div>`:''}</div>
     <div style="overflow-x:auto"><table><thead><tr>
       <th>#</th><th onclick="_setRS('name')">Name ${ar('name')}</th>
       <th onclick="_setRS('pos')">Pos ${ar('pos')}</th><th onclick="_setRS('yr')">Yr ${ar('yr')}</th>
@@ -112,7 +112,7 @@ function pgRoster(sid){
       <th onclick="_setRS('spd')">Spd ${ar('spd')}</th><th onclick="_setRS('str')">Str ${ar('str')}</th><th onclick="_setRS('awr')">Awr ${ar('awr')}</th>
       <th>Ht</th><th>Wt</th><th onclick="_setRS('gpa')">GPA ${ar('gpa')}</th>
       <th>Traits</th><th>Inj</th>
-      ${isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:'<th></th>'}
+      ${!ed?'':isMe?`<th onclick="_setRS('sp')">SP ${ar('sp')}</th><th></th>`:'<th></th>'}
     </tr></thead>
     <tbody>${pl.map(p=>`<tr class="cl" onclick="showPlayer(${p.id})">
       <td style="color:var(--mu)">${p.num}</td><td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,28)}<span>${p.fn} ${p.ln}</span></div></td>
@@ -126,7 +126,7 @@ function pgRoster(sid){
       <td>${gpaL(p.gpa)}</td>
       <td>${(p.traits||[]).map(t=>trB(t)).join('')}</td>
       <td>${injBadgeTable(p)}</td>
-      ${isMe?`<td style="color:var(--te);font-weight:700">${p.sp||0}</td><td>
+      ${isMe&&ed?`<td style="color:var(--te);font-weight:700">${p.sp||0}</td><td>
         <div style="display:flex;gap:3px;align-items:center">
           <button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button>
           ${p.onJV?`<button class="btn bxs bgn" onclick="event.stopPropagation();callUpToVarsity(${p.id})" title="Call up to Varsity" style="font-size:9px;padding:2px 5px">V</button>`
@@ -134,7 +134,7 @@ function pgRoster(sid){
           <button class="btn bxs" onclick="event.stopPropagation();confirmCutPlayer(${p.id})" title="Cut player" style="background:var(--rd);font-size:9px;padding:2px 5px"></button>
         </div>
       </td>`:''}
-      ${isMe?'':`<td><button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button></td>`}
+      ${isMe||!ed?'':`<td><button class="bgh bxs" onclick="event.stopPropagation();editPlayer(${p.id})">Edit</button></td>`}
     </tr>`).join('')}</tbody></table></div></div>`;
 }
 
@@ -318,7 +318,8 @@ function pgTrain(){
   </div></div>`;
 }
 
-window.autoSP=function(pid){const p=getP(pid);if(!p||!(p.sp>0))return;const sp=p.sp;p.rat=clamp(p.rat+sp,1,Math.max(p.pot,p.rat));p.pot=Math.max(p.pot,p.rat);_attrBoostForOvr(p,sp);p.sp=0;updateRats();notify(`${p.fn} ${p.ln}: ${sp} SP → +${sp} OVR! Attributes boosted.`);nav('training');};
+function spApply(p){const sp=p.sp;p.rat=clamp(p.rat+sp,1,Math.max(p.pot,p.rat));p.pot=Math.max(p.pot,p.rat);_attrBoostForOvr(p,sp);p.sp=0;return sp;}
+window.autoSP=function(pid){const p=getP(pid);if(!p||!(p.sp>0))return;const sp=spApply(p);updateRats();notify(`${p.fn} ${p.ln}: ${sp} SP → +${sp} OVR! Attributes boosted.`);nav('training');};
 
 window.upgradeTrainLevel=function(){
   const tLvl=getTrainLevel();
@@ -561,14 +562,16 @@ function applyC(){const ms=myS();ms.name=document.getElementById('cn').value||ms
 window.schFind=function(q){const el=document.getElementById('schFindL');if(!el)return;q=String(q||'').trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}
   const L=[];for(const s of allSchoolsAll()){if(L.length>=30)break;if((s.name+' '+s.mascot+' '+(s.city||'')).toLowerCase().includes(q))L.push(s);}
   el.innerHTML=L.length?L.map(s=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--bd)">${sLogo(s,22)}<div style="flex:1;min-width:0;font-size:12px"><b>${s.name} ${s.mascot}</b> <span style="color:var(--mu)">${s.city||''} · ${clsName(s.cls)}</span></div><button class="bgh bxs" onclick="openEditSch(${s.id})">Edit</button></div>`).join(''):'<div style="font-size:12px;color:var(--mu)">No school found.</div>';};
-function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School</h2>
+// uniforms are changed on a copy of the school's colors, so Cancel leaves the school as it was
+window.schUniCol=function(){const T=window._schUniT;if(!T)return;T.c1=document.getElementById('ec1').value;T.c2=document.getElementById('ec2').value;const el=document.getElementById('sch-uni');if(el)el.innerHTML=uniHostHtml(T,schUniCol,T.id===G.myId);};
+function openEditSch(sid){const s=getS(sid);if(!s)return;window._schUniT={id:s.id,name:s.name,mascot:s.mascot,c1:s.c1,c2:s.c2,c3:s.c3,uni:uniClean(s.uni)};window._uniKind='home';openMo(`<h2>Edit School</h2>
   <div class="g2" style="gap:10px;margin-top:8px">
     <div class="fg"><label>Team Name</label><input class="ei" id="en" value="${s.name}"></div>
     <div class="fg"><label>Mascot</label><input class="ei" id="em" value="${s.mascot}"></div>
     <div class="fg"><label>City</label><input class="ei" id="ec" value="${s.city}"></div>
     <div class="fg"><label>Abbreviation</label><input class="ei" id="ea" value="${s.abbr}" maxlength="3" style=""></div>
-    <div class="fg"><label>Primary Color</label><input type="color" id="ec1" value="${s.c1}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
-    <div class="fg"><label>Secondary Color</label><input type="color" id="ec2" value="${s.c2}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
+    <div class="fg"><label>Primary Color</label><input type="color" id="ec1" value="${s.c1}" oninput="schUniCol()" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
+    <div class="fg"><label>Secondary Color</label><input type="color" id="ec2" value="${s.c2}" oninput="schUniCol()" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
     <div class="fg"><label>Off Scheme</label><select class="ei" id="eos">${OFF_SCH.map(sc=>`<option ${sc===s.offS?'selected':''}>${sc}</option>`).join('')}</select></div>
     <div class="fg"><label>Def Scheme</label><select class="ei" id="eds">${DEF_SCH.map(sc=>`<option ${sc===s.defS?'selected':''}>${sc}</option>`).join('')}</select></div>
     <div class="fg"><label>Logo icon</label><select class="ei" id="elk" onchange="schLogoPrev(${sid})"><option value="">From the mascot name</option>${Object.keys(_LGO).sort().map(k=>`<option value="${k}" ${k===s.logoKey?'selected':''}>${k}</option>`).join('')}</select></div>
@@ -586,12 +589,16 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
       </div>
     </div>
   </div>
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+    <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:8px">Uniforms</div>
+    <div id="sch-uni">${uniHostHtml(window._schUniT,schUniCol,sid===G.myId)}</div>
+  </div>
   <div style="display:flex;gap:8px;margin-top:12px">
     <button class="btn" onclick="saveSch(${sid})">Save</button>
     <button class="bgh" onclick="clo()">Cancel</button>
   </div>`);}
 window.schLogoPrev=function(sid){const s=getS(sid),el=document.getElementById('elk-prev');if(!s||!el)return;const t=Object.assign({},s,{logoKey:document.getElementById('elk').value||null,mash:document.getElementById('emash').value||null,c1:document.getElementById('ec1').value,c2:document.getElementById('ec2').value,customLogo:null});el.innerHTML=sLogo(t,64);};
-window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
+window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}{const T=window._schUniT;if(T&&T.id===s.id){const u=uniClean(T.uni);if(u)s.uni=u;else delete s.uni;if(T.c3)s.c3=T.c3;}window._schUniT=null;window._uniT=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
 window.handleSchLogoUpload=function(inp,sid){
   const file=inp.files[0];if(!file)return;
   logoShrink(file,function(d){
@@ -621,8 +628,8 @@ function pgSched(){
     <span>Schedule: ${2026+(G.yr-1)} Season
       ${hasRivalry?'<span style="color:var(--gd);font-size:12px;font-weight:700;margin-left:10px"> Rivalry included</span>':''}
     </span>
-    ${noGamesPlayed&&!hasEmpty?`<button class="bgh bsm" onclick="openScheduleBuilder()"> Edit Schedule</button>`:''}
-    ${hasEmpty?`<button class="btn" style="padding:4px 12px;font-size:12px;background:var(--rd)" onclick="openScheduleBuilder()"> Finish Building Schedule!</button>`:''}
+    ${noGamesPlayed&&!hasEmpty&&!pcAuto()?`<button class="bgh bsm" onclick="openScheduleBuilder()"> Edit Schedule</button>`:''}
+    ${hasEmpty&&!pcAuto()?`<button class="btn" style="padding:4px 12px;font-size:12px;background:var(--rd)" onclick="openScheduleBuilder()"> Finish Building Schedule!</button>`:''}
   </div>
   ${sosAvg>0?`<div style="padding:6px 14px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
     <span style="color:${sosTierDisp.color};font-weight:700">${sosTierDisp.icon} SOS: ${sosTierDisp.label}</span>

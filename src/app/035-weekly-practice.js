@@ -95,11 +95,12 @@ function pracFinish(res){
   const rows=pracGrant(gains);
   try{showLoading('Practice wrap-up',myS(),5,()=>pracShow(rows,'Practice results'));}catch(e){pracShow(rows,'Practice results');}
 }
-function pracSim(){
+function pracSim(){pracShow(pracSimRows(),'Simulated practice');}
+function pracSimRows(){
   const ps=myP().filter(p=>!(p.inj>0)).sort((a,b)=>b.rat-a.rat).slice(0,30),gains={};
   for(const p of ps){let xp=2+Math.floor(Math.random()*3);if(p.traits&&p.traits.includes('hard-worker'))xp+=1;if(p.yr<=10)xp+=1;gains[p.id]=xp;}
   if(window._pracJV!==false)for(const p of G.players.filter(q=>q.sId===G.myId&&q.onJV&&!(q.inj>0))){let xp=2+Math.floor(Math.random()*2);if(p.traits&&p.traits.includes('hard-worker'))xp+=1;gains[p.id]=(gains[p.id]||0)+xp;}
-  const rows=pracGrant(gains);pracShow(rows,'Simulated practice');
+  return pracGrant(gains);
 }
 
 // ═══════════ INTERNATIONAL TEAMS (fixed, hand-made) ═══════════

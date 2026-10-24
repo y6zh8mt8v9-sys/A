@@ -73,13 +73,15 @@ function seniorCeremony(){const S=myP().filter(p=>p.yr===12).sort((a,b)=>b.rat-a
   openMo(`<h2>Senior Night · Class of ${yr+1}</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">${S.length} senior${S.length>1?'s':''} played their last game for ${ms.name} ${ms.mascot}. The team and the crowd say thank you.</div>
     <div style="display:grid;gap:8px;max-height:56vh;overflow-y:auto">${S.map(p=>`<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px">${face(p.fs,44)}<div style="flex:1;min-width:0"><div style="font-weight:800">${p.fn} ${p.ln}${captains().includes(p.id)?' <span style="color:var(--gd)">(C)</span>':''}</div><div style="font-size:12px;color:var(--mu)">${p.pos} · ${p.rat} OVR${p.stars>=2?` · ${p.stars}★`:''}</div><div style="font-size:12px">${p.committed&&p.committed.school?`Signed with <b>${p.committed.school}</b>${p.committed.lvl?` (${p.committed.lvl})`:''}`:'Undecided: signing day is next'}</div></div></div>`).join('')}</div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="seniorDone()">Honor the seniors</button></div>`);}
-window.seniorDone=function(){G.morale=clamp(moraleOf()+3,5,100);clo();addLog(`<span style="color:var(--gd)">Senior Night: the Class of ${(G.baseYear||2026)+G.yr} was honored.</span>`);runOffseason();};
+window.seniorDone=function(){seniorHonor();clo();runOffseason();};
+function seniorHonor(){G.morale=clamp(moraleOf()+3,5,100);addLog(`<span style="color:var(--gd)">Senior Night: the Class of ${(G.baseYear||2026)+G.yr} was honored.</span>`);}
 
 // ═══════════ ACTIONS ═══════════
 function advWk(){
   if(ccOn()){ccNext();return;}
   if(G.phase==='playoffs'){advPlayoffWeek();return;}
   try{autoJVCallup();}catch(e){console.error('autoJVCallup',e);}
+  if(G.sched.some(g=>g.custom&&g._empty)&&pcAuto())pcAutoSched(); // Player Career: the staff fills it
   if(G.sched.some(g=>g.custom&&g._empty)){
     notify('Finish building your schedule first!','e');
     openScheduleBuilder();
@@ -95,7 +97,7 @@ function advWk(){
   }
   const game=G.sched[idx];
   // v2.00: the first game of a new career offers the interactive gameplay tutorial first (asked once per save)
-  if(!G.tutAsked&&!G.tutDone&&G.yr===1&&!G.sched.some(g=>g.result&&g.type==='regular')&&!window._gdAutoSim){tutOffer(true);return;}
+  if(!G.tutAsked&&!G.tutDone&&G.yr===1&&!G.sched.some(g=>g.result&&g.type==='regular')&&!window._gdAutoSim&&!pcAuto()){tutOffer(true);return;}
   const oppTeam=getS(game.oppId);
   const myTeam=myS();
   const label=oppTeam?`Week ${game.wk}: vs ${oppTeam.name} ${oppTeam.mascot}`:`Week ${game.wk}`;

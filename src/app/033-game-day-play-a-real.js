@@ -65,6 +65,8 @@ function gdTeam(s,kind,kitOv,opt){
     let k=0;while(need()>0){let n=pos==='OL'?60+k:pos==='DL'?90+k:pos==='LB'?45+k:pos==='TE'?85+k:20+k;while(used.has(n))n++;used.add(n);
       const w=gdPlayer({id:null,pos,rat:Math.round(avg-8),fn:GD_WALKON[k%GD_WALKON.length],ln:'(walk-on)',num:n,fs:(s.id*31+k)},roster.length);w.mid=null;roster.push(w);cnt[pos]=(cnt[pos]||0)+1;k++;}
   }
+  // your depth chart's starters start on Game Day too (your own career player follows his playing time instead)
+  if(isMe&&!scout)try{const n={};for(const p of getStarters(G.myId)){const i=n[p.pos]=(n[p.pos]||0)+1;if(p.id===_gdPc)continue;const q=roster.find(x=>x.mid===p.id&&x.pos===p.pos);if(q)q.dep=i-1;}}catch(e){}
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
   for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}if(q.eb&&q.eb!=='none'){q.eq=q.eq||{};q.eq.eb=q.eb;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);
@@ -82,6 +84,11 @@ let _gdCtx=null;
 function gdChoose(kind,info,simFn){
   if(ccOn()){notify('Your player is in college now: the high school season plays out in the background.','w');return;}
   const opp=info.opp,me=myS();if(!opp||window._gdAutoSim){simFn();return;}
+  const pa=pcAuto();
+  if(pa){ // Player Career: the staff runs practice and picks the uniform; a game your player can't play in is simulated
+    if(kind==='reg'||kind==='po')try{if(pracAvailable())pracSimRows();}catch(e){console.error('practice',e);}
+    const pp=pcActive();if(!pp||pp.inj>0){simFn();return;}
+    let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else if(kind==='po')hi=(G.wins||0)>=(opp.wins||0)?0:1;window._gdUni=hi?'away':'home';}
   window._gdSim=simFn;window._gdInfo={kind,info};
   openMo(`<div style="text-align:center;padding:6px 4px 2px">
     <div style="font-size:13px;color:var(--mu);margin-bottom:10px">${info.label||''}</div>
@@ -91,14 +98,14 @@ function gdChoose(kind,info,simFn){
       <div style="text-align:center">${sLogo(opp,64)}<div style="font-weight:800;margin-top:4px">${opp.mascot}</div></div></div>
     ${(()=>{let hi=0;if(kind==='reg'){const gm=G.sched[info.idx];hi=gm&&((gm.wk+G.myId)%2===1)?1:0;}else hi=(G.wins||0)>=(opp.wins||0)?0:1;const H=hi?opp:me,si=stadInfo(stadOf(H));if(kind==='nat')return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">Neutral site · ${(G.natl&&G.natl.venue)||'National Championship'}</div>`;if(kind==='po'&&info.slot&&poRoundName(info.slot.playoffRound)==='State Final')return`<div style="font-size:12px;color:var(--gd);font-weight:800;margin:-6px 0 12px">State Final · neutral site · ${stateFinalVenue()}</div>`;if(kind==='reg'&&G.sched[info.idx]&&G.sched[info.idx].isRivalry)return rivalryWeekHtml(opp)+`<div style="height:8px"></div>`;return`<div style="font-size:12px;color:var(--mu);margin:-6px 0 12px">${hi?'Away':'Home'} game · ${si.name} (tier ${si.tier})</div>`;})()}
     ${(()=>{const w=gdWxFor(kind,info);return w?`<div class="gd-wx">${wxIcon(w,22)}<div><b>${wxLine(w)}</b><div>${wxEffects(w)}</div></div></div>`:'';})()}
-    <div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">Your uniform</div>
+    ${pa?'':`<div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">Your uniform</div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">${[['home','Home'],['away','Away'],['alt','Alternate']].map(([k,l])=>`<button class="gd-uni${(window._gdUni||'home')===k?' on':''}" data-k="${k}" onclick="gdPickUni('${k}')">${uniSvg(uniOf(me,k),(myP()[0]||{}).num,54)}<span>${l}</span></button>`).join('')}</div>
     <div style="font-size:12px;font-weight:800;color:var(--mu);margin-bottom:6px">How do you want to play?</div>
-    <div class="gd-modes" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">${[['all','Full game','You play every snap'],['coach','Coach mode','You call plays, the team runs them'],['off','Offense only','Defense drives are simmed'],['def','Defense only','Offense drives are simmed']].map(([k,l,d])=>`<button class="gd-uni gd-mode${(window._gdMode||'all')===k?' on':''}" data-k="${k}" onclick="window._gdMode='${k}';document.querySelectorAll('.gd-mode').forEach(b=>b.classList.toggle('on',b.dataset.k==='${k}'))" style="padding:8px 12px;min-width:120px"><span style="font-weight:900">${l}</span><small style="display:block;font-size:10px;opacity:.75;font-weight:600">${d}</small></button>`).join('')}</div>
+    <div class="gd-modes" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">${[['all','Full game','You play every snap'],['coach','Coach mode','You call plays, the team runs them'],['off','Offense only','Defense drives are simmed'],['def','Defense only','Offense drives are simmed']].map(([k,l,d])=>`<button class="gd-uni gd-mode${(window._gdMode||'all')===k?' on':''}" data-k="${k}" onclick="window._gdMode='${k}';document.querySelectorAll('.gd-mode').forEach(b=>b.classList.toggle('on',b.dataset.k==='${k}'))" style="padding:8px 12px;min-width:120px"><span style="font-weight:900">${l}</span><small style="display:block;font-size:10px;opacity:.75;font-weight:600">${d}</small></button>`).join('')}</div>`}
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button class="btn bgn" style="min-width:180px;font-size:16px" onclick="clo();gdStart()">Play Game</button>
       <button class="bgh" style="min-width:180px;font-size:16px" onclick="clo();window._gdSim&&window._gdSim()">Simulate</button></div>
-    <div style="font-size:11px;color:var(--mu);margin-top:12px">Play it yourself with your real roster, or let the sim decide.</div></div>`);
+    <div style="font-size:11px;color:var(--mu);margin-top:12px">${pa?'Play it as your player (the coach calls the plays), or let the sim decide.':'Play it yourself with your real roster, or let the sim decide.'}</div></div>`);
 }
 function gdStart(){
   const ctx=window._gdInfo;if(!ctx)return;const opp=ctx.info.opp,me=myS();_gdCtx=ctx;
