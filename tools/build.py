@@ -42,5 +42,8 @@ if __name__=='__main__':
     print('built app/index.html',len(out),'bytes')
     if '--release' in sys.argv:
         os.makedirs(os.path.join(R,'dist'),exist_ok=True)
-        subprocess.run(['node',os.path.join(R,'tools','minify.js'),dst,os.path.join(R,'dist','index.html')],check=True)
+        rel=os.path.join(R,'dist','index.src.html')   # local copies stop working in the release (see 000a-copyright.js)
+        assert out.count('const G27_LOCAL=true;')==1
+        open(rel,'w',encoding='utf-8',newline='').write(out.replace('const G27_LOCAL=true;','const G27_LOCAL=false;'))
+        subprocess.run(['node',os.path.join(R,'tools','minify.js'),rel,os.path.join(R,'dist','index.html')],check=True);os.remove(rel)
         shutil.copy(os.path.join(R,'sw.js'),os.path.join(R,'dist','sw.js'))

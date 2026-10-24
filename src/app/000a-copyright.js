@@ -6,10 +6,13 @@ const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
 const G27_HOME='https://gridiron27.neocities.org';   // the official address shown on that screen
-function g27Official(h){h=(h||'').toLowerCase();if(!G27_HOSTS.length||!h||h==='localhost'||h==='127.0.0.1')return true;
+// local copies (a file on disk, localhost) only run in development builds; the release build sets this to false, so
+// a downloaded copy wrapped in a desktop app (Electron, NW.js, a Steam upload) shows the unofficial screen too
+const G27_LOCAL=true;
+function g27Official(h){h=(h||'').toLowerCase();if(!G27_HOSTS.length)return true;if(!h||h==='localhost'||h==='127.0.0.1')return G27_LOCAL;
   return G27_HOSTS.some(x=>h===x||h.endsWith('.'+x));}
 (function(){
-  let ok=location.protocol==='file:'||g27Official(location.hostname);
+  let ok=location.protocol==='file:'?G27_LOCAL||!G27_HOSTS.length:g27Official(location.hostname);
   // framed by another site: the parent has to be official too
   if(ok&&G27_HOSTS.length&&window.top!==window.self){let p='';try{p=window.top.location.hostname;}catch(e){try{p=(location.ancestorOrigins&&location.ancestorOrigins[0])||document.referrer;p=new URL(p).hostname;}catch(_){p='?';}}ok=g27Official(p);}
   try{document.documentElement.setAttribute('data-g27',G27_COPY.mark);document.documentElement.setAttribute('data-owner',G27_COPY.owner);
