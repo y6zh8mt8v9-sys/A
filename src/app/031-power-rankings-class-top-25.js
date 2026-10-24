@@ -190,7 +190,7 @@ function _fileSave(name,data){
 // teams only: every school of every classification (names, mascots, colors, logos, schemes) plus the colleges and pro teams,
 // as a team pack that Team Builder imports into a new career. No players, records or progress.
 function saveTeamsPack(GG,from){const T=t=>{const o={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,tier:t.tier,offS:t.offS,defS:t.defS};
-    for(const k of['c3','logoKey','mash','customLogo'])if(t[k])o[k]=t[k];return o;};
+    for(const k of['c3','logoKey','mash','customLogo','uni'])if(t[k])o[k]=t[k];return o;};
   const L={};const add=(c,divs)=>{if(!divs||L[c])return;L[c]={divisions:divs.map(d=>({name:d.name,teams:(d.teams||[]).filter(t=>t&&!t.intl).map(T)}))};};
   if(GG.cls&&GG.divisions)add(GG.cls,GG.divisions);for(const c in(GG.allLeagues||{}))add(c,GG.allLeagues[c]&&GG.allLeagues[c].divisions);
   const W=GG.world||{};return{type:'gridiron_team_pack',v:3,app:'Gridiron 27',from:from||'',cls:GG.cls,exportDate:new Date().toISOString().slice(0,10),allClassifications:L,
