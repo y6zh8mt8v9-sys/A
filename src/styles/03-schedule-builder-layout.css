@@ -1,0 +1,17 @@
+/* ════ Schedule builder layout ════ */
+div[style*="gap:16px;height:72vh"]{height:min(72vh,680px)!important;height:min(70dvh,680px)!important;}
+@media (max-width:900px),(max-height:700px){
+ div[style*="gap:16px;height:72vh"]{flex-direction:column!important;height:auto!important;min-height:0!important;}
+ div[style*="width:260px;flex-shrink:0;display:flex;flex-direction:column"]{width:100%!important;}
+ div[style*="width:260px;flex-shrink:0;display:flex;flex-direction:column"]>div[style*="flex:1;overflow-y:auto"]{max-height:240px;flex:none!important;}
+ div[style*="width:260px;flex-shrink:0;display:flex;flex-direction:column"]>button.btn{position:sticky;bottom:0;z-index:3;box-shadow:0 -6px 16px rgba(0,0,0,.35),0 4px 12px rgba(0,60,110,.35)!important;}
+ div[style*="flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden"]{overflow:visible!important;}
+ div[style*="flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden"]>div[style*="flex:1;overflow-y:auto"]{max-height:55vh;max-height:55dvh;flex:none!important;-webkit-overflow-scrolling:touch;}
+}
+/* overlays must sit above the setup screen (z 500) but below coach creator / title / loading */
+#mo{z-index:610!important;}
+#pu{z-index:620!important;}
+#settings-modal{z-index:630!important;}
+#tut-overlay{z-index:640!important;}
+#offer-popup{z-index:650!important;}
+#team-builder{z-index:660!important;overflow-y:auto;-webkit-overflow-scrolling:touch;}

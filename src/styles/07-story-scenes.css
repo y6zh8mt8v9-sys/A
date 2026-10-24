@@ -1,0 +1,32 @@
+/* ════════ Career story scenes: a cutscene card inside the modal (tokens from 06-design.css) ════════ */
+.st-scene{display:flex;flex-direction:column;gap:12px;max-width:620px;margin:0 auto}
+.st-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px;padding-right:36px;background:var(--yardline);background-position:bottom;padding-top:0}
+.st-place{font:600 12px/1.3 var(--font);color:var(--gd)}
+.st-step{font:600 12px/1 var(--font);color:var(--mu);white-space:nowrap}
+html body #mb h2.st-title{margin:0;font-size:26px;line-height:1.05;color:var(--tx)}
+.st-cast{display:flex;flex-wrap:wrap;gap:10px 18px}
+.st-who{display:flex;align-items:center;gap:10px;min-width:0}
+.st-who svg{flex:none;border-radius:var(--rad);background:var(--s2)}
+.st-nm{font:800 18px/1.1 var(--hd);color:var(--tx)}
+.st-role{font-size:12px;color:var(--mu)}
+.st-lines{display:flex;flex-direction:column;gap:8px}
+.st-line{margin:0;padding:10px 12px;background:var(--s2);border-left:3px solid var(--ac);border-radius:0 var(--rad) var(--rad) 0;font-size:15px;line-height:1.45;color:var(--tx)}
+.st-line b{display:block;font:700 12px/1.2 var(--font);color:var(--mu);margin-bottom:2px}
+.st-reply{margin:0;font-size:14px;line-height:1.45;color:var(--mu);font-style:italic}
+.st-reply b{color:var(--gd);font-style:normal}
+.st-ch{display:flex;flex-direction:column;gap:8px}
+html body .st-ch .st-c{width:100%;min-height:44px;text-align:left;padding:11px 14px!important;font-size:14px!important;line-height:1.3!important}
+.st-foot{display:flex;justify-content:flex-end}
+html body .st-skip{color:var(--mu)!important;border-color:var(--bd)!important}
+.st-fx{display:flex;flex-wrap:wrap;gap:6px}
+.st-fx span{font:700 13px/1 var(--font);padding:7px 10px;border-radius:var(--rad);background:var(--s2);border:1px solid var(--bd)}
+.st-fx span.up{color:var(--gn)}.st-fx span.dn{color:var(--rd)}
+.st-cmb{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.st-cmb span{padding:8px 10px;background:var(--board,var(--s2));border:1px solid var(--bd);border-radius:var(--rad);font-size:12px;color:var(--mu)}
+.st-cmb b{display:block;font:800 20px/1.1 var(--hd);color:var(--gd)}
+.st-vcard .pb{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.st-vc-h{font:800 18px/1.1 var(--hd);color:var(--tx)}.st-vc-s{font-size:12px;color:var(--mu)}
+.st-vlist{display:flex;flex-direction:column;gap:6px}
+html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%;text-align:left;padding:8px 12px!important;min-height:48px}
+.st-vrow span{display:flex;flex-direction:column;min-width:0}.st-vrow small{color:var(--mu);font-weight:500}
+@media (max-width:520px){html body #mb h2.st-title{font-size:22px}.st-line{font-size:14px}.st-who svg{width:56px;height:56px}}
