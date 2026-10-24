@@ -23174,6 +23174,8 @@ function catchMeterTap(){
 }
 const CATCH_NAME={slide:'Sliding catch!',obj:'ONE-HANDED CATCH OF THE YEAR!',moss:'Mossed him!',toetap:'Toe-tap catch!',onedive:'One-handed diving grab!',trafL:'Caught in traffic!',trafR:'Caught in traffic!',safe:'Secured it!',hands:'Caught it!',shoulder:'Over the shoulder!',onehand:'One-handed grab!',high:'High-point catch!',low:'Shoestring catch!',poss:'Tough catch in traffic!',dive:'Diving catch!'};
 const CATCH_DUR={slide:.65,obj:.85,moss:.7,toetap:.7,onedive:.6,trafL:.5,trafR:.5,safe:.45,hands:.32,shoulder:.42,onehand:.45,high:.62,low:.45,poss:.5,dive:.55};
+// the showy versions of a catch are harder than the plain one they come from
+const CATCH_DIFF={safe:0.02,toetap:-0.08,moss:-0.1,onedive:-0.15};
 function gpCatchVariant(t,r,b,a,dd,dn){
   if(t==='low'&&b.h<0.65)return'slide';
   if((t==='onehand'&&b.h>1.4&&Math.random()<0.03)||(t==='high'&&dn<1.6&&Math.random()<0.006))return'obj';
@@ -23298,7 +23300,11 @@ function airStep(dt){
     a.tried.add(r);
     if(!type){const rs=Math.hypot(r.vx,r.vy),along=(r.vx*a.dx+r.vy*a.dy)/(rs||1);
       type=contested?'poss':rs>2.5&&along>0.6&&a.D>15?'shoulder':dd>1.1?'onehand':'hands';}
-    let p={hands:.95,shoulder:.91,onehand:.78,high:.82,low:.87,poss:.72,dive:.73}[type]-(contested&&type!=='poss'?0.14:0)+(((contested&&r.pl.cit)?r.pl.cit:r.pl.hands)-80)*0.003+sla(r.team,'cat',0.12);
+    // catch rates by style, near real ones: routine balls are caught, over-the-shoulder and low balls most of the time,
+    // one-handed, diving and contested grabs about half the time; good hands matter most on the hard ones
+    const hard=type==='onehand'||type==='dive'||type==='high'||type==='poss';
+    let p={hands:.95,shoulder:.86,onehand:.62,high:.74,low:.82,poss:.62,dive:.58}[type]-(contested&&type!=='poss'?0.14:0)+(((contested&&r.pl.cit)?r.pl.cit:r.pl.hands)-80)*(hard?0.0048:0.003)+sla(r.team,'cat',0.12);
+    if(type==='onehand'||type==='dive')p-=clamp((dd-1.1)*0.1,0,0.12); // the farther off target, the harder
     // v2.15 jump balls and contested catches: the better player (hands vs coverage, overall, height) usually wins
     if(contested||type==='high'){let cd=null,ck=1.6;for(const d of G.ents)if(d.side==='d'&&!d.down){const k=Math.hypot(d.x-r.x,d.y-r.y);if(k<ck){ck=k;cd=d;}}
       if(cd&&cd.pl&&r.pl){const rq=0.5*(r.pl.cit||r.pl.hands||70)+0.3*(r.pl.ovr||70)+0.2*(r.pl.jmp?(r.pl.str+r.pl.jmp)/2:(r.pl.str||60)),dq=0.5*(cd.pl.cov||65)+0.3*(cd.pl.ovr||70)+0.2*(cd.pl.awr||70);
@@ -23318,6 +23324,8 @@ function airStep(dt){
     type=_gc||gpCatchVariant(type,r,b,a,dd,dn);
     p+=gpCatchMod(r,type)-gpDropForm(r);if(isAI(r.team)||G.test)p-=0.05;
     if(type==='slide')p=Math.min(p,0.62)-0.08;
+    else if(type==='obj')p*=0.45;
+    else p+=CATCH_DIFF[type]||0;
     p-=WX.drop;
     if(_gc)p=1.01;
     if(Math.random()<p){catchBall(r,type,b);return;}
