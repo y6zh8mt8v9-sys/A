@@ -126,7 +126,8 @@ function pccRender(part){
   const look=()=>{const L=d.look,sw=(k,arr,cur)=>arr.map((c,i)=>{const v=k==='ti'?i:c;return`<button class="cc-sw${String(cur)===String(v)?' on':''}" style="background:${c}" onclick="pccLook('${k}','${v}')" aria-label="${c}"></button>`;}).join('');
     return`<div class="cc-lbl">Skin tone</div><div class="cc-sws">${sw('ti',FACE_SKIN,L.ti)}</div>
      <div class="cc-row2"><label>Hairstyle<select onchange="pccLook('hs',this.value)"><option value="">Random</option>${CC_HAIR.map(([v,l])=>`<option value="${v}"${String(L.hs)===String(v)?' selected':''}>${l}</option>`).join('')}</select></label>
-     <label>Facial hair<select onchange="pccLook('fh',this.value)"><option value="">Random</option>${CC_FH.map(([v,l])=>`<option value="${v}"${L.fh===v?' selected':''}>${l}</option>`).join('')}</select></label></div>
+     <label>Facial hair<select onchange="pccLook('fh',this.value)"><option value="">Random</option>${CC_FH.map(([v,l])=>`<option value="${v}"${L.fh===v?' selected':''}>${l}</option>`).join('')}</select></label>
+     <label>Eye black<select onchange="pccLook('eb',this.value)"><option value="">Random</option>${CC_EB.map(([v,l])=>`<option value="${v}"${L.eb===v?' selected':''}>${l}</option>`).join('')}</select></label></div>
      <div class="cc-lbl">Hair color</div><div class="cc-sws">${sw('hc',CC_HC,L.hc)}</div>
      <div class="cc-lbl">Eye color</div><div class="cc-sws">${sw('eye',CC_EYE,L.eye)}</div>
      <div class="cc-segs" style="margin-top:8px"><button class="cc-seg" onclick="_pcd.fs=Math.floor(Math.random()*1e9);_pcd.look={};pccRender('look')">Randomize look</button></div>`;};
