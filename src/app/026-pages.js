@@ -12,25 +12,25 @@ function pgDash(){
   let actionBtn='';
   const hasEmptySlots=G.sched.some(g=>g.custom&&g._empty);
   if(hasEmptySlots){
-    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="openScheduleBuilder()">Build Your Schedule</button>`;
+    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="openScheduleBuilder()">Build your schedule</button>`;
   } else if(G.phase==='offseason'&&no&&nextUnplayed&&nextUnplayed.type==='regular'){
     // a new season that has not started yet: the next step is week 1, not the offseason
-    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">Play Week ${nextUnplayed.wk}</button>`;
+    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">Play week ${nextUnplayed.wk}</button>`;
   } else if(G.phase==='offseason'){
-    actionBtn=`<button class="btn bgn" style="padding:8px 18px;font-size:14px" onclick="doOffseason()">Begin Offseason</button>`;
+    actionBtn=`<button class="btn bgn" style="padding:8px 18px;font-size:14px" onclick="doOffseason()">Begin offseason</button>`;
   } else if(G.phase==='regular'&&no){
-    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">Play Week ${nextUnplayed.wk}</button>`;
+    actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">Play week ${nextUnplayed.wk}</button>`;
   } else if((G.phase==='regular'||G.phase==='playoffs')&&regDone&&!playoffSlot&&!G.playoff){
-    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="startPlayoffs()">State Playoffs</button>`;
+    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="startPlayoffs()">State playoffs</button>`;
   } else if(G.phase==='playoffs'&&playoffSlot&&playoffOpp){
     const _prn=poRoundName(playoffSlot.playoffRound)||`Round ${playoffSlot.playoffRound}`;
     actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="advPlayoffWeek()">${_prn}</button>`;
   } else if(G.phase==='postseason'){
     try{natEnsure();}catch(e){console.error('natl',e);}
-    actionBtn=natMine()?`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="natPlay()">National Championship</button>`
-      :`<button class="btn bgn" style="padding:8px 18px;font-size:14px" onclick="doOffseason()">Begin Offseason</button>`;
+    actionBtn=natMine()?`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="natPlay()">National championship</button>`
+      :`<button class="btn bgn" style="padding:8px 18px;font-size:14px" onclick="doOffseason()">Begin offseason</button>`;
   } else if(regDone&&!G.playoff&&G.phase!=='postseason'){
-    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="startPlayoffs()">State Playoffs</button>`;
+    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="startPlayoffs()">State playoffs</button>`;
   }
 
   const phaseLabel={offseason:'Offseason',regular:`Week ${G.week||0}`,playoffs:'Playoffs',postseason:'Postseason'}[G.phase]||G.phase;

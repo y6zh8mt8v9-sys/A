@@ -184,7 +184,11 @@ function sLogo(s,sz=28){
 function fmtDate(idx){if(!GAME_DATES[idx])return'';const d=GAME_DATES[idx];const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${mn[d.getMonth()]} ${d.getDate()}`;}
 
 function _fmx(a,b,t){const h=c=>{c=c.replace('#','');if(c.length===3)c=c.split('').map(x=>x+x).join('');return[0,2,4].map(i=>parseInt(c.substr(i,2),16));};const A=h(a),B=h(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');}
-function _faceTeam(seed){try{if(typeof G==='undefined'||!G||!G.players)return null;let p=G.players.find(x=>x.fs===seed);if(!p)p=(G.hofArchive||[]).find(x=>x.fs===seed)||(G.wlArchive||[]).find(x=>x.fs===seed);if(!p)return null;const s=getS(p.sId);return s&&/^#[0-9a-f]{3,6}$/i.test(s.c1||'')&&/^#[0-9a-f]{3,6}$/i.test(s.c2||'')?{c1:s.c1,c2:s.c2}:null;}catch(e){return null;}}
+// face seed -> player, rebuilt when the player list changes (a page of faces no longer scans every player per face)
+let _fsIx=null;
+function _fsFind(seed){const A=G.players;if(!_fsIx||_fsIx.a!==A||_fsIx.n!==A.length){const m=new Map();for(const q of A)if(!m.has(q.fs))m.set(q.fs,q);_fsIx={a:A,n:A.length,m};}
+  const p=_fsIx.m.get(seed);return p&&p.fs===seed?p:A.find(x=>x.fs===seed);}
+function _faceTeam(seed){try{if(typeof G==='undefined'||!G||!G.players)return null;let p=_fsFind(seed);if(!p)p=(G.hofArchive||[]).find(x=>x.fs===seed)||(G.wlArchive||[]).find(x=>x.fs===seed);if(!p)return null;const s=getS(p.sId);return s&&/^#[0-9a-f]{3,6}$/i.test(s.c1||'')&&/^#[0-9a-f]{3,6}$/i.test(s.c2||'')?{c1:s.c1,c2:s.c2}:null;}catch(e){return null;}}
 const FACE_SKIN=['#f3d2b8','#ebbf9e','#ddab85','#c99069','#b0774f','#93603d','#74482c','#56331f'];
 // v2.15: a player edited in Edit Player carries p.look; G.looks maps his face seed to it so every face() call shows it
 function lookOf(seed){if(window._lkRaw)return null;try{const a=typeof G!=='undefined'&&G&&G.looks&&G.looks[seed];if(a)return a;

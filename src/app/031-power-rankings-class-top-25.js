@@ -1,9 +1,12 @@
 // ═══════════ POWER RANKINGS (class Top 25 + All-State Top 25) ═══════════
 let _RK=null;
 function rkKey(all){let g=0;for(const s of all)g+=(s.wins||0)+(s.losses||0);return G.yr+'|'+g+'|'+all.length;}
+// the school list is rebuilt once per task (a page render asks for hundreds of badges), the key still checks every result
+let _rkAll=null;
+function rkAll(){if(_rkAll&&_rkAll.G===G)return _rkAll.a;const a=allSchoolsAll().filter(s=>isUSSchool(s));_rkAll={G,a};setTimeout(()=>{_rkAll=null;},0);return a;}
 function rkCompute(){
   if(typeof G==='undefined'||!G||!G.divisions)return null;
-  const all=allSchoolsAll().filter(s=>isUSSchool(s)),key=rkKey(all);
+  const all=rkAll(),key=rkKey(all);
   if(_RK&&_RK.key===key&&_RK.G===G)return _RK;
   if(_RK&&_RK.G===G&&_RK.key!==key)G.rkPrev={c:_RK.cMap,a:_RK.aMap,n:_RK.nMap,yr:_RK.yr};
   if(G.rkPrev&&G.rkPrev.yr!==G.yr)G.rkPrev=null;

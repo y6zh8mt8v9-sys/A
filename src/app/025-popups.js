@@ -91,7 +91,8 @@ function navSync(page){
     const h=document.getElementById('np-home');if(h)h.classList.toggle('dot',vis('news-badge'));const pg=document.getElementById('np-program');if(pg)pg.classList.toggle('dot',vis('adv-badge')&&!pcHidePg('advisor'));
     {const c=gdsMain().cnav!==false;document.body.classList.toggle('cnav',c);document.body.classList.toggle('cnav-dash',c&&page==='dash');
      const T=cnavTodo();document.querySelectorAll('#nav-bar .nb[id^="nb-"]').forEach(b=>{const k=b.id.slice(3);b.classList.toggle('todo',!!T[k]&&k!=='news');});}
-    const on=document.querySelector('#nav-bar .nb.on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'});}catch(e){}
+    // after the frame's layout, so a page change lays out once instead of forcing it here
+    requestAnimationFrame(()=>{try{const on=document.querySelector('#nav-bar .nb.on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'});}catch(e){}});}catch(e){}
 }
 // ── tile dashboard (compact menu): a club bar with Continue, a status strip, then tiles that open their page ──
 function dtOD(sid){const t=getS(sid);if(t&&t.lite){const v=t.str||50;return[v,v,v];}
@@ -101,12 +102,15 @@ function dtOD(sid){const t=getS(sid);if(t&&t.lite){const v=t.str||50;return[v,v,
 function dtChips(r){return`<div class="dt-chips"><span>OFF: <b>${r[0]}</b></span><span>DEF: <b>${r[1]}</b></span><span>OVR: <b>${r[2]}</b></span></div>`;}
 function dtTile(title,go,body,cls){return`<div class="dt${cls?' '+cls:''}" role="button" tabindex="0" onclick="${go}"><div class="dt-h"><span>${title}</span><svg viewBox="0 0 24 24"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></div><div class="dt-b">${body}</div></div>`;}
 window.dtMenu=function(){openMo(`<h2>Menu</h2>${cnavHub(true)}<div style="text-align:right"><button class="bgh" onclick="clo()">Close</button></div>`);};
+// two teams side by side in their own colors, meeting at a slanted seam
+function vsStrip(a,b,subA,subB){const h=(s,sub,i)=>{const c=_hx(s.c1)?s.c1:'#33415c';return`<div class="vs-h${i?' vs-b':''}" style="background:${c};color:${_lm(c)>.55?'#0f241a':'#fff'}">${sLogo(s,44)}<div><b>${s.mascot}</b><small>${sub}</small></div></div>`;};
+  return`<div class="vs">${h(a,subA,0)}<span class="vs-x">vs</span>${h(b,subB,1)}</div>`;}
 function dashTiles(o){
   const{ms,pl,nextUnplayed,no,playoffSlot,playoffOpp,actionBtn,curYear,phaseLabel,newsItems}=o,T=cnavTodo(),dot=k=>T[k]?'<i class="dt-dot"></i>':'';
   const opp=no||playoffOpp,ng=no?nextUnplayed:playoffOpp?playoffSlot:null;
   // next game
   let nb;if(opp){const r=dtOD(opp.id),lbl=no?(ng.isRivalry?'Rivalry week':'Week '+ng.wk)+(ng.date?' · '+ng.date:''):(poRoundName(ng.playoffRound)||ng.label||'Playoffs');
-    nb=`<div class="dt-ng"><div style="min-width:0"><div class="dt-sub">${lbl}</div><div class="dt-big">${opp.name} ${opp.mascot}</div><div class="dt-sub">${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}</div>${no&&ng.isRivalry?rivalryWeekHtml(opp):''}${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div></div><div class="dt-logo">${sLogo(opp,96)}</div></div>`;}
+    nb=`<div class="dt-sub">${lbl}</div>${vsStrip(ms,opp,`${G.wins}-${G.losses}`,`${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}`)}<div class="dt-big">${opp.name} ${opp.mascot}</div>${no&&ng.isRivalry?rivalryWeekHtml(opp):''}${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div>`;}
   else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)&&!pcAuto()?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
   const tNext=dtTile('Next game',opp?`viewSchool(${opp.id})`:`nav('sched')`,nb,'dt-tall');
   // schedule
