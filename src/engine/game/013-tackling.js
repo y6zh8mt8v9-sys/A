@@ -47,15 +47,21 @@ function resolveTackle(f,c,type){
 // form tackle: short reach, the surest way down, little gained after contact
 // hit stick: launches through the runner, knocks him back and can jar the ball loose; whiffs and bounces off more often
 // ankle bite: a long dive at the legs, the farthest reach and good against fast runners, but it often only trips him up
-const UTK={form:{reach:2.1,v:6.7,r:0.85,dur:0.42},stick:{reach:2.6,v:7.6,r:0.85,dur:0.42},bite:{reach:3.7,v:7.3,r:1.05,dur:0.56}};
+const UTK={form:{reach:2.1,v:6.7,r:0.85,dur:0.42},stick:{reach:2.6,v:7.6,r:0.85,dur:0.42},bite:{reach:3.7,v:7.6,r:1.05,dur:0.6}};
 function gpTkReach(u,k){const p=u.pl,b=((p.spd||75)-75)*0.012+((p.tkl||70)-75)*0.006;return k?UTK[k].reach+b*(k==='bite'?1.4:1):4.2+b;}
 // launch at where the runner will be: a long dive takes longer to get there
 function gpUserLunge(u,c,k,dd){
   u.tkL=dd;u.tkSpr=gpSprintOn();u.tkBuf=null;
-  if(!k){if(dd<2.8)startLunge(u,c,chooseTackle(u,c));else{startLunge(u,c,'dive');u.lunge=u.lungeDur=clamp(dd/6.6,0.3,0.62);}return;}
-  u.lt=k;u.lunge=u.lungeDur=clamp((dd+0.4)/UTK[k].v,0.24,UTK[k].dur);u.dir=Math.sign((c.y-u.y)*(G.flip?-1:1))||u.dir;
+  const cs=Math.hypot(c.vx,c.vy);
+  if(!k){if(dd<2.8)startLunge(u,c,chooseTackle(u,c));else{startLunge(u,c,'dive');const s=Math.max(6.8,cs+1);u.lunge=u.lungeDur=clamp(gpIntercept(u,c,s,0.62)-0.05,0.3,0.62);}return;}
+  const K=UTK[k],s=Math.max(K.v*(u.tkSpr?1.05:1),cs+(k==='bite'?1.8:0.8));
+  u.lt=k;u.lunge=u.lungeDur=clamp(gpIntercept(u,c,s,K.dur)-K.r/s+0.1,0.24,K.dur);u.dir=Math.sign((c.y-u.y)*(G.flip?-1:1))||u.dir;
   if(k==='stick')dust(u.x,u.y,3);
 }
+// when a man launched at speed s meets the runner (capped at what is left of the dive)
+function gpIntercept(e,c,s,T){const rx=c.x-e.x,ry=c.y-e.y,a=c.vx*c.vx+c.vy*c.vy-s*s,b=2*(rx*c.vx+ry*c.vy),q=rx*rx+ry*ry;
+  let t=T;if(Math.abs(a)<1e-6)t=b<0?-q/b:T;else{const D=b*b-4*a*q;if(D>=0){const r1=(-b-Math.sqrt(D))/(2*a),r2=(-b+Math.sqrt(D))/(2*a),m=[r1,r2].filter(x=>x>0);if(m.length)t=Math.min(...m);}}
+  return clamp(t,0,T);}
 // a press while the runner is out of reach (or while shedding a block) waits a moment and fires once he comes into range
 function gpTkBufStep(){
   const u=G.uctl,c=G.carrier,B=u&&u.tkBuf;if(!B)return;
@@ -273,7 +279,8 @@ function updateLive(dt){
     if(e.down||e.hurt||(G.seq&&G.seq.fs.includes(e))){accel(e,0,0,dt,40);continue;}
     if(e.lunge>0&&c){
       e.lunge-=dt;if(e.lt==='jump')e.jz=Math.max(0,Math.sin(Math.PI*clamp(1-e.lunge/(e.lungeDur||0.26),0,1))*0.9);
-      const K=UTK[e.lt],ld=K||e.tkL>2.8?Math.min(0.3,e.lunge):0,dx=c.x+c.vx*ld-e.x,dy=c.y+c.vy*ld-e.y,l=Math.hypot(dx,dy)||1,s=K?K.v*(e.tkSpr?1.05:1):e.lt==='hit'?7:6.6;e.vx=dx/l*s;e.vy=dy/l*s;
+      const K=UTK[e.lt],aim=K||e.tkL>2.8,cs=Math.hypot(c.vx,c.vy),s=K?Math.max(K.v*(e.tkSpr?1.05:1),cs+(e.lt==='bite'?1.8:0.8)):e.tkL>2.8?Math.max(6.8,cs+1):e.lt==='hit'?7:6.6;
+      const ld=aim?gpIntercept(e,c,s,0.6):0,dx=c.x+c.vx*ld-e.x,dy=c.y+c.vy*ld-e.y,l=Math.hypot(dx,dy)||1;e.vx=dx/l*s;e.vy=dy/l*s;
       if(e.lunge<=0){if(e.lt==='form'){e.stun=0.35;e.vx*=0.4;e.vy*=0.4;}else{e.down=true;e.downT=e.lt==='bite'?0.9:0.8;e.downAnim='tackle_dive';dust(e.x,e.y,4);}e.tkL=0;}
       continue;
     }

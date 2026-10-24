@@ -129,7 +129,7 @@ function userTackle(k){
   if(SEVENS()){if(dist(u,c)<1.5&&G.phase==='live'&&G.ballState==='carrier'){flash('Two-hand touch');endPlay({type:'tackle',spot:c.y});}return;} // 7v7: reach out and touch, no dives
   const dd=dist(u,c);
   if(dd<=gpTkReach(u,k)&&!(u.stun>0)&&!(u.eng>0))gpUserLunge(u,c,k,dd);
-  else u.tkBuf={k,t:G.t+0.45};
+  else u.tkBuf={k,t:G.t+0.6};
 }
 // v2.17 defense controls: the tackle wheel (or a row of buttons), a hold-to-sprint button and Switch
 const DEF_HINT='Drag anywhere to move your player, hold Sprint to close in. Form tackle is the sure one, Hit stick can knock the ball loose, Ankle bite reaches farthest. Tackle picks for you.';
