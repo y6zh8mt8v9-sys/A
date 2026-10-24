@@ -33,9 +33,10 @@ const GDS=(()=>{let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')
 try{camSet(GDS.cam);}catch(e){}
 function gdsSave(){try{localStorage.setItem('gpgm_gd',JSON.stringify(GDS));}catch(e){}}
 // which way the offense attacks on screen: always right (default), always left, or real (teams switch ends every quarter)
+// right: does team 0 attack to the right? Team 1 always goes the other way, so a punt or kick flies the way its team was driving
 function gpFlipFor(off){
   let right=true;
-  if(!ON&&!DEMO){if(GDS.dir==='left')right=false;else if(GDS.dir==='real'){const q=typeof G!=='undefined'&&G.q?G.q:1;right=(q>4||q===1||q===3)?off===0:off!==0;}}
+  if(!ON&&!DEMO){if(GDS.dir==='left')right=false;else if(GDS.dir==='real'){const q=typeof G!=='undefined'&&G.q?G.q:1;right=q>4||q===1||q===3;}}
   return(off===1)===right;
 }
 let SC=1,DPR=1;
