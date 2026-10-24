@@ -75,7 +75,7 @@ function wsRender(){
       <div style="font-size:12px;color:var(--mu);margin-bottom:6px">Teams and divisions in each classification (more teams make a bigger league; at least 4 teams per division).</div>
       <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:150px;font-size:12px;font-weight:800">${clsName(c)}</span><label style="font-size:12px">Teams <input id="ws-t-${c}" type="number" min="8" max="160" value="${sz(c).t}" style="width:76px"></label><label style="font-size:12px">Divisions <input id="ws-d-${c}" type="number" min="1" max="16" value="${sz(c).d}" style="width:64px"></label></div>`).join('')}</div>
       <div style="font-size:12px;color:var(--mu);margin-bottom:4px">Division names, one per line, in order (smallest classification first). Add lines for new divisions.</div>
-      <textarea id="ws-dn" rows="10" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${names.join('\n')}</textarea>`;
+      <textarea id="ws-dn" rows="10" style="width:100%;font:13px/1.4 Archivo,system-ui,sans-serif">${names.join('\n')}</textarea>`;
   }else if(WS.tab==='map'){body=meBody();
   }else if(WS.tab==='share'){body=shareBody();
   }else if(WS.tab==='colleges'){
@@ -83,14 +83,14 @@ function wsRender(){
     const list=(D.colleges&&D.colleges[WS.lvl]&&D.colleges[WS.lvl].length?D.colleges[WS.lvl]:O.colleges[WS.lvl]);
     body=`<div class="tabs" style="margin-bottom:8px">${lv.map(([k,l])=>`<button class="tab ${WS.lvl===k?'on':''}" onclick="wsGrab();WS.lvl='${k}';wsRender()">${l}</button>`).join('')}</div>
       <div style="font-size:12px;color:var(--mu);margin-bottom:4px">One college per line, strongest program first. Rename, add or remove lines (at least 3). ${list.length} colleges.</div>
-      <textarea id="ws-col" rows="8" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${list.join('\n')}</textarea>
+      <textarea id="ws-col" rows="8" style="width:100%;font:13px/1.4 Archivo,system-ui,sans-serif">${list.join('\n')}</textarea>
       ${WS.colEdit?(()=>{window._wsColEdit=true;window._ceK=WS.colEdit;window._wsRendering=true;const I=colInfo(WS.colEdit);const fh=colFormHtml(I,'setup');window._wsRendering=false;return`<div class="pnl" style="margin-top:10px"><div class="ph">Edit ${I.name}</div><div class="pb">${fh}<div style="text-align:right;margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button class="bgh" onclick="WS.colEdit=null;window._wsColEdit=false;wsRender()">Cancel</button><button class="btn bgn" onclick="wsColSave()">Save college</button></div></div></div>`;})():''}
       <div style="font-size:12px;color:var(--mu);margin:10px 0 4px">Tap a college to change its name, mascot, colors, logo, state and prestige.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:40vh;overflow-y:auto">${(()=>{window._wsRendering=true;const h=list.map(n=>{const k=n+'|'+WS.lvl;return`<button class="bgh" style="display:flex;align-items:center;gap:8px;text-align:left;padding:6px 8px" onclick="wsGrab();WS.colEdit='${k.replace(/'/g,"\\'")}';wsRender()">${colLogo(k,30)}<span style="font-size:12px;line-height:1.2"><b>${n}</b><br><small style="color:var(--mu)">${colInfo(k).mascot}</small></span></button>`;}).join('');window._wsRendering=false;return h;})()}</div>`;
   }else if(WS.tab==='pro'){
     const P=k=>(D.pro&&D.pro[k]&&D.pro[k].length?D.pro[k]:O.pro[k]);
     body=`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">The pro teams your former players can be drafted by or sign with. One team per line, add as many as you like.</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${[['NGL','National Gridiron League (draft)'],['SFL','Spring Football League'],['MGL','Maple Gridiron League']].map(([k,l])=>`<label style="font-size:12px;font-weight:800">${l}<textarea id="ws-pro-${k}" rows="12" style="width:100%;font:13px/1.4 Nunito,system-ui,sans-serif">${P(k).join('\n')}</textarea></label>`).join('')}</div>`;
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${[['NGL','National Gridiron League (draft)'],['SFL','Spring Football League'],['MGL','Maple Gridiron League']].map(([k,l])=>`<label style="font-size:12px;font-weight:800">${l}<textarea id="ws-pro-${k}" rows="12" style="width:100%;font:13px/1.4 Archivo,system-ui,sans-serif">${P(k).join('\n')}</textarea></label>`).join('')}</div>`;
   }else{
     const st=Object.assign({},O.stars,D.stars||{});
     body=`<div style="font-size:12px;color:var(--mu);margin-bottom:8px">How many players nationally earn each star rating per graduating class (the full 13-state country). Smaller countries scale these down.</div>

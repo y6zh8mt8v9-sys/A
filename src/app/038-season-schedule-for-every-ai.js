@@ -138,8 +138,8 @@ function pbSVG(P,opt){
   }
   if(moS)s+=`<polyline points="${PBX(moStart[0]).toFixed(1)},${PBY(-moStart[1]).toFixed(1)} ${PBX(pos[moS][0]).toFixed(1)},${PBY(-pos[moS][1]).toFixed(1)}" fill="none" stroke="#fff" stroke-width="1.1" stroke-dasharray="1.4 1.2"/><circle cx="${PBX(moStart[0]).toFixed(1)}" cy="${PBY(-moStart[1]).toFixed(1)}" r="1.6" fill="#fff" fill-opacity=".45"/>`;
   PB_SLOTS.forEach((k,i)=>{const[x,d]=pos[k],lab=k==='SL'&&isFB(k)?'FB':k;
-    s+=`<g ${ed?`data-k="${k}" style="cursor:grab"`:''}><circle cx="${PBX(x).toFixed(1)}" cy="${PBY(-d).toFixed(1)}" r="${ed?2.5:2.2}" fill="${run?(isFB(k)?'#ffe6a8':'#fff'):PB_COL[i]}" stroke="#0d2a43" stroke-width=".7"/>${ed?`<text x="${PBX(x).toFixed(1)}" y="${(PBY(-d)+1.2).toFixed(1)}" font-size="2.6" font-weight="900" text-anchor="middle" fill="#0d2a43" font-family="Nunito,sans-serif" pointer-events="none">${lab}</text>`:''}</g>`;});
-  s+=`<circle cx="${PBX(CX).toFixed(1)}" cy="${PBY(-qbD).toFixed(1)}" r="${ed?2.5:2.2}" fill="#fff" stroke="#0d2a43" stroke-width=".7"/>${ed?`<text x="${PBX(CX).toFixed(1)}" y="${(PBY(-qbD)+1.2).toFixed(1)}" font-size="2.6" font-weight="900" text-anchor="middle" fill="#0d2a43" font-family="Nunito,sans-serif">QB</text>`:''}</svg>`;
+    s+=`<g ${ed?`data-k="${k}" style="cursor:grab"`:''}><circle cx="${PBX(x).toFixed(1)}" cy="${PBY(-d).toFixed(1)}" r="${ed?2.5:2.2}" fill="${run?(isFB(k)?'#ffe6a8':'#fff'):PB_COL[i]}" stroke="#0d2a43" stroke-width=".7"/>${ed?`<text x="${PBX(x).toFixed(1)}" y="${(PBY(-d)+1.2).toFixed(1)}" font-size="2.6" font-weight="900" text-anchor="middle" fill="#0d2a43" font-family="Archivo,sans-serif" pointer-events="none">${lab}</text>`:''}</g>`;});
+  s+=`<circle cx="${PBX(CX).toFixed(1)}" cy="${PBY(-qbD).toFixed(1)}" r="${ed?2.5:2.2}" fill="#fff" stroke="#0d2a43" stroke-width=".7"/>${ed?`<text x="${PBX(CX).toFixed(1)}" y="${(PBY(-qbD)+1.2).toFixed(1)}" font-size="2.6" font-weight="900" text-anchor="middle" fill="#0d2a43" font-family="Archivo,sans-serif">QB</text>`:''}</svg>`;
   return s;
 }
 function pbDiagram(f,r,w){return pbSVG({kind:'pass',f,r},{w});}

@@ -189,8 +189,8 @@ function gpIntroSkip(){const el=document.getElementById('gpPrev');if(el)el.remov
 function gpShowPreview(){
   if(!GP.previewHtml){gpIntroSkip();return;}
   const ov=document.createElement('div');ov.id='gpPrev';
-  ov.style.cssText='position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;background:rgba(3,14,28,.55);padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch';
-  ov.innerHTML='<div style="margin:auto;width:min(620px,96vw);border-radius:14px;padding:16px 18px 14px;background:rgba(14,26,43,.96);color:#f2f5f7;border:1px solid rgba(214,228,245,.14);border-top:4px solid var(--tA,#2f66c0);box-shadow:0 20px 50px rgba(2,8,18,.5)">'+GP.previewHtml+
+  ov.style.cssText='position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;background:rgba(2,10,6,.6);padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  ov.innerHTML='<div style="margin:auto;width:min(620px,96vw);border-radius:0;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);padding:16px 18px 14px;background:rgba(11,31,22,.96);color:#f2f5f7;border:1px solid rgba(225,240,228,.14);border-top:4px solid var(--tA,#2f66c0);box-shadow:0 20px 50px rgba(0,8,4,.5)">'+GP.previewHtml+
     '<div style="text-align:center;margin-top:12px"><button id="gpPrevGo" style="min-height:46px;padding:0 30px;border-radius:8px;border:0;font:700 16px Barlow,system-ui,sans-serif;color:var(--tOn,#fff);cursor:pointer;background:var(--tA,#2f66c0)">Coin toss<\/button><\/div><\/div>';
   document.body.appendChild(ov);document.getElementById('gpPrevGo').onclick=gpIntroSkip;
 }

@@ -7,7 +7,7 @@ function tutBox(){
   if(TUT.box)return TUT.box;
   const b=document.createElement('div');b.id='tutBox';
   b.style.cssText='position:fixed;right:max(8px,env(safe-area-inset-right));top:max(52px,calc(env(safe-area-inset-top) + 48px));z-index:200;width:min(340px,46vw);max-height:62vh;overflow-y:auto;border-radius:16px;padding:12px 14px;'+
-    'background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.05)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);box-shadow:0 14px 40px rgba(0,0,0,.45);color:#fff;font:600 13px/1.4 Nunito,system-ui,sans-serif';
+    'background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.05)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);box-shadow:0 14px 40px rgba(0,0,0,.45);color:#fff;font:600 13px/1.4 Archivo,system-ui,sans-serif';
   document.body.appendChild(b);TUT.box=b;return b;
 }
 // steps: [title, html, needs a button?]
@@ -15,10 +15,10 @@ const TUT_STEPS=7;
 function tutShow(no,title,html,btn){
   const k=no+'|'+title+'|'+html;if(TUT.last===k)return;TUT.last=k;
   const b=tutBox();
-  b.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font:900 11px Nunito,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#7fd3ff">Coach · step ${no} of ${TUT_STEPS}<\/span>
-    <button id="tutSkip" style="margin-left:auto;background:none;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;font:800 11px Nunito,sans-serif;padding:3px 10px;cursor:pointer">Skip tutorial<\/button><\/div>
-    <div style="font:900 16px Nunito,sans-serif;margin-bottom:4px">${title}<\/div><div>${html}<\/div>
-    ${btn?`<div style="text-align:right;margin-top:10px"><button id="tutGo" style="min-height:38px;padding:0 20px;border-radius:8px;border:1px solid rgba(255,255,255,.5);font:900 14px Nunito,sans-serif;color:#fff;cursor:pointer;background:#2f66c0">${btn}<\/button><\/div>`:''}`;
+  b.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font:900 11px Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#7fd3ff">Coach · step ${no} of ${TUT_STEPS}<\/span>
+    <button id="tutSkip" style="margin-left:auto;background:none;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;font:800 11px Archivo,sans-serif;padding:3px 10px;cursor:pointer">Skip tutorial<\/button><\/div>
+    <div style="font:900 16px Archivo,sans-serif;margin-bottom:4px">${title}<\/div><div>${html}<\/div>
+    ${btn?`<div style="text-align:right;margin-top:10px"><button id="tutGo" style="min-height:38px;padding:0 20px;border-radius:8px;border:1px solid rgba(255,255,255,.5);font:900 14px Archivo,sans-serif;color:#fff;cursor:pointer;background:#2f66c0">${btn}<\/button><\/div>`:''}`;
   const sk=document.getElementById('tutSkip');if(sk)sk.onclick=e=>{e.stopPropagation();tutEnd(false);};
   const go=document.getElementById('tutGo');if(go)go.onclick=e=>{e.stopPropagation();tutNext();};
   b.onpointerdown=e=>e.stopPropagation();
@@ -274,7 +274,7 @@ function gpPassBtnTick(){
   let b=document.getElementById('gpRePass');
   const show=(G.client?olScrambling():gpScrambling()&&!isAI(G.offTeam)&&G.offTeam===G.me)&&!G.test&&!G.noDraw;
   if(!b){if(!show)return;b=document.createElement('button');b.id='gpRePass';b.textContent='Pass';
-    b.style.cssText='position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;min-height:48px;padding:0 30px;border-radius:8px;border:1px solid rgba(255,255,255,.6);font:900 17px Nunito,system-ui,sans-serif;color:#fff;background:var(--tA,#2f66c0);box-shadow:0 6px 16px rgba(0,0,0,.35)';
+    b.style.cssText='position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;min-height:48px;padding:0 30px;border-radius:8px;border:1px solid rgba(255,255,255,.6);font:900 17px Archivo,system-ui,sans-serif;color:#fff;background:var(--tA,#2f66c0);box-shadow:0 6px 16px rgba(0,0,0,.35)';
     b.onclick=ev=>{ev.stopPropagation();if(G.client){olCmd('repass');return;}if(gpScrambling()){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}};document.body.appendChild(b);}
   b.style.display=show?'block':'none';
 }
@@ -393,9 +393,9 @@ function gpAudOK(e){const q=G.qb&&G.qb.pl,r=e.pl;if(!q||!r)return 0.8;return(1-g
 function gpAudOpen(e){
   let el=document.getElementById('gpAud');if(el)el.remove();
   el=document.createElement('div');el.id='gpAud';
-  el.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(420px,92vw);max-height:80vh;overflow-y:auto;border-radius:18px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.06)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);color:#fff;font:600 13px Nunito,system-ui,sans-serif;box-shadow:0 18px 40px rgba(0,0,0,.5)';
+  el.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(420px,92vw);max-height:80vh;overflow-y:auto;border-radius:18px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.06)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);color:#fff;font:600 13px Archivo,system-ui,sans-serif;box-shadow:0 18px 40px rgba(0,0,0,.5)';
   const keys=Object.keys(ROUTES).filter(k=>k!=='block'||e.role==='TE'||e.role==='RB');
-  el.innerHTML=`<div style="font-weight:900;font-size:16px;margin-bottom:2px">Audible: #${e.pl.num} ${nm(e.pl)}<\/div><div style="opacity:.75;margin-bottom:8px">Now: ${e.route?e.route.name:'block'} · chance he gets the call: ${Math.round(gpAudOK(e)*100)}%<\/div><div style="display:flex;flex-wrap:wrap;gap:6px">${keys.map(k=>`<button data-k="${k}" style="min-height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:800 12px Nunito,system-ui,sans-serif;cursor:pointer">${k}<\/button>`).join('')}<\/div><div style="text-align:right;margin-top:10px"><button data-x="1" style="min-height:34px;padding:0 14px;border-radius:8px;border:0;background:#334;color:#fff;font-weight:800">Cancel<\/button><\/div>`;
+  el.innerHTML=`<div style="font-weight:900;font-size:16px;margin-bottom:2px">Audible: #${e.pl.num} ${nm(e.pl)}<\/div><div style="opacity:.75;margin-bottom:8px">Now: ${e.route?e.route.name:'block'} · chance he gets the call: ${Math.round(gpAudOK(e)*100)}%<\/div><div style="display:flex;flex-wrap:wrap;gap:6px">${keys.map(k=>`<button data-k="${k}" style="min-height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:800 12px Archivo,system-ui,sans-serif;cursor:pointer">${k}<\/button>`).join('')}<\/div><div style="text-align:right;margin-top:10px"><button data-x="1" style="min-height:34px;padding:0 14px;border-radius:8px;border:0;background:#334;color:#fff;font-weight:800">Cancel<\/button><\/div>`;
   el.onclick=ev=>{ev.stopPropagation();const b=ev.target.closest('button');if(!b)return;el.remove();if(b.dataset.k)gpAudible(e,b.dataset.k);};
   document.body.appendChild(el);
 }
@@ -404,9 +404,9 @@ function gpAudOpen(e){
 const GP_PAUD=[['Quick pass','pass','Slant-Flat'],['Deep shot','pass','Four Verts'],['Play action','pass','PA Boot'],['Screen','pass','RB Screen'],['Inside run','run','Inside Zone'],['Outside run','run','Outside Zone'],['Toss','run','Toss'],['QB sneak','run','QB Sneak']];
 function gpPlayAudOpen(){if(G.phase!=='presnap'||!G.play||G.play.kind!=='scrimmage')return;
   let el=document.getElementById('gpAud');if(el)el.remove();el=document.createElement('div');el.id='gpAud';
-  el.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(420px,92vw);max-height:80vh;overflow-y:auto;border-radius:18px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.06)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);color:#fff;font:600 13px Nunito,system-ui,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.5)';
+  el.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(420px,92vw);max-height:80vh;overflow-y:auto;border-radius:18px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.06)),rgba(8,30,52,.94);border:1px solid rgba(255,255,255,.35);color:#fff;font:600 13px Archivo,system-ui,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.5)';
   const q=G.qb&&G.qb.pl,ok=Math.round(gpPlayAudOK()*100);
-  el.innerHTML=`<div style="font-weight:900;font-size:16px;margin-bottom:2px">Audible: change the play<\/div><div style="opacity:.75;margin-bottom:8px">Now: ${(G.pbp&&G.pbp.call)||'–'} · chance everyone gets it: ${ok}%<\/div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${GP_PAUD.map((x,i)=>`<button data-i="${i}" style="padding:10px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:${x[1]==='run'?'rgba(92,207,60,.25)':'rgba(63,169,245,.25)'};color:#fff;font:800 13px Nunito,system-ui,sans-serif;cursor:pointer">${x[0]}<div style="font-weight:600;font-size:11px;opacity:.8">${x[2]}<\/div><\/button>`).join('')}<\/div><div style="text-align:right;margin-top:8px"><button data-x="1" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:none;color:#fff;cursor:pointer">Keep the play<\/button><\/div>`;
+  el.innerHTML=`<div style="font-weight:900;font-size:16px;margin-bottom:2px">Audible: change the play<\/div><div style="opacity:.75;margin-bottom:8px">Now: ${(G.pbp&&G.pbp.call)||'–'} · chance everyone gets it: ${ok}%<\/div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${GP_PAUD.map((x,i)=>`<button data-i="${i}" style="padding:10px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:${x[1]==='run'?'rgba(92,207,60,.25)':'rgba(63,169,245,.25)'};color:#fff;font:800 13px Archivo,system-ui,sans-serif;cursor:pointer">${x[0]}<div style="font-weight:600;font-size:11px;opacity:.8">${x[2]}<\/div><\/button>`).join('')}<\/div><div style="text-align:right;margin-top:8px"><button data-x="1" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:none;color:#fff;cursor:pointer">Keep the play<\/button><\/div>`;
   el.onclick=ev=>{ev.stopPropagation();const b=ev.target.closest('button');if(!b)return;el.remove();if(b.dataset.i!=null)gpPlayAud(+b.dataset.i);};document.body.appendChild(el);}
 function gpPlayAudOK(){const q=G.qb&&G.qb.pl;return clamp((0.62+(((q&&q.awr)||70)-70)*0.007+(((q&&q.ovr)||60)-60)*0.004)*(1-gpNoiseFor(G.offTeam)*0.5),0.3,0.96);}
 function gpPlayAud(i){const A=GP_PAUD[i];if(!A||G.phase!=='presnap')return;const L=A[1]==='run'?RUNS:PASSES,pl=L.find(x=>x.n===A[2]);if(!pl)return;
@@ -532,8 +532,8 @@ function gpGod(){return GP&&GP.god&&GP.god.on?GP.god:null;}
 function gpCD(c){const gd=gpGod();return gd&&c&&c.team===0?(gd.cd||0.25):1;}
 const GOD_CATCHES=[['auto','Normal'],['hands','Hands'],['shoulder','Over the shoulder'],['high','High point'],['moss','Over the top'],['onehand','One-handed'],['obj','One-hand fingertip'],['low','Low'],['slide','Sliding'],['dive','Diving'],['onedive','One-hand dive'],['toetap','Toe tap'],['poss','In traffic'],['trafL','Traffic, left'],['trafR','Traffic, right'],['safe','Secure']];
 function gpGodRow(ft){const gd=gpGod();if(!gd||isAI(0))return;
-  const w=document.createElement('label');w.style.cssText='display:inline-flex;align-items:center;gap:6px;font:800 12px Nunito,system-ui,sans-serif;color:#0d2a43;margin-right:auto';
-  w.innerHTML='God mode catch <select style="font:700 12px Nunito,system-ui,sans-serif;padding:6px 8px;border-radius:10px">'+GOD_CATCHES.map(([k,l])=>'<option value="'+k+'"'+((G.godCatch||'auto')===k?' selected':'')+'>'+l+'<\/option>').join('')+'<\/select>';
+  const w=document.createElement('label');w.style.cssText='display:inline-flex;align-items:center;gap:6px;font:800 12px Archivo,system-ui,sans-serif;color:#0d2a43;margin-right:auto';
+  w.innerHTML='God mode catch <select style="font:700 12px Archivo,system-ui,sans-serif;padding:6px 8px;border-radius:10px">'+GOD_CATCHES.map(([k,l])=>'<option value="'+k+'"'+((G.godCatch||'auto')===k?' selected':'')+'>'+l+'<\/option>').join('')+'<\/select>';
   w.querySelector('select').onchange=ev=>{G.godCatch=ev.target.value;};ft.prepend(w);}
 function gpGodPickStep(e,dt){const gd=gpGod();if(!gd||!gd.picks||G.ballState!=='air'||e!==G.godPk)return false;
   const L=ballAt(G.air,Math.min(G.air.T,G.air.t+0.15)),dx=L.x-e.x,dy=L.y-e.y,d=Math.hypot(dx,dy)||1,s=Math.max(e.spd*1.6,d/Math.max(0.12,G.air.T-G.air.t));accel(e,dx/d*s,dy/d*s,dt,120);return true;}

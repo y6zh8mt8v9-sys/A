@@ -189,7 +189,7 @@ function diagramSVG(kind,data,hi){
     if(hi&&P[hi])s+=`<circle cx="${X(P[hi].x).toFixed(1)}" cy="${Y(P[hi].y).toFixed(1)}" r="4.6" fill="none" stroke="#ffd23f" stroke-width="1.4"/>`;
   }else{
     const ttl=kind==='punt'?'P':kind==='fg'?'K':kind==='kneel'?'QB':'QB';
-    s+=`<text x="60" y="34" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" font-family="Nunito,sans-serif">${ttl}<\/text>`;
+    s+=`<text x="60" y="34" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" font-family="Archivo,sans-serif">${ttl}<\/text>`;
   }
   return s+'<\/svg>';
 }

@@ -32,7 +32,7 @@ addEventListener('keydown',ev=>{if(!ev.shiftKey||KB.wait||G.paused||G.phase!=='l
 function drawKeyBadges(){
   gpThrowTargets().forEach((r,i)=>{if(i>4)return;const[wx,wy]=toW(r.x,r.y),p=proj(wx,wy,0),z=p.k*0.0212,y=p.sy-132*z;
     ctx.save();ctx.translate(p.sx,y);ctx.beginPath();ctx.arc(0,0,5.4,0,Math.PI*2);ctx.fillStyle=(r.route&&r.route.col)||'#fff';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='#0d2a43';ctx.stroke();
-    ctx.font='900 7px Nunito, sans-serif';ctx.fillStyle='#0d2a43';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),0,0.5);ctx.restore();});
+    ctx.font='900 7px Archivo, sans-serif';ctx.fillStyle='#0d2a43';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),0,0.5);ctx.restore();});
 }
 const KB={wait:null};
 function gpControlsHtml(){

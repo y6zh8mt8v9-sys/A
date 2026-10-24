@@ -279,7 +279,7 @@ function stadPrevFar(st,day){
 function stadPreviewSvg(i,w){
   w=w||300;const H=120,day=i.day,ind=i.indoor;let o='';
   const R=(x,y,ww,hh,c,op)=>`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${c}"${op!=null?` opacity="${op}"`:''}/>`;
-  if(ind){o+=R(0,0,300,76,'#4a505a');o+=R(0,0,300,52,'#2a2e35');o+=R(0,64,300,10,i.wall);for(let k=0;k<6;k++)o+=R(10+k*50,6,34,4,'#f4f7ff');for(let k=0;k<12;k++)o+=R(k*25,0,1,52,'#3a3f48');o+=R(0,30,300,24,i.wall);o+=`<text x="150" y="45" font-size="9" font-weight="900" text-anchor="middle" fill="${i.c2}" font-family="Nunito,sans-serif">Performance center</text>`;}
+  if(ind){o+=R(0,0,300,76,'#4a505a');o+=R(0,0,300,52,'#2a2e35');o+=R(0,64,300,10,i.wall);for(let k=0;k<6;k++)o+=R(10+k*50,6,34,4,'#f4f7ff');for(let k=0;k<12;k++)o+=R(k*25,0,1,52,'#3a3f48');o+=R(0,30,300,24,i.wall);o+=`<text x="150" y="45" font-size="9" font-weight="900" text-anchor="middle" fill="${i.c2}" font-family="Archivo,sans-serif">Performance center</text>`;}
   else{o+=`<defs><linearGradient id="sk${i.tier}${i.kind}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${day?'#4f9de0':'#070b1c'}"/><stop offset="1" stop-color="${day?'#bfe3f7':'#1b2850'}"/></linearGradient></defs>`+R(0,0,300,56,`url(#sk${i.tier}${i.kind})`);
     if(day)o+=`<circle cx="262" cy="13" r="7" fill="#fff4c2"/>`;else o+=`<circle cx="262" cy="12" r="4" fill="#e9e7d6"/>`;
     o+=stadPrevFar(i.st||'CF',day);
@@ -368,18 +368,19 @@ function gdPreviewHtml(me,opp,homeIdx){
   const home=T[homeIdx||0],si=stadInfo(stadOf(home));facts.push(`Tonight at ${si.name} (${si.tier===1?'standing room only':si.cap.toLocaleString()+' seats'}), home of the ${home.mascot}.`);
   try{const w=window.__GP&&window.__GP.weather;if(w)facts.push(`Forecast: ${wxLine(w).toLowerCase()}. ${wxEffects(w).replace(/^./,c=>c.toUpperCase())}.`);}catch(e){}
   const logo=s=>{const L=sLogoStandalone(s,64);return L;};
-  const col=(s,i)=>`<div style="flex:1;min-width:0;text-align:center">${logo(s)}<div style="font-weight:900;font-size:17px;margin-top:2px">${s.name.replace(/\s+High.*$/,'')} ${s.mascot}</div>
-    <div style="font-size:12px;opacity:.85">${rec(s)}${rk[i].n&&rk[i].n<=25?` · <b style="color:#8fc4ff">#${rk[i].n} National</b>`:rk[i].a&&rk[i].a<=25?` · <b style="color:#ffcf4a">#${rk[i].a} ${stName(stOf(s))}</b>`:rk[i].c&&rk[i].c<=25?` · <b style="color:#ff7a7a">#${rk[i].c} ${clsL(s.cls)}</b>`:''}</div></div>`;
+  // broadcast matchup strip: each half in its team's color, meeting at a slanted seam
+  const rkTxt=i=>rk[i].n&&rk[i].n<=25?` · #${rk[i].n} national`:rk[i].a&&rk[i].a<=25?` · #${rk[i].a} ${stName(stOf(T[i]))}`:rk[i].c&&rk[i].c<=25?` · #${rk[i].c} in class`:'';
+  const col=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',ink=_lm(c)>.55?'#0f241a':'#ffffff';
+    return`<div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;${i?'flex-direction:row-reverse;text-align:right;':''}padding:12px ${i?'14px 12px 22px':'22px 12px 14px'};background:${c};color:${ink};clip-path:${i?'polygon(16px 0,100% 0,100% 100%,0 100%)':'polygon(0 0,100% 0,calc(100% - 16px) 100%,0 100%)'}">${logo(s)}<div style="min-width:0"><div style="font:900 clamp(20px,4.6vw,28px)/.92 'Alumni Sans','Arial Narrow',sans-serif">${s.name.replace(/\s+High.*$/,'')} ${s.mascot}</div><div style="font-size:12px;opacity:.9;margin-top:3px">${rec(s)}${rkTxt(i)}</div></div></div>`;};
   const row=(l,a,b)=>`<tr><td style="text-align:right;padding:3px 8px;font-weight:800">${a}</td><td style="text-align:center;opacity:.7;font-size:11px;padding:3px 8px">${l}</td><td style="text-align:left;padding:3px 8px;font-weight:800">${b}</td></tr>`;
-  const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:12px;background:rgba(255,255,255,.08);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
+  const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:4px;border-left:3px solid rgba(242,194,48,.7);background:rgba(255,255,255,.06);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
   const stars=T.map(s=>_gdStars(s).map(p=>star(p,s)).join(''));
-  return`<div style="font-family:Nunito,'Segoe UI',system-ui,sans-serif;color:#eef7ff">
-    <div style="text-align:center;font-size:11px;letter-spacing:.12em;font-weight:900;opacity:.8">Matchup preview</div>
-    <div style="display:flex;align-items:center;gap:10px;margin:8px 0 10px">${col(me,0)}<div style="font-weight:900;font-size:22px;opacity:.7">VS</div>${col(opp,1)}</div>
+  return`<div style="font-family:Archivo,'Segoe UI',system-ui,sans-serif;color:#f1f5ef">
+    <div style="display:flex;align-items:stretch;gap:0;margin:-2px -4px 12px">${col(me,0)}${col(opp,1)}</div>
     <table style="margin:0 auto 10px;border-collapse:collapse;font-size:13px">${row('Record',rec(me),rec(opp))}${row('Last 3',form(logs[0]),form(logs[1]))}${row('Points for / game',ppg(logs[0],'us'),ppg(logs[1],'us'))}${row('Points against / game',ppg(logs[0],'them'),ppg(logs[1],'them'))}${row('Team rating',ovr(me),ovr(opp))}</table>
-    <div style="font-size:12px;font-weight:900;opacity:.8;margin-bottom:4px">Keys to the game</div>
+    <div style="font:800 19px/1 'Alumni Sans','Arial Narrow',sans-serif;margin-bottom:4px">Keys to the game</div>
     <ul style="margin:0 0 10px 18px;padding:0;font-size:13px;line-height:1.45">${facts.slice(0,6).map(f=>`<li>${f}</li>`).join('')}</ul>
-    <div style="font-size:12px;font-weight:900;opacity:.8">Players to watch</div>
+    <div style="font:800 19px/1 'Alumni Sans','Arial Narrow',sans-serif">Players to watch</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1 1 220px">${stars[0]}</div><div style="flex:1 1 220px">${stars[1]}</div></div></div>`;
 }
 

@@ -145,7 +145,7 @@ function drawSprite(S,sx,sy,z,dir){
   if(!isRef){
     ctx.strokeStyle=K.trim.m;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(...T.A(0.08,-1.5));ctx.lineTo(...T.A(0.85,-1.5));ctx.stroke();
     if(S.num!=null){const c=T.A(0.6,3.2*ws),m1=ctx.getTransform();ctx.translate(c[0],c[1]);ctx.rotate(Math.atan2(T.uy,T.ux)+Math.PI/2);ctx.scale(dir,1);
-      ctx.font='900 10.5px Nunito, Arial Black, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.font='900 10.5px Archivo, Arial Black, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.lineWidth=1.6;ctx.strokeStyle=K.trim.s;ctx.strokeText(String(S.num),0,0);ctx.fillStyle=K.num.m;ctx.fillText(String(S.num),0,0);ctx.setTransform(m1);}
   }
   ctx.strokeStyle=isRef?'#0e0e0e':K.pants.s;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(...T.A(0.06,-8.6*ws));ctx.lineTo(...T.A(0.06,8.6*ws+B.belly*6));ctx.stroke();

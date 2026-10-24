@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gridiron 27: Game Day<\/title>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Barlow:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@600;700;800;900&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --pg1:#eaf7ff; --pg2:#bfe4fb; --ink:#0d2a43; --ink2:#46657f;
@@ -17,7 +17,7 @@
 :root[data-theme="dark"]{ --pg1:#163a59; --pg2:#0a1f33; }
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;height:100%;font-family:'Nunito','Segoe UI',system-ui,-apple-system,sans-serif;color:var(--ink);
+body{margin:0;height:100%;font-family:'Archivo','Segoe UI',system-ui,-apple-system,sans-serif;color:var(--ink);
   background:radial-gradient(130% 90% at 50% 0%,var(--pg1),var(--pg2));
   display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -134,7 +134,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;border-radius:calc
 .pseg{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.pseg button{font:inherit;font-size:12px;font-weight:900;border-radius:8px;border:1px solid #9fc4de;background:#fff;color:var(--ink);padding:.35em .8em;cursor:pointer}
 .pseg button.on{background:linear-gradient(180deg,#8ad8ff,#1aa3e8);color:#fff;border-color:#0a6fae}.prow input[type=range]{width:140px}
 .ctlg{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;text-align:left;font-size:12.5px;font-weight:700;margin:4px 0 8px;color:var(--ink)}.ctlg>div{color:var(--ink)}.ctlg b{font-weight:900}.ctlh{grid-column:1/-1;font-weight:900;font-size:12px;letter-spacing:.06em;color:var(--ink2);margin-top:6px;text-transform:uppercase}
-kbd{display:inline-block;min-width:1.6em;padding:1px 5px;border-radius:5px;border:1px solid #9fc4de;background:#fff;font:800 11px Nunito,sans-serif;text-align:center;box-shadow:0 1px 0 #9fc4de}.pmb{display:flex;flex-direction:column;gap:8px;margin-top:6px}.pmb .btn{width:100%}.pmn{font-size:12px;opacity:.75;margin:10px 0 0}
+kbd{display:inline-block;min-width:1.6em;padding:1px 5px;border-radius:5px;border:1px solid #9fc4de;background:#fff;font:800 11px Archivo,sans-serif;text-align:center;box-shadow:0 1px 0 #9fc4de}.pmb{display:flex;flex-direction:column;gap:8px;margin-top:6px}.pmb .btn{width:100%}.pmn{font-size:12px;opacity:.75;margin:10px 0 0}
 #rbar.recording .rtag{background:#d8333b;color:#fff}#rbar.recording #rSlow,#rbar.recording #rSave,#rbar.recording #rExit{display:none}
 #fsBtn.on svg path{d:path("M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5")}
 body.full #stage{padding:0}
@@ -147,11 +147,11 @@ body.kbm .btn[data-k]::after{content:attr(data-k);display:inline-block;margin-le
 .mw-hub{width:78px;height:78px;border-radius:50%!important;padding:0!important;font-weight:900;z-index:2;touch-action:none}
 .mw-ring{position:absolute;inset:0;pointer-events:none;opacity:0;transform:scale(.6);transition:opacity .12s,transform .12s}
 .mwheel.open .mw-ring{pointer-events:auto;opacity:1;transform:scale(1)}
-.mw-i{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:linear-gradient(180deg,#fff,#dbeefc);box-shadow:0 4px 10px rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 9px Nunito,sans-serif;color:#0d2a43;cursor:pointer;touch-action:none}
+.mw-i{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:linear-gradient(180deg,#fff,#dbeefc);box-shadow:0 4px 10px rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 9px Archivo,sans-serif;color:#0d2a43;cursor:pointer;touch-action:none}
 .mw-i span{font-size:22px;line-height:1}.mw-i small{font-size:8px;font-weight:900;white-space:nowrap}
 .mw-i.on{background:linear-gradient(180deg,#6cc8ff,#1590e0);color:#fff;transform:scale(1.12)}
 body.bugtv body.pcbug #bug{zoom:.6;left:8px!important;transform:none!important;opacity:.92} /* Player Career: a small scoreboard in the corner, out of the way of the catch meter */
-#bug{border-radius:5px;background:#0d1117;border:0;box-shadow:0 3px 10px rgba(0,0,0,.45);backdrop-filter:none;-webkit-backdrop-filter:none;font-family:'Barlow Condensed',Nunito,system-ui,sans-serif}
+#bug{border-radius:5px;background:#0d1117;border:0;box-shadow:0 3px 10px rgba(0,0,0,.45);backdrop-filter:none;-webkit-backdrop-filter:none;font-family:'Alumni Sans',Archivo,system-ui,sans-serif}
 body.bugtv #bug .tm{padding:0 0 0 max(8px,calc(var(--s)*6px));gap:max(5px,calc(var(--s)*4px));border-bottom:3px solid rgba(255,255,255,.85)}
 body.bugtv #bug .tm.away{padding:0 max(8px,calc(var(--s)*6px)) 0 0}
 body.bugtv #bug .tm::after{display:none}
@@ -167,7 +167,7 @@ body.bugtv #bug .dd{color:#d6dde6}
 body.bugtv #bug .dd b{color:#0d1117;background:#ffd23f;border-radius:2px;padding:0 .3em}
 body.bugtv #bug .wxl{color:#8fb6d6}
 body.bugtv #bug .tos i{border-radius:1px;width:max(8px,calc(var(--s)*6px));height:max(3px,calc(var(--s)*2px))}
-#noiseM{position:absolute;top:40px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:6px;padding:2px 7px;background:rgba(13,17,23,.85);border-radius:3px;font:800 max(9px,calc(var(--s)*5.5px)) 'Barlow Condensed',Nunito,sans-serif;letter-spacing:.08em;color:#cfd6de;pointer-events:none;white-space:nowrap}
+#noiseM{position:absolute;top:40px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:6px;padding:2px 7px;background:rgba(13,17,23,.85);border-radius:3px;font:800 max(9px,calc(var(--s)*5.5px)) 'Alumni Sans',Archivo,sans-serif;letter-spacing:.08em;color:#cfd6de;pointer-events:none;white-space:nowrap}
 #noiseM i{display:block;width:max(70px,calc(var(--s)*50px));height:max(5px,calc(var(--s)*3px));background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
 #noiseM b{display:block;height:100%;width:0;transition:width .25s linear}
 #noiseM.loud span{color:#ff6b5a;animation:nzPulse .5s ease-in-out infinite alternate}
@@ -252,7 +252,7 @@ body:not(.bugtv) #bug .nm .rec{display:none}
 }
 
 /* Gridiron 27 console menus: charcoal (or white) panels, condensed caps, your team's color */
-html.g27{--ink:#eef1f4;--ink2:#9aa4ae;--cs:rgba(17,19,23,.94);--cs2:#1d2026;--cb:rgba(255,255,255,.09);--hd:'Barlow Condensed','Arial Narrow',sans-serif}
+html.g27{--ink:#eef1f4;--ink2:#9aa4ae;--cs:rgba(17,19,23,.94);--cs2:#1d2026;--cb:rgba(255,255,255,.09);--hd:'Alumni Sans','Arial Narrow',sans-serif}
 html.g27.g27l{--ink:#15181d;--ink2:#5c6672;--cs:rgba(255,255,255,.97);--cs2:#f1f2f4;--cb:rgba(0,0,0,.1)}
 html.g27 .glass{background:var(--cs);border:1px solid var(--cb);box-shadow:0 8px 24px rgba(0,0,0,.45);-webkit-backdrop-filter:none;backdrop-filter:none}
 html.g27.g27l .glass{box-shadow:0 8px 24px rgba(0,0,0,.18)}
@@ -296,39 +296,45 @@ html.g27 .mbar{border-radius:3px}
 .mw-s{fill:rgba(26,28,32,.88);stroke:rgba(255,255,255,.1);stroke-width:1;cursor:pointer;transition:fill .08s}
 .mw-s.on{fill:var(--tA,#2f66c0)}
 .mw-ic{stroke:#fff;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.mw-k{font:900 10px 'Barlow Condensed','Arial Narrow',sans-serif;fill:#cfd6de;pointer-events:none;text-anchor:middle;dominant-baseline:central}
+.mw-k{font:900 10px 'Alumni Sans','Arial Narrow',sans-serif;fill:#cfd6de;pointer-events:none;text-anchor:middle;dominant-baseline:central}
 .mw-c{fill:rgba(16,18,21,.8);stroke:rgba(255,255,255,.08)}
-.mw-lbl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:.28em .9em;border-radius:8px;background:rgba(112,116,122,.9);color:#fff;font:800 13px 'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.05em;pointer-events:none;white-space:nowrap}
+.mw-lbl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:.28em .9em;border-radius:8px;background:rgba(112,116,122,.9);color:#fff;font:800 13px 'Alumni Sans','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.05em;pointer-events:none;white-space:nowrap}
 html.g27l .mw-s{fill:rgba(255,255,255,.92);stroke:rgba(0,0,0,.14)}
 html.g27l .mw-s.on{fill:var(--tA,#2f66c0)}
 html.g27l .mw-ic{stroke:#1d2127}
 html.g27l .mw-k{fill:#4a535d}
 html.g27l .mw-c{fill:rgba(255,255,255,.85);stroke:rgba(0,0,0,.1)}
-/* Friday night design (matches the main app): navy plates, chalk text, the team color for the main action, sentence case */
-html.g27{--ink:#f2f5f7;--ink2:#a3b3c6;--cs:rgba(14,26,43,.94);--cs2:#1c2f48;--cb:rgba(214,228,245,.12);--hd:'Big Shoulders Display','Barlow Condensed','Arial Narrow',sans-serif;--bf:'Barlow','Segoe UI',system-ui,sans-serif}
-html.g27.g27l{--ink:#10202f;--ink2:#536273;--cs:rgba(255,255,255,.97);--cs2:#eef2f7;--cb:rgba(16,32,47,.12)}
+/* Painted field design (matches the main app): turf plates, chalk text, goalpost yellow for focus and numbers, the team color
+   for the main action, clipped plate corners, sentence case */
+html.g27{--ink:#f1f5ef;--ink2:#a7bcae;--cs:rgba(11,31,22,.95);--cs2:#183c28;--cb:rgba(225,240,228,.14);--post:#f2c230;--cut:12px;
+  --hd:'Alumni Sans','Arial Narrow',sans-serif;--bf:'Archivo','Segoe UI',system-ui,sans-serif}
+html.g27.g27l{--ink:#0f241a;--ink2:#4f6658;--cs:rgba(255,255,255,.97);--cs2:#eaf0e8;--cb:rgba(15,36,26,.14);--post:#8a6400}
 html.g27 body,html.g27 .btn,html.g27 .tab,html.g27 .pcard,html.g27 .pseg button,html.g27 button[data-k],html.g27 button[data-x],html.g27 #hint,html.g27 #toast,html.g27 #flash{font-family:var(--bf)}
 html.g27 *:not(svg):not(svg *){text-transform:none!important;letter-spacing:normal!important}
-html.g27 .glass{background:var(--cs);border:1px solid var(--cb);box-shadow:0 10px 30px rgba(2,8,18,.45)}
-html.g27 .panel,html.g27 .pm{border-radius:14px;border-top:4px solid var(--tA)}
-html.g27 .ph h3,html.g27 .pm h2,html.g27 #simTitle,html.g27 .secth{font-family:var(--hd);font-weight:800}
-html.g27 .btn{font:600 max(13px,calc(var(--s)*7.2px))/1.15 var(--bf);border-radius:8px;background:var(--cs2);color:var(--ink);border:1px solid var(--cb);box-shadow:0 4px 12px rgba(0,0,0,.28)}
-html.g27 .btn.go{background:var(--tA);color:var(--tOn);border-color:transparent}
+html.g27 .glass{background:var(--cs);border:1px solid var(--cb);box-shadow:0 10px 30px rgba(0,8,4,.45)}
+html.g27 .panel,html.g27 .pm{border-radius:0;border-top:5px solid var(--tA);clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
+html.g27 .ph h3,html.g27 .pm h2,html.g27 #simTitle,html.g27 .secth{font-family:var(--hd);font-weight:800;font-size:1.25em;line-height:1}
+html.g27 .btn{font:650 max(13px,calc(var(--s)*7.2px))/1.15 var(--bf);border-radius:4px;background:var(--cs2);color:var(--ink);border:1px solid var(--cb);border-bottom:3px solid rgba(0,0,0,.3);box-shadow:0 4px 12px rgba(0,0,0,.25)}
+html.g27 .btn.go{background:var(--tA);color:var(--tOn);border-color:transparent;border-bottom-color:rgba(0,0,0,.3)}
 html.g27 .btn.alt{background:var(--cs);color:var(--ink);border:1px solid var(--cb)}
-html.g27.g27l .btn,html.g27.g27l .btn.alt{background:#fff;color:var(--ink);border:1px solid var(--cb);box-shadow:0 2px 8px rgba(16,32,47,.14)}
+html.g27.g27l .btn,html.g27.g27l .btn.alt{background:#fff;color:var(--ink);border:1px solid var(--cb);border-bottom:3px solid rgba(15,36,26,.2);box-shadow:0 2px 8px rgba(15,36,26,.12)}
 html.g27.g27l .btn.go{background:var(--tA);color:var(--tOn)}
-html.g27 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;box-shadow:none}
-html.g27 .tab{border-radius:8px;font:600 13px/1 var(--bf);background:var(--cs2);color:var(--ink);border:1px solid var(--cb)}
+html.g27 .btn:focus-visible{outline:2px solid var(--post);outline-offset:2px;box-shadow:none}
+html.g27 .tab{border-radius:4px;font:600 13px/1 var(--bf);background:var(--cs2);color:var(--ink);border:1px solid var(--cb)}
 html.g27 .tab.on{background:var(--tA);color:var(--tOn);border-color:transparent}
-html.g27 .pcard{border-radius:10px;background:var(--cs2);border:1px solid var(--cb)}
-html.g27 .pcard b{font:700 15px/1.1 var(--hd)}
-html.g27 .srow{border-radius:6px}
-html.g27 .subpick button{border-radius:8px}
-html.g27 .pseg button{border-radius:8px!important;font:600 12px/1 var(--bf)!important}
-html.g27 #hint{border-radius:10px}
-html.g27 #pauseBtn,html.g27 #fsBtn{border-radius:10px}
-html.g27 #gpPrevGo,html.g27 #gpRePass,html.g27 #tutGo,html.g27 #tutSkip,html.g27 button[data-k],html.g27 button[data-x]{border-radius:8px!important;font-family:var(--bf)!important;font-weight:700!important}
-html.g27 .mbar{border-radius:6px}
+html.g27 .pcard{border-radius:4px;background:var(--cs2);border:0;border-left:3px solid var(--cb)}
+html.g27 .pcard:hover,html.g27 .pcard:focus-visible{border-left-color:var(--post)}
+html.g27 .pcard b{font:800 17px/1.05 var(--hd)}
+html.g27 .srow{border-radius:3px}
+html.g27 .subpick button{border-radius:4px}
+html.g27 .pseg button{border-radius:4px!important;font:600 12px/1 var(--bf)!important}
+html.g27 #hint{border-radius:4px;border-left:3px solid var(--post)}
+html.g27 #pauseBtn,html.g27 #fsBtn{border-radius:4px}
+html.g27 #gpPrevGo,html.g27 #gpRePass,html.g27 #tutGo,html.g27 #tutSkip,html.g27 button[data-k],html.g27 button[data-x]{border-radius:4px!important;font-family:var(--bf)!important;font-weight:700!important}
+html.g27 .mbar{border-radius:3px}
+/* score bug numbers and the clock read like the stadium board */
+html.g27 #bug .sc,html.g27 #bug #clock{font-family:var(--hd)!important;font-weight:900!important}
+html.g27 #flash{font-family:var(--hd)!important;font-weight:900!important}
 <\/style>
 <main id="stage">
   <div id="wrap">
