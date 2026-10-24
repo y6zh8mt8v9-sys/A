@@ -562,14 +562,16 @@ function applyC(){const ms=myS();ms.name=document.getElementById('cn').value||ms
 window.schFind=function(q){const el=document.getElementById('schFindL');if(!el)return;q=String(q||'').trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}
   const L=[];for(const s of allSchoolsAll()){if(L.length>=30)break;if((s.name+' '+s.mascot+' '+(s.city||'')).toLowerCase().includes(q))L.push(s);}
   el.innerHTML=L.length?L.map(s=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--bd)">${sLogo(s,22)}<div style="flex:1;min-width:0;font-size:12px"><b>${s.name} ${s.mascot}</b> <span style="color:var(--mu)">${s.city||''} · ${clsName(s.cls)}</span></div><button class="bgh bxs" onclick="openEditSch(${s.id})">Edit</button></div>`).join(''):'<div style="font-size:12px;color:var(--mu)">No school found.</div>';};
-function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School</h2>
+// uniforms are changed on a copy of the school's colors, so Cancel leaves the school as it was
+window.schUniCol=function(){const T=window._schUniT;if(!T)return;T.c1=document.getElementById('ec1').value;T.c2=document.getElementById('ec2').value;const el=document.getElementById('sch-uni');if(el)el.innerHTML=uniHostHtml(T,schUniCol,T.id===G.myId);};
+function openEditSch(sid){const s=getS(sid);if(!s)return;window._schUniT={id:s.id,name:s.name,mascot:s.mascot,c1:s.c1,c2:s.c2,c3:s.c3,uni:uniClean(s.uni)};window._uniKind='home';openMo(`<h2>Edit School</h2>
   <div class="g2" style="gap:10px;margin-top:8px">
     <div class="fg"><label>Team Name</label><input class="ei" id="en" value="${s.name}"></div>
     <div class="fg"><label>Mascot</label><input class="ei" id="em" value="${s.mascot}"></div>
     <div class="fg"><label>City</label><input class="ei" id="ec" value="${s.city}"></div>
     <div class="fg"><label>Abbreviation</label><input class="ei" id="ea" value="${s.abbr}" maxlength="3" style=""></div>
-    <div class="fg"><label>Primary Color</label><input type="color" id="ec1" value="${s.c1}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
-    <div class="fg"><label>Secondary Color</label><input type="color" id="ec2" value="${s.c2}" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
+    <div class="fg"><label>Primary Color</label><input type="color" id="ec1" value="${s.c1}" oninput="schUniCol()" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
+    <div class="fg"><label>Secondary Color</label><input type="color" id="ec2" value="${s.c2}" oninput="schUniCol()" style="width:46px;height:30px;border:none;background:none;cursor:pointer"></div>
     <div class="fg"><label>Off Scheme</label><select class="ei" id="eos">${OFF_SCH.map(sc=>`<option ${sc===s.offS?'selected':''}>${sc}</option>`).join('')}</select></div>
     <div class="fg"><label>Def Scheme</label><select class="ei" id="eds">${DEF_SCH.map(sc=>`<option ${sc===s.defS?'selected':''}>${sc}</option>`).join('')}</select></div>
     <div class="fg"><label>Logo icon</label><select class="ei" id="elk" onchange="schLogoPrev(${sid})"><option value="">From the mascot name</option>${Object.keys(_LGO).sort().map(k=>`<option value="${k}" ${k===s.logoKey?'selected':''}>${k}</option>`).join('')}</select></div>
@@ -587,12 +589,16 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;openMo(`<h2>Edit School
       </div>
     </div>
   </div>
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+    <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:8px">Uniforms</div>
+    <div id="sch-uni">${uniHostHtml(window._schUniT,schUniCol,sid===G.myId)}</div>
+  </div>
   <div style="display:flex;gap:8px;margin-top:12px">
     <button class="btn" onclick="saveSch(${sid})">Save</button>
     <button class="bgh" onclick="clo()">Cancel</button>
   </div>`);}
 window.schLogoPrev=function(sid){const s=getS(sid),el=document.getElementById('elk-prev');if(!s||!el)return;const t=Object.assign({},s,{logoKey:document.getElementById('elk').value||null,mash:document.getElementById('emash').value||null,c1:document.getElementById('ec1').value,c2:document.getElementById('ec2').value,customLogo:null});el.innerHTML=sLogo(t,64);};
-window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
+window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}{const T=window._schUniT;if(T&&T.id===s.id){const u=uniClean(T.uni);if(u)s.uni=u;else delete s.uni;if(T.c3)s.c3=T.c3;}window._schUniT=null;window._uniT=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
 window.handleSchLogoUpload=function(inp,sid){
   const file=inp.files[0];if(!file)return;
   logoShrink(file,function(d){

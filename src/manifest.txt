@@ -10,6 +10,7 @@ styles/06-design.css
 shell/10-style-end-body.html
 vendor/gsap-3.13.0.min.js
 shell/11-vendor-end-app-start.html
+app/000a-copyright.js
 app/000-boot-theme-settings.js
 app/001-division-names-per-classification-8.js
 app/002-player-interests-cosmetic.js
