@@ -1,6 +1,6 @@
 // Career story scenes: queued at the big moments, shown on the dashboard, choices apply their effects, every scene can be skipped.
 const {boot,newCareer,ok,done}=require('./_lib');
-const SHOTS=process.env.SHOTS||'/tmp/claude-0/-home-user-A/b17063cd-74d2-5c9b-bab6-de9271e9f1a1/scratchpad/shots';
+const SHOTS=process.env.SHOTS||require('path').join(require('os').tmpdir(),'g27-story-shots');
 require('fs').mkdirSync(SHOTS,{recursive:true});
 const scene=page=>page.evaluate(()=>{const e=document.getElementById('st-scene');const mo=document.getElementById('mo');return e&&mo.classList.contains('open')?e.dataset.key:null;});
 async function waitScene(page,ms=6000){for(let t=0;t<ms;t+=250){const k=await scene(page);if(k)return k;await page.waitForTimeout(250);}return null;}
@@ -43,7 +43,7 @@ async function run(vp,tag){
   ok(r.vis===3+2+3+2&&r.ti===51+4+3,`visit: his interest ${r.vis}, theirs ${r.ti} (${r.chips.join(', ')})`);
   await page.evaluate(()=>storyDone());
   // My Player has the plan-a-visit card while visits are left
-  await page.evaluate(()=>nav('mine'));await page.waitForTimeout(300);
+  await page.evaluate(()=>{const p=myPlayer(),c=COLLEGES.filter(c=>c.lvl==='FCS')[0];addOffer(p,c,null,'');G.story.offN=p.offers.length;G.story.q=[];nav('mine');});await page.waitForTimeout(300);
   r=await page.evaluate(()=>({card:!!document.getElementById('st-vcard'),left:3-(G.story.vis[stYk()]||0)}));ok(r.card&&r.left===2,`My Player shows official visits (${r.left} left)`);
   // 6. season cap
   r=await page.evaluate(()=>{for(let w=1;w<12;w++)storyGame(true,{opp:'X',my:50,op:0,wk:w*3,sm:{}});return{n:G.story.n[stYk()],q:G.story.q.length};});
@@ -61,7 +61,7 @@ async function run(vp,tag){
   await page.evaluate(()=>{storyPick(0);});await page.waitForTimeout(80);await page.evaluate(()=>{storyPick(1);storyPick(0);});await shot(page,`${tag}-combine-interview`);
   await page.evaluate(()=>{storyPick(0);});
   r=await page.evaluate(()=>{const t=[...document.querySelectorAll('.st-cmb b')].map(b=>b.textContent);storyDone();return{t,d:G.cc.draft&&G.cc.draft.cmb,txt:(document.getElementById('mc2')||{}).textContent||''};});
-  ok(r.d&&r.t.length===4&&r.txt.includes(r.d.forty.toFixed(2))&&r.txt.includes('Draft'),`draft uses the combine results (${r.d&&r.d.forty} 40, ${r.d&&r.d.bench} reps)`);
+  ok(r.d&&r.t.length===4&&r.txt.includes(String(r.d.forty))&&r.txt.includes('Draft'),`draft uses the combine results (${r.d&&r.d.forty} 40, ${r.d&&r.d.bench} reps)`);
   await shot(page,`${tag}-draft`);
   // 8. coach mode: a word with the captain or a coordinator after a blowout
   await newCareer(page);

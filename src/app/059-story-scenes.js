@@ -25,7 +25,7 @@ function stMate(p){const L=(ccOn()?ccRoster(G.cc.k):myP()).filter(q=>q&&q.id!==p
   const R=['WR','TE','RB'];if(R.includes(p.pos)){const q=L.filter(x=>x.pos==='QB').sort((a,b)=>b.rat-a.rat)[0];if(q)return q;}
   if(p.pos==='QB'){const r=L.filter(x=>R.includes(x.pos)).sort((a,b)=>b.rat-a.rat)[0];if(r)return r;}
   const D=['DL','LB','CB','S'],mine=D.includes(p.pos);return L.filter(x=>D.includes(x.pos)===mine).sort((a,b)=>b.rat-a.rat)[0]||L[0];}
-// queue: one per key, a few per season (must: first practice, signing day), at most 4 waiting
+// queue: one per key, a few per season (must: first practice, commitment, signing day), at most 4 waiting
 function stQueue(sc){const S=stS();if(!S||!sc||!sc.key||S.seen[sc.key])return false;const yk=stYk(),cap=stMe()?ST_CAP_PC:ST_CAP_CO;
   if(!sc.must&&(S.n[yk]||0)>=cap)return false;S.seen[sc.key]=1;if(!sc.must)S.n[yk]=(S.n[yk]||0)+1;sc.yk=yk;S.q.push(sc);
   while(S.q.length>4){const i=S.q.findIndex(x=>!x.must);if(i<0)break;S.q.splice(i,1);}return true;}
@@ -80,7 +80,7 @@ window.storyPick=function(i){const C=window._stCur;if(!C)return;const sc=C.sc,st
   if(C.step<sc.steps.length-1){C.step++;C.reply=r;stDraw();return;}
   const sum={};for(const[l,d]of C.fx)sum[l]=(sum[l]||0)+d;const L=Object.entries(sum).filter(x=>x[1]);
   document.getElementById('mc2').innerHTML=`<div class="st-scene st-end"><div class="st-top"><span class="st-place">${stEsc(st.place||sc.place||'')}</span></div>
-    ${r?`<p class="st-reply">${r}</p>`:''}${stChips(L)}<div class="st-ch"><button class="btn" onclick="storyDone()">Continue</button></div></div>`;
+    ${r?`<p class="st-reply">${r}</p>`:''}${sc.end?sc.end():''}${stChips(L)}<div class="st-ch"><button class="btn" onclick="storyDone()">Continue</button></div></div>`;
   try{saveGame(true);}catch(e){}};
 window.storySkip=function(){const C=window._stCur;window._stCur=null;clo();if(C&&C.live&&C.live.skip)try{C.live.skip();}catch(e){console.error('story',e);}else stAfter();};
 window.storyDone=function(){const C=window._stCur;window._stCur=null;clo();if(C&&C.live&&C.live.done)try{C.live.done(C);}catch(e){console.error('story',e);}else stAfter();};
@@ -142,7 +142,7 @@ function stScan(){const S=stS(),me=stMe();if(!S||!me)return;const col=ccOn();
     else S.offN=O.length;
     // commitment
     if(me.committed){const k=me.committed.school+'|'+me.committed.lvl,I=colInfo(k);
-      stQueue({key:'cm:'+k,kind:'commit',place:'Your school gym, commitment day',title:`Committed to ${I.name}`,cast:[stPl(me,'You'),coach],steps:[{lines:[['',`Three hats on the table. Your family in the front row. The local news has a camera in the corner.`],[coach.nm,'Whenever you are ready, son.']],
+      stQueue({key:'cm:'+k,must:true,kind:'commit',place:'Your school gym, commitment day',title:`Committed to ${I.name}`,cast:[stPl(me,'You'),coach],steps:[{lines:[['',`Three hats on the table. Your family in the front row. The local news has a camera in the corner.`],[coach.nm,'Whenever you are ready, son.']],
         ch:[{t:'Thank my family first.',fx:{morale:2,fol:80},r:`You pull on the ${I.name} hat. Your mom is crying before you finish the sentence.`},{t:'Thank coach and my teammates.',fx:{trust:3,chem:2},r:'The whole team is in the bleachers. They chant your name.'},{t:'Keep it short and post the video.',fx:{fol:150},r:'The video is the most shared post of the week.'}]}]});}
     // official visits: once a year in the junior and senior season, an invite to pick a school
     if(stVisitOk(me)&&!S.seen['vinv:'+stYk()]){const L=stVisitList(me).slice(0,3);if(L.length)stQueue({key:'vinv:'+stYk(),kind:'visits',place:'Kitchen table, a letter from the colleges',title:'Official visits',cast:[coach],steps:[{lines:[[coach.nm,`You have ${(me.offers||[]).length} offer${(me.offers||[]).length===1?'':'s'}. You can take official visits this year: see the campus, meet the coaches and the players.`],[coach.nm,'Pick one to start with. You can plan more from My Player.']],
@@ -197,6 +197,6 @@ function storyCombine(run){const C=G.cc,p=C&&C.p;if(!p){run();return;}const cmb=
     {place:'Combine, team interviews',cast:[gm],lines:[[gm.nm,`Sit down, ${p.fn}. We have seen the tape. Tell us something the tape does not show.`]],extra:'',
       ch:[{t:'How I prepare: film every night, first one in.',fx:{fol:60},r:'He writes something down and underlines it twice.'},{t:'Point to my production. The numbers speak.',fx:{fol:90},r:'"They do," he says. "So does the competition you put them up against."'},{t:'Ask what they need at my position.',fx:{fol:40},r:'The room relaxes. Ten minutes later you are talking football like coaches.'}]}]};
   // the results so far sit under the lines of each step
-  for(const s of sc.steps)Object.defineProperty(s,'extra',{get:res,configurable:true});
+  for(const s of sc.steps)Object.defineProperty(s,'extra',{get:res,configurable:true});sc.end=res;
   stRun(sc,{done:()=>{window._ccCmb=cmb;run();},skip:()=>{run();}});}
 (function(){const f=window.ccDraftRun;if(typeof f!=='function'||f._st)return;const w=function(){if(gdsMain().scenes===false)return f.apply(this,arguments);storyCombine(()=>f());};w._st=true;window.ccDraftRun=w;})();

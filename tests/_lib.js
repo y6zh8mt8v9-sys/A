@@ -15,7 +15,7 @@ async function newCareer(page,cls='3A'){
   await page.evaluate(c=>{const divs=makeDivisions(c);_pId=1;initGame('Test Coach',divs,0,0,[]);try{checkAndFillRosters();}catch(e){}
     document.getElementById('setup').classList.add('hid');document.getElementById('app').classList.remove('hid');
     for(const id of['ts','title','loading'])try{const el=document.getElementById(id);if(el)el.classList.remove('active');}catch(e){}
-    clo();nav('dash');},cls);
+    try{hideTitle();}catch(e){}clo();nav('dash');},cls);
   await page.waitForTimeout(300);
 }
 let fails=0;
