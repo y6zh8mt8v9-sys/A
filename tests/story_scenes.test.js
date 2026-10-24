@@ -4,7 +4,7 @@ const SHOTS=process.env.SHOTS||require('path').join(require('os').tmpdir(),'g27-
 require('fs').mkdirSync(SHOTS,{recursive:true});
 const scene=page=>page.evaluate(()=>{const e=document.getElementById('st-scene');const mo=document.getElementById('mo');return e&&mo.classList.contains('open')?e.dataset.key:null;});
 async function waitScene(page,ms=6000){for(let t=0;t<ms;t+=250){const k=await scene(page);if(k)return k;await page.waitForTimeout(250);}return null;}
-async function shot(page,name){await page.screenshot({path:`${SHOTS}/${name}.png`});}
+const KEEP=['phone-visit-campus','phone-postgame','desktop-combine-interview'];async function shot(page,name){if(!KEEP.includes(name))return;await page.screenshot({path:`${SHOTS}/${name}.png`});}
 async function run(vp,tag){
   const {browser,page,errors}=await boot({ctx:{viewport:vp,deviceScaleFactor:vp.width<500?2:1}});
   console.log(`story scenes (${tag})`);
