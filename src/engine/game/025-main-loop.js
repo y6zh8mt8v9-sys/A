@@ -95,7 +95,7 @@ function fit(){
 function newGame(){
   PID=0;G.teams=GP?[gpTeam(0,GP.teams[0]),gpTeam(1,GP.teams[1])]:[mkTeam(0,'Harbor','Gulls','HAR'),mkTeam(1,'Ironwood','Elk','IRN')];G.st={};G.played={};G.splits=null;G.gpDone=false;
   Object.assign(G,{score:[0,0],q:1,clock:QLEN,clockRun:false,restartReady:false,to:[3,3],poss:0,los:25,down:1,toGo:10,next:null,conv:null,ot:null,
-    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false});
+    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false,koPen:null,gs:{}});
   if(SEVENS())G.q=s7Q()===1?4:2;
   G.offTeam=0;setupScrimmage({kind:'pass',data:PASSES[1]},DCALLS[3]);G.phase='menu';
   const[wx,wy]=toW(0,G.linesW.los);G.camY=wy+3.5;
@@ -143,7 +143,10 @@ function olWait(txt){let el=document.getElementById('olWait');
   el.textContent=txt;}
 function olKickWait(){if(G.client){const s=OL.s;return s&&s.kw!=null?s.kw:null;}return G.rmeter?G.rmeter.team:G.meter?G.me:null;}
 function olFair(){if(G.client)olCmd('fair');G.fair=true;setCtl();}
-function olKneel(){if(G.client){olCmd('kneel');return;}if(G.carrier)G.carrier.kneel=true;}
+function olKneel(){if(G.client){olCmd('kneel');return;}gpKneelNow(G.carrier);}
+// a kick returner who takes a knee in the end zone gets a touchback; once he is out of it he is down where he kneels (it used to be a touchback from anywhere)
+function gpKneelNow(c){if(!c||c!==G.carrier||G.phase!=='live'||G.ballState!=='carrier'||!(G.kneelOK>0)||!G.play||G.play.kind!=='kickoff'||c.side!=='o')return;
+  if(c.y<10){c.kneel=true;return;}c.down=true;c.downAnim='tackled';c.vx=c.vy=0;flash('He takes a knee');endPlay({type:'tackle',spot:c.y});}
 function olScrambling(){const s=OL.s;return!!(s&&s.scr&&G.offTeam===G.me&&G.phase==='live');}
 function olGameOver(){olWait(null);}
 
@@ -219,7 +222,7 @@ function olRemote(m){
       case 'aud':{if(G.phase!=='presnap'||G.offTeam!==R||typeof m.name!=='string'||!ROUTES[m.name])return;const e=(G.recv||[]).find(x=>x.nk===m.n&&x.team===R);if(e)gpAudible(e,m.name);return;}
       case 'celeb':{const c=G.celebPick,t=TD_CELEBS.find(x=>x[0]===m.c);if(c&&t&&c.team===R&&!c.celeb)startCeleb(c,t[0]);return;}
       case 'fair':{const P=G.play;if(G.phase==='live'&&P&&P.kind==='punt'&&G.offTeam===R&&['kick','punter','snap'].includes(G.ballState))G.fair=true;return;}
-      case 'kneel':if(G.phase==='live'&&G.carrier&&G.carrier.team===R&&G.kneelOK>0)G.carrier.kneel=true;return;
+      case 'kneel':if(G.carrier&&G.carrier.team===R)gpKneelNow(G.carrier);return;
       case 'sub':{const T=G.teams[R];if(!T||!m.l||typeof m.l!=='object')return;
         for(const s in m.l){if(!(s in T.lineup))continue;const p=T.get(+m.l[s]);if(p&&!p.inj)T.lineup[s]=p.id;}
         T.auto=!!m.a;T.lock={};if(m.k&&typeof m.k==='object')for(const s in m.k)if(s in T.lineup)T.lock[s]=1;return;}

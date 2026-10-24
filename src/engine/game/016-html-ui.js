@@ -40,7 +40,7 @@ function setTray(mode){
       if(uOff&&!pcAIQB()){btn(box,'Snap','go',doSnap,'enter');if(!G.conv)btn(box,'Audible','alt',gpPlayAudOpen);}else if(uOff&&me&&me.role!=='OL')btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');if(uOff&&me&&me.route&&['WR','TE','SL','SR','X','Z','Y'].some(r=>me.role===r||me.slot===r||(me.pl&&me.pl.pos===r)))btn(box,'Flip side','alt',gpPcFlip);
       G.hint=me?`Coach's call: ${(G.pbp&&G.pbp.call)||'–'}. You are #${me.pl.num}, the ringed player${uOff&&!pcAIQB()?'. Snap when ready.':'. The ball is snapped for you.'}`:'Coach has you on the sideline for this play.';
     }else if(P.kind==='scrimmage'){
-      if(uOff){btn(box,'Snap','go',doSnap,'enter');if(!ON&&!G.conv)btn(box,'Audible','alt',gpPlayAudOpen);G.hint='Routes and names show before the snap. Tap Snap when ready, or Audible to change the play.';}
+      if(uOff){btn(box,'Snap','go',doSnap,'enter');if(!ON&&!G.conv&&!P.special)btn(box,'Audible','alt',gpPlayAudOpen);G.hint='Routes and names show before the snap. Tap Snap when ready, or Audible to change the play.';}
       else{btn(box,'Switch player','alt',switchUser);
         if(gpDAdjOK()){const A=G.dAdj||{};btn(box,DADJ_COV[A.cov||0],A.cov?'go':'alt',()=>gpDAdj('cov'),'v');btn(box,A.spy?'QB spy: on':'QB spy: off',A.spy?'go':'alt',()=>gpDAdj('spy'),'y');btn(box,A.con?'Contain: on':'Contain: off',A.con?'go':'alt',()=>gpDAdj('con'),'n');}
         G.hint=ON?'Tap a linebacker or defensive back to control him. Your opponent snaps the ball.':'Tap a linebacker or defensive back to control him. The offense will snap soon.';}
