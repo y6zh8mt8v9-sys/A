@@ -34,7 +34,7 @@ function step(dt){
   if(G.phase==='replay'){
     const P=G.replay;if(P.playing){P.i+=dt*30*P.speed;if(P.i>=P.R.frames.length-1){P.i=P.R.frames.length-1;P.playing=false;$('rPlay').textContent='Play again';if(P.demo)P.doneAt=G.time;}}
     if(P.demo&&!P.playing&&G.time-(P.doneAt||G.time)>0.7){gpDemoNext();return;}
-    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;
+    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;gpFcStep(P,dt);drawScene(F);updateHUD();gpRecTick();return;
   }
   if(G.phase==='presnap'){
     meterStep(dt);
@@ -95,7 +95,7 @@ function fit(){
 function newGame(){
   PID=0;G.teams=GP?[gpTeam(0,GP.teams[0]),gpTeam(1,GP.teams[1])]:[mkTeam(0,'Harbor','Gulls','HAR'),mkTeam(1,'Ironwood','Elk','IRN')];G.st={};G.played={};G.splits=null;G.gpDone=false;
   Object.assign(G,{score:[0,0],q:1,clock:QLEN,clockRun:false,restartReady:false,to:[3,3],poss:0,los:25,down:1,toGo:10,next:null,conv:null,ot:null,
-    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false,koPen:null,gs:{}});
+    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false,koPen:null,gs:{},drivePoss:null});
   if(SEVENS())G.q=s7Q()===1?4:2;
   G.offTeam=0;setupScrimmage({kind:'pass',data:PASSES[1]},DCALLS[3]);G.phase='menu';
   const[wx,wy]=toW(0,G.linesW.los);G.camY=wy+3.5;
@@ -396,7 +396,7 @@ function olClientStep(dt){
   G.time+=dt;
   if(G.phase==='replay'&&G.replay){
     const P=G.replay;if(P.playing){P.i+=dt*30*P.speed;if(P.i>=P.R.frames.length-1){P.i=P.R.frames.length-1;P.playing=false;$('rPlay').textContent='Play again';}}
-    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;}
+    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;gpFcStep(P,dt);drawScene(F);updateHUD();gpRecTick();return;}
   let F=olInterp();
   if(!F){F={ents:[],ball:null,flags:[],camY:G.camY,anch:G.anch,lines:null};drawScene(F);updateHUD();return;}
   OL.lastF=F;olSync(F);

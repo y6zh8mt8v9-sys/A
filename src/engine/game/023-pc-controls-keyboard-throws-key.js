@@ -134,6 +134,8 @@ function padGameStep(){
   const g=padGet();if(!g||DEMO)return;const b=padBtns(g),P=PADN.prev,pr=i=>b[i]&&!P[i];
   if(b.some((x,i)=>x&&!P[i]))try{sndPadKick();}catch(e){}
   if(pr(9)&&!G.client&&G.phase!=='over'&&!G.recVid){gpPause(!G.paused);PADN.prev=b;return;}
+  if(G.phase==='replay'&&G.replay){const x=g.axes[2]||0,y=g.axes[3]||0,zi=(g.buttons[7]&&g.buttons[7].value)||0,zo=(g.buttons[6]&&g.buttons[6].value)||0; // replay free cam: right stick, triggers, R3 resets
+    G.fcPad={x:Math.abs(x)>0.2?x:0,y:Math.abs(y)>0.2?y:0,z:zi-zo};if(pr(11))gpFcReset();}else G.fcPad=null;
   const ov=padOverlay();
   if(ov){G.pad=null;padNavStep(g,b,ov,()=>{if(G.paused)gpPause(false);});PADN.prev=b;return;}
   if(PADN.f)padSetFocus(null);

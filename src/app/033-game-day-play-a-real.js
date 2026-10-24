@@ -35,7 +35,7 @@ function gdPlayer(p,i){
   const a=k=>atv(p,k)+_sk;
   const M=(key,val)=>{const[lo,hi]=R[key]||GD_BASE[key];const q=Math.max(0,Math.min(1.05,(val-30)/60));const w=key==='spd'?24:14;return Math.max(25,Math.min(99,Math.round(lo-w+(hi-lo+w+(key==='spd'?2:0))*q+_gdTAdj)));};
   const h=(p.id||i)*2654435761>>>0,sk=faceSkinHex(p.fs!=null?p.fs:p.id),_ft=faceTraits(p.fs!=null?p.fs:p.id);
-  return{mid:p.id,arch:p.arch||null,traits:(p.traits||[]).slice(),pos,pos2:p.pos2&&p.pos2!==pos?p.pos2:null,first:p.fn||'Player',last:p.ln||'',num:p.num!=null?p.num:(10+i),ht:p.ht||74,wt:p.wt||210,
+  return{mid:p.id,fs:p.fs!=null?p.fs:p.id,arch:p.arch||null,traits:(p.traits||[]).slice(),pos,pos2:p.pos2&&p.pos2!==pos?p.pos2:null,first:p.fn||'Player',last:p.ln||'',num:p.num!=null?p.num:(10+i),ht:p.ht||74,wt:p.wt||210,
     spd:M('spd',spd),str:M('str',str),agi:M('agi',a('agi')),hands:M('hands',a('cth')*.85+awr*.15),acc:M('acc',a('sac')*.85+awr*.15),pow:M('pow',a('thp')),
     tkl:M('tkl',a('tak')),cov:M('cov',(a('mcv')+a('zcv'))/2*.85+awr*.15),
     dac:M('acc',a('dac')),tup:M('acc',a('tup')),car:M('hands',a('car')),elu:M('agi',a('elu')),btk:M('str',a('btk')),cit:M('hands',a('cit')),rte:M('agi',a('rte')),jmp:M('agi',a('jmp')),

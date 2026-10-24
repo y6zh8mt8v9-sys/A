@@ -207,7 +207,7 @@ function commit(S,r){
   if(S.stop==='snap'){G.clockRun=false;G.restartReady=false;}
   else if(S.stop==='ready'){G.clockRun=false;G.restartReady=true;}
   if(G.q>4)G.clockRun=false;
-  if(S.td!=null){G.cele=S.td;G.cheer=S.td===gpHomeTeam()?3:0.5;}
+  if(S.td!=null){G.cele=S.td;G.cheer=S.td===gpHomeTeam()?3:0.5;try{gpTdCard(S);}catch(e){}}
   else if(S.msg==='Interception'||S.msg==='Turnover')G.cele=1-G.offTeam;
   try{gpResultSound(S,r);}catch(e){}
   toast(S.msg,S.sub);if(G.measure){const m=G.measure;G.measure=null;setTimeout(()=>{try{flash(m);}catch(e){}},700);}

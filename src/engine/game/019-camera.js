@@ -40,7 +40,7 @@ function recGet(R,i){const F=R.frames[i];if(!F||!F.z)return F;if(R._ci===i&&R._c
   R._ci=i;R._cf=Object.assign({},F,{ents});return R._cf;}
 function startReplay(onExit){
   const R=(G.rec&&G.rec.frames.length)?G.rec:G.lastRec;if(!R||!R.frames.length)return;
-  G.replay={R,i:0,speed:0.6,playing:true,prev:G.phase,onExit};G.phase='replay';
+  G.replay={R,i:0,speed:0.6,playing:true,prev:G.phase,onExit};G.phase='replay';try{gpFcBtn();FC.keys.clear();}catch(e){}
   show('rbar');$('rPlay').textContent='Pause';$('rSlow').textContent='Slow-mo';setTray('none');$('ctl').innerHTML='';
 }
 function exitReplay(){
@@ -50,6 +50,30 @@ function exitReplay(){
 $('rPlay').onclick=()=>{const P=G.replay;if(!P||P.recording)return;if(P.i>=P.R.frames.length-1)P.i=0;P.playing=!P.playing;$('rPlay').textContent=P.playing?'Pause':'Play';};
 $('rSlow').onclick=()=>{const P=G.replay;if(!P||P.recording)return;P.speed=P.speed>0.5?0.28:0.6;$('rSlow').textContent=P.speed>0.5?'Slow-mo':'Normal speed';};
 $('rExit').onclick=exitReplay;
+/* v2.17 replay free cam: drag, W A S D / arrows or the right stick to move along the field, scroll, pinch, + / - or the triggers to zoom.
+   The Free cam button turns it on where the camera is; Reset camera goes back to following the ball. */
+const FC={keys:new Set(),pts:new Map(),pinch:0};
+function gpFcOn(){const P=G.replay;if(!P)return null;if(!P.fc){P.fc={y:G.camY,z:1,oy:0};gpFcBtn();}return P.fc;}
+function gpFcReset(){const P=G.replay;if(P){P.fc=null;gpFcBtn();}}
+function gpFcBtn(){const b=$('rCam');if(b)b.textContent=G.replay&&G.replay.fc?'Reset camera':'Free cam';}
+function gpFcClamp(f){f.z=clamp(f.z,1,3);f.y=clamp(f.y,-10,130);const m=(f.z-1)*H*0.5;f.oy=clamp(f.oy,-m,m);}
+function gpFcStep(P,dt){
+  const K=FC.keys,J=G.fcPad;let mx=(K.has('arrowright')||K.has('d')?1:0)-(K.has('arrowleft')||K.has('a')?1:0),my=(K.has('arrowdown')||K.has('s')?1:0)-(K.has('arrowup')||K.has('w')?1:0),mz=(K.has('+')||K.has('=')?1:0)-(K.has('-')||K.has('_')?1:0);
+  if(J){mx+=J.x;my+=J.y;mz+=J.z;}
+  if((mx||my||mz)&&!P.fc)gpFcOn();const f=P.fc;if(!f)return;
+  f.y+=mx*dt*26/f.z;f.oy-=my*dt*150;f.z*=Math.exp(mz*dt*1.4);gpFcClamp(f);G.camY=f.y;G.anch=0.5;}
+{const rb=$('rbar'),b=document.createElement('button');b.className='btn alt';b.id='rCam';b.textContent='Free cam';b.title='Drag, W A S D or the right stick to move. Scroll, pinch or + / - to zoom';
+  b.onclick=()=>{if(G.replay&&G.replay.fc)gpFcReset();else{gpFcOn();try{flash('Free cam: drag or W A S D to move, scroll or + / - to zoom');}catch(e){}}};rb.insertBefore(b,$('rExit'));}
+const gpFcPx=ev=>{const r=cv.getBoundingClientRect();return[ev.clientX*W/r.width,ev.clientY*H/r.height];};
+cv.addEventListener('pointerdown',ev=>{if(G.phase!=='replay')return;FC.pts.set(ev.pointerId,gpFcPx(ev));FC.pinch=0;try{cv.setPointerCapture(ev.pointerId);}catch(_){}});
+cv.addEventListener('pointermove',ev=>{if(G.phase!=='replay'||!FC.pts.has(ev.pointerId))return;const o=FC.pts.get(ev.pointerId),n=gpFcPx(ev);FC.pts.set(ev.pointerId,n);const f=gpFcOn();if(!f)return;
+  if(FC.pts.size>=2){const[a,b]=[...FC.pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(FC.pinch)f.z*=d/FC.pinch;FC.pinch=d;}
+  else{const k=proj(CX,f.y).k||5;f.y-=(n[0]-o[0])/(k*f.z);f.oy+=n[1]-o[1];}gpFcClamp(f);});
+const gpFcUp=ev=>{FC.pts.delete(ev.pointerId);FC.pinch=0;};cv.addEventListener('pointerup',gpFcUp);cv.addEventListener('pointercancel',gpFcUp);
+cv.addEventListener('wheel',ev=>{if(G.phase!=='replay')return;ev.preventDefault();const f=gpFcOn();if(f){f.z*=Math.exp(-ev.deltaY*0.0015);gpFcClamp(f);}},{passive:false});
+addEventListener('keydown',ev=>{if(G.phase!=='replay')return;const k=String(ev.key||'').toLowerCase();
+  if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d','+','=','-','_'].includes(k)){FC.keys.add(k);ev.preventDefault();}else if(k==='0'){gpFcReset();ev.preventDefault();}});
+addEventListener('keyup',ev=>FC.keys.delete(String(ev.key||'').toLowerCase()));
 $('rSave').onclick=()=>gpRecordReplay();
 $('pauseBtn').onclick=ev=>{ev.stopPropagation();gpPause(!G.paused);};
 

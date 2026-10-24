@@ -147,3 +147,31 @@ function celebrateAfter(S){
   }
   return false;
 }
+/* v2.17 touchdown card: a broadcast-style lower third with the scorer's face, name, number, position and his line so far this game.
+   It never takes a tap (pointer-events off), leaves on its own, and only fades in with reduced motion. */
+function gpTdLine(pl){const s=(G.gs||{})[pl.id]||{},o=[],n=(v,w)=>`${v} ${w}`;
+  if(s.passAtt)o.push(`${s.passCmp||0}/${s.passAtt}, ${s.passYds||0} yds${s.passTD?', '+n(s.passTD,'TD'):''}${s.passInt?', '+n(s.passInt,'INT'):''}`);
+  if(s.rushAtt)o.push(`${n(s.rushAtt,'car')}, ${s.rushYds||0} yds${s.rushTD?', '+n(s.rushTD,'TD'):''}`);
+  if(s.rec)o.push(`${n(s.rec,'rec')}, ${s.recYds||0} yds${s.recTD?', '+n(s.recTD,'TD'):''}`);
+  const rt=(s.krYds||0)+(s.prYds||0),rtd=(s.krTD||0)+(s.prTD||0);if(s.krRet||s.prRet)o.push(`${n((s.krRet||0)+(s.prRet||0),'ret')}, ${rt} yds${rtd?', '+n(rtd,'TD'):''}`);
+  const d=[s.tackles?n(s.tackles,'tkl'):'',s.sacks?n(s.sacks,'sack'+(s.sacks>1?'s':'')):'',s.ints?n(s.ints,'INT'):''].filter(Boolean);if(d.length)o.push(d.join(', '));
+  return o.slice(0,2).join(' · ')||'First score of the game';}
+function gpTdFace(pl,team){const sd=pl.fs!=null?pl.fs:pl.mid!=null?pl.mid:pl.id;
+  try{const f=window.parent&&window.parent!==window&&window.parent.face;if(typeof f==='function')return f(sd,64);}catch(e){}
+  const k=KITS[team]||KITS[0],j=k.jersey.m,sk=(pl.look&&pl.look.skin&&pl.look.skin.m)||'#c68a5e'; // no portrait outside the full game: a plain bust
+  return`<svg viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" fill="${k.helmet.s}"/><path d="M8 64c2-14 12-20 24-20s22 6 24 20z" fill="${j}"/><circle cx="32" cy="28" r="13" fill="${sk}"/><text x="32" y="60" text-anchor="middle" font-size="11" font-weight="900" fill="${k.num.m}" font-family="Nunito,sans-serif">${pl.num}<\/text><\/svg>`;}
+function gpTdCard(S){
+  const c=G.carrier,pl=c&&c.pl;if(!pl||G.simming||G.noDraw||G.demo||DEMO||G.test||G.client)return;
+  let el=$('tdCard');if(!el){el=document.createElement('div');el.id='tdCard';el.setAttribute('role','status');el.hidden=true;$('wrap').appendChild(el);
+    const st=document.createElement('style');st.textContent=`#tdCard{position:absolute;left:calc(var(--s)*10px);bottom:calc(var(--s)*58px);display:flex;align-items:stretch;max-width:min(78%,430px);pointer-events:none;z-index:6;border-radius:10px;overflow:hidden;box-shadow:0 10px 26px rgba(0,0,0,.45);background:rgba(10,16,26,.94);color:#fff;font-family:Nunito,system-ui,sans-serif}
+#tdCard .tf{flex:0 0 auto;width:clamp(52px,calc(var(--s)*44px),76px);background:var(--tc,#1f3a68);display:flex;align-items:flex-end;justify-content:center}#tdCard .tf svg{width:100%;height:auto;display:block}
+#tdCard .tx{padding:.45em .9em .5em;border-left:4px solid var(--tc2,#f2b632);min-width:0}#tdCard .tk{font:900 clamp(10px,calc(var(--s)*6px),13px)/1.1 Nunito,sans-serif;letter-spacing:.14em;color:var(--tc2,#f2b632)}
+#tdCard .tn{font-weight:900;font-size:clamp(15px,calc(var(--s)*11px),24px);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#tdCard .tp{font-weight:800;font-size:clamp(10px,calc(var(--s)*6px),13px);opacity:.8}
+#tdCard .ts{font-weight:800;font-size:clamp(11px,calc(var(--s)*7px),15px);margin-top:.2em}
+#tdCard.show{animation:tdIn 4.4s ease forwards}@keyframes tdIn{0%{opacity:0;transform:translateX(-40px)}8%{opacity:1;transform:none}88%{opacity:1;transform:none}100%{opacity:0;transform:translateX(-20px)}}
+@media (prefers-reduced-motion: reduce){#tdCard.show{animation:tdFade 4.4s linear forwards}@keyframes tdFade{0%{opacity:0}5%,92%{opacity:1}100%{opacity:0}}}`;document.head.appendChild(st);}
+  const t=c.team,T=G.teams[t]||{},k=KITS[t]||KITS[0];
+  el.style.setProperty('--tc',k.jersey.m);el.style.setProperty('--tc2',k.trim?k.trim.l:'#f2b632');
+  el.innerHTML=`<div class="tf">${gpTdFace(pl,t)}<\/div><div class="tx"><div class="tk">TOUCHDOWN<\/div><div class="tn">#${pl.num} ${pl.first} ${pl.last}<\/div><div class="tp">${pl.pos} · ${T.city?T.city+' ':''}${T.name||''}<\/div><div class="ts">${gpTdLine(pl)}<\/div><\/div>`;
+  clearTimeout(G.tdCardT);G.tdCardT=setTimeout(()=>{el.hidden=false;restartAnim(el);G.tdCardT=setTimeout(()=>{el.hidden=true;el.classList.remove('show');},4500);},700);
+}

@@ -95,7 +95,7 @@ function pbResolvePlay(ref){
 function pbResolveRun(ref){
   if(ref.startsWith('C:')){const c=pbCustom(ref.slice(2));if(!c||c.kind!=='run')return null;
     const o={n:c.n,f:c.f==='base'?undefined:c.f,path:c.path.map(p=>p.slice()),pos:c.pos?JSON.parse(JSON.stringify(c.pos)):undefined,d:c.d||'Custom run',custom:1};
-    if(c.carrier==='QB')o.qb=1;if(c.carrier==='FB')o.fbc=1;if(c.toss)o.toss=1;if(c.lead)o.lead=1;if(c.delay)o.delay=0.7;if(c.mo&&c.mo.s){o.mo={s:c.mo.s,k:c.mo.k};if(c.carrier==='JET'&&c.mo.k==='jet'){o.jet=1;delete o.qb;delete o.fbc;}}return o;}
+    if(c.carrier==='QB')o.qb=1;if(c.carrier==='OPT'&&c.keep&&c.keep.length>1){o.option=1;o.keep=c.keep.map(p=>p.slice());}if(c.carrier==='FB')o.fbc=1;if(c.toss)o.toss=1;if(c.lead)o.lead=1;if(c.delay)o.delay=0.7;if(c.mo&&c.mo.s){o.mo={s:c.mo.s,k:c.mo.k};if(c.carrier==='JET'&&c.mo.k==='jet'){o.jet=1;delete o.qb;delete o.fbc;}}return o;}
   const r=GDX.RUNS.find(x=>x.n===ref);return r?JSON.parse(JSON.stringify(r)):null;
 }
 function pbForTeam(s,side){
@@ -128,6 +128,8 @@ function pbSVG(P,opt){
     s+=`<polyline points="${pts.map(([x,d])=>PBX(x).toFixed(1)+','+PBY(d).toFixed(1)).join(' ')}" fill="none" stroke="#ffd23f" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
     const e=pts[pts.length-1],q=pts[pts.length-2];const ang=Math.atan2(PBY(e[1])-PBY(q[1]),PBX(e[0])-PBX(q[0]));
     s+=`<path d="M0,0 L-3.2,-1.8 L-3.2,1.8Z" fill="#ffd23f" transform="translate(${PBX(e[0]).toFixed(1)},${PBY(e[1]).toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(0)})"/>`;
+    if(car==='OPT'&&P.keep){const kp=[[CX,-qbD],...P.keep.map(([dx,dy])=>[CX+dx,dy])];s+=`<polyline points="${kp.map(([x,d])=>PBX(x).toFixed(1)+','+PBY(d).toFixed(1)).join(' ')}" fill="none" stroke="#4fd1ff" stroke-width="1.8" stroke-dasharray="2.4 1.4" stroke-linejoin="round"/>`;
+      if(ed)P.keep.forEach(([dx,dy],i)=>s+=`<circle data-q="${i}" cx="${PBX(CX+dx).toFixed(1)}" cy="${PBY(dy).toFixed(1)}" r="3.4" fill="#4fd1ff" fill-opacity=".35" stroke="#4fd1ff" stroke-width="1" style="cursor:grab"/>`);}
     if(ed)P.path.forEach(([dx,dy],i)=>s+=`<circle data-w="${i}" cx="${PBX(CX+dx).toFixed(1)}" cy="${PBY(dy).toFixed(1)}" r="3.4" fill="#ffd23f" fill-opacity=".35" stroke="#ffd23f" stroke-width="1" style="cursor:grab"/>`);
   }else{
     PB_SLOTS.forEach((k,i)=>{const R=GDX.ROUTES[P.r[i]],[x0,d0]=[pos[k][0],-pos[k][1]],out=k===moS&&mo.k==='jet'?(moStart[0]<CX?-1:1):x0<CX?-1:1;
@@ -141,14 +143,14 @@ function pbSVG(P,opt){
   return s;
 }
 function pbDiagram(f,r,w){return pbSVG({kind:'pass',f,r},{w});}
-function pbThumb(p,w){return pbSVG(p.kind==='run'?{kind:'run',f:p.f,pos:p.pos,path:p.path,carrier:p.carrier,lead:p.lead,toss:p.toss,mo:p.mo}:{kind:'pass',f:p.f,r:p.r,pos:p.pos,mo:p.mo},{w});}
+function pbThumb(p,w){return pbSVG(p.kind==='run'?{kind:'run',f:p.f,pos:p.pos,path:p.path,carrier:p.carrier,keep:p.keep,lead:p.lead,toss:p.toss,mo:p.mo}:{kind:'pass',f:p.f,r:p.r,pos:p.pos,mo:p.mo},{w});}
 // ── designer state ──
 window._pbD=null;window._pbB=null;
-function pbDraftInit(){if(!window._pbD)window._pbD={kind:'pass',n:'',f:'base',r:['go','go','seam','block','check'],pos:null,d:'',path:[[1,0.3],[1.5,6]],carrier:'RB',toss:false,lead:false,delay:false};return window._pbD;}
+function pbDraftInit(){if(!window._pbD)window._pbD={kind:'pass',n:'',f:'base',r:['go','go','seam','block','check'],pos:null,d:'',path:[[1,0.3],[1.5,6]],keep:[[7.5,-0.5],[9.5,5]],carrier:'RB',toss:false,lead:false,delay:false};return window._pbD;}
 function pbSetR(i,v){pbDraftInit().r[i]=v;pbRefresh();}
 function pbSetKind(k){const D=pbDraftInit();D.kind=k;pbRerender();}
 function pbSetForm(f){const D=pbDraftInit();D.f=f;D.pos=null;const two=(GDX.FORMS[f]||{}).sub&&GDX.FORMS[f].sub.SL==='FB';if(!two){if(D.carrier==='FB')D.carrier='RB';D.lead=false;}pbRerender();}
-function pbFromRun(n){const r=GDX.RUNS.find(x=>x.n===n);if(!r)return;const D=pbDraftInit();D.kind='run';D.path=r.path.map(p=>p.slice());D.f=r.f||'base';D.pos=null;D.toss=!!r.toss;D.lead=!!r.lead;D.delay=!!r.delay;D.carrier=r.qb?'QB':r.fbc?'FB':r.jet?'JET':'RB';D.mo=r.mo?{s:r.mo.s,k:r.mo.k}:null;pbRerender();}
+function pbFromRun(n){const r=GDX.RUNS.find(x=>x.n===n);if(!r)return;const D=pbDraftInit();D.kind='run';D.path=r.path.map(p=>p.slice());D.f=r.f||'base';D.pos=null;D.toss=!!r.toss;D.lead=!!r.lead;D.delay=!!r.delay;D.carrier=r.option?'OPT':r.qb?'QB':r.fbc?'FB':r.jet?'JET':'RB';if(r.keep)D.keep=r.keep.map(p=>p.slice());D.mo=r.mo?{s:r.mo.s,k:r.mo.k}:null;pbRerender();}
 function pbSetMo(s,k){const D=pbDraftInit();if(!s){D.mo=null;if(D.carrier==='JET')D.carrier='RB';D.touch=false;}else D.mo={s,k:k||(D.mo&&D.mo.k)||'jet'};if(D.mo&&D.mo.k!=='jet'){if(D.carrier==='JET')D.carrier='RB';D.touch=false;}pbRerender();}
 function pbMoCtl(D,two){const mo=D.mo||{};const sl=[['','No motion'],['X','X (wide left)'],['Z','Z (wide right)'],['SL',two?'FB':'Slot'],['TE','TE / slot #3'],['RB','Running back']];
   return`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;padding:8px;border-radius:10px;background:var(--s2)">
@@ -163,11 +165,12 @@ function pbBindDrag(){
   const svg=document.getElementById('pb-edit');if(!svg||svg._bound)return;svg._bound=true;const FW=GDX.FW,CX=GDX.CX;
   const toF=ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());return[(p.x-6)/108*FW,(46-p.y)/3.4];};
   let drag=null;
-  svg.addEventListener('pointerdown',ev=>{const g=ev.target.closest('[data-k],[data-w]');if(!g)return;ev.preventDefault();drag=g.dataset.k?{k:g.dataset.k}:{w:+g.dataset.w};try{svg.setPointerCapture(ev.pointerId);}catch(e){}});
+  svg.addEventListener('pointerdown',ev=>{const g=ev.target.closest('[data-k],[data-w],[data-q]');if(!g)return;ev.preventDefault();drag=g.dataset.k?{k:g.dataset.k}:g.dataset.q!=null?{q:+g.dataset.q}:{w:+g.dataset.w};try{svg.setPointerCapture(ev.pointerId);}catch(e){}});
   svg.addEventListener('pointermove',ev=>{if(!drag)return;ev.preventDefault();const D=pbDraftInit();let[x,y]=toF(ev);
     if(drag.k){if(!D.pos)D.pos=pbPos(D.f,null);let dep=Math.max(0.9,Math.min(9,-y));x=Math.max(1.5,Math.min(FW-1.5,x));
       if(dep<2.4&&Math.abs(x-CX)<5.2)dep=2.4;const qd=(GDX.FORMS[D.f]||GDX.FORMS.base).qbD||5;if(Math.abs(x-CX)<1.1&&Math.abs(dep-qd)<1)x=CX+(x<CX?-1.2:1.2);
       D.pos[drag.k]=[+x.toFixed(1),+dep.toFixed(1)];}
+    else if(drag.q!=null){if(!D.keep)D.keep=[[7.5,-0.5],[9.5,5]];D.keep[drag.q]=[+Math.max(-26,Math.min(26,x-CX)).toFixed(1),+Math.max(-4,Math.min(22,y)).toFixed(1)];}
     else D.path[drag.w]=[+Math.max(-26,Math.min(26,x-CX)).toFixed(1),+Math.max(drag.w===0?-6:-4,Math.min(drag.w===0?2.5:22,y)).toFixed(1)];
     const tmp=document.createElement('div');tmp.innerHTML=pbSVG(D,{edit:true,w:420});svg.innerHTML=tmp.firstElementChild.innerHTML;});
   const end=()=>{drag=null;};svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
@@ -176,7 +179,7 @@ function pbSavePlay(){
   const D=pbDraftInit(),n=(document.getElementById('pb-n').value||'').trim();if(!n){notify('Name your play first.','e');return;}
   const d=(document.getElementById('pb-d').value||'').trim(),P=pbData(),id='p'+Date.now().toString(36);
   const mo=D.mo&&D.mo.s?{s:D.mo.s,k:D.mo.k}:null;
-  if(D.kind==='run')P.plays.push({id,kind:'run',n,f:D.f,pos:D.pos?JSON.parse(JSON.stringify(D.pos)):null,path:D.path.map(p=>p.slice()),carrier:D.carrier==='JET'&&!(mo&&mo.k==='jet')?'RB':D.carrier,toss:!!D.toss,lead:!!D.lead,delay:!!D.delay,mo,d});
+  if(D.kind==='run')P.plays.push({id,kind:'run',n,f:D.f,pos:D.pos?JSON.parse(JSON.stringify(D.pos)):null,path:D.path.map(p=>p.slice()),carrier:D.carrier==='JET'&&!(mo&&mo.k==='jet')?'RB':D.carrier,keep:D.carrier==='OPT'?(D.keep||[[7.5,-0.5],[9.5,5]]).map(p=>p.slice()):null,toss:!!D.toss,lead:!!D.lead,delay:!!D.delay,mo,d});
   else P.plays.push({id,kind:'pass',n,f:D.f,r:D.r.slice(),pos:D.pos?JSON.parse(JSON.stringify(D.pos)):null,mo,touch:!!(D.touch&&mo&&mo.k==='jet'),d});
   window._pbD=null;if(window._fpMode)fpSave();notify(`"${n}" saved. Add it to a playbook below.`);pbRerender();
 }
@@ -213,7 +216,7 @@ function pbEditorHtml(){
   const tog=(k,l)=>`<button class="tab ${D.kind===k?'on':''}" onclick="pbSetKind('${k}')">${l}</button>`;
   const passCtl=slots.map(([k,l],i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">${l}</span><select onchange="pbSetR(${i},this.value)" style="flex:1">${rOpts(i)}</select></div>`).join('');
   const runCtl=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
-      <label style="font-size:12px;color:var(--mu)">Ball carrier <select onchange="pbDraftInit().carrier=this.value;pbRefresh()">${['RB'].concat(two?['FB']:[]).concat(['QB']).concat(D.mo&&D.mo.k==='jet'?['JET']:[]).map(c=>`<option value="${c}"${D.carrier===c?' selected':''}>${c==='JET'?'Jet man (jet sweep)':c}</option>`).join('')}</select></label>
+      <label style="font-size:12px;color:var(--mu)">Ball carrier <select onchange="pbDraftInit().carrier=this.value;pbRerender()">${['RB'].concat(two?['FB']:[]).concat(['QB','OPT']).concat(D.mo&&D.mo.k==='jet'?['JET']:[]).map(c=>`<option value="${c}"${D.carrier===c?' selected':''}>${c==='JET'?'Jet man (jet sweep)':c==='OPT'?'QB option (read the end: give or keep)':c}</option>`).join('')}</select></label>
       <label style="font-size:12px;color:var(--mu)">Start from <select onchange="pbFromRun(this.value)"><option value="">a run play…</option>${GDX.RUNS.map(r=>`<option value="${r.n}">${fn(r.f)}${r.n}</option>`).join('')}</select></label></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:12px">
       <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" ${D.toss?'checked':''} onchange="pbDraftInit().toss=this.checked">Pitch (toss)</label>
@@ -228,7 +231,7 @@ function pbEditorHtml(){
       <div class="tabs" style="margin-bottom:10px">${tog('pass','Pass play')}${tog('run','Run play')}</div>
       <div style="display:flex;gap:18px;flex-wrap:wrap">
       <div style="flex:0 1 420px;min-width:0"><div id="pb-prev">${pbSVG(D,{edit:true,w:420})}</div>
-        <div style="font-size:11px;color:var(--mu);margin-top:6px">Drag any receiver or back to line him up${D.kind==='run'?', and drag the yellow points to shape the run path':''}. <a href="#" onclick="pbResetPos();return false" style="color:var(--te)">Reset alignment</a></div></div>
+        <div style="font-size:11px;color:var(--mu);margin-top:6px">Drag any receiver or back to line him up${D.kind==='run'?', and drag the yellow points to shape the run path'+(D.carrier==='OPT'?' (the give to the back) and the blue points for the QB keep':''):''}. <a href="#" onclick="pbResetPos();return false" style="color:var(--te)">Reset alignment</a></div></div>
       <div style="flex:1 1 280px;min-width:0">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><input id="pb-n" placeholder="Play name" maxlength="22" value="${D.n.replace(/"/g,'&quot;')}" oninput="pbDraftInit().n=this.value" style="flex:1 1 140px">
           <select onchange="pbSetForm(this.value)">${PB_FORMS.map(([k,l])=>`<option value="${k}"${D.f===k?' selected':''}>${l}</option>`).join('')}</select></div>

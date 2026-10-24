@@ -237,6 +237,7 @@ function drawScene(F){
     {const vt=clamp(cy*(1-1/z),fB+6-H/z,fT-14);cy=vt/(1-1/z);}
     G.zcy=G.zcy==null?cy:G.zcy+(cy-G.zcy)*0.08;G.zcx=G.zcx==null?cx:G.zcx+(cx-G.zcx)*0.1;}
    G.zm=z>1?{z,cx:cm==='close'?G.zcx:W*G.anch,cy:G.zcy}:null;if(G.zm){const Z=G.zm,k=SC*DPR;ctx.fillStyle='#0b1220';ctx.fillRect(0,0,W,H);ctx.setTransform(k*z,0,0,k*z,k*(Z.cx-Z.cx*z),k*(Z.cy-Z.cy*z));}}
+  {const fc=G.phase==='replay'&&G.replay&&G.replay.fc;if(fc){const k=SC*DPR,z=fc.z,cx=W*0.5,cy=H*0.62;G.zm={z,cx,cy:cy-fc.oy/z};ctx.fillStyle='#0b1220';ctx.fillRect(0,0,W,H);ctx.setTransform(k*z,0,0,k*z,k*(cx-cx*z),k*(cy-cy*z+fc.oy));}} // replay free cam
   ctx.drawImage(BGC,0,0,W,H);
   drawRoutes();
   if(G.phase!=='replay')try{drawLand();}catch(e){}
