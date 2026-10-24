@@ -39,10 +39,20 @@ function endzoneText(s,y,yards,col,rev){
   const ux=(ax.sx-c.sx),uy=(ax.sy-c.sy),vx=(ay.sx-c.sx),vy=(ay.sy-c.sy),sg=rev?-1:1;
   const m=ctx.getTransform();
   ctx.setTransform(ux*sg,uy*sg,vx*sg,vy*sg,c.sx,c.sy);
+  const F=GP&&GP.ezGlyphs;
+  if(F&&F.g){ // the stadium's end zone font (Customize → End zone font), drawn from letter outlines
+    const sc=F.k==='script',t=sc?s.toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()):s;let w=0;for(const c of t)w+=(F.g[c]||F.g[' '])[0];
+    const k=Math.min((sc?4.4:3.7)/100,(FW-7)/Math.max(1,w));ctx.scale(k,k);ctx.translate(-w/2,sc?34:50);ctx.lineJoin='round';
+    for(const c of t){const g=F.g[c]||F.g[' '];if(g[1]){const p=ezGlyph(g[1]);
+      if(F.k==='outline'){ctx.fillStyle='rgba(10,16,24,.22)';ctx.fill(p);ctx.lineWidth=0.5/k;ctx.strokeStyle=col;ctx.stroke(p);}
+      else{ctx.lineWidth=0.35/k;ctx.strokeStyle='rgba(10,16,24,.55)';ctx.stroke(p);ctx.fillStyle=col;ctx.fill(p);}}
+      ctx.translate(g[0],0);}
+    ctx.setTransform(m);return;}
   ctx.font=`900 ${yards}px Nunito, Arial Black, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.lineWidth=0.35;ctx.strokeStyle='rgba(10,16,24,.55)';ctx.strokeText(s,0,0);ctx.fillStyle=col;ctx.fillText(s,0,0);
   ctx.setTransform(m);
 }
+const EZG=new Map();function ezGlyph(d){let p=EZG.get(d);if(!p){p=new Path2D(d);EZG.set(d,p);}return p;}
 function endzoneLogo(y,x,size,rev){if(GP)return;
   // laid flat on the turf the same way as the midfield logo
   const im=logoImg.gull;if(!(im.complete&&im.naturalWidth))return;

@@ -1,9 +1,9 @@
 /* ===================== playbook ===================== */
-// route points: [across toward sideline, depth, speed fraction at break]
+// route points: [across toward sideline, depth, speed fraction at break]; qk: quick-game speed after the break
 const ROUTES={
   go:{p:[[0.6,3,1],[1.4,45,1]],end:'cont',fade:1},
   seam:{p:[[-0.5,4,1],[-0.9,45,1]],end:'cont'},
-  slant:{p:[[0,2.5,.8],[-6,8,1]],end:'cont'},
+  slant:{p:[[0,2.5,.92],[-6,8,1]],end:'cont',qk:1.04},
   qout:{p:[[0,5,.4],[5,5,1]],end:'cont'},
   out:{p:[[0,10,.45],[8,10,1]],end:'cont'},
   hitch:{p:[[0,6,.3],[-0.3,5,0]],end:'settle'},

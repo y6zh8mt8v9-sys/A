@@ -103,7 +103,7 @@ function gpMotionStep(dt){
 }
 function setRoute(e,name,out,col){
   const R=ROUTES[name];if(!R){e.route=null;e.block=true;return;}
-  e.route={name,end:R.end,i:0,col,delay:R.delay||0,pts:R.p.map(([dx,dy,c,f])=>{let x=e.x+dx*out;x=R.fade?clamp(x,3.5,FW-3.5):clamp(x,1.5,FW-1.5);return{x,y:Math.min(119,e.y+dy),c,fake:f==='f'};})};
+  e.route={name,end:R.end,i:0,col,delay:R.delay||0,qk:R.qk||0,pts:R.p.map(([dx,dy,c,f])=>{let x=e.x+dx*out;x=R.fade?clamp(x,3.5,FW-3.5):clamp(x,1.5,FW-1.5);return{x,y:Math.min(119,e.y+dy),c,fake:f==='f'};})};
 }
 const RCOL=['#ffd23f','#4fd1ff','#ff7ad9','#b6ff6a','#ff9f43'];
 function setupScrimmage(offCall,defCall){

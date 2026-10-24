@@ -3281,7 +3281,11 @@ function face(seed,sz=48,o){
   });
   const by=ey-5.8-r()*.7,bw=1.3+r()*1.1,ba=(r()-.5)*1.6;
   [-1,1].forEach(d=>{const x=50+d*ex,i=x-d*(es+.6),o=x+d*(es+.9);s+=`<path d="M${f1(i)},${f1(by+.6+ba*.3)} Q${f1(x)},${f1(by-1.5)} ${f1(o)},${f1(by+.6-ba*.2)}" fill="none" stroke="${_fmx(hc,'#000000',.1)}" stroke-width="${f1(bw)}" stroke-linecap="round"/>`;});
-  if(r()<.2&&!(o&&o.coach))[-1,1].forEach(d=>{const x=50+d*ex;s+=`<rect x="${f1(x-3.4)}" y="${f1(ey+3.6)}" width="6.8" height="2.2" rx=".6" fill="#111" opacity=".88"/>`;});
+  // eye black: stripes or a smear under each eye (Look → Eye black; Original keeps the random stripes)
+  {const eR=r()<.2,eb=o&&o.eb?o.eb:eR&&!(o&&o.coach)?'stripes':'none';
+  if(eb==='stripes')[-1,1].forEach(d=>{const x=50+d*ex;s+=`<rect x="${f1(x-3.4)}" y="${f1(ey+3.6)}" width="6.8" height="2.2" rx=".6" fill="#111" opacity=".88"/>`;});
+  else if(eb==='smear')[-1,1].forEach(d=>{const x=50+d*ex,P=(k)=>`M${f1(x-d*(4.3+k))},${f1(ey+3.2-k*.4)} Q${f1(x)},${f1(ey+2.3-k*.6)} ${f1(x+d*(4.4+k))},${f1(ey+3.3-k*.4)} Q${f1(x+d*(3.6+k))},${f1(ey+6.6+k)} ${f1(x+d*.8)},${f1(ey+8.6+k)} Q${f1(x-d*2.4)},${f1(ey+7.2+k)} ${f1(x-d*(4.3+k))},${f1(ey+3.2-k*.4)}Z`;
+    s+=`<path d="${P(.9)}" fill="#141414" opacity=".22"/><path d="${P(0)}" fill="#141414" opacity=".82"/>`;});}
   // nose
   const nw=3.1+r()*1.6,ny=56+r()*1.4;
   s+=`<path d="M48.4,47.5 Q47.4,${f1(ny-4)} ${f1(50-nw)},${f1(ny-.4)}" fill="none" stroke="${skDD}" stroke-opacity=".3" stroke-width=".9"/><ellipse cx="50" cy="${f1(ny-1.8)}" rx="1.5" ry="1.1" fill="#fff" opacity=".14"/>`;
@@ -3369,7 +3373,10 @@ function faceTraits(seed){
   r();r();r();r();r();       // head shape
   const TX=[3,4,5,6,11,12,13,17,18,20,24,25,26,30,0,1,2,8,9,22],ST=[0,1,2,7,10,14,15,16,19,20,13,9,21,22,23,24,27,28,29],pr=r(),pool=(ti>=4?(pr<.82?TX:ST):ti<=1?(pr<.86?ST:TX):(pr<.5?TX:ST));
   let hs=pool[Math.floor(r()*pool.length)];if(o&&o.hs!=null)hs=o.hs;else hs=hsVariant(hs,seed);
-  return{ti,hc,hs};
+  // eye black: replays face() up to its eye black roll (dreads, facial hair, eyes, brows)
+  if(hs===11||hs===12)for(let i=0,n=hs===11?7:9;i<n*4;i++)r();
+  for(let i=0;i<8;i++)r();const eR=r()<.2,eb=o&&o.eb?o.eb:eR?'stripes':'none';
+  return{ti,hc,hs,eb};
 }
 // some cornrow, fade and waves heads get a lineup or a cornrow variation (from the seed, so no other part of the face changes)
 function hsVariant(hs,seed){const h=((seed||0)*2654435761+7)>>>0;if(hs===5&&h%2===0)return[33,34,35,36][(h>>>4)%4];if(hs===2&&h%3===0)return 31;if(hs===4&&h%3===0)return 32;return hs;}
@@ -10870,6 +10877,7 @@ const CC_HAIR=[[0,'Buzz cut'],[1,'Short crop'],[2,'Fade'],[15,'Quiff'],[7,'Side 
 const CC_HC=['#0e0b09','#2e2119','#4a3020','#6b4a2b','#8a6a46','#b89a64','#d8c08a','#ece0b8','#9c4a22','#b5562e','#6b5a4a','#8a8a8a','#c9c9c9','#ececec'];
 const CC_EYE=['#3a2416','#5a3a22','#4a6fa5','#5b7f5a','#6e7f86'];
 const CC_FH=[['none','None'],['stubble','Stubble'],['mustache','Mustache'],['goatee','Goatee'],['beard','Beard']];
+const CC_EB=[['none','None'],['stripes','Stripes'],['smear','Smear']]; // eye black under the eyes
 const CC_BG=['Former college quarterback','Former lineman','Defensive mastermind','Offensive play-caller','Analytics guru','Player developer','Small-town motivator','Longtime assistant'];
 const CC_FN=['Mike','Dave','Tom','Ray','Darnell','Luis','Kevin','Brian','Marcus','Steve','Andre','Tony','Greg','Jason','Carlos','Terrence','Scott','Eric'];
 const CC_LN=['Harper','Coleman','Reyes','Whitfield','Brooks','Sutton','McAllister','Okafor','Delgado','Strickland','Hayes','Barlow','Kowalski','Nguyen','Fontaine','Mercer'];
@@ -11075,7 +11083,7 @@ function gdPlayer(p,i){
     tkl:M('tkl',a('tak')),cov:M('cov',(a('mcv')+a('zcv'))/2*.85+awr*.15),
     dac:M('acc',a('dac')),tup:M('acc',a('tup')),car:M('hands',a('car')),elu:M('agi',a('elu')),btk:M('str',a('btk')),cit:M('hands',a('cit')),rte:M('agi',a('rte')),jmp:M('agi',a('jmp')),
     pbk:M('str',a('pbk')),rbk:M('str',a('rbk')),pmv:M('str',a('pmv')),fmv:M('agi',a('fmv')),bsh:M('tkl',a('bsh')),hpw:M('str',a('hpw')),mcv:M('cov',a('mcv')),zcv:M('cov',a('zcv')),prs:M('cov',a('prs')),end:clamp(Math.round(a('sta')),1,99),awr:Math.max(30,Math.min(99,Math.round(40+awr*0.6+_gdTAdj))),kpow:M('kpow',a('kpw')),kacc:M('kacc',a('kac')),ovr:r,stars:p.stars>=2?Math.min(5,p.stars):0,skin:sk,
-    pk:sk,hair:_ft.hc,hst:hairCat(_ft.hs),sl:h%5===3?1:h%5===4?2:0,visor:h%9===0,ls:h%2===0,band:h%7<3,eq:eqOf(p),...gdForm(p),...progGdP(p)};
+    pk:sk,hair:_ft.hc,hst:hairCat(_ft.hs),eb:_ft.eb||null,sl:h%5===3?1:h%5===4?2:0,visor:h%9===0,ls:h%2===0,band:h%7<3,eq:eqOf(p),...gdForm(p),...progGdP(p)};
 }
 // season form the engine uses: QBs trust sure-handed receivers, attack corners who give up yards, linemen who bury people keep doing it
 function gdForm(p){const s=p.seasStats||{},e=stEff(s),o={};if(e.drop!=null&&((s.rec||0)+(s.drops||0))>=6)o.dropR=+e.drop.toFixed(3);if(e.ypgA!=null&&(s.gp||0)>=2)o.ypgA=+e.ypgA.toFixed(1);if((s.gp||0)>=2){o.pbuR=+((s.pbu||0)/s.gp).toFixed(2);if(p.pos==='OL')o.pkR=+((s.pancakes||0)/s.gp).toFixed(2);}return o;}
@@ -11101,7 +11109,7 @@ function gdTeam(s,kind,kitOv,opt){
       const w=gdPlayer({id:null,pos,rat:Math.round(avg-8),fn:GD_WALKON[k%GD_WALKON.length],ln:'(walk-on)',num:n,fs:(s.id*31+k)},roster.length);w.mid=null;roster.push(w);cnt[pos]=(cnt[pos]||0)+1;k++;}
   }
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
-  for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}}
+  for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}if(q.eb&&q.eb!=='none'){q.eq=q.eq||{};q.eq.eb=q.eb;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);
   for(const q of roster){q.eq=q.eq||{};q.eq.helm={shell:u.hShell||'gloss',stripe:u.hStripe||'team',mask:''};}
   if(u.shoulder&&u.shoulder!=='none')for(const q of roster){q.eq=q.eq||{};q.eq.shoulder={mode:u.shoulder,c:u.shoulderC||u.trim};}
@@ -11151,7 +11159,7 @@ function gdStart(){
   window.__GP={mode:window._gdMode||'all',rival:(()=>{try{return ctx.kind==='reg'&&!!(G.sched[ctx.info.idx].isRivalry||isRivalry(G.myId,opp.id));}catch(e){return false;}})(),big:ctx.kind!=='reg',teams:[_t1,_t2],home:homeIdx,weather:gdWxFor(ctx.kind,ctx.info),stadium:stadInfo(stadOf(H),H.stadC,H),ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff'};
   try{window.__GP.previewHtml=gdPreviewHtml(me,opp,homeIdx);}catch(e){console.error(e);}
   if(_fmt<11){window.__GP.fmt=_fmt;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">${fmtName(_fmt)[0].toUpperCase()+fmtName(_fmt).slice(1)} football: ${_fmt} players a side</div>`;}
-  try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v});window.__GP.neutral=true;window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
+  try{if(ctx.kind==='po'&&ctx.info.slot&&poRoundName(ctx.info.slot.playoffRound)==='State Final'){const v=stateFinalVenue();window.__GP.stadium=Object.assign(stadInfo(20,null,H),{name:v,logo:'logo'});window.__GP.neutral=true;window.__GP.midLogoUrl=stateFinalLogoUrl();window.__GP.previewHtml=(window.__GP.previewHtml||'')+`<div style="text-align:center;font-weight:800;margin-top:6px">State Final · neutral site · ${v}</div>`;}}catch(e){}
   try{if(window.__GP.rival)window.__GP.previewHtml=(window.__GP.previewHtml||'')+rivalryWeekHtml(opp);}catch(e){}
   if(ctx.kind==='s7'&&G.s7){_gdTAdj=0;window.__GP.sevens=true;window.__GP.s7q=G.s7.qn===1?1:2;window.__GP.big=true;window.__GP.teams[0]=Object.assign(gdTeam(me,mk,null,{only:new Set(G.s7.picks)}),{ovr:Math.round(_o1)});window.__GP.previewHtml='';}
   try{pcGP(ctx);}catch(e){console.error('player career',e);}
@@ -11180,7 +11188,12 @@ function gdLaunch(){
     let done=false;const go=()=>{if(done)return;done=true;try{if(ld)ld.classList.remove('active');}catch(e){}gdLaunchFrame();};sv.then(go,go);setTimeout(go,10000);return;}
   gdLaunchFrame();
 }
+// end zone lettering in the stadium's font: the letter outlines go to the engine with the game (they work offline)
+function gdEzGlyphs(P){if(!P)return;const k=P.stadium&&P.stadium.ezFont;delete P.ezGlyphs;if(!k||k==='std')return;
+  const T=k==='script'?_LG_S:_LG_V,H=P.teams&&P.teams[P.home||0];if(!H||!T)return;const s=String(H.name||'')+' '+String(H.city||''),g={' ':T[' ']||[30,'']};
+  for(const c of s.toUpperCase()+s.toLowerCase())if(T[c])g[c]=T[c];P.ezGlyphs={k,g};}
 function gdLaunchFrame(){
+  try{gdEzGlyphs(window.__GP);}catch(e){}
   let ov=document.getElementById('gd-ov');if(ov)gdTeardown();
   ov=document.createElement('div');ov.id='gd-ov';
   ov.innerHTML=`<iframe id="gd-if" title="Game Day" allow="autoplay; web-share; fullscreen"></iframe>`;
@@ -11369,6 +11382,7 @@ const STAD_SEATS=[['silver','Aluminum silver'],['team','Team color'],['alt','Sec
 const STAD_LOGO=[['logo','Team logo'],['initial','Big letter'],['none','No logo']];
 const STAD_TRACK=[['red','Red'],['blue','Blue'],['black','Black'],['team','Team color']];
 const STAD_EZTXT=[['mascot','Mascot'],['name','School name'],['none','Blank']];
+const STAD_EZFONT=[['std','Bold'],['block','Varsity block'],['outline','Block outline'],['script','Script']]; // end zone lettering
 function _stHex(h){h=String(h||'#777').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;return[n>>16&255,n>>8&255,n&255];}
 function _stMix(a,b,t){const A=_stHex(a),B=_stHex(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');}
 function stadOf(s){
@@ -11414,7 +11428,7 @@ function stadApply(i,cust,s){
   i.logo=(STAD_LOGO.find(x=>x[0]===c.logo)||[i.logoDef])[0];
   const trK=(STAD_TRACK.find(x=>x[0]===c.track)||STAD_TRACK[0])[0];i.trackK=trK;
   i.trackCol=trK==='blue'?['#2a4f8c','#3e67ad']:trK==='black'?['#24262b','#3a3d44']:trK==='team'?[_gdDark(c1,.2),_gdDark(c1,.02)]:['#8c3b2f','#b8574a'];
-  i.ezTxtK=i.ezText?(STAD_EZTXT.find(x=>x[0]===c.eztxt)||STAD_EZTXT[0])[0]:'none';
+  i.ezTxtK=i.ezText?(STAD_EZTXT.find(x=>x[0]===c.eztxt)||STAD_EZTXT[0])[0]:'none';i.ezFont=(STAD_EZFONT.find(x=>x[0]===c.ezfont)||STAD_EZFONT[0])[0];
   i.wall=_gdDark(c1,.15);i.wall2=c2;i.c1=c1;i.c2=c2;
   return i;
 }
@@ -11585,9 +11599,9 @@ function stadPreviewSvg(i,w){
   return`<svg viewBox="0 0 300 ${H}" width="${w}" height="${Math.round(w*H/300)}" style="display:block;border-radius:10px;max-width:100%">${o}</svg>`;
 }
 function stadCustHtml(cust,i,set){
-  const cur={turf:i.turfK,ez:i.ezK,eztxt:i.ezTxtK,logo:i.logo,seats:i.seatK,track:i.trackK};
+  const cur={turf:i.turfK,ez:i.ezK,eztxt:i.ezTxtK,ezfont:i.ezFont,logo:i.logo,seats:i.seatK,track:i.trackK};
   const sel=(k,list,lab,dis)=>`<label style="font-size:12px;color:var(--mu)">${lab}<br><select ${dis?'disabled':''} onchange="${set}('${k}',this.value)">${list.map(([v,l,art])=>`<option value="${v}"${cur[k]===v?' selected':''}${art&&i.turf!=='turf'?' disabled':''}>${l}${art&&i.turf!=='turf'?' (turf only)':''}</option>`).join('')}</select></label>`;
-  return`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${sel('turf',STAD_TURF,'Field color')}${sel('ez',STAD_EZ,'End zones',!i.ezColor)}${sel('eztxt',STAD_EZTXT,'End zone text',!i.ezText)}${sel('logo',STAD_LOGO,'Midfield')}
+  return`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${sel('turf',STAD_TURF,'Field color')}${sel('ez',STAD_EZ,'End zones',!i.ezColor)}${sel('eztxt',STAD_EZTXT,'End zone text',!i.ezText)}${sel('ezfont',STAD_EZFONT,'End zone font',!i.ezText||i.ezTxtK==='none')}${sel('logo',STAD_LOGO,'Midfield')}
     ${sel('seats',STAD_SEATS,'Seats',i.stands==='none'||i.stands==='wood')}${sel('track',STAD_TRACK,'Track',!i.track)}</div>`;
 }
 function stadCost(t){return Math.round(12000*Math.pow(t,1.35)/1000)*1000;}
@@ -14489,7 +14503,7 @@ const EQ_UNDER=[['none','None'],['long','Long sleeve'],['quarter','Quarter sleev
 function eqDefault(p){
   const id=p.id!=null?p.id:(p.fs||0),h=n=>((id*2654435761+n*40503)>>>0)%1000/1000,pos=p.pos||'WR',skill=['QB','RB','WR','TE','CB','S'].includes(pos),line=pos==='OL'||pos==='DL';
   const pick=(a,r)=>a[Math.floor(r*a.length)%a.length];
-  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:''};
+  const e={towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:'',spats:''};
   if(h(21)<(['WR','CB','S','RB','LB'].includes(pos)?0.22:pos==='QB'?0.12:0.08))e.visor=pick(['smoke','smoke','black','clear','gold','blue'],h(22));
   if(h(23)<(skill?0.14:0.05)){e.legS=h(24)<0.55?'one':'both';e.legSC=pick(['#16181d','#ffffff','c1'],h(25));}
   if(['WR','RB','CB','S','LB'].includes(pos)&&h(26)<0.14)e.crop=true;
@@ -14509,11 +14523,11 @@ function eqOf(p){return Object.assign(eqDefault(p),(p&&p.eq)||{});}
 const EQ_VISOR={clear:'#a9bccd',smoke:'#3a414c',black:'#14171c',gold:'#d9a520',blue:'#2f7fe0',red:'#d8452f',purple:'#7b45d8'};
 function eqCol(c,s){return c==='c1'?(s&&s.c1)||'#1d3557':c==='c2'?(s&&s.c2)||'#ffffff':c;}
 function eqResolve(e,s){if(!e)return null;const C=c=>eqCol(c,s);
-  return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,mouth2:e.mouth2?C(e.mouth2):null,ski:e.ski?C(e.ski):null,gcap:e.gcap?C(e.gcap):null,
+  return{glove:e.glove?C(e.glove):null,cleat:e.cleat?C(e.cleat):null,towel:e.towel?C(e.towelC||'#ffffff'):null,mouth:e.mouth?C(e.mouth):null,mouth2:e.mouth2?C(e.mouth2):null,ski:e.ski?C(e.ski):null,gcap:e.gcap?C(e.gcap):null,spats:e.spats?C(e.spats):null,
     helm:{shell:'gloss',stripe:'team',mask:''}, // the helmet is the team's (Customize → Uniforms)
     pants:e.pants||'knee',socks:e.socks||'high',visor:e.visor?EQ_VISOR[e.visor]||null:null,legS:{mode:e.legS||'none',c:C(e.legSC||'#16181d')},crop:!!e.crop,sleeve:{mode:e.sleeve||'none',c:C(e.sleeveC||'#16181d')},band:{mode:e.band||'none',c:C(e.bandC||'#ffffff')},under:{mode:e.under||'none',c:C(e.underC||'#8d939b')}};}
-function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push(e.mouth2?'two mouthpieces':'mouthpiece');if(e.ski)o.push('ski mask');if(e.gcap)o.push('guardian cap');if(e.sleeve!=='none')o.push(e.sleeve==='both'?'arm sleeves':'arm sleeve');
-  if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Baggy'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
+function eqDesc(e){const o=[];if(e.towel)o.push('towel');if(e.glove)o.push('gloves');if(e.mouth)o.push(e.mouth2?'two mouthpieces':'mouthpiece');if(e.ski)o.push('ski mask');if(e.gcap)o.push('guardian cap');if(e.spats)o.push('spats');if(e.sleeve!=='none')o.push(e.sleeve==='both'?'arm sleeves':'arm sleeve');
+  if(e.band!=='none')o.push(e.band==='bicep'?'bicep bands':'wristbands');if(e.under!=='none')o.push({long:'long-sleeve',quarter:'quarter-sleeve',jamo:'Baggy'}[e.under]+' undershirt');if(e.cleat)o.push('custom cleats');if(e.visor)o.push(e.visor+' visor');if(e.legS&&e.legS!=='none')o.push(e.legS==='one'?'leg sleeve':'leg sleeves');if(e.crop)o.push('cropped jersey');if(e.pants==='short')o.push('pants above the knee');if(e.socks==='mid')o.push('medium socks');if(e.socks==='low')o.push('low socks');if(e.socks==='none')o.push('no socks');return o.join(' · ')||'standard uniform';}
 // colour picker: presets plus any custom colour
 function eqColHtml(id,val,none){const pre=EQ_COLORS.some(c=>c[0]===val)||(none&&!val);const hex=/^#/.test(val||'')?val:'#ffffff';
   return`<span style="display:inline-flex;gap:4px;align-items:center"><select class="ei" id="${id}" onchange="eqPrev()" style="width:auto;min-width:0;padding:4px 6px">${none?`<option value=""${!val?' selected':''}>${none}</option>`:''}${EQ_COLORS.map(([v,l])=>`<option value="${v}"${v===val?' selected':''}>${l}</option>`).join('')}<option value="custom"${pre?'':' selected'}>Custom…</option></select><input type="color" id="${id}-x" value="${hex}" oninput="document.getElementById('${id}').value='custom';eqPrev()" style="width:34px;height:30px;padding:0;border:0;background:none"></span>`;}
@@ -14530,13 +14544,14 @@ function lookEditorHtml(p){
       <div><div style="font-size:12px;color:var(--mu);margin-bottom:3px">Eye color</div>${sw('lk-eye',CC_EYE,L.eye)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <label style="font-size:12px;color:var(--mu)">Hairstyle<br><select class="ei" id="lk-hs" onchange="lookPrev()">${opt(CC_HAIR,L.hs)}</select></label>
-        <label style="font-size:12px;color:var(--mu)">Facial hair<br><select class="ei" id="lk-fh" onchange="lookPrev()">${opt(CC_FH,L.fh)}</select></label></div>
+        <label style="font-size:12px;color:var(--mu)">Facial hair<br><select class="ei" id="lk-fh" onchange="lookPrev()">${opt(CC_FH,L.fh)}</select></label>
+        <label style="font-size:12px;color:var(--mu)">Eye black<br><select class="ei" id="lk-eb" onchange="lookPrev()">${opt(CC_EB,L.eb)}</select></label></div>
     </div></div></div>`;}
 function lookPick(id,v){const el=document.getElementById(id);if(!el)return;el.dataset.v=v;
   el.querySelectorAll('button[title]').forEach(b=>{const bv=id==='lk-ti'?String(FACE_SKIN.indexOf(b.title)):b.title;b.style.borderColor=bv===String(v)?'var(--ac)':'rgba(0,0,0,.2)';});lookPrev();}
 function lookForm(){const g=id=>{const el=document.getElementById(id);return el?(el.dataset.v!=null&&el.tagName!=='SELECT'?el.dataset.v:el.value):'';};
-  const L={},ti=g('lk-ti'),hc=g('lk-hc'),eye=g('lk-eye'),hs=g('lk-hs'),fh=g('lk-fh');
-  if(ti!=='')L.ti=+ti;if(hc)L.hc=hc;if(eye)L.eye=eye;if(hs!=='')L.hs=+hs;if(fh)L.fh=fh;return L;}
+  const L={},ti=g('lk-ti'),hc=g('lk-hc'),eye=g('lk-eye'),hs=g('lk-hs'),fh=g('lk-fh'),eb=g('lk-eb');
+  if(ti!=='')L.ti=+ti;if(hc)L.hc=hc;if(eye)L.eye=eye;if(hs!=='')L.hs=+hs;if(fh)L.fh=fh;if(eb)L.eb=eb;return L;}
 function lookPrev(){const el=document.getElementById('lk-prev');if(!el)return;
   const L=lookForm();window._lkRaw=true;try{el.innerHTML=face(window._lkSeed,84,Object.keys(L).length?L:null);}finally{window._lkRaw=false;}}
 function lookRead(p,store){if(!document.getElementById('lk-ti'))return;const L=lookForm();
@@ -14554,11 +14569,12 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         ${row('2nd mouthpiece',eqColHtml('eq-mo2',e.mouth2||'','None'))}
         ${row('Ski mask',eqColHtml('eq-sk',e.ski||'','None'))}
         ${row('Guardian cap',eqColHtml('eq-gc',e.gcap||'','None'))}
+        ${row('Spats',eqColHtml('eq-sp',e.spats||'','None'))}
         ${row('Arm sleeves',eqSel('eq-sl',EQ_SLEEVE,e.sleeve)+eqColHtml('eq-slc',e.sleeveC))}
         ${row('Arm bands',eqSel('eq-bd',EQ_BAND,e.band)+eqColHtml('eq-bdc',e.bandC))}
         ${row('Undershirt',eqSel('eq-un',EQ_UNDER,e.under)+eqColHtml('eq-unc',e.underC))}
         ${row('Pants',eqSel('eq-pa',[['knee','At the knee'],['short','Above the knee']],e.pants||'knee'))}
-        ${row('Socks',eqSel('eq-so',[['high','High'],['low','Low'],['none','No socks']],e.socks||'high'))}
+        ${row('Socks',eqSel('eq-so',[['high','High'],['mid','Medium (mid-calf)'],['low','Low'],['none','No socks']],e.socks||'high'))}
         ${row('Leg sleeves',eqSel('eq-ls',[['none','None'],['one','One leg (near side)'],['onefar','One leg (far side)'],['both','Both legs']],e.legS||'none')+eqColHtml('eq-lsc',e.legSC||'#16181d'))}
         ${row('Visor',eqSel('eq-vi',[['','None'],['clear','Clear'],['smoke','Smoke'],['black','Black'],['gold','Gold mirror'],['blue','Blue mirror'],['red','Red mirror'],['purple','Purple mirror']],e.visor||''))}
         ${row('Jersey',eqSel('eq-cr',[['0','Regular'],['1','Cropped (undershirt / back plate shows)']],e.crop?'1':'0'))}
@@ -14569,11 +14585,11 @@ function eqEditorHtml(p){const e=eqOf(p),row=(l,a)=>`<div style="display:flex;al
         <div style="font-size:11px;color:var(--mu)">Shows on the field in Game Day</div></div></div></div>`;}
 function eqRead(){const g=id=>document.getElementById(id);if(!g('eq-tw'))return null;
   return{towel:g('eq-tw').value==='1',towelC:eqColRead('eq-twc')||'#ffffff',glove:eqColRead('eq-gl'),cleat:eqColRead('eq-cl'),mouth:eqColRead('eq-mo'),
-    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||'',mouth2:g('eq-mo2')?eqColRead('eq-mo2'):'',ski:g('eq-sk')?eqColRead('eq-sk'):'',gcap:g('eq-gc')?eqColRead('eq-gc'):''};}
+    sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||'',mouth2:g('eq-mo2')?eqColRead('eq-mo2'):'',ski:g('eq-sk')?eqColRead('eq-sk'):'',gcap:g('eq-gc')?eqColRead('eq-gc'):'',spats:g('eq-sp')?eqColRead('eq-sp'):''};}
 function eqSetForm(e){const g=id=>document.getElementById(id),sc=(id,v)=>{const s=g(id);if(!s)return;if([...s.options].some(o=>o.value===v))s.value=v;else{s.value='custom';g(id+'-x').value=v;}};
-  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');sc('eq-mo2',e.mouth2||'');sc('eq-sk',e.ski||'');sc('eq-gc',e.gcap||'');eqPrev();}
+  g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');sc('eq-mo2',e.mouth2||'');sc('eq-sk',e.ski||'');sc('eq-gc',e.gcap||'');sc('eq-sp',e.spats||'');eqPrev();}
 function eqRandom(pid){const p=window._eqPid==='pcd'&&_pcd?pccP():getP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
-function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:''});}
+function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:'',spats:''});}
 // the same pixel sprites as Game Day, loaded once from the embedded game for the preview
 let _eqLibP=null;
 function eqLib(){
@@ -14736,7 +14752,10 @@ function gameInviteResolve(wk,pops){const I=G.gameInv;if(!I||I.yr!==G.yr||I.wk!=
     if(Math.abs(c.pr-Lv)<=25&&colRoom(c,x.p,true)&&Math.random()<clamp(0.15+x.v*0.12,0.1,0.55)){x.p.offers=x.p.offers||[];addOffer(x.p,c,pops,'saw him live');got.push(`${x.p.fn} ${x.p.ln} → ${c.school}`);break;}}
   try{addLog(`<span style="color:var(--te)">The visiting staffs left Week ${wk} with ${got.length?got.join(', '):'no new offers'}.</span>`);}catch(e){}}
 // ── a neutral site for the state final: the flagship college stadium of your state ──
-function stateFinalVenue(){try{_colStReady();}catch(e){}const st=clsSt(G.cls),c=COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0];return c?`${c.school} Stadium`:`${stName(st)} Championship Stadium`;}
+function stateFinalCollege(){try{_colStReady();}catch(e){}const st=clsSt(G.cls);return COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0]||null;}
+function stateFinalVenue(){const c=stateFinalCollege();return c?`${c.school} Stadium`:`${stName(clsSt(G.cls))} Championship Stadium`;}
+// the host college's logo for the middle of the field (Game Day)
+function stateFinalLogoUrl(){try{const c=stateFinalCollege();if(!c)return null;const I=colInfo(c);return'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sLogoStandalone({name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,logoKey:I.logoKey,mash:I.mash,customLogo:I.customLogo},100));}catch(e){return null;}}
 // v2.16 coach any school: take over another program in the offseason, before its first game
 function coachTakeOver(sid,quiet){
   const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;G.role='HC';
@@ -17385,7 +17404,8 @@ function pccRender(part){
   const look=()=>{const L=d.look,sw=(k,arr,cur)=>arr.map((c,i)=>{const v=k==='ti'?i:c;return`<button class="cc-sw${String(cur)===String(v)?' on':''}" style="background:${c}" onclick="pccLook('${k}','${v}')" aria-label="${c}"></button>`;}).join('');
     return`<div class="cc-lbl">Skin tone</div><div class="cc-sws">${sw('ti',FACE_SKIN,L.ti)}</div>
      <div class="cc-row2"><label>Hairstyle<select onchange="pccLook('hs',this.value)"><option value="">Random</option>${CC_HAIR.map(([v,l])=>`<option value="${v}"${String(L.hs)===String(v)?' selected':''}>${l}</option>`).join('')}</select></label>
-     <label>Facial hair<select onchange="pccLook('fh',this.value)"><option value="">Random</option>${CC_FH.map(([v,l])=>`<option value="${v}"${L.fh===v?' selected':''}>${l}</option>`).join('')}</select></label></div>
+     <label>Facial hair<select onchange="pccLook('fh',this.value)"><option value="">Random</option>${CC_FH.map(([v,l])=>`<option value="${v}"${L.fh===v?' selected':''}>${l}</option>`).join('')}</select></label>
+     <label>Eye black<select onchange="pccLook('eb',this.value)"><option value="">Random</option>${CC_EB.map(([v,l])=>`<option value="${v}"${L.eb===v?' selected':''}>${l}</option>`).join('')}</select></label></div>
      <div class="cc-lbl">Hair color</div><div class="cc-sws">${sw('hc',CC_HC,L.hc)}</div>
      <div class="cc-lbl">Eye color</div><div class="cc-sws">${sw('eye',CC_EYE,L.eye)}</div>
      <div class="cc-segs" style="margin-top:8px"><button class="cc-seg" onclick="_pcd.fs=Math.floor(Math.random()*1e9);_pcd.look={};pccRender('look')">Randomize look</button></div>`;};
@@ -19005,7 +19025,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
 . . s1 s1 s2 s1 s1 . .
 . . . s1 s2 s1 . . .
 . . . s1 s2 s1 . . .`) }; })();
-    const bareC = new Map();
+    const bareC = new Map(), BARE_EYE = new Map(); // eye pixels of each bare-head frame (for eye black)
     function bareGrid(view, style) {
       const key = view + '|' + style; if (bareC.has(key)) return bareC.get(key);
       let g = BARE_T[view].map(r => r.slice()), ar = g.length - 1; const w = g[0].length;
@@ -19054,12 +19074,14 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       const cols = data[sheet].px.width / fw, back = BACK_ROWS[sheet].has(Math.floor(id / cols));
       const view = back || !fn ? 'back' : face === 0 ? 'front' : 'side', T = bareGrid(view, P.bare), G = T.g, gw = G[0].length, mir = view === 'side' && face < 0;
       const ox = view === 'side' ? (face > 0 ? x1 - 1 - (gw - 1) : x0 + 1) : Math.round((x0 + x1) / 2 - (gw - 1) / 2), oy = y1 - T.ar;
-      const JE = MI.jersey, JT = MI.jerseyTrim;
+      const JE = MI.jersey, JT = MI.jerseyTrim, eyes = [], sk = new Set();
       for (let gy = 0; gy < G.length; gy++) for (let gx = 0; gx < gw; gx++) { const t = G[gy][mir ? gw - 1 - gx : gx]; if (!t || t === '.') continue;
         const X = ox + gx, Y = oy + gy; if (X < 0 || Y < 0 || X >= fw || Y >= fh) continue; const m = mat[Y * fw + X];
         // never over the ball, the arms or the hands; long hair may fall over the jersey
         if (!(m === -2 || m === -1 || m === SK || (gy > T.ar - 2 && (m === JE || m === JT)))) continue;
-        set(X, Y, t[0] === 'h' ? hair[+t[1]] : t[0] === 's' ? skin[+t[1]] : eye); }
+        set(X, Y, t[0] === 'h' ? hair[+t[1]] : t[0] === 's' ? skin[+t[1]] : eye); if (t[0] === 'e') eyes.push([X, Y]); else if (t[0] === 's') sk.add(X + ',' + Y); }
+      // eye black sits on the cheekbone: one skin row below the eye stays clear, the smear runs a row further down
+      BARE_EYE.set(sheet + '|' + id, eyes.filter(([x, y]) => sk.has(x + ',' + (y + 2))).map(([x, y]) => [x, y + 1, sk.has(x + ',' + (y + 3))]));
     }
 
     function recolor(sheetName, P, number, mirrorNumbers) {
@@ -19167,7 +19189,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       const out = { glove: [], cleat: [], arm: [], neck: [], hem: [], baggy: [], towel: null, mouth: null, knee: [], sock: [], towelPx: null, helm: [], mask: [], shoulder: [] };
       let hx = 0, hn = 0, fx = 0, fn = 0, fyMax = -1, hyMax = -1;
       for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const m = mat[y * fw + x];
-        if (m === GL) out.glove.push([x, y, lv[y * fw + x]]); else if (m === CL) out.cleat.push([x, y, lv[y * fw + x]]);
+        if (m === GL) out.glove.push([x, y, lv[y * fw + x]]); else if (m === CL) out.cleat.push([x, y, lv[y * fw + x], at(x, y + 1) !== CL ? 1 : 0]);
         if (HELM.includes(m)) { hx += x; hn++; hyMax = Math.max(hyMax, y); out.helm.push([x, y, lv[y * fw + x], m]); } if (m === FM) { fx += x; fn++; fyMax = Math.max(fyMax, y); out.mask.push([x, y, lv[y * fw + x]]); } }
       const face = fn && hn ? Math.sign(Math.round(fx / fn - hx / hn)) : 0;
       const backRowAll = !!(BACK_ROWS[sheetName] && BACK_ROWS[sheetName].has(Math.floor(cell / cols)));
@@ -19175,7 +19197,10 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       out.visor = [];
       if (fn && hn && !backRowAll) { let hy0 = 99, hx0 = 99, hx1 = -1; for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const m = mat[y * fw + x]; if (HELM.includes(m) || m === FM) { hy0 = Math.min(hy0, y); hx0 = Math.min(hx0, x); hx1 = Math.max(hx1, x); } }
         const F = []; for (let y = hy0; y <= Math.max(hyMax, fyMax); y++) for (let x = hx0; x <= hx1; x++) { const m = mat[y * fw + x]; if (m === SK || m === MI.faceDark) F.push([x, y]); }
-        if (F.length) { const y0 = Math.min(...F.map(f => f[1])); for (const [x, y] of F) if (y <= y0 + 1) out.visor.push([x, y, y === y0 ? 1 : 0]); out.faceSk = F; out.faceY0 = y0; } }
+        if (F.length) { const y0 = Math.min(...F.map(f => f[1])); for (const [x, y] of F) if (y <= y0 + 1) out.visor.push([x, y, y === y0 ? 1 : 0]); out.faceSk = F; out.faceY0 = y0;
+          // eye black under the helmet: the face pixel just under each eye (the dark face pixels of the top face row)
+          const D = F.filter(([x, y]) => mat[y * fw + x] === MI.faceDark), dy = D.length ? Math.min(...D.map(f => f[1])) : -1;
+          out.ebH = D.filter(f => f[1] === dy && at(f[0], dy + 1) === SK).map(([x, y]) => [x, y + 1]); } }
       // arm pixels: distance (through the arm) from the jersey sleeve and from the glove, split into the two arms
       const dJ = new Int16Array(fw * fh).fill(99), dG = new Int16Array(fw * fh).fill(99), comp = new Int16Array(fw * fh).fill(-1), N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
       const bfs = (dist, seed) => { const q = []; for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) if (mat[y * fw + x] === ARM && N4.some(([a, b]) => seed(at(x + a, y + b)))) { dist[y * fw + x] = 0; q.push(y * fw + x); }
@@ -19220,7 +19245,14 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         const two = xs.length && Math.abs(c1 - c0) >= 2.5, legOf = x => !two ? 0 : (Math.abs(x - c0) <= Math.abs(x - c1) ? 0 : 1);
         let sleeveLeg = 0;
         if (two) { const lvAvg = g => { let s = 0, n = 0; for (const q of out.sock) if (legOf(q[0]) === g) { s += q[2]; n++; } return n ? s / n : 0; }; const l0 = lvAvg(0), l1 = lvAvg(1); sleeveLeg = Math.abs(l0 - l1) >= 0.3 ? (l1 > l0 ? 1 : 0) : 0; }
-        for (const s of out.sock) s.push(legOf(s[0])); for (const k of out.knee) k.push(legOf(k[0])); out.legs = two ? 2 : 1; out.sleeveLeg = sleeveLeg; out.legC = [c0, c1]; }
+        for (const s of out.sock) s.push(legOf(s[0])); for (const k of out.knee) k.push(legOf(k[0])); out.legs = two ? 2 : 1; out.sleeveLeg = sleeveLeg; out.legC = [c0, c1];
+        // distance (through the sock) from the cleat, so medium socks and spats follow the shin in any pose; a sock
+        // part that never touches the cleat counts from its own lowest pixels
+        { const dS = new Int16Array(fw * fh).fill(99), q = [], isS = (x, y) => SO.includes(at(x, y));
+          for (const [x, y] of out.sock) if (N4.some(([a, b]) => at(x + a, y + b) === CL)) { dS[y * fw + x] = 0; q.push(y * fw + x); }
+          const run = () => { for (let h = 0; h < q.length; h++) { const p = q[h], x = p % fw, y = (p - x) / fw; for (const [a, b] of N4) { const X = x + a, Y = y + b; if (!isS(X, Y)) continue; const k = Y * fw + X; if (dS[k] <= dS[p] + 1) continue; dS[k] = dS[p] + 1; q.push(k); } } };
+          run(); const left = out.sock.filter(([x, y, l, bot]) => bot && dS[y * fw + x] === 99); if (left.length) { q.length = 0; for (const [x, y] of left) { dS[y * fw + x] = 0; q.push(y * fw + x); } run(); }
+          const mx = [0, 0]; for (const s of out.sock) { const d = dS[s[1] * fw + s[0]]; s.push(d); if (d < 99) mx[s[4]] = Math.max(mx[s[4]], d); } out.sockMax = mx; } }
       // cropped jersey: the bottom two jersey rows above the pants show the undershirt (front / side) or the back plate (back)
       out.crop = []; out.back = backRowAll;
       for (let x = 0; x < fw; x++) { let yb = -1; for (let y = fh - 1; y >= 0; y--) { const m = mat[y * fw + x]; if ((m === JE || m === JT) && (PANTS.includes(at(x, y + 1)) || PANTS.includes(at(x, y + 2)))) { yb = y; break; } }
@@ -19235,6 +19267,10 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         if (backRow) out.towel = null; else { const ok = new Set([-2, MI.pants, MI.pantsStripe, MI.belt, MI.socks, MI.sockStripe]); out.towelPx = (x, y) => ok.has(at(x, y)); } }
       if (fn) { let bx = -1; for (let x = 0; x < fw; x++) if (at(x, fyMax) === FM && (bx < 0 || (face >= 0 ? x > bx : x < bx))) bx = x; if (face === 0) { let s = 0, c = 0; for (let x = 0; x < fw; x++) if (at(x, fyMax) === FM) { s += x; c++; } bx = Math.round(s / c); }
         out.mouth = [bx - (face > 0 ? 1 : 0), fyMax + 1]; }
+      // tank top seen from the front or the back: the outer ends of the top jersey rows are bare shoulders
+      out.tankF = []; if (backRowAll || !face) { let jt = -1; for (let y = 0; y < fh && jt < 0; y++) for (let x = 0; x < fw; x++) if (mat[y * fw + x] === JE || mat[y * fw + x] === JT) { jt = y; break; }
+        if (jt >= 0) for (let y = jt; y < jt + 3 && y < fh; y++) { let x0 = 99, x1 = -1; for (let x = 0; x < fw; x++) if (mat[y * fw + x] === JE || mat[y * fw + x] === JT) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); }
+          const cut = Math.round((x1 - x0 + 1) * (y === jt + 2 ? 0.14 : 0.24)); for (let x = x0; x <= x1; x++) { const m = mat[y * fw + x]; if ((m === JE || m === JT) && (x < x0 + cut || x > x1 - cut)) out.tankF.push([x, y, lv[y * fw + x]]); } } }
       out.face = face; M.set(cell, out); return out;
     }
     // follow one physical leg through an animation (legs swap front and back while running), so a single
@@ -19255,7 +19291,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       const T = legTrackC[key], f = cell % cols; return T.res ? T.res[f] : (E.sleeveLeg || 0); }
     const eqCss = new Map();
     function eqRamp(hex) { if (!eqCss.has(hex)) eqCss.set(hex, ramp(hex).map(css)); return eqCss.get(hex); }
-    function drawEq(ctx, sheet, cell, ax, ay, sx, sy, eq, skin, hp) {
+    function drawEq(ctx, sheet, cell, ax, ay, sx, sy, eq, skin, hp, bare) {
       const E = eqCell(sheet, cell), R = (x, y, c) => { ctx.fillStyle = c; ctx.fillRect((x - ax) * sx, (y - ay) * sy, sx + 0.04, sy + 0.04); };
       // v2.14 jersey style: stripes across the shoulders (team uniform setting)
       if (eq.shoulder && eq.shoulder.mode && eq.shoulder.mode !== 'none' && E.shoulder) { const r = eqRamp(eq.shoulder.c || '#ffffff'), D = { single: [2], double: [1, 3], triple: [1, 2, 3] }[eq.shoulder.mode] || [2];
@@ -19266,6 +19302,8 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         if (H.mask) { const r = eqRamp(H.mask); for (const [x, y, l] of E.mask) R(x, y, r[l]); } }
       if (skin && eq.pants === 'short') for (const [x, y, l] of E.knee) R(x, y, skin[l]);
       if (skin && (eq.socks === 'low' || eq.socks === 'none')) for (const [x, y, l, bottom] of E.sock) if (eq.socks === 'none' || !bottom) R(x, y, skin[l]);
+      // medium socks: the shin shows above mid-calf
+      if (skin && eq.socks === 'mid' && E.sockMax) for (const [x, y, l, bottom, g, d] of E.sock) if (d < 99 && d > Math.round(E.sockMax[g] * 0.45)) R(x, y, skin[l]);
       // leg sleeves: from the knee to the ankle, on one leg or both
       if (eq.legS && eq.legS.mode && eq.legS.mode !== 'none') { const r = eqRamp(eq.legS.c), one = eq.legS.mode === 'one' || eq.legS.mode === 'onefar', l0 = one ? legSleeveFor(sheet, cell, E) : 0, leg = eq.legS.mode === 'onefar' ? 1 - l0 : l0, ok = g => !one || (E.legs || 1) < 2 || g === leg;
         if (eq.pants === 'short') for (const [x, y, l, g] of E.knee) if (ok(g)) R(x, y, r[Math.max(1, l)]);
@@ -19276,6 +19314,8 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
           for (const [x, y, l] of E.crop) R(x, y, x >= m0 && x <= m1 ? rp[Math.min(3, l + 1)] : ru[Math.max(1, l)]); }
         else { for (const [x, y, l] of E.crop) R(x, y, ru[Math.max(1, l)]);
           if (E.cropBack != null) { ctx.globalAlpha = 0.55; for (const [x, y, l] of E.crop) if (x === E.cropBack) R(x, y, rp[2]); ctx.globalAlpha = 1; } } }
+      // 7v7 tank top: no sleeve caps, the shoulders show
+      if (eq.tank && skin) { if (E.shoulder) for (const [x, y, l, d] of E.shoulder) if (d <= 2) R(x, y, skin[l]); for (const [x, y, l] of E.tankF) R(x, y, skin[Math.max(1, l - 1)]); }
       const U = eq.under, S = eq.sleeve, B = eq.band;
       if (U && U.mode !== 'none') { const r = eqRamp(U.c);
         const lim = U.mode === 'long' ? 99 : U.mode === 'quarter' ? 3 : 5;
@@ -19287,11 +19327,16 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       if (eq.glove) { const r = eqRamp(eq.glove); for (const [x, y, l] of E.glove) R(x, y, r[l]); }
       if (eq.cleat) { const r = eqRamp(eq.cleat); for (const [x, y, l] of E.cleat) R(x, y, r[l]); }
       if (eq.noGlove && skin) for (const [x, y, l] of E.glove) R(x, y, skin[l]); // quarterbacks throw bare-handed
+      // spats: tape over the cleat (the sole still shows) and up over the ankle
+      if (eq.spats) { const r = eqRamp(eq.spats); for (const [x, y, l, sole] of E.cleat) if (!sole) R(x, y, r[Math.max(1, l)]); for (const [x, y, l, b, g, d] of E.sock) if (d <= 1) R(x, y, r[Math.max(1, l)]); }
       if (eq.visor && E.visor && E.visor.length) { const r = eqRamp(eq.visor), xs = E.visor.map(v => v[0]), gx = Math.min(...xs) + 1; for (const [x, y, top] of E.visor) R(x, y, top ? r[2] : (x === gx ? r[3] : r[1])); }
       if (eq.towel && E.towel) { const r = eqRamp(eq.towel), [tx, ty, f] = E.towel, ok = E.towelPx || (() => true), T = (x, y, c) => { if (ok(x, y)) R(x, y, c); };
         for (let k = 0; k < 6; k++) { T(tx - 1, ty + k, r[0]); T(tx + 3, ty + k, r[0]); for (let j = 0; j < 3; j++) if (!(k === 5 && j === 1)) T(tx + j, ty + k, r[j === 1 ? 3 : 2 - (j === 2 && f > 0 ? 1 : 0)]); } T(tx, ty + 6, r[0]); T(tx + 2, ty + 6, r[0]); }
       // ski mask: the face and neck under the helmet in the mask colour, an eye slit left open
       if (eq.ski) { const r = eqRamp(eq.ski); if (E.faceSk) for (const [x, y] of E.faceSk) if (y !== E.faceY0) R(x, y, r[y === E.faceY0 + 1 ? 1 : 2]); for (const [x, y, l] of E.neck) R(x, y, r[Math.max(1, l)]); }
+      // eye black: under the eye of a bare head, or the face pixel under the eye inside the facemask
+      if (eq.eb && !eq.ski) { const P = bare ? BARE_EYE.get(sheet + '|' + cell) : E.ebH, dy = bare ? 1 : 0;
+        if (P) for (const [x, y, low] of P) { R(x, y + dy, '#161414'); if (bare && low && eq.eb === 'smear') { ctx.globalAlpha = 0.7; R(x, y + 2, '#161414'); ctx.globalAlpha = 1; } } }
       if (eq.mouth && E.mouth) { const r = eqRamp(eq.mouth), [mx, my] = E.mouth; R(mx, my, r[3]); R(mx + 1, my, r[2]); R(mx, my + 1, r[2]); R(mx + 1, my + 1, r[1]); R(mx, my + 2, r[1]); }
       if (eq.mouth2 && E.mouth) { const r = eqRamp(eq.mouth2), [m0, my] = E.mouth, mx = m0 + (E.face < 0 ? 3 : -3); R(mx, my, r[3]); R(mx + 1, my, r[2]); R(mx, my + 1, r[2]); R(mx + 1, my + 1, r[1]); R(mx, my + 2, r[1]); }
       // guardian cap: a padded, ribbed soft shell over the helmet, a little taller than the shell
@@ -19358,7 +19403,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
             }
           }
         }
-        if (eq && this.sheet !== 'referee') drawEq(ctx, this.sheet, a.row * this.cols + frame, ax, ay, sx, sy, eq, this.skin, this.helm);
+        if (eq && this.sheet !== 'referee') drawEq(ctx, this.sheet, a.row * this.cols + frame, ax, ay, sx, sy, eq, this.skin, this.helm, !!this.P.bare);
         ctx.setTransform(m);
       }
     }
@@ -20936,10 +20981,20 @@ function endzoneText(s,y,yards,col,rev){
   const ux=(ax.sx-c.sx),uy=(ax.sy-c.sy),vx=(ay.sx-c.sx),vy=(ay.sy-c.sy),sg=rev?-1:1;
   const m=ctx.getTransform();
   ctx.setTransform(ux*sg,uy*sg,vx*sg,vy*sg,c.sx,c.sy);
+  const F=GP&&GP.ezGlyphs;
+  if(F&&F.g){ // the stadium's end zone font (Customize → End zone font), drawn from letter outlines
+    const sc=F.k==='script',t=sc?s.toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()):s;let w=0;for(const c of t)w+=(F.g[c]||F.g[' '])[0];
+    const k=Math.min((sc?4.4:3.7)/100,(FW-7)/Math.max(1,w));ctx.scale(k,k);ctx.translate(-w/2,sc?34:50);ctx.lineJoin='round';
+    for(const c of t){const g=F.g[c]||F.g[' '];if(g[1]){const p=ezGlyph(g[1]);
+      if(F.k==='outline'){ctx.fillStyle='rgba(10,16,24,.22)';ctx.fill(p);ctx.lineWidth=0.5/k;ctx.strokeStyle=col;ctx.stroke(p);}
+      else{ctx.lineWidth=0.35/k;ctx.strokeStyle='rgba(10,16,24,.55)';ctx.stroke(p);ctx.fillStyle=col;ctx.fill(p);}}
+      ctx.translate(g[0],0);}
+    ctx.setTransform(m);return;}
   ctx.font=`900 ${yards}px Nunito, Arial Black, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.lineWidth=0.35;ctx.strokeStyle='rgba(10,16,24,.55)';ctx.strokeText(s,0,0);ctx.fillStyle=col;ctx.fillText(s,0,0);
   ctx.setTransform(m);
 }
+const EZG=new Map();function ezGlyph(d){let p=EZG.get(d);if(!p){p=new Path2D(d);EZG.set(d,p);}return p;}
 function endzoneLogo(y,x,size,rev){if(GP)return;
   // laid flat on the turf the same way as the midfield logo
   const im=logoImg.gull;if(!(im.complete&&im.naturalWidth))return;
@@ -21520,11 +21575,11 @@ function drawCheerSquad(){
   }
 }
 /* ===================== playbook ===================== */
-// route points: [across toward sideline, depth, speed fraction at break]
+// route points: [across toward sideline, depth, speed fraction at break]; qk: quick-game speed after the break
 const ROUTES={
   go:{p:[[0.6,3,1],[1.4,45,1]],end:'cont',fade:1},
   seam:{p:[[-0.5,4,1],[-0.9,45,1]],end:'cont'},
-  slant:{p:[[0,2.5,.8],[-6,8,1]],end:'cont'},
+  slant:{p:[[0,2.5,.92],[-6,8,1]],end:'cont',qk:1.04},
   qout:{p:[[0,5,.4],[5,5,1]],end:'cont'},
   out:{p:[[0,10,.45],[8,10,1]],end:'cont'},
   hitch:{p:[[0,6,.3],[-0.3,5,0]],end:'settle'},
@@ -21792,7 +21847,7 @@ function gpMotionStep(dt){
 }
 function setRoute(e,name,out,col){
   const R=ROUTES[name];if(!R){e.route=null;e.block=true;return;}
-  e.route={name,end:R.end,i:0,col,delay:R.delay||0,pts:R.p.map(([dx,dy,c,f])=>{let x=e.x+dx*out;x=R.fade?clamp(x,3.5,FW-3.5):clamp(x,1.5,FW-1.5);return{x,y:Math.min(119,e.y+dy),c,fake:f==='f'};})};
+  e.route={name,end:R.end,i:0,col,delay:R.delay||0,qk:R.qk||0,pts:R.p.map(([dx,dy,c,f])=>{let x=e.x+dx*out;x=R.fade?clamp(x,3.5,FW-3.5):clamp(x,1.5,FW-1.5);return{x,y:Math.min(119,e.y+dy),c,fake:f==='f'};})};
 }
 const RCOL=['#ffd23f','#4fd1ff','#ff7ad9','#b6ff6a','#ff9f43'];
 function setupScrimmage(offCall,defCall){
@@ -21918,22 +21973,25 @@ function resetBall(){
 }
 
 /* ===================== special teams setup ===================== */
+// players a side: six-, eight- and nine-man games field that many on every kick too
+function gpPer(){return GP&&GP.fmt&&GP.fmt<11&&!SEVENS()?GP.fmt:11;}
 function setupKickoff(kickTeam,spot){try{gpHotseat(kickTeam);}catch(e){}
   const K=G.teams[kickTeam],R=G.teams[1-kickTeam];autoSubs(K);autoSubs(R);
   G.offTeam=1-kickTeam;G.flip=gpFlipFor(G.offTeam);
   const ky=110-spot,L=[];
   const kicker=K.byPos('K')[0];
   const kick=addE(L,K,kicker,'d','K',CX,ky+4,'K');
-  const cover=fillUnit(K,10,[kicker],['LB','S','CB','DL','WR','RB','TE']);
-  const xs=[3.5,8,12.5,17,21.5],of=typeof G.onsideNext==='string'?G.onsideNext:null;
-  if(of==='left'||of==='right'){const sd=of==='left'?-1:1;   // overload: seven stacked to the kick side, three to hold the other
-    cover.forEach((p,i)=>{const x=i<7?CX+sd*(2.2+i*2.6):CX-sd*(6+(i-7)*7);addE(L,K,p,'d','COV',clamp(x,1.5,FW-1.5),ky+0.8,'COV'+i);});}
+  const N=gpPer(),cover=fillUnit(K,N-1,[kicker],['LB','S','CB','DL','WR','RB','TE']);
+  const np=Math.ceil(cover.length/2),xs=[...Array(np)].map((_,j)=>3.5+j*18/Math.max(1,np-1)),of=typeof G.onsideNext==='string'?G.onsideNext:null,ks=Math.round(cover.length*0.7);
+  if(of==='left'||of==='right'){const sd=of==='left'?-1:1;   // overload: seven of ten stacked to the kick side, the rest hold the other
+    cover.forEach((p,i)=>{const x=i<ks?CX+sd*(2.2+i*2.6):CX-sd*(6+(i-ks)*7);addE(L,K,p,'d','COV',clamp(x,1.5,FW-1.5),ky+0.8,'COV'+i);});}
   else cover.forEach((p,i)=>{const side=i%2?1:-1,j=Math.floor(i/2);addE(L,K,p,'d','COV',CX+side*xs[j]*(of==='popup'?0.7:1),ky+0.8,'COV'+i);});
   const rets=fastest(R,['RB','WR','CB'],[]).slice(0,2);
   const kr1=addE(L,R,rets[0],'o','KR',CX-6,12,'KR'),kr2=addE(L,R,rets[1],'o','KR',CX+6,13,'KR2');
-  const blk=fillUnit(R,9,rets,['TE','LB','WR','RB','S','OL','DL']);
-  const fx=[8,16,CX,FW-16,FW-8],mx=[CX-9,CX-3,CX+3,CX+9];
-  blk.forEach((p,i)=>{const[x,y]=i<5?[fx[i],ky-10.5]:[mx[i-5],ky-25];addE(L,R,p,'o','BLK',x,y,'BLK'+i);});
+  const blk=fillUnit(R,N-2,rets,['TE','LB','WR','RB','S','OL','DL']);
+  // front line and second wall, spread over the field whatever the number of blockers
+  const fN=blk.length>=9?5:Math.round(blk.length*5/9),fx=[[CX],[16,FW-16],[8,CX,FW-8],[8,16,FW-16,FW-8],[8,16,CX,FW-16,FW-8]][fN-1]||[],mx=[[CX],[CX-6,CX+6],[CX-9,CX,CX+9],[CX-9,CX-3,CX+3,CX+9]][blk.length-fN-1]||[];
+  blk.forEach((p,i)=>{const[x,y]=i<fN?[fx[i],ky-10.5]:[mx[i-fN],ky-25];addE(L,R,p,'o','BLK',x,y,'BLK'+i);});
   G.ents=L;G.refs=mkRefs(ky);G.refs[0].y=ky+6;G.refs[3].y=10;
   G.play={kind:'kickoff',kickTeam,spot,kicker:kick,rets:[L.find(e=>e.slot==='KR'),L.find(e=>e.slot==='KR2')],onside:!!G.onsideNext,oform:of||'std',ky};G.onsideNext=false;
   G.linesW=null;resetBall();
@@ -21945,18 +22003,17 @@ function setupPunt(puntTeam,los){
   const punter=P.byPos('P')[0],ls=slotPlayer(P,'C');
   const pe=addE(L,P,punter,'d','P',CX,Math.min(ly+14,119),'P');
   addE(L,P,ls,'d','LS',CX,ly+0.8,'LS');
-  const line=fillUnit(P,8,[punter,ls],['OL','TE','LB','WR','RB','DL']);
+  const N=gpPer(),line=fillUnit(P,N-4,[punter,ls],['OL','TE','LB','WR','RB','DL']);
   const gun=fastest(P,['WR','CB','RB','S'],[punter,ls,...line]).slice(0,2);
-  const lineFixed=line.slice(0,4),wings=line.slice(4,6),pp=line[6];
-  [[-1.9,0.9],[1.9,0.9],[-3.8,1.0],[3.8,1.0]].forEach(([dx,dy],i)=>addE(L,P,lineFixed[i],'d','PL',CX+dx,ly+dy,'PL'+i));
-  [[-5.3,1.8],[5.3,1.8]].forEach(([dx,dy],i)=>addE(L,P,wings[i],'d','PL',CX+dx,ly+dy,'W'+i));
-  addE(L,P,pp,'d','PL',CX+0.8,ly+5,'PP');
+  // the line fills from the snapper out: guards, tackles, the up-back, then the wings
+  {const S=[[-1.9,0.9,'PL0'],[1.9,0.9,'PL1'],[-3.8,1.0,'PL2'],[3.8,1.0,'PL3'],[-5.3,1.8,'W0'],[5.3,1.8,'W1'],[0.8,5,'PP']],pick=[0,1,2,3,6,4,5].slice(0,line.length).sort((a,b)=>a-b);
+   pick.forEach((k,i)=>{const[dx,dy,sl]=S[k];addE(L,P,line[i],'d','PL',CX+dx,ly+dy,sl);});}
   const g1=addE(L,P,gun[0],'d','GUN',3,ly+0.9,'GUN1'),g2=addE(L,P,gun[1],'d','GUN',FW-3,ly+0.9,'GUN2');
   const pr=fastest(R,['RB','WR','CB'],[])[0];
-  const others=fillUnit(R,10,[pr],['LB','DL','CB','S','TE','WR']);
-  [-1,1,-3,3,-5.5,5.5].forEach((dx,i)=>addE(L,R,others[i],'o','RUSH',CX+dx,ly-1.2,'RU'+i));
-  addE(L,R,others[6],'o','JAM',3.6,ly-1.5,'JAM1');addE(L,R,others[7],'o','JAM',FW-3.6,ly-1.5,'JAM2');
-  addE(L,R,others[8],'o','HOLD',CX-6,ly-10,'HU1');addE(L,R,others[9],'o','HOLD',CX+6,ly-10,'HU2');
+  const others=fillUnit(R,N-1,[pr],['LB','DL','CB','S','TE','WR']),nh=others.length>=9?2:1,nr=others.length-2-nh;
+  [-1,1,-3,3,-5.5,5.5].slice(0,nr).forEach((dx,i)=>addE(L,R,others[i],'o','RUSH',CX+dx,ly-1.2,'RU'+i));
+  addE(L,R,others[nr],'o','JAM',3.6,ly-1.5,'JAM1');addE(L,R,others[nr+1],'o','JAM',FW-3.6,ly-1.5,'JAM2');
+  if(nh===2){addE(L,R,others[nr+2],'o','HOLD',CX-6,ly-10,'HU1');addE(L,R,others[nr+3],'o','HOLD',CX+6,ly-10,'HU2');}else addE(L,R,others[nr+2],'o','HOLD',CX,ly-10,'HU1');
   const pre=addE(L,R,pr,'o','PR',CX,Math.max(8,ly-40),'PR');
   G.ents=L;G.refs=mkRefs(ly);G.refs[0].y=ly+17;G.refs[3].y=Math.max(4,ly-44);
   G.play={kind:'punt',puntTeam,los,punter:pe,ret:pre,gunners:[g1,g2]};
@@ -21967,12 +22024,13 @@ function setupFG(kind){
   const ly=10+G.los,L=[];
   const k=O.byPos('K')[0],holder=O.byPos('P')[0];
   const ke=addE(L,O,k,'o','K',CX-1.6,ly-9.6,'K'),he=addE(L,O,holder,'o','H',CX,ly-7,'H');
-  const line=[slotPlayer(O,'C'),slotPlayer(O,'LG'),slotPlayer(O,'RG'),slotPlayer(O,'LT'),slotPlayer(O,'RT'),slotPlayer(O,'TE')];
+  const N=gpPer(),line=[slotPlayer(O,'C'),slotPlayer(O,'LG'),slotPlayer(O,'RG'),slotPlayer(O,'LT'),slotPlayer(O,'RT'),slotPlayer(O,'TE')];
   const ext=fillUnit(O,3,[k,holder,...line],['TE','OL','DL','LB']);
-  [[0,-0.8],[-1.9,-0.8],[1.9,-0.8],[-3.8,-1],[3.8,-1],[5.6,-1.4]].forEach(([dx,dy],i)=>addE(L,O,line[i],'o',i===0?'LS':'OL',CX+dx,ly+dy,'FL'+i));
-  [[-5.6,-1.4],[-6.6,-2.2],[6.6,-2.2]].forEach(([dx,dy],i)=>addE(L,O,ext[i],'o','OL',CX+dx,ly+dy,'FX'+i));
+  // fewer a side: the snapper and guards stay, then the wing, the tackles and the outside men
+  {const S=[[line[0],0,-0.8,'FL0'],[line[1],-1.9,-0.8,'FL1'],[line[2],1.9,-0.8,'FL2'],[line[3],-3.8,-1,'FL3'],[line[4],3.8,-1,'FL4'],[line[5],5.6,-1.4,'FL5'],[ext[0],-5.6,-1.4,'FX0'],[ext[1],-6.6,-2.2,'FX1'],[ext[2],6.6,-2.2,'FX2']];
+   [0,1,2,5,3,4,6,7,8].slice(0,N-2).sort((a,b)=>a-b).forEach(k=>{const[p,dx,dy,sl]=S[k];addE(L,O,p,'o',k===0?'LS':'OL',CX+dx,ly+dy,sl);});}
   const rush=[...DSLOTS.map(([s])=>slotPlayer(D,s))];
-  [-0.9,0.9,-2.8,2.8,-4.7,4.7,-6.8,6.8,0].forEach((dx,i)=>addE(L,D,rush[i],'d','FGR',CX+dx,ly+(i===8?6:1.2),'FR'+i));
+  [-0.9,0.9,-2.8,2.8,-4.7,4.7,-6.8,6.8,0].slice(0,N-2).forEach((dx,i)=>addE(L,D,rush[i],'d','FGR',CX+dx,ly+(i===8?6:1.2),'FR'+i));
   addE(L,D,rush[9],'d','S',CX-8,ly+11,'FS1');addE(L,D,rush[10],'d','S',CX+8,ly+11,'FS2');
   G.ents=L;G.refs=mkRefs(ly);G.refs[3].y=Math.min(122,ly+30);
   G.play={kind,kicker:ke,holder:he,two:false};
@@ -22003,17 +22061,17 @@ function pursuit(d,c){
 /* ===================== route running ===================== */
 function routeRun(e){
   const r=e.route;if(!r)return[0,0];
-  const jam=e.jam>0?0.35:1;
+  const jam=e.jam>0?0.35:1,qk=r.qk&&r.i>0?r.qk:1; // slants: a sharp break and a burst out of it
   if(r.delay&&G.t<r.delay)return desire(e,e.hx-0.6,e.hy-0.8,1.6);
   let pt=r.pts[r.i];
   if(pt){
     const dp=Math.hypot(pt.x-e.x,pt.y-e.y);
     r.wt=(r.wt||0)+1/60;
     const passed=dp<1.4&&((pt.x-e.x)*e.vx+(pt.y-e.y)*e.vy)<0&&Math.hypot(e.vx,e.vy)>1;
-    if(dp<0.45||passed||r.wt>3.5){if((pt.c<0.6||pt.fake)&&r.i<r.pts.length-1){e.plant=0.18;breakCut(e,pt.fake);}r.i++;r.wt=0;pt=r.pts[r.i];}
+    if(dp<0.45||passed||r.wt>3.5){if((pt.c<0.6||pt.fake)&&r.i<r.pts.length-1){e.plant=0.18;breakCut(e,pt.fake);}if(r.qk&&r.i===0)e.rAcc={p:G.play,t:G.t+0.45};r.i++;r.wt=0;pt=r.pts[r.i];}
   }
   if(pt){
-    const d=Math.hypot(pt.x-e.x,pt.y-e.y),cut=pt.c*e.spd,v=Math.min(e.spd,Math.sqrt(cut*cut+2*6.5*d))*jam;
+    const d=Math.hypot(pt.x-e.x,pt.y-e.y),cut=pt.c*e.spd,v=Math.min(e.spd,Math.sqrt(cut*cut+2*6.5*d))*jam*qk;
     let vx=(pt.x-e.x)/d*v,vy=(pt.y-e.y)/d*v;
     // swerve: a defender sitting right in the route's path is stepped around, not run into
     for(const o of G.ents){if(o.side!=='d'||o.down)continue;const ox=o.x-e.x,oy=o.y-e.y,od=Math.hypot(ox,oy);if(od>1.6||od<0.01)continue;
@@ -22026,7 +22084,7 @@ function routeRun(e){
     const a=r.pts[r.pts.length-2]||{x:e.hx,y:e.hy};let dx=z.x-a.x,dy=z.y-a.y;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
     if((e.x<2.2&&dx<0)||(e.x>FW-2.2&&dx>0)){dx=0;dy=1;}
     if(e.y>117)dy=Math.min(dy,0);
-    return[dx*e.spd*jam,dy*e.spd*jam];
+    return[dx*e.spd*jam*qk,dy*e.spd*jam*qk];
   }
   e.settled=true;
   if(!e.hole||G.t>e.holeT){
@@ -23120,7 +23178,7 @@ function updateLive(dt){
     let px=0,py=0;
     const runPush=P.kind==='scrimmage'&&P.off.kind==='run'||G.ballState==='carrier';
     if(e.eng>0&&e.blockedBy&&runPush&&e.blockedBy.pl){const b=e.blockedBy,dx=e.x-b.x,dy=e.y-b.y,l=Math.hypot(dx,dy)||1,m=1.5*clamp(b.pl.str/e.pl.str,0.7,1.35);px=dx/l*m;py=dy/l*m;}
-    accel(e,v[0]*f+px,v[1]*f+py,dt);
+    accel(e,v[0]*f+px,v[1]*f+py,dt,e.rAcc&&e.rAcc.p===P&&e.rAcc.t>G.t?e.acc*1.35:0); // quick break out of a slant
   }
   for(const e of G.ents){
     e.x+=e.vx*dt;e.y+=e.vy*dt;const sp=Math.hypot(e.vx,e.vy);e.anim+=sp*dt*2.1;e.run+=sp*dt;if(e.pl&&!e.spd0)e.spd0=e.spd;if(e.spd0)e.spd=e.spd0*(1-Math.min(0.07,Math.max(0,e.run-25)*0.0014*(0.6+gpFat(e))));
@@ -24522,7 +24580,7 @@ function packSprite(pk){
 }
 function drawPack(S,p,z){
   const pk=S.pk,sp=packSprite(pk);
-  if(pk.bare&&S.look){const q=S.look.eq||{};S={...S,look:{...S.look,eq:{...q,visor:null,mouth:null,mouth2:null,helm:null,ski:null,gcap:null,...(pk.slim?{pants:'short',socks:'low'}:{})}}};}
+  if(pk.bare&&S.look){const q=S.look.eq||{};S={...S,look:{...S.look,eq:{...q,visor:null,mouth:null,mouth2:null,helm:null,ski:null,gcap:null,...(pk.slim?{pants:'short',socks:'low',tank:true,under:null,crop:false,shoulder:null}:{})}}};}
   const s=98*z*(S.body?S.body.hs:1)/48,sx=s*clamp(Math.sqrt((S.body?S.body.ws:1)/BUILD_WS[pk.build]),0.9,1.12);
   const hb=S.qbBall?gpHeldBall(sp,pk,S.dir<0,sx,s):null;
   if(S.rot||(S.sq&&S.sq!==1)){ctx.save();ctx.translate(p.sx,p.sy-S.jz*p.k);ctx.rotate(S.rot||0);ctx.scale(1,S.sq||1);sp.draw(ctx,pk.anim,pk.frame,0,0,sx,s,S.dir<0,S.ref?null:S.num,S.ref?null:S.look&&S.look.eq);if(hb)gpDrawHeld(hb,0,0,s);ctx.restore();}
@@ -25856,7 +25914,7 @@ if(GP){try{
   if(L0){L0.setAttribute('viewBox','0 0 100 100');L0.innerHTML=GP.teams[0].logoInner;}
   if(L1){L1.setAttribute('viewBox','0 0 100 100');L1.innerHTML=GP.teams[1].logoInner;}
   for(const i of[0,1]){const c=document.getElementById('gpC'+i),n=document.getElementById('gpN'+i);if(c)c.textContent=GP.teams[i].city.toUpperCase()+(GP.teams[i].ovr?' · '+GP.teams[i].ovr+' OVR':'');if(n){n.textContent=GP.teams[i].name.toUpperCase();n.dataset.full=n.textContent;n.dataset.abbr=(GP.teams[i].abbr||n.textContent.slice(0,4)).toUpperCase();n.dataset.rec=GP.teams[i].rec||'';}}
-  if(GP.teams[GP.home||0].logoUrl)logoImg.gull.src=GP.teams[GP.home||0].logoUrl;
+  if(GP.midLogoUrl||GP.teams[GP.home||0].logoUrl)logoImg.gull.src=GP.midLogoUrl||GP.teams[GP.home||0].logoUrl; // a neutral-site final shows the host college at midfield
   const h0=document.querySelector('.tm.home'),h1=document.querySelector('.tm.away');if(h0&&GP.teams[0].hud)h0.style.background=GP.teams[0].hud;if(h1&&GP.teams[1].hud)h1.style.background=GP.teams[1].hud;
   document.title=GP.teams[0].name+' vs '+GP.teams[1].name;
 }catch(e){console.error(e);}}

@@ -255,7 +255,10 @@ function gameInviteResolve(wk,pops){const I=G.gameInv;if(!I||I.yr!==G.yr||I.wk!=
     if(Math.abs(c.pr-Lv)<=25&&colRoom(c,x.p,true)&&Math.random()<clamp(0.15+x.v*0.12,0.1,0.55)){x.p.offers=x.p.offers||[];addOffer(x.p,c,pops,'saw him live');got.push(`${x.p.fn} ${x.p.ln} → ${c.school}`);break;}}
   try{addLog(`<span style="color:var(--te)">The visiting staffs left Week ${wk} with ${got.length?got.join(', '):'no new offers'}.</span>`);}catch(e){}}
 // ── a neutral site for the state final: the flagship college stadium of your state ──
-function stateFinalVenue(){try{_colStReady();}catch(e){}const st=clsSt(G.cls),c=COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0];return c?`${c.school} Stadium`:`${stName(st)} Championship Stadium`;}
+function stateFinalCollege(){try{_colStReady();}catch(e){}const st=clsSt(G.cls);return COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0]||null;}
+function stateFinalVenue(){const c=stateFinalCollege();return c?`${c.school} Stadium`:`${stName(clsSt(G.cls))} Championship Stadium`;}
+// the host college's logo for the middle of the field (Game Day)
+function stateFinalLogoUrl(){try{const c=stateFinalCollege();if(!c)return null;const I=colInfo(c);return'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sLogoStandalone({name:I.name,mascot:I.mascot,c1:I.c1,c2:I.c2,logoKey:I.logoKey,mash:I.mash,customLogo:I.customLogo},100));}catch(e){return null;}}
 // v2.16 coach any school: take over another program in the offseason, before its first game
 function coachTakeOver(sid,quiet){
   const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;G.role='HC';
