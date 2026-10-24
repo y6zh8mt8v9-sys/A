@@ -61,7 +61,8 @@ function startGame(){
   const chosenRivals=[..._selectedRivals];
   const team=_selectedOfferTeam;
   showLoading('Building Your Program…',team,18,()=>{
-    initGame(coach,divs,foundDIdx,foundSIdx,chosenRivals);
+    window._pcNewCareer=!!(pcDraft&&pcDraft.lock); // a Player Career never opens the schedule builder
+    try{initGame(coach,divs,foundDIdx,foundSIdx,chosenRivals);}finally{window._pcNewCareer=false;}
     try{G.world=JSON.parse(JSON.stringify(WORLD||{}));}catch(e){G.world={};}G.world.geo=USA.on?JSON.parse(JSON.stringify(USA.cfg)):{mode:'classic'};
     G.coach=window._coachDraft||null;G.saveId=null;window._coachDraft=null;setTimeout(()=>{try{saveGame(true);}catch(e){}},900);
     document.getElementById('setup').classList.add('hid');
@@ -70,8 +71,9 @@ function startGame(){
     checkAndFillRosters();
     _allClsDivs=null;_setupDivs=null;_mapOffers=[];for(const c of MAPC){c.offers=[];} // the setup map's lists: free them
     try{if(pcDraft)pcCreate(pcDraft);}catch(e){console.error('player career',e);}
+    if(G.pcLock)try{pcAutoSched();}catch(e){console.error('player career schedule',e);} // Player Career: the staff builds the schedule
     nav(G.myPlayerId!=null?'mine':'dash');
-    showTutorial();
+    showTutorial();if(G.pcLock){const i=TUT_PAGES.findIndex(x=>x.tab==='Player Career');if(i>=0)goTutTab(i);}
   });
 }
 // ═══════════ PLAYER CREATOR (Player Career): who he is, how he looks, what he wears and his starting ratings ═══════════
@@ -126,7 +128,8 @@ function pccRender(part){
   const look=()=>{const L=d.look,sw=(k,arr,cur)=>arr.map((c,i)=>{const v=k==='ti'?i:c;return`<button class="cc-sw${String(cur)===String(v)?' on':''}" style="background:${c}" onclick="pccLook('${k}','${v}')" aria-label="${c}"></button>`;}).join('');
     return`<div class="cc-lbl">Skin tone</div><div class="cc-sws">${sw('ti',FACE_SKIN,L.ti)}</div>
      <div class="cc-row2"><label>Hairstyle<select onchange="pccLook('hs',this.value)"><option value="">Random</option>${CC_HAIR.map(([v,l])=>`<option value="${v}"${String(L.hs)===String(v)?' selected':''}>${l}</option>`).join('')}</select></label>
-     <label>Facial hair<select onchange="pccLook('fh',this.value)"><option value="">Random</option>${CC_FH.map(([v,l])=>`<option value="${v}"${L.fh===v?' selected':''}>${l}</option>`).join('')}</select></label></div>
+     <label>Facial hair<select onchange="pccLook('fh',this.value)"><option value="">Random</option>${CC_FH.map(([v,l])=>`<option value="${v}"${L.fh===v?' selected':''}>${l}</option>`).join('')}</select></label>
+     <label>Eye black<select onchange="pccLook('eb',this.value)"><option value="">Random</option>${CC_EB.map(([v,l])=>`<option value="${v}"${L.eb===v?' selected':''}>${l}</option>`).join('')}</select></label></div>
      <div class="cc-lbl">Hair color</div><div class="cc-sws">${sw('hc',CC_HC,L.hc)}</div>
      <div class="cc-lbl">Eye color</div><div class="cc-sws">${sw('eye',CC_EYE,L.eye)}</div>
      <div class="cc-segs" style="margin-top:8px"><button class="cc-seg" onclick="_pcd.fs=Math.floor(Math.random()*1e9);_pcd.look={};pccRender('look')">Randomize look</button></div>`;};

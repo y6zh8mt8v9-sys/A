@@ -91,7 +91,7 @@ function tutTick(){
       const S=G.result&&G.result.S,msg=S?`${S.msg}${S.sub?' · '+S.sub:''}`:'Rep complete';
       G.pOff=0;G.poss=0;G.drivePoss=0;G.los=75;G.down=4;G.toGo=6;G.next=null;G.conv=null;
       TUT.st='k_call';tutShow(6,'Defense done: '+msg,`Last one: your offense is on the 25 on 4th down.`);return;}
-    tutShow(5,'Play defense',G.im&&G.ballState==='air'?`A <b>meter<\/b> is up over a defender: tap the screen in the <b>green<\/b> to break up the pass or pick it off.`:`<b>Press and drag<\/b> anywhere to move your player, like a joystick. Get close to the ball carrier and tap <b>Tackle<\/b> (or J). <b>Switch<\/b> (Tab) jumps to the defender nearest the ball.`);return;
+    tutShow(5,'Play defense',G.im&&G.ballState==='air'?`A <b>meter<\/b> is up over a defender: tap the screen in the <b>green<\/b> to break up the pass or pick it off.`:`<b>Press and drag<\/b> anywhere to move your player, like a joystick. Hold <b>Sprint<\/b> (Shift) to close in, then pick a tackle on the wheel: <b>Form tackle<\/b> (U) is the sure one, <b>Hit stick<\/b> (I) can knock the ball loose, <b>Ankle bite<\/b> (O) reaches farthest, <b>Tackle<\/b> (J) picks for you. <b>Switch<\/b> (Tab) jumps to the defender nearest the ball.`);return;
   }
   if(st==='k_call'){
     if(ph==='presnap'&&P&&(P.kind==='fg'||P.kind==='punt')){TUT.st='k_meter';}
@@ -108,7 +108,7 @@ function tutTick(){
     if(ph!=='dead')return;
     const S=G.result&&G.result.S,msg=S?`${S.msg}${S.sub?' · '+S.sub:''}`:'Kick complete';
     TUT.st='fin';
-    tutShow(7,'Tutorial complete: '+msg,`That covers the core of every game day:<br>• Call a play, snap, throw with the slingshot, and win catch meters<br>• Make moves with swipes and the move buttons<br>• Take control of a defender, drag to move, tap Tackle<br>• Stop the kick meters in the green<br><br>In real games you can also <b>simulate a drive<\/b> when one comes up, use <b>timeouts<\/b> and <b>substitutions<\/b> from the call sheet, and open the <b>pause menu<\/b> any time. Good luck in week 1!`,'Finish');
+    tutShow(7,'Tutorial complete: '+msg,`That covers the core of every game day:<br>• Call a play, snap, throw with the slingshot, and win catch meters<br>• Make moves with swipes and the move buttons<br>• Take control of a defender, drag to move, sprint and pick a tackle on the wheel<br>• Stop the kick meters in the green<br><br>In real games you can also <b>simulate a drive<\/b> when one comes up, use <b>timeouts<\/b> and <b>substitutions<\/b> from the call sheet, and open the <b>pause menu<\/b> any time. Good luck in week 1!`,'Finish');
     return;
   }
 }
@@ -202,7 +202,7 @@ function tackleFx(e,dir){
   if(!e.down&&e.shakeT>0){e.shakeT-=1/60;o.rot=0.16*Math.sin(e.shakeT*26)*Math.min(1,e.shakeT/0.3);}
   return o;
 }
-function gpFx(e,dir){const a=catchFx(e,dir),b=tackleFx(e,dir),q=qbFx(e,dir),c=downFx(e),v=diveFx(e,dir);return{rot:a.rot+b.rot+q.rot+v.rot,sq:a.sq*b.sq*c.sq,jz:a.jz+b.jz+q.jz+c.jz+v.jz,flip:b.flip};}
+function gpFx(e,dir){const a=catchFx(e,dir),b=tackleFx(e,dir),q=qbFx(e,dir),c=downFx(e),v=diveFx(e,dir),t=gpTkFx(e,dir);return{rot:a.rot+b.rot+q.rot+v.rot+t.rot,sq:a.sq*b.sq*c.sq*t.sq,jz:a.jz+b.jz+q.jz+c.jz+v.jz+t.jz,flip:b.flip};}
 
 // ── coverage quality: man = DB vs his receiver, zone = DB reading the QB ──
 function gpCoverTune(d){
@@ -693,12 +693,18 @@ function autoSubs(T){
         const r=pool.sort((a,b)=>b.stamina-a.stamina)[0];if(r){inUse.delete(cur.id);T.lineup[s]=r.id;inUse.add(r.id);}
         continue;
       }
+      const dep=p=>p.dep!=null&&p.pos===pos; // a depth-chart starter (from the app)
+      // the depth chart's quarterback gets his job back once he is healthy again
+      if(s==='QB'&&T.auto&&!(T.lock&&T.lock[s])&&!dep(cur)){const b=pool.filter(dep).sort((a,b)=>a.dep-b.dep)[0];if(b){inUse.delete(cur.id);T.lineup[s]=b.id;inUse.add(b.id);}continue;}
       if(!T.auto||s==='QB'||(T.lock&&T.lock[s]))continue;
       if(cur.stamina<52){
         const r=pool.filter(p=>p.stamina>78).sort((a,b)=>b.ovr-a.ovr)[0];
         if(r){inUse.delete(cur.id);T.lineup[s]=r.id;inUse.add(r.id);}
+      }else if(dep(cur)){
+        // he keeps his spot while he has legs
       }else{
-        const better=pool.filter(p=>p.stamina>88&&p.ovr>cur.ovr+2).sort((a,b)=>b.ovr-a.ovr)[0];
+        const back=pool.filter(p=>dep(p)&&p.stamina>80).sort((a,b)=>a.dep-b.dep)[0];
+        const better=back||pool.filter(p=>p.stamina>88&&p.ovr>cur.ovr+2).sort((a,b)=>b.ovr-a.ovr)[0];
         if(better){inUse.delete(cur.id);T.lineup[s]=better.id;inUse.add(better.id);}
       }
     }

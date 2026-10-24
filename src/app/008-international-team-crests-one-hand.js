@@ -250,7 +250,11 @@ function face(seed,sz=48,o){
   });
   const by=ey-5.8-r()*.7,bw=1.3+r()*1.1,ba=(r()-.5)*1.6;
   [-1,1].forEach(d=>{const x=50+d*ex,i=x-d*(es+.6),o=x+d*(es+.9);s+=`<path d="M${f1(i)},${f1(by+.6+ba*.3)} Q${f1(x)},${f1(by-1.5)} ${f1(o)},${f1(by+.6-ba*.2)}" fill="none" stroke="${_fmx(hc,'#000000',.1)}" stroke-width="${f1(bw)}" stroke-linecap="round"/>`;});
-  if(r()<.2&&!(o&&o.coach))[-1,1].forEach(d=>{const x=50+d*ex;s+=`<rect x="${f1(x-3.4)}" y="${f1(ey+3.6)}" width="6.8" height="2.2" rx=".6" fill="#111" opacity=".88"/>`;});
+  // eye black: stripes or a smear under each eye (Look → Eye black; Original keeps the random stripes)
+  {const eR=r()<.2,eb=o&&o.eb?o.eb:eR&&!(o&&o.coach)?'stripes':'none';
+  if(eb==='stripes')[-1,1].forEach(d=>{const x=50+d*ex;s+=`<rect x="${f1(x-3.4)}" y="${f1(ey+3.6)}" width="6.8" height="2.2" rx=".6" fill="#111" opacity=".88"/>`;});
+  else if(eb==='smear')[-1,1].forEach(d=>{const x=50+d*ex,P=(k)=>`M${f1(x-d*(4.3+k))},${f1(ey+3.2-k*.4)} Q${f1(x)},${f1(ey+2.3-k*.6)} ${f1(x+d*(4.4+k))},${f1(ey+3.3-k*.4)} Q${f1(x+d*(3.6+k))},${f1(ey+6.6+k)} ${f1(x+d*.8)},${f1(ey+8.6+k)} Q${f1(x-d*2.4)},${f1(ey+7.2+k)} ${f1(x-d*(4.3+k))},${f1(ey+3.2-k*.4)}Z`;
+    s+=`<path d="${P(.9)}" fill="#141414" opacity=".22"/><path d="${P(0)}" fill="#141414" opacity=".82"/>`;});}
   // nose
   const nw=3.1+r()*1.6,ny=56+r()*1.4;
   s+=`<path d="M48.4,47.5 Q47.4,${f1(ny-4)} ${f1(50-nw)},${f1(ny-.4)}" fill="none" stroke="${skDD}" stroke-opacity=".3" stroke-width=".9"/><ellipse cx="50" cy="${f1(ny-1.8)}" rx="1.5" ry="1.1" fill="#fff" opacity=".14"/>`;
@@ -338,7 +342,10 @@ function faceTraits(seed){
   r();r();r();r();r();       // head shape
   const TX=[3,4,5,6,11,12,13,17,18,20,24,25,26,30,0,1,2,8,9,22],ST=[0,1,2,7,10,14,15,16,19,20,13,9,21,22,23,24,27,28,29],pr=r(),pool=(ti>=4?(pr<.82?TX:ST):ti<=1?(pr<.86?ST:TX):(pr<.5?TX:ST));
   let hs=pool[Math.floor(r()*pool.length)];if(o&&o.hs!=null)hs=o.hs;else hs=hsVariant(hs,seed);
-  return{ti,hc,hs};
+  // eye black: replays face() up to its eye black roll (dreads, facial hair, eyes, brows)
+  if(hs===11||hs===12)for(let i=0,n=hs===11?7:9;i<n*4;i++)r();
+  for(let i=0;i<8;i++)r();const eR=r()<.2,eb=o&&o.eb?o.eb:eR?'stripes':'none';
+  return{ti,hc,hs,eb};
 }
 // some cornrow, fade and waves heads get a lineup or a cornrow variation (from the seed, so no other part of the face changes)
 function hsVariant(hs,seed){const h=((seed||0)*2654435761+7)>>>0;if(hs===5&&h%2===0)return[33,34,35,36][(h>>>4)%4];if(hs===2&&h%3===0)return 31;if(hs===4&&h%3===0)return 32;return hs;}

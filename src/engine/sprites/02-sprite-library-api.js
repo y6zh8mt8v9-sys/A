@@ -160,7 +160,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
 . . s1 s1 s2 s1 s1 . .
 . . . s1 s2 s1 . . .
 . . . s1 s2 s1 . . .`) }; })();
-    const bareC = new Map();
+    const bareC = new Map(), BARE_EYE = new Map(); // eye pixels of each bare-head frame (for eye black)
     function bareGrid(view, style) {
       const key = view + '|' + style; if (bareC.has(key)) return bareC.get(key);
       let g = BARE_T[view].map(r => r.slice()), ar = g.length - 1; const w = g[0].length;
@@ -209,12 +209,14 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       const cols = data[sheet].px.width / fw, back = BACK_ROWS[sheet].has(Math.floor(id / cols));
       const view = back || !fn ? 'back' : face === 0 ? 'front' : 'side', T = bareGrid(view, P.bare), G = T.g, gw = G[0].length, mir = view === 'side' && face < 0;
       const ox = view === 'side' ? (face > 0 ? x1 - 1 - (gw - 1) : x0 + 1) : Math.round((x0 + x1) / 2 - (gw - 1) / 2), oy = y1 - T.ar;
-      const JE = MI.jersey, JT = MI.jerseyTrim;
+      const JE = MI.jersey, JT = MI.jerseyTrim, eyes = [], sk = new Set();
       for (let gy = 0; gy < G.length; gy++) for (let gx = 0; gx < gw; gx++) { const t = G[gy][mir ? gw - 1 - gx : gx]; if (!t || t === '.') continue;
         const X = ox + gx, Y = oy + gy; if (X < 0 || Y < 0 || X >= fw || Y >= fh) continue; const m = mat[Y * fw + X];
         // never over the ball, the arms or the hands; long hair may fall over the jersey
         if (!(m === -2 || m === -1 || m === SK || (gy > T.ar - 2 && (m === JE || m === JT)))) continue;
-        set(X, Y, t[0] === 'h' ? hair[+t[1]] : t[0] === 's' ? skin[+t[1]] : eye); }
+        set(X, Y, t[0] === 'h' ? hair[+t[1]] : t[0] === 's' ? skin[+t[1]] : eye); if (t[0] === 'e') eyes.push([X, Y]); else if (t[0] === 's') sk.add(X + ',' + Y); }
+      // eye black sits on the cheekbone: one skin row below the eye stays clear, the smear runs a row further down
+      BARE_EYE.set(sheet + '|' + id, eyes.filter(([x, y]) => sk.has(x + ',' + (y + 2))).map(([x, y]) => [x, y + 1, sk.has(x + ',' + (y + 3))]));
     }
 
     function recolor(sheetName, P, number, mirrorNumbers) {
@@ -322,7 +324,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       const out = { glove: [], cleat: [], arm: [], neck: [], hem: [], baggy: [], towel: null, mouth: null, knee: [], sock: [], towelPx: null, helm: [], mask: [], shoulder: [] };
       let hx = 0, hn = 0, fx = 0, fn = 0, fyMax = -1, hyMax = -1;
       for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const m = mat[y * fw + x];
-        if (m === GL) out.glove.push([x, y, lv[y * fw + x]]); else if (m === CL) out.cleat.push([x, y, lv[y * fw + x]]);
+        if (m === GL) out.glove.push([x, y, lv[y * fw + x]]); else if (m === CL) out.cleat.push([x, y, lv[y * fw + x], at(x, y + 1) !== CL ? 1 : 0]);
         if (HELM.includes(m)) { hx += x; hn++; hyMax = Math.max(hyMax, y); out.helm.push([x, y, lv[y * fw + x], m]); } if (m === FM) { fx += x; fn++; fyMax = Math.max(fyMax, y); out.mask.push([x, y, lv[y * fw + x]]); } }
       const face = fn && hn ? Math.sign(Math.round(fx / fn - hx / hn)) : 0;
       const backRowAll = !!(BACK_ROWS[sheetName] && BACK_ROWS[sheetName].has(Math.floor(cell / cols)));
@@ -330,7 +332,10 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       out.visor = [];
       if (fn && hn && !backRowAll) { let hy0 = 99, hx0 = 99, hx1 = -1; for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) { const m = mat[y * fw + x]; if (HELM.includes(m) || m === FM) { hy0 = Math.min(hy0, y); hx0 = Math.min(hx0, x); hx1 = Math.max(hx1, x); } }
         const F = []; for (let y = hy0; y <= Math.max(hyMax, fyMax); y++) for (let x = hx0; x <= hx1; x++) { const m = mat[y * fw + x]; if (m === SK || m === MI.faceDark) F.push([x, y]); }
-        if (F.length) { const y0 = Math.min(...F.map(f => f[1])); for (const [x, y] of F) if (y <= y0 + 1) out.visor.push([x, y, y === y0 ? 1 : 0]); out.faceSk = F; out.faceY0 = y0; } }
+        if (F.length) { const y0 = Math.min(...F.map(f => f[1])); for (const [x, y] of F) if (y <= y0 + 1) out.visor.push([x, y, y === y0 ? 1 : 0]); out.faceSk = F; out.faceY0 = y0;
+          // eye black under the helmet: the face pixel just under each eye (the dark face pixels of the top face row)
+          const D = F.filter(([x, y]) => mat[y * fw + x] === MI.faceDark), dy = D.length ? Math.min(...D.map(f => f[1])) : -1;
+          out.ebH = D.filter(f => f[1] === dy && at(f[0], dy + 1) === SK).map(([x, y]) => [x, y + 1]); } }
       // arm pixels: distance (through the arm) from the jersey sleeve and from the glove, split into the two arms
       const dJ = new Int16Array(fw * fh).fill(99), dG = new Int16Array(fw * fh).fill(99), comp = new Int16Array(fw * fh).fill(-1), N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
       const bfs = (dist, seed) => { const q = []; for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) if (mat[y * fw + x] === ARM && N4.some(([a, b]) => seed(at(x + a, y + b)))) { dist[y * fw + x] = 0; q.push(y * fw + x); }
@@ -375,7 +380,14 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         const two = xs.length && Math.abs(c1 - c0) >= 2.5, legOf = x => !two ? 0 : (Math.abs(x - c0) <= Math.abs(x - c1) ? 0 : 1);
         let sleeveLeg = 0;
         if (two) { const lvAvg = g => { let s = 0, n = 0; for (const q of out.sock) if (legOf(q[0]) === g) { s += q[2]; n++; } return n ? s / n : 0; }; const l0 = lvAvg(0), l1 = lvAvg(1); sleeveLeg = Math.abs(l0 - l1) >= 0.3 ? (l1 > l0 ? 1 : 0) : 0; }
-        for (const s of out.sock) s.push(legOf(s[0])); for (const k of out.knee) k.push(legOf(k[0])); out.legs = two ? 2 : 1; out.sleeveLeg = sleeveLeg; out.legC = [c0, c1]; }
+        for (const s of out.sock) s.push(legOf(s[0])); for (const k of out.knee) k.push(legOf(k[0])); out.legs = two ? 2 : 1; out.sleeveLeg = sleeveLeg; out.legC = [c0, c1];
+        // distance (through the sock) from the cleat, so medium socks and spats follow the shin in any pose; a sock
+        // part that never touches the cleat counts from its own lowest pixels
+        { const dS = new Int16Array(fw * fh).fill(99), q = [], isS = (x, y) => SO.includes(at(x, y));
+          for (const [x, y] of out.sock) if (N4.some(([a, b]) => at(x + a, y + b) === CL)) { dS[y * fw + x] = 0; q.push(y * fw + x); }
+          const run = () => { for (let h = 0; h < q.length; h++) { const p = q[h], x = p % fw, y = (p - x) / fw; for (const [a, b] of N4) { const X = x + a, Y = y + b; if (!isS(X, Y)) continue; const k = Y * fw + X; if (dS[k] <= dS[p] + 1) continue; dS[k] = dS[p] + 1; q.push(k); } } };
+          run(); const left = out.sock.filter(([x, y, l, bot]) => bot && dS[y * fw + x] === 99); if (left.length) { q.length = 0; for (const [x, y] of left) { dS[y * fw + x] = 0; q.push(y * fw + x); } run(); }
+          const mx = [0, 0]; for (const s of out.sock) { const d = dS[s[1] * fw + s[0]]; s.push(d); if (d < 99) mx[s[4]] = Math.max(mx[s[4]], d); } out.sockMax = mx; } }
       // cropped jersey: the bottom two jersey rows above the pants show the undershirt (front / side) or the back plate (back)
       out.crop = []; out.back = backRowAll;
       for (let x = 0; x < fw; x++) { let yb = -1; for (let y = fh - 1; y >= 0; y--) { const m = mat[y * fw + x]; if ((m === JE || m === JT) && (PANTS.includes(at(x, y + 1)) || PANTS.includes(at(x, y + 2)))) { yb = y; break; } }
@@ -390,6 +402,10 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         if (backRow) out.towel = null; else { const ok = new Set([-2, MI.pants, MI.pantsStripe, MI.belt, MI.socks, MI.sockStripe]); out.towelPx = (x, y) => ok.has(at(x, y)); } }
       if (fn) { let bx = -1; for (let x = 0; x < fw; x++) if (at(x, fyMax) === FM && (bx < 0 || (face >= 0 ? x > bx : x < bx))) bx = x; if (face === 0) { let s = 0, c = 0; for (let x = 0; x < fw; x++) if (at(x, fyMax) === FM) { s += x; c++; } bx = Math.round(s / c); }
         out.mouth = [bx - (face > 0 ? 1 : 0), fyMax + 1]; }
+      // tank top seen from the front or the back: the outer ends of the top jersey rows are bare shoulders
+      out.tankF = []; if (backRowAll || !face) { let jt = -1; for (let y = 0; y < fh && jt < 0; y++) for (let x = 0; x < fw; x++) if (mat[y * fw + x] === JE || mat[y * fw + x] === JT) { jt = y; break; }
+        if (jt >= 0) for (let y = jt; y < jt + 3 && y < fh; y++) { let x0 = 99, x1 = -1; for (let x = 0; x < fw; x++) if (mat[y * fw + x] === JE || mat[y * fw + x] === JT) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); }
+          const cut = Math.round((x1 - x0 + 1) * (y === jt + 2 ? 0.14 : 0.24)); for (let x = x0; x <= x1; x++) { const m = mat[y * fw + x]; if ((m === JE || m === JT) && (x < x0 + cut || x > x1 - cut)) out.tankF.push([x, y, lv[y * fw + x]]); } } }
       out.face = face; M.set(cell, out); return out;
     }
     // follow one physical leg through an animation (legs swap front and back while running), so a single
@@ -410,7 +426,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       const T = legTrackC[key], f = cell % cols; return T.res ? T.res[f] : (E.sleeveLeg || 0); }
     const eqCss = new Map();
     function eqRamp(hex) { if (!eqCss.has(hex)) eqCss.set(hex, ramp(hex).map(css)); return eqCss.get(hex); }
-    function drawEq(ctx, sheet, cell, ax, ay, sx, sy, eq, skin, hp) {
+    function drawEq(ctx, sheet, cell, ax, ay, sx, sy, eq, skin, hp, bare) {
       const E = eqCell(sheet, cell), R = (x, y, c) => { ctx.fillStyle = c; ctx.fillRect((x - ax) * sx, (y - ay) * sy, sx + 0.04, sy + 0.04); };
       // v2.14 jersey style: stripes across the shoulders (team uniform setting)
       if (eq.shoulder && eq.shoulder.mode && eq.shoulder.mode !== 'none' && E.shoulder) { const r = eqRamp(eq.shoulder.c || '#ffffff'), D = { single: [2], double: [1, 3], triple: [1, 2, 3] }[eq.shoulder.mode] || [2];
@@ -421,6 +437,8 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
         if (H.mask) { const r = eqRamp(H.mask); for (const [x, y, l] of E.mask) R(x, y, r[l]); } }
       if (skin && eq.pants === 'short') for (const [x, y, l] of E.knee) R(x, y, skin[l]);
       if (skin && (eq.socks === 'low' || eq.socks === 'none')) for (const [x, y, l, bottom] of E.sock) if (eq.socks === 'none' || !bottom) R(x, y, skin[l]);
+      // medium socks: the shin shows above mid-calf
+      if (skin && eq.socks === 'mid' && E.sockMax) for (const [x, y, l, bottom, g, d] of E.sock) if (d < 99 && d > Math.round(E.sockMax[g] * 0.45)) R(x, y, skin[l]);
       // leg sleeves: from the knee to the ankle, on one leg or both
       if (eq.legS && eq.legS.mode && eq.legS.mode !== 'none') { const r = eqRamp(eq.legS.c), one = eq.legS.mode === 'one' || eq.legS.mode === 'onefar', l0 = one ? legSleeveFor(sheet, cell, E) : 0, leg = eq.legS.mode === 'onefar' ? 1 - l0 : l0, ok = g => !one || (E.legs || 1) < 2 || g === leg;
         if (eq.pants === 'short') for (const [x, y, l, g] of E.knee) if (ok(g)) R(x, y, r[Math.max(1, l)]);
@@ -431,6 +449,8 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
           for (const [x, y, l] of E.crop) R(x, y, x >= m0 && x <= m1 ? rp[Math.min(3, l + 1)] : ru[Math.max(1, l)]); }
         else { for (const [x, y, l] of E.crop) R(x, y, ru[Math.max(1, l)]);
           if (E.cropBack != null) { ctx.globalAlpha = 0.55; for (const [x, y, l] of E.crop) if (x === E.cropBack) R(x, y, rp[2]); ctx.globalAlpha = 1; } } }
+      // 7v7 tank top: no sleeve caps, the shoulders show
+      if (eq.tank && skin) { if (E.shoulder) for (const [x, y, l, d] of E.shoulder) if (d <= 2) R(x, y, skin[l]); for (const [x, y, l] of E.tankF) R(x, y, skin[Math.max(1, l - 1)]); }
       const U = eq.under, S = eq.sleeve, B = eq.band;
       if (U && U.mode !== 'none') { const r = eqRamp(U.c);
         const lim = U.mode === 'long' ? 99 : U.mode === 'quarter' ? 3 : 5;
@@ -442,11 +462,16 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
       if (eq.glove) { const r = eqRamp(eq.glove); for (const [x, y, l] of E.glove) R(x, y, r[l]); }
       if (eq.cleat) { const r = eqRamp(eq.cleat); for (const [x, y, l] of E.cleat) R(x, y, r[l]); }
       if (eq.noGlove && skin) for (const [x, y, l] of E.glove) R(x, y, skin[l]); // quarterbacks throw bare-handed
+      // spats: tape over the cleat (the sole still shows) and up over the ankle
+      if (eq.spats) { const r = eqRamp(eq.spats); for (const [x, y, l, sole] of E.cleat) if (!sole) R(x, y, r[Math.max(1, l)]); for (const [x, y, l, b, g, d] of E.sock) if (d <= 1) R(x, y, r[Math.max(1, l)]); }
       if (eq.visor && E.visor && E.visor.length) { const r = eqRamp(eq.visor), xs = E.visor.map(v => v[0]), gx = Math.min(...xs) + 1; for (const [x, y, top] of E.visor) R(x, y, top ? r[2] : (x === gx ? r[3] : r[1])); }
       if (eq.towel && E.towel) { const r = eqRamp(eq.towel), [tx, ty, f] = E.towel, ok = E.towelPx || (() => true), T = (x, y, c) => { if (ok(x, y)) R(x, y, c); };
         for (let k = 0; k < 6; k++) { T(tx - 1, ty + k, r[0]); T(tx + 3, ty + k, r[0]); for (let j = 0; j < 3; j++) if (!(k === 5 && j === 1)) T(tx + j, ty + k, r[j === 1 ? 3 : 2 - (j === 2 && f > 0 ? 1 : 0)]); } T(tx, ty + 6, r[0]); T(tx + 2, ty + 6, r[0]); }
       // ski mask: the face and neck under the helmet in the mask colour, an eye slit left open
       if (eq.ski) { const r = eqRamp(eq.ski); if (E.faceSk) for (const [x, y] of E.faceSk) if (y !== E.faceY0) R(x, y, r[y === E.faceY0 + 1 ? 1 : 2]); for (const [x, y, l] of E.neck) R(x, y, r[Math.max(1, l)]); }
+      // eye black: under the eye of a bare head, or the face pixel under the eye inside the facemask
+      if (eq.eb && !eq.ski) { const P = bare ? BARE_EYE.get(sheet + '|' + cell) : E.ebH, dy = bare ? 1 : 0;
+        if (P) for (const [x, y, low] of P) { R(x, y + dy, '#161414'); if (bare && low && eq.eb === 'smear') { ctx.globalAlpha = 0.7; R(x, y + 2, '#161414'); ctx.globalAlpha = 1; } } }
       if (eq.mouth && E.mouth) { const r = eqRamp(eq.mouth), [mx, my] = E.mouth; R(mx, my, r[3]); R(mx + 1, my, r[2]); R(mx, my + 1, r[2]); R(mx + 1, my + 1, r[1]); R(mx, my + 2, r[1]); }
       if (eq.mouth2 && E.mouth) { const r = eqRamp(eq.mouth2), [m0, my] = E.mouth, mx = m0 + (E.face < 0 ? 3 : -3); R(mx, my, r[3]); R(mx + 1, my, r[2]); R(mx, my + 1, r[2]); R(mx + 1, my + 1, r[1]); R(mx, my + 2, r[1]); }
       // guardian cap: a padded, ribbed soft shell over the helmet, a little taller than the shell
@@ -513,7 +538,7 @@ s0 h0 h1 h1 h1 h1 h1 h0 s0
             }
           }
         }
-        if (eq && this.sheet !== 'referee') drawEq(ctx, this.sheet, a.row * this.cols + frame, ax, ay, sx, sy, eq, this.skin, this.helm);
+        if (eq && this.sheet !== 'referee') drawEq(ctx, this.sheet, a.row * this.cols + frame, ax, ay, sx, sy, eq, this.skin, this.helm, !!this.P.bare);
         ctx.setTransform(m);
       }
     }

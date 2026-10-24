@@ -120,6 +120,7 @@ function animFor(e,sheet){
   if(e.hurt&&e.down)return A('tackled',1);
   {const cb=e.celeb&&G.phase!=='live'?celebAnim(e,A,Lp):null;if(cb)return cb;}
   if(S&&S.c===e)return gpTackledFrame(e,S,A);
+  {const ta=gpTkAnim(e,A);if(ta)return ta;} // the user's tackle types and a tripped runner
   if(S&&S.fs.includes(e))return A(S.type==='dive'||S.type==='shoe'?'tackle_dive':'tackle',S.t/S.dur);
   if(e.down){
     if(e.slid&&M('qb_slide')){if(e.downT>0&&e.downT<0.3)return A('getup',0.7+0.29*(1-e.downT/0.3));return A('qb_slide',0.99);}
@@ -198,7 +199,7 @@ function packSprite(pk){
 }
 function drawPack(S,p,z){
   const pk=S.pk,sp=packSprite(pk);
-  if(pk.bare&&S.look){const q=S.look.eq||{};S={...S,look:{...S.look,eq:{...q,visor:null,mouth:null,mouth2:null,helm:null,ski:null,gcap:null,...(pk.slim?{pants:'short',socks:'low'}:{})}}};}
+  if(pk.bare&&S.look){const q=S.look.eq||{};S={...S,look:{...S.look,eq:{...q,visor:null,mouth:null,mouth2:null,helm:null,ski:null,gcap:null,...(pk.slim?{pants:'short',socks:'low',tank:true,under:null,crop:false,shoulder:null}:{})}}};}
   const s=98*z*(S.body?S.body.hs:1)/48,sx=s*clamp(Math.sqrt((S.body?S.body.ws:1)/BUILD_WS[pk.build]),0.9,1.12);
   const hb=S.qbBall?gpHeldBall(sp,pk,S.dir<0,sx,s):null;
   if(S.rot||(S.sq&&S.sq!==1)){ctx.save();ctx.translate(p.sx,p.sy-S.jz*p.k);ctx.rotate(S.rot||0);ctx.scale(1,S.sq||1);sp.draw(ctx,pk.anim,pk.frame,0,0,sx,s,S.dir<0,S.ref?null:S.num,S.ref?null:S.look&&S.look.eq);if(hb)gpDrawHeld(hb,0,0,s);ctx.restore();}

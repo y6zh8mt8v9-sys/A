@@ -20,7 +20,7 @@ const cv=$('c'),MAINCTX=cv.getContext('2d');let ctx=MAINCTX;
 const GDS_DEF={sound:true,band:true,vol:0.8,crowd:true,tips:false,ball:1,dir:'right',haptics:true,kr:true,keys:{},gfx:'auto',crowdV:'full',bug:'tv',moveUI:'wheel',clickTk:true,pcCam:'close',land:'pc',cam:'broadcast',noiseM:true};
 // v2.15 rebindable keys: [action, label, default key]. W A S D and the arrows always move your defender.
 const KB_ACT=[['jukeU','Juke up','w'],['jukeD','Juke down','s'],['dive','Dive','d'],['slow','Slow down','a'],['spin','Spin','e'],['stiff','Stiff arm','q'],['truck','Truck','r'],['hurdle','Hurdle','h'],
-  ['tackle','Tackle','j'],['switch','Switch player','tab'],['play','Play the ball','k'],['scramble','QB tuck and run','c'],['fair','Fair catch','f']];
+  ['tackle','Tackle','j'],['form','Form tackle','u'],['stick','Hit stick','i'],['bite','Ankle bite','o'],['sprint','Sprint (hold)','shift'],['switch','Switch player','tab'],['play','Play the ball','k'],['scramble','QB tuck and run','c'],['fair','Fair catch','f']];
 // v2.15 difficulty sliders: 0-100 per team (you / CPU), 50 is normal. Online games always play at 50.
 const SL_KEYS=[['spd','Speed'],['acc','Acceleration'],['str','Strength'],['iq','Awareness (IQ)'],['thr','Throwing accuracy'],['bsp','Ball speed'],['cat','Catching'],['int','Interceptions'],['man','Man coverage'],['zone','Zone coverage'],['fum','Fumbles'],['juk','Juke ability']];
 function slv(t,k){if(ON||G.test||G.demo||DEMO)return 50;const S=GDS.sl&&GDS.sl[t===G.me?'u':'c'],v=S&&S[k];return v==null||isNaN(+v)?50:Math.max(0,Math.min(100,+v));}
@@ -28,7 +28,7 @@ function slf(t,k,span){return 1+(slv(t,k)-50)/50*span;}
 function sla(t,k,span){return(slv(t,k)-50)/50*span;}
 function gspd(){if(ON||G.test||G.demo||DEMO)return 1;const v=+GDS.gspd;return v>0?Math.max(0.75,Math.min(1.25,v)):1;}
 function kb(a){const d=KB_ACT.find(x=>x[0]===a);return((GDS.keys&&GDS.keys[a])||(d?d[2]:'')).toLowerCase();}
-function kbLabel(k){return{tab:'Tab',' ':'Space',enter:'Enter',arrowup:'↑',arrowdown:'↓',arrowleft:'←',arrowright:'→',escape:'Esc'}[k]||k.toUpperCase();}
+function kbLabel(k){return{tab:'Tab',' ':'Space',enter:'Enter',arrowup:'↑',arrowdown:'↓',arrowleft:'←',arrowright:'→',escape:'Esc',shift:'Shift'}[k]||k.toUpperCase();}
 const GDS=(()=>{let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')||{};}catch(e){}if(!o.mw2){o.moveUI='wheel';o.mw2=true;try{localStorage.setItem('gpgm_gd',JSON.stringify(o));}catch(e){}}return Object.assign({},GDS_DEF,o);})();
 try{camSet(GDS.cam);}catch(e){}
 function gdsSave(){try{localStorage.setItem('gpgm_gd',JSON.stringify(GDS));}catch(e){}}
@@ -111,7 +111,7 @@ function gpTeam(id,c){
   if(c.kit)KITS[id]=kitOf(c.kit);
   if(c.pack)PACK_TEAMS[id]=c.pack;
   const roster=c.players.map(q=>{const ht=q.ht||74,wt=q.wt||210,bmi=wt*703/(ht*ht);
-    const p={id:PID++,mid:q.mid,fs:q.fs,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
+    const p={id:PID++,mid:q.mid,fs:q.fs,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
       ...Object.fromEntries('dac,tup,car,elu,btk,cit,rte,jmp,pbk,rbk,pmv,fmv,bsh,hpw,mcv,zcv,prs,end'.split(',').filter(k=>q[k]!=null).map(k=>[k,q[k]])),
       stamina:100,inj:null,body:{hs:1+(ht-74)*0.012,ws:clamp(1+(bmi-26)*0.04,0.88,1.5),belly:clamp((bmi-31)*0.09,0,0.65)},
       look:{pk:q.pk,skin:tone(q.skin||'#c68a5e'),sleeve:q.pos==='OL'||q.pos==='DL'?null:(q.sl===1?tone('#111820'):q.sl===2?tone('#ffffff'):null),visor:!!q.visor,longSock:!!q.ls,band:!!q.band,eq:q.eq||null,hair:q.hair||null,hst:q.hst||null},ovr:q.ovr,stars:q.stars>=2?Math.min(5,q.stars|0):0};
@@ -120,7 +120,9 @@ function gpTeam(id,c){
   // v2.16 two-way players: a second position makes him eligible there too (a little behind the specialists)
   T.byPos=pos=>roster.filter(p=>p.pos===pos||p.pos2===pos).sort((a,b)=>(b.ovr-(b.pos===pos?0:4))-(a.ovr-(a.pos===pos?0:4)));
   T.get=pid=>roster.find(p=>p.id===pid);
-  for(const set of[OSLOTS,DSLOTS]){const used=new Set();for(const[s,pos]of set){const pl=T.byPos(pos).find(p=>!used.has(p.id))||roster.find(p=>!used.has(p.id))||roster[0];used.add(pl.id);T.lineup[s]=pl.id;}}
+  // the depth chart's starters (dep, from the app) take the first spots, then the best by rating
+  const dk=(p,pos)=>p.dep!=null&&p.pos===pos?p.dep:99,first=pos=>T.byPos(pos).sort((a,b)=>dk(a,pos)-dk(b,pos));
+  for(const set of[OSLOTS,DSLOTS]){const used=new Set();for(const[s,pos]of set){const pl=first(pos).find(p=>!used.has(p.id))||roster.find(p=>!used.has(p.id))||roster[0];used.add(pl.id);T.lineup[s]=pl.id;}}
   return T;
 }
 function gpTrack(S,r){

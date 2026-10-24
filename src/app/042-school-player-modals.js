@@ -11,7 +11,7 @@ function viewSchool(id){
         ${rb(teamOvr(id))}<span class="sbh">${s.offS}/${s.defS}</span>
         <span style="color:var(--mu);font-size:12px">${s.lite?`${pl.length} tracked prospect${pl.length===1?'':'s'}`:`${pl.length} players`}</span>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="bgh bsm" onclick="clo();nav('roster',${id})">Full roster / edit players</button><button class="bgh bsm" onclick="clo();openEditSch(${id})">Edit team</button>${id!==G.myId&&!s.intl&&!s.lite?`<button class="bgh bsm" onclick="coachTakeOver(${id})">Coach this team…</button>`:''}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="bgh bsm" onclick="clo();nav('roster',${id})">${pcAuto()?'Full roster':'Full roster / edit players'}</button>${pcAuto()?'':`<button class="bgh bsm" onclick="clo();openEditSch(${id})">Edit team</button>`}${id!==G.myId&&!s.intl&&!s.lite&&!pcAuto()?`<button class="bgh bsm" onclick="coachTakeOver(${id})">Coach this team…</button>`:''}</div>
     </div>
   </div>
   ${s.lite?`<div style="font-size:12px;color:var(--mu);margin:-6px 0 10px;padding:8px 10px;border:1px solid var(--bd);border-radius:6px">${stName(clsSt(s.cls))} is a light state: the school plays its full season and state playoffs, and the game follows its top prospects. Team strength ${s.str||50}.</div>`:''}
@@ -99,7 +99,7 @@ function showPlayer(id){
   if(!p)return;
   const isGraduated=!G.players.find(x=>x.id===id);
   const sch=getS(p.sId)||{name:'Alumni',id:p.sId,c1:'#333',c2:'#fff',mascot:'Alumni',abbr:'AL'};
-  const isMe=p.sId===G.myId;
+  const isMe=p.sId===G.myId,ctl=isMe&&!pcAuto(),own=p.id===G.myPlayerId; // ctl: coach controls (none in Player Career)
   const isSpecialPos=(p.pos==='OL'||p.pos==='K');
   const streakBadge=p.streak==='hot'?`<span style="background:#7f2d00;color:#ff9966;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700"> Hot Streak (${p.streakGamesLeft}g left)</span>`:p.streak==='cold'?`<span style="background:#0a2a3a;color:#4fc3f7;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700"> Cold Streak (${p.streakGamesLeft}g left)</span>`:'';
   const archBadge=p.arch?`<span style="background:#0a2a10;border:1px solid #1a6030;color:#44dd88;border-radius:3px;padding:1px 7px;font-size:11px;font-weight:700">${p.arch}</span>`:'';
@@ -161,7 +161,7 @@ function showPlayer(id){
     <button class="tab" onclick="swMTab(this,'pv-gl')">Game Log</button>
     <button class="tab" onclick="swMTab(this,'pv-cr')">Career</button>
     <button class="tab" onclick="swMTab(this,'pv-o')">Offers (${p.offers.length})</button>
-    ${isMe&&(p.sp||0)>0?`<button class="tab" onclick="swMTab(this,'pv-sp')">Skill Points (${p.sp})</button>`:''}
+    ${ctl&&(p.sp||0)>0?`<button class="tab" onclick="swMTab(this,'pv-sp')">Skill Points (${p.sp})</button>`:''}
     ${isGraduated?`<button class="tab" onclick="swMTab(this,'pv-st')"> Story</button>`:''}
   </div>
   <div id="pv-b"><div class="g2">
@@ -220,16 +220,16 @@ function showPlayer(id){
       </div>
     </div>`:''}
     ${p.committed?`<div style="padding:8px;background:rgba(34,184,112,.1);border:1px solid rgba(34,184,112,.3);border-radius:4px;margin-bottom:10px;font-size:13px"> Committed to ${p.committed.school} (${p.committed.lvl})${p.dreamSchool&&p.committed.school===p.dreamSchool.school?'  Dream School!':''}</div>`:''}
-    ${isMe&&!p.committed&&p.offers.length?`<div style="margin-bottom:10px">
+    ${(ctl||(isMe&&own))&&!p.committed&&p.offers.length?`<div style="margin-bottom:10px">
       <select id="csel" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:4px;font-size:12px;margin-right:8px">
         ${p.offers.map(o=>`<option value='${JSON.stringify(o)}'>${o.lvl}: ${o.school}${(()=>{const c=COL_BY[o.school+'|'+o.lvl];return c&&!colRoom(c,p,false)?' (spots filled)':'';})()}${p.dreamSchool&&o.school===p.dreamSchool.school?' ':''}</option>`).join('')}
       </select>
       <button class="btn bsm bgn" onclick="commitNow(${p.id})">Commit Now</button>
     </div>`:''}
-    ${isMe&&p.yr>=10?`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Camps this year: ${campsUsed(p)}/${campCap()}${(p.camps||[]).length?' · '+p.camps.slice(-3).map(c=>`${c.name} (${c.grade}${c.offers?', '+c.offers+' offer'+(c.offers>1?'s':''):''})`).join(' · '):''}${(G.campInv||[]).some(v=>v.pid===p.id)?' · <a href="#" onclick="clo();nav(\'recr\');return false" style="color:var(--te)">camp invite waiting</a>':''}</div>`:''}
+    ${isMe&&p.yr>=10?`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Camps this year: ${campsUsed(p)}/${campCap()}${(p.camps||[]).length?' · '+p.camps.slice(-3).map(c=>`${c.name} (${c.grade}${c.offers?', '+c.offers+' offer'+(c.offers>1?'s':''):''})`).join(' · '):''}${ctl&&(G.campInv||[]).some(v=>v.pid===p.id)?' · <a href="#" onclick="clo();nav(\'recr\');return false" style="color:var(--te)">camp invite waiting</a>':''}</div>`:''}
     <div style="display:flex;flex-wrap:wrap;gap:4px">${p.offers.map(o=>`<span class="ob ${(()=>{const m={FBS:'of',FCS:'oc',D2:'od',NAIA:'on',D3:'ot',JUCO:'oj'};return m[o.lvl]||'od';})()}">${p.dreamSchool&&o.school===p.dreamSchool.school?' ':''}${o.lvl==='JUCO'?'JUCO interest':o.lvl}: ${o.school}</span>`).join('')||'<span style="color:var(--mu)">No offers yet.</span>'}</div>
   </div>
-  ${isMe&&(p.sp||0)>0?`<div id="pv-sp" class="hid">
+  ${ctl&&(p.sp||0)>0?`<div id="pv-sp" class="hid">
     <div style="font-size:12px;color:var(--mu);margin-bottom:10px">You have <strong style="color:var(--te)">${p.sp} skill points</strong>. Spending SP upgrades OVR and automatically boosts attributes.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <div style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:10px;text-align:center;min-width:110px">
@@ -248,9 +248,9 @@ function showPlayer(id){
     </div>
     <button class="bgh bsm" onclick="autoSP(${p.id})">Auto-upgrade all SP</button>
   </div>`:''}
-  ${isMe?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+  ${ctl?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="bgh bsm" onclick="clo();editPlayer(${p.id})"> Edit Player &amp; Equipment</button><button class="bgh bsm" onclick="capToggle(${p.id});clo();showPlayer(${p.id})">${captains().includes(p.id)?'Remove captain':'Name captain'}</button>${colFlipTarget(p)?`<button class="bgh bsm" onclick="pushFlip(${p.id})">Push him to flip to ${colFlipTarget(p).school}</button>`:''}${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
   </div>`:''}
-  ${!isMe&&!isGraduated&&G.players.includes(p)&&getS(p.sId)&&!getS(p.sId).fp?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+  ${!isMe&&!pcAuto()&&!isGraduated&&G.players.includes(p)&&getS(p.sId)&&!getS(p.sId).fp?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
     ${plScouted(p)?`<button class="btn bsm" onclick="meetOpen(${p.id})">Set up a meeting (transfer pitch)</button><span style="font-size:11px;color:var(--mu)">Cares most about ${PRIO_TXT[plPriority(p)]} · ${meetLeft()} meeting${meetLeft()===1?'':'s'} left · ${transferWindow()?'transfer window open':'transfers open in the offseason'}</span>`:`<button class="bgh bsm" onclick="clo();scoutPlayer(${p.id})">Scout him (${scoutLeft()} left)</button><span style="font-size:11px;color:var(--mu)">Scout a player to learn what he cares about; you can meet with him the season after.</span>`}
   </div>`:''}`);}

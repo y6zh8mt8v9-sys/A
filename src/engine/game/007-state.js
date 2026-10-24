@@ -21,7 +21,9 @@ function pcDrive(){const u=pcUnit(),mine=G.poss===G.me,on=GP.pc.two?true:u==='d'
   G.pcSer=(G.pcSer||0)+1;const n=G.pcSer,sh=clamp(GP.pc.share||0.3,0.1,1);G.pcIn=n===1||Math.floor(n*sh)>Math.floor((n-1)*sh);
   G.pcRot=!G.pcIn;return G.pcIn;}
 function pcLineup(){if(!pcOn()||!G.pcIn)return;const T=G.teams[G.me],rp=T.roster.find(p=>p.mid===GP.pc.mid&&healthy(p));if(!rp)return;
-  const all=OSLOTS.concat(DSLOTS);if(all.some(([x])=>T.lineup[x]===rp.id))return;const sl=all.find(([x,pos])=>pos===rp.pos);if(sl)T.lineup[sl[0]]=rp.id;}
+  // a two-way player lines up at the position of the side that is on the field
+  const U=p=>['QB','RB','WR','TE','OL'].includes(p)?'o':['DL','LB','CB','S'].includes(p)?'d':'k',side=GP.pc.two?(G.poss===G.me?'o':'d'):null,pos=side&&rp.pos2&&U(rp.pos2)===side?rp.pos2:rp.pos;
+  const set=side?(side==='o'?OSLOTS:DSLOTS):OSLOTS.concat(DSLOTS);if(set.some(([x])=>T.lineup[x]===rp.id))return;const sl=set.find(([x,ps])=>ps===pos);if(sl)T.lineup[sl[0]]=rp.id;}
 // a simulated series you are not part of: your player goes to the bench so the stats go to whoever really played
 function pcBenchOut(){const T=G.teams[G.me];if(!T||!T.lineup)return;const rp=T.roster.find(p=>p.mid===GP.pc.mid);if(!rp)return;
   const used=new Set(Object.values(T.lineup));
@@ -105,7 +107,7 @@ function gpMotionStep(dt){
 }
 function setRoute(e,name,out,col){
   const R=ROUTES[name];if(!R){e.route=null;e.block=true;return;}
-  e.route={name,end:R.end,i:0,col,delay:R.delay||0,pts:R.p.map(([dx,dy,c,f])=>{let x=e.x+dx*out;x=R.fade?clamp(x,3.5,FW-3.5):clamp(x,1.5,FW-1.5);return{x,y:Math.min(119,e.y+dy),c,fake:f==='f'};})};
+  e.route={name,end:R.end,i:0,col,delay:R.delay||0,qk:R.qk||0,pts:R.p.map(([dx,dy,c,f])=>{let x=e.x+dx*out;x=R.fade?clamp(x,3.5,FW-3.5):clamp(x,1.5,FW-1.5);return{x,y:Math.min(119,e.y+dy),c,fake:f==='f'};})};
 }
 const RCOL=['#ffd23f','#4fd1ff','#ff7ad9','#b6ff6a','#ff9f43'];
 function setupScrimmage(offCall,defCall){

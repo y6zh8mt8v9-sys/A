@@ -91,7 +91,7 @@ const TUT_PAGES=[
       <li><strong>Menu</strong>: the Dashboard lists every section (Team, Season, League, Program) with its pages. A gold dot marks a page that needs you (new news, a schedule to build, practice, skill points). Each page opens on its own; <strong>‹ Home</strong> takes you back. Settings → Menu layout switches back to the classic tabs.</li>
       <li><strong>Job offers</strong>: after a good season other schools in your league call about their head coaching job. The offers sit on the Dashboard until your first game of the new season. A rebuild job comes with a bigger budget.</li>
       <li><strong>Division names</strong>: in a real-states world your home state uses its own class names (Texas 2A to 6A, Ohio Division VII to I, Class S to LL in Connecticut...).</li>
-      <li><strong>Player Career</strong>: pick a school on the map, then build your player: name, position, archetype, height and weight, up to 3 interests and 2 character traits, his look and his gear. Attribute points build a freshman between 40 and 55 overall. In Player Career mode the school already has a head coach, so you don't create one.</li>
+      <li><strong>Player Career</strong>: pick a school on the map, then build your player: name, position, archetype, height and weight, up to 3 interests and 2 character traits, his look and his gear. Attribute points build a freshman between 40 and 55 overall. In Player Career mode the school already has a head coach, so you don't create one: he runs the team for you.</li>
       <li><strong>Levels and skill points</strong>: every game earns your player XP (more for big games, wins and the playoffs). Each level gives 3 skill points to spend on any attribute on the My Player page. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 above 90.</li>
       <li><strong>Catch meter</strong>: in Player Career only your own player gets one.</li>
       <li><strong>Transfers</strong>: meet a scouted player any time. During the season a yes means he joins you next season (seniors can't, they graduate). Your own players may want to transfer out, depending on what they care about, their traits and morale; never more than 15% of your roster in a year. Talk to them from the Players leaving tile; they leave when offseason training ends.</li>
@@ -225,7 +225,7 @@ const TUT_PAGES=[
       <li><strong>Passing</strong>: press and pull back like a slingshot, release to throw; a quick tap switches between a bullet and a lob, the QB run button scrambles</li>
       <li><strong>Catch meters</strong>: tap while the marker is in the green</li>
       <li><strong>Running</strong>: swipe up or down to juke, forward to dive, back to slow down, plus the Spin, Stiff arm, Truck and Hurdle buttons</li>
-      <li><strong>Defense</strong>: pick your defender, drag to move, tap Tackle</li>
+      <li><strong>Defense</strong>: pick your defender, drag to move, hold Sprint, and pick a tackle on the tackle wheel: Form tackle, Hit stick, Ankle bite or Tackle</li>
       <li><strong>Kicking</strong>: stop the power and accuracy meters in the green</li>
     </ul>
     <p>Nothing counts on your record, every player who takes a rep earns 2 XP, and your weekly practice stays available.</p>
@@ -261,11 +261,11 @@ const TUT_PAGES=[
       <li><b>Snap</b>: Enter or Space · <b>Timeout</b>: T · <b>Pause</b>: P or Esc</li>
       <li><b>Pass</b>: 1–5 throw to that receiver (the numbers float over them), Space switches bullet / lob, C to run with the QB, or pull back with the mouse like a slingshot</li>
       <li><b>Ball carrier</b>: W/S or ↑/↓ juke, D or → dive, A or ← slow down, E spin, Q stiff arm, R truck, H hurdle</li>
-      <li><b>Defense</b>: WASD or arrows move, J tackle, Tab switch, click a player to control him, K or Space when the ball meter is up</li>
+      <li><b>Defense</b>: WASD or arrows move, Shift (hold) sprint, J tackle, U form tackle, I hit stick, O ankle bite, Tab switch, click a player to control him, K or Space when the ball meter is up</li>
       <li><b>Kicks and catches</b>: Space or click to stop the meters · F fair catch · 1–9 pick a celebration</li>
     </ul>
     <p><b>Change any key</b>: Pause → Settings → Change keys. Click an action, press the new key.</p>
-    <p><b>Controllers</b> (Xbox, PlayStation and most others) work too. Left stick moves your player, flick it up or down to juke. Passing: A, B, X, Y and RB throw to receivers 1–5, LT tucks and runs. Ball carrier: X spin, B stiff arm, Y hurdle, RB truck, RT dive, LB juke. Defense: A tackle, LT switch player. Start pauses; in menus the d-pad moves, A selects, B goes back, and LB/RB switch sections.</p>
+    <p><b>Controllers</b> (Xbox, PlayStation and most others) work too. Left stick moves your player, flick it up or down to juke. Passing: A, B, X, Y and RB throw to receivers 1–5, LT tucks and runs. Ball carrier: X spin, B stiff arm, Y hurdle, RB truck, RT dive, LB juke. Defense: A tackle, B form tackle, Y hit stick, X ankle bite, hold RT to sprint, LT switch player. Start pauses; in menus the d-pad moves, A selects, B goes back, and LB/RB switch sections.</p>
   `},
   {tab:'Stats & careers',icon:'',title:'Stats, Game Logs and Careers',body:`
     <p>Every player card has a <b>Game Log</b> (each game this season) and a <b>Career</b> tab (season by season, career totals, awards and college).</p>
@@ -311,6 +311,7 @@ const TUT_PAGES=[
       <li><b>Coach trust</b> (0 to 100) goes up with good games and wins and down with turnovers, drops and losses. Trust also moves you up the depth chart.</li>
       <li><b>Call for the ball</b> (B key, Y / Triangle or the button) makes your quarterback look your way, and a running back gets a run called for him. Do not ask on every play: the coach notices.</li>
       <li><b>Transfer</b> from the Dashboard in the offseason, before the first game: you join a school in your league and start over with neutral trust.</li>
+      <li><b>The coach runs the team.</b> The schedule, depth chart, JV call-ups, practice, offseason training, skill points, captains, staff, facilities, recruiting and reclassification are all handled for you. You only play as your player: his games, his skill points, his commitment and his transfer.</li>
       <li>After your senior year, follow his college and pro career on <b>My Player</b>.</li>
     </ul>`},
   {tab:'Money & trophies',icon:'',title:'Ticket Sales and the Trophy Case',body:`

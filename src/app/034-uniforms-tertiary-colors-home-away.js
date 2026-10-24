@@ -30,22 +30,32 @@ function uniSvg(k,num,w){
   <path d="M34,26 H66 M36,31 H64 M50,26 V36" stroke="${k.mask}" stroke-width="2.4" fill="none"/>
   ${k.hShell==='matte'?'':k.hShell==='chrome'?'<path d="M33,14 Q40,8 48,8" stroke="#fff" stroke-opacity=".85" stroke-width="3" fill="none"/><path d="M60,10 Q66,13 67,20" stroke="#fff" stroke-opacity=".55" stroke-width="2" fill="none"/>':'<path d="M33,14 Q40,8 48,8" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/>'}</svg>`;
 }
-function _uniS(){return window._fpMode&&window._fpEditT?window._fpEditT:myS();}
-function _uniNum(){const t=_uniS();if(t&&t.fp)return(t.roster.find(p=>p.pos==='QB')||t.roster[0]||{}).num;return(myP()[0]||{}).num;}
+// the editor can work on any school (Team Builder, Edit school): uniHostHtml points it at that school while its box is on screen
+function _uniBox(){return[...document.querySelectorAll('#uni-host')].find(h=>h.getClientRects().length)||null;}
+function _uniHost(){const T=window._uniT;if(T&&_uniBox())return T;window._uniT=null;return null;}
+function _uniS(){return _uniHost()||(window._fpMode&&window._fpEditT?window._fpEditT:myS());}
+function _uniNum(t){t=t||_uniS();if(t&&t.fp)return(t.roster.find(p=>p.pos==='QB')||t.roster[0]||{}).num;if(t===window._uniT){try{const q=typeof G!=='undefined'&&G&&G.players&&getS(t.id)?G.players.find(p=>p.sId===t.id&&p.pos==='QB'&&!p.grad):null;return q?q.num:7;}catch(e){return 7;}}return(myP()[0]||{}).num;}
 window._uniKind='home';
-function uniSet(kind,f,v){if(window._fpMode)setTimeout(fpSave,0);const ms=_uniS();ms.uni=ms.uni||{};ms.uni[kind]=Object.assign(uniOf(ms,kind),ms.uni[kind]||{});ms.uni[kind][f]=v;uniRefresh();}
-function uniReset(kind){if(window._fpMode)setTimeout(fpSave,0);const ms=_uniS();if(ms.uni)delete ms.uni[kind];pbRerender();}
-function uniSetC3(v){if(window._fpMode)setTimeout(fpSave,0);_uniS().c3=v;pbRerender();}
-function uniRefresh(){const el=document.getElementById('uni-prev');if(el)el.innerHTML=uniSvg(uniOf(_uniS(),window._uniKind),_uniNum(),170);
-  UNI_F.forEach(([f])=>{const i=document.getElementById('uni-'+f);if(i)i.value=uniOf(_uniS(),window._uniKind)[f];});}
-function uniEditorHtml(){
-  const ms=_uniS(),kind=window._uniKind,u=uniOf(ms,kind),pal=[ms.c1,ms.c2,teamC3(ms),'#ffffff','#111111','#8a8d8f','#c0c0c0','#b5a36a','#7a1f2b','#0b3d91','#2e7d32','#f2b705','#e8731a','#5b2c83'];
-  const tabs=[['home','Home'],['away','Away'],['alt','Alternate']].map(([k,l])=>`<button class="tab ${kind===k?'on':''}" onclick="window._uniKind='${k}';pbRerender()">${l}</button>`).join('');
+function uniRerender(){if(_uniHost()&&window._uniRe)window._uniRe();else pbRerender();}
+function uniHostHtml(T,re,mine){window._uniT=T;window._uniRe=re;return`<div id="uni-host">${uniEditorHtml(T,mine)}</div>`;}
+// uniforms from a team pack, world file or Team Builder draft: only known parts, real colors and known styles are kept
+function uniClean(u){if(!u||typeof u!=='object'||Array.isArray(u))return undefined;const hx=v=>typeof v==='string'&&/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)?v:undefined,o={};
+  for(const kind of['home','away','alt']){const x=u[kind];if(!x||typeof x!=='object')continue;const y={};for(const[f]of UNI_F.concat([['shoulderC']])){const c=hx(x[f]);if(c)y[f]=c;}
+    if(['none','single','double','triple'].includes(x.shoulder))y.shoulder=x.shoulder;if(['gloss','matte','chrome'].includes(x.hShell))y.hShell=x.hShell;if(['team','none'].includes(x.hStripe))y.hStripe=x.hStripe;if(Object.keys(y).length)o[kind]=y;}
+  return Object.keys(o).length?o:undefined;}
+function uniSet(kind,f,v){if(window._fpMode&&!_uniHost())setTimeout(fpSave,0);const ms=_uniS();ms.uni=ms.uni||{};ms.uni[kind]=Object.assign(uniOf(ms,kind),ms.uni[kind]||{});ms.uni[kind][f]=v;uniRefresh();}
+function uniReset(kind){if(window._fpMode&&!_uniHost())setTimeout(fpSave,0);const ms=_uniS();if(ms.uni)delete ms.uni[kind];uniRerender();}
+function uniSetC3(v){if(window._fpMode&&!_uniHost())setTimeout(fpSave,0);_uniS().c3=v;uniRerender();}
+function uniRefresh(){const H=_uniHost()&&_uniBox(),q=id=>H?H.querySelector('#'+id):[...document.querySelectorAll('#'+id)].find(e=>!e.closest('#uni-host')),el=q('uni-prev');if(el)el.innerHTML=uniSvg(uniOf(_uniS(),window._uniKind),_uniNum(),170);
+  UNI_F.forEach(([f])=>{const i=q('uni-'+f);if(i)i.value=uniOf(_uniS(),window._uniKind)[f];});}
+function uniEditorHtml(T,mine){
+  const ms=T||_uniS(),kind=window._uniKind,u=uniOf(ms,kind),pal=[ms.c1,ms.c2,teamC3(ms),'#ffffff','#111111','#8a8d8f','#c0c0c0','#b5a36a','#7a1f2b','#0b3d91','#2e7d32','#f2b705','#e8731a','#5b2c83'];
+  const tabs=[['home','Home'],['away','Away'],['alt','Alternate']].map(([k,l])=>`<button class="tab ${kind===k?'on':''}" onclick="window._uniKind='${k}';uniRerender()">${l}</button>`).join('');
   const rows=UNI_F.map(([f,l])=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">${l}</label>
     <input type="color" id="uni-${f}" value="${u[f]}" oninput="uniSet('${kind}','${f}',this.value)" style="width:46px;height:34px;padding:0;border-radius:8px;cursor:pointer">
     <div style="display:flex;gap:4px;flex-wrap:wrap">${pal.map(c=>`<button title="${c}" onclick="uniSet('${kind}','${f}','${c}')" style="width:22px;height:22px;min-height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.45);background:${c};padding:0;cursor:pointer"></button>`).join('')}</div></div>`).join('');
   return`<div style="display:flex;gap:22px;flex-wrap:wrap">
-    <div style="flex:0 0 190px;text-align:center"><div id="uni-prev" style="padding:10px;border-radius:16px;background:linear-gradient(180deg,#3f9a4f,#2a7a3b)">${uniSvg(u,_uniNum(),170)}</div>
+    <div style="flex:0 0 190px;text-align:center"><div id="uni-prev" style="padding:10px;border-radius:16px;background:linear-gradient(180deg,#3f9a4f,#2a7a3b)">${uniSvg(u,_uniNum(ms),170)}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:8px">Preview: ${kind==='home'?'Home':kind==='away'?'Away':'Alternate'} uniform</div></div>
     <div style="flex:1 1 300px;min-width:0">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><b style="font-size:13px">Team colors</b>
@@ -55,14 +65,14 @@ function uniEditorHtml(){
       <div class="tabs" style="margin-bottom:12px">${tabs}</div>
       ${rows}
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">Shoulder stripes</label>
-        <select onchange="uniSet('${kind}','shoulder',this.value);pbRerender()" style="padding:5px 8px;border-radius:8px">${[['none','None'],['single','Single stripe'],['double','Double stripe'],['triple','Triple stripe']].map(([v,l])=>`<option value="${v}"${(u.shoulder||'none')===v?' selected':''}>${l}</option>`).join('')}</select>
+        <select onchange="uniSet('${kind}','shoulder',this.value);uniRerender()" style="padding:5px 8px;border-radius:8px">${[['none','None'],['single','Single stripe'],['double','Double stripe'],['triple','Triple stripe']].map(([v,l])=>`<option value="${v}"${(u.shoulder||'none')===v?' selected':''}>${l}</option>`).join('')}</select>
         <input type="color" value="${u.shoulderC||u.trim}" oninput="uniSet('${kind}','shoulderC',this.value)" style="width:46px;height:34px;padding:0;border-radius:8px;cursor:pointer" title="Stripe color"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">Helmet finish</label>
-        <select onchange="uniSet('${kind}','hShell',this.value);pbRerender()" style="padding:5px 8px;border-radius:8px">${[['gloss','Gloss'],['matte','Matte'],['chrome','Chrome']].map(([v,l])=>`<option value="${v}"${(u.hShell||'gloss')===v?' selected':''}>${l}</option>`).join('')}</select></div>
+        <select onchange="uniSet('${kind}','hShell',this.value);uniRerender()" style="padding:5px 8px;border-radius:8px">${[['gloss','Gloss'],['matte','Matte'],['chrome','Chrome']].map(([v,l])=>`<option value="${v}"${(u.hShell||'gloss')===v?' selected':''}>${l}</option>`).join('')}</select></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><label style="width:110px;font-size:12px;font-weight:700;color:var(--mu)">Helmet stripe</label>
-        <select onchange="uniSet('${kind}','hStripe',this.value);pbRerender()" style="padding:5px 8px;border-radius:8px">${[['team','Center stripe'],['none','No stripe']].map(([v,l])=>`<option value="${v}"${(u.hStripe||'team')===v?' selected':''}>${l}</option>`).join('')}</select></div>
+        <select onchange="uniSet('${kind}','hStripe',this.value);uniRerender()" style="padding:5px 8px;border-radius:8px">${[['team','Center stripe'],['none','No stripe']].map(([v,l])=>`<option value="${v}"${(u.hStripe||'team')===v?' selected':''}>${l}</option>`).join('')}</select></div>
       <button class="bgh bsm" onclick="uniReset('${kind}')">Reset this uniform to team colors</button>
-      <div style="font-size:11px;color:var(--mu);margin-top:8px">Pick any color with the color picker or tap a swatch. You choose which uniform to wear before every game you play.</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:8px">Pick any color with the color picker or tap a swatch. ${T&&!mine?'On Game Day this school wears its home or away uniform, whichever stands out more against the other team. The alternate is for when you coach here.':'You choose which uniform to wear before every game you play.'}</div>
     </div></div>`;
 }
 function gdFixNums(p){
@@ -82,6 +92,7 @@ const STAD_SEATS=[['silver','Aluminum silver'],['team','Team color'],['alt','Sec
 const STAD_LOGO=[['logo','Team logo'],['initial','Big letter'],['none','No logo']];
 const STAD_TRACK=[['red','Red'],['blue','Blue'],['black','Black'],['team','Team color']];
 const STAD_EZTXT=[['mascot','Mascot'],['name','School name'],['none','Blank']];
+const STAD_EZFONT=[['std','Bold'],['block','Varsity block'],['outline','Block outline'],['script','Script']]; // end zone lettering
 function _stHex(h){h=String(h||'#777').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;return[n>>16&255,n>>8&255,n&255];}
 function _stMix(a,b,t){const A=_stHex(a),B=_stHex(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');}
 function stadOf(s){
@@ -127,7 +138,7 @@ function stadApply(i,cust,s){
   i.logo=(STAD_LOGO.find(x=>x[0]===c.logo)||[i.logoDef])[0];
   const trK=(STAD_TRACK.find(x=>x[0]===c.track)||STAD_TRACK[0])[0];i.trackK=trK;
   i.trackCol=trK==='blue'?['#2a4f8c','#3e67ad']:trK==='black'?['#24262b','#3a3d44']:trK==='team'?[_gdDark(c1,.2),_gdDark(c1,.02)]:['#8c3b2f','#b8574a'];
-  i.ezTxtK=i.ezText?(STAD_EZTXT.find(x=>x[0]===c.eztxt)||STAD_EZTXT[0])[0]:'none';
+  i.ezTxtK=i.ezText?(STAD_EZTXT.find(x=>x[0]===c.eztxt)||STAD_EZTXT[0])[0]:'none';i.ezFont=(STAD_EZFONT.find(x=>x[0]===c.ezfont)||STAD_EZFONT[0])[0];
   i.wall=_gdDark(c1,.15);i.wall2=c2;i.c1=c1;i.c2=c2;
   return i;
 }
@@ -298,9 +309,9 @@ function stadPreviewSvg(i,w){
   return`<svg viewBox="0 0 300 ${H}" width="${w}" height="${Math.round(w*H/300)}" style="display:block;border-radius:10px;max-width:100%">${o}</svg>`;
 }
 function stadCustHtml(cust,i,set){
-  const cur={turf:i.turfK,ez:i.ezK,eztxt:i.ezTxtK,logo:i.logo,seats:i.seatK,track:i.trackK};
+  const cur={turf:i.turfK,ez:i.ezK,eztxt:i.ezTxtK,ezfont:i.ezFont,logo:i.logo,seats:i.seatK,track:i.trackK};
   const sel=(k,list,lab,dis)=>`<label style="font-size:12px;color:var(--mu)">${lab}<br><select ${dis?'disabled':''} onchange="${set}('${k}',this.value)">${list.map(([v,l,art])=>`<option value="${v}"${cur[k]===v?' selected':''}${art&&i.turf!=='turf'?' disabled':''}>${l}${art&&i.turf!=='turf'?' (turf only)':''}</option>`).join('')}</select></label>`;
-  return`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${sel('turf',STAD_TURF,'Field color')}${sel('ez',STAD_EZ,'End zones',!i.ezColor)}${sel('eztxt',STAD_EZTXT,'End zone text',!i.ezText)}${sel('logo',STAD_LOGO,'Midfield')}
+  return`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${sel('turf',STAD_TURF,'Field color')}${sel('ez',STAD_EZ,'End zones',!i.ezColor)}${sel('eztxt',STAD_EZTXT,'End zone text',!i.ezText)}${sel('ezfont',STAD_EZFONT,'End zone font',!i.ezText||i.ezTxtK==='none')}${sel('logo',STAD_LOGO,'Midfield')}
     ${sel('seats',STAD_SEATS,'Seats',i.stands==='none'||i.stands==='wood')}${sel('track',STAD_TRACK,'Track',!i.track)}</div>`;
 }
 function stadCost(t){return Math.round(12000*Math.pow(t,1.35)/1000)*1000;}

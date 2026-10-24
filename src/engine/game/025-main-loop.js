@@ -105,7 +105,7 @@ function newGame(){
   try{gpSliderBake();}catch(e){}
   if(GP&&!ON&&GP.mode){const m=GP.mode;G.playMode=m==='off'||m==='def'?m:'all';if(m==='coach')gpSetCoach(true);}
   if(ON){gpIntro(()=>olToss());return;}
-  gpIntro(()=>showModal(G.teams[0].name===G.teams[1].name?(G.teams[0].city+' '+G.teams[0].name+' vs '+G.teams[1].city+' '+G.teams[1].name):(G.teams[0].name+' vs '+G.teams[1].name),'Two-minute quarters, eleven on eleven. Call the coin toss.',[['Heads','go',()=>toss(0)],['Tails','alt',()=>toss(1)]]));
+  gpIntro(()=>showModal(G.teams[0].name===G.teams[1].name?(G.teams[0].city+' '+G.teams[0].name+' vs '+G.teams[1].city+' '+G.teams[1].name):(G.teams[0].name+' vs '+G.teams[1].name),'Two-minute quarters, '+({6:'six on six',7:'seven on seven',8:'eight on eight',9:'nine on nine'}[SEVENS()?7:gpPer()]||'eleven on eleven')+'. Call the coin toss.',[['Heads','go',()=>toss(0)],['Tails','alt',()=>toss(1)]]));
 }
 function gpSliderBake(){if(ON||G.test||G.demo||DEMO)return;
   for(const T of G.teams)for(const p of T.roster){const ds=sla(T.id,'str',15),di=sla(T.id,'iq',15);if(ds)p.str=clamp(Math.round((p.str||70)+ds),25,99);if(di)p.awr=clamp(Math.round((p.awr||70)+di),25,99);}}
@@ -208,12 +208,12 @@ function olRemote(m){
       case 'repass':if(gpScrambling()&&G.offTeam===R){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}return;
       case 'mv':{if(!userCarrier())return;const f={juke:()=>tryJuke(Math.sign(num(m.d,1))||1),spin:trySpin,stiff:tryStiff,truck:tryTruck,hurdle:tryHurdle,dive:tryDive,slow:trySlow}[m.mv];
         if(f)f();return;}
-      case 'tackle':if(G.uctl&&G.uctl.team===R)userTackle();return;
+      case 'tackle':if(G.uctl&&G.uctl.team===R)userTackle(typeof m.t==='string'?m.t:null);return;
       case 'switch':if(gpDefending(R))switchUser();return;
       case 'pick':{const live=G.phase==='live'&&gpDefending(R);if(!live&&(G.phase!=='presnap'||!G.play||G.play.kind!=='scrimmage'||G.offTeam===R))return;
         const e=G.ents.find(x=>x.nk===m.n&&x.team===R&&!x.down&&(live?!['K','P','H'].includes(x.role):['LB','CB','NB','S'].includes(x.role)));if(e){G.uctl=e;if(['LB','CB','NB','S'].includes(e.role))G.uSlotT[R]=e.slot;setCtl();}return;}
       case 'joy':{const v=Array.isArray(m.v)?m.v:[0,0],x=num(v[0],0),y=num(v[1],0),l=Math.hypot(x,y);
-        G.rjoy={v:l>0.001?[x/l,y/l]:[0,0],m:clamp(num(m.m,0),0,1),t:G.time};return;}
+        G.rjoy={v:l>0.001?[x/l,y/l]:[0,0],m:clamp(num(m.m,0),0,1),sp:!!m.sp,t:G.time};return;}
       case 'cm':{const M=G.cm,a=G.air;if(!M||!M.target||M.target.team!==R||M.tapped!=null||G.ballState!=='air'||!a)return;
         const u=clamp(num(m.u,0),0,1);M.tapped=u;M.result=u>=M.g0&&u<=M.g1?'PERFECT':(u>=M.g0-M.yw&&u<=M.g1+M.yw)?'GOOD':u<M.g0?'EARLY':'LATE';return;}
       case 'im':{const M=G.im,a=G.air,U=M&&M.def;if(!M||!U||U.team!==R||M.tapped!=null||G.ballState!=='air'||!a)return;
@@ -366,16 +366,16 @@ function olSync(F){
   if(key!==OL.uiKey){OL.uiKey=key;if(G.phase!=='replay'){setTray(G.phase==='presnap'?'presnap':G.phase==='dead'?(G.celebPick?'celebrate':'dead'):'none');setCtl();}}
 }
 function olJoySend(){
-  const u=G.uctl;let v=[0,0],m=0;
+  const u=G.uctl;let v=[0,0],m=0;const sp=gpSprintOn()?1:0;
   if(u&&u.team===G.me&&G.phase==='live'){let sx=0,sy=0;
     if(G.joy){sx=G.joy.x-G.joy.ox;sy=G.joy.y-G.joy.oy;}
     else if(G.pad){sx=G.pad.x*30;sy=G.pad.y*30;}
   else{if(keys.has('arrowleft')||keys.has('a'))sx-=30;if(keys.has('arrowright')||keys.has('d'))sx+=30;if(keys.has('arrowup')||keys.has('w'))sy-=30;if(keys.has('arrowdown')||keys.has('s'))sy+=30;}
     const l=Math.hypot(sx,sy);if(l>=4){const[fx,fy]=screenToSimDir(u,sx,sy);v=[Math.round(fx*100)/100,Math.round(fy*100)/100];m=Math.round(Math.min(1,l/26)*100)/100;}}
-  const now=performance.now(),L=OL.joyLast,same=L&&L.m===m&&Math.abs(L.v[0]-v[0])<0.06&&Math.abs(L.v[1]-v[1])<0.06;
+  const now=performance.now(),L=OL.joyLast,same=L&&L.m===m&&L.sp===sp&&Math.abs(L.v[0]-v[0])<0.06&&Math.abs(L.v[1]-v[1])<0.06;
   if(m===0&&(!L||L.m===0))return;
   if(same&&now-OL.joyAt<(m?250:1e9))return;if(!same&&now-OL.joyAt<60)return;
-  OL.joyLast={v,m};OL.joyAt=now;olCmd('joy',{v,m});
+  OL.joyLast={v,m,sp};OL.joyAt=now;olCmd('joy',{v,m,sp});
 }
 function olDrawRoutes(){
   if(G.phase!=='presnap'||!G.play||G.play.kind!=='scrimmage'||G.offTeam!==G.me||!OL.routes)return;
@@ -451,14 +451,14 @@ if(GP){try{
   const L0=document.getElementById('gull'),L1=document.getElementById('elk');
   if(L0){L0.setAttribute('viewBox','0 0 100 100');L0.innerHTML=GP.teams[0].logoInner;}
   if(L1){L1.setAttribute('viewBox','0 0 100 100');L1.innerHTML=GP.teams[1].logoInner;}
-  for(const i of[0,1]){const c=document.getElementById('gpC'+i),n=document.getElementById('gpN'+i);if(c)c.textContent=GP.teams[i].city.toUpperCase()+(GP.teams[i].ovr?' · '+GP.teams[i].ovr+' OVR':'');if(n){n.textContent=GP.teams[i].name.toUpperCase();n.dataset.full=n.textContent;n.dataset.abbr=(GP.teams[i].abbr||n.textContent.slice(0,4)).toUpperCase();n.dataset.rec=GP.teams[i].rec||'';}}
-  if(GP.teams[GP.home||0].logoUrl)logoImg.gull.src=GP.teams[GP.home||0].logoUrl;
+  for(const i of[0,1]){const c=document.getElementById('gpC'+i),n=document.getElementById('gpN'+i);if(c)c.textContent=GP.teams[i].city.toUpperCase()+(GP.teams[i].ovr?' · '+GP.teams[i].ovr+' OVR':'');if(n){n.textContent=GP.teams[i].name.toUpperCase();n.dataset.full=n.textContent;n.dataset.abbr=(GP.teams[i].abbr||n.textContent.slice(0,4)).toUpperCase();n.dataset.rec=GP.teams[i].rec||'';n.dataset.rk=GP.teams[i].rk||'';}}
+  if(GP.midLogoUrl||GP.teams[GP.home||0].logoUrl)logoImg.gull.src=GP.midLogoUrl||GP.teams[GP.home||0].logoUrl; // a neutral-site final shows the host college at midfield
   const h0=document.querySelector('.tm.home'),h1=document.querySelector('.tm.away');if(h0&&GP.teams[0].hud)h0.style.background=GP.teams[0].hud;if(h1&&GP.teams[1].hud)h1.style.background=GP.teams[1].hud;
   document.title=GP.teams[0].name+' vs '+GP.teams[1].name;
 }catch(e){console.error(e);}}
 // v2.15 TV-style scorebug (Settings → Scorebug): abbreviations, records and a yellow down-and-distance tag
 function gpBugStyle(){const tv=GDS.bug!=='classic';document.body.classList.toggle('bugtv',tv);try{document.body.classList.toggle('pcbug',pcOn());}catch(e){}for(const k of['slab','tower','mini'])document.body.classList.toggle('bug-'+k,GDS.bug===k);
-  for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;
+  for(const i of[0,1]){const n=document.getElementById('gpN'+i);if(!n||!n.dataset.full)continue;n.textContent=tv?n.dataset.abbr:n.dataset.full;if(n.dataset.rk){const k=document.createElement('span');k.className='rkn';k.textContent=n.dataset.rk;n.prepend(k);} // national or state class rank before the name
     let r=n.parentNode.querySelector('.rec');if(n.dataset.rec&&!r){r=document.createElement('span');r.className='rec';n.after(r);}if(r)r.textContent=n.dataset.rec||'';}}
 try{gpBugStyle();}catch(e){}
 new ResizeObserver(fit).observe($('stage'));
