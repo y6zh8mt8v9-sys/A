@@ -61,7 +61,8 @@ function startGame(){
   const chosenRivals=[..._selectedRivals];
   const team=_selectedOfferTeam;
   showLoading('Building Your Program…',team,18,()=>{
-    initGame(coach,divs,foundDIdx,foundSIdx,chosenRivals);
+    window._pcNewCareer=!!(pcDraft&&pcDraft.lock); // a Player Career never opens the schedule builder
+    try{initGame(coach,divs,foundDIdx,foundSIdx,chosenRivals);}finally{window._pcNewCareer=false;}
     try{G.world=JSON.parse(JSON.stringify(WORLD||{}));}catch(e){G.world={};}G.world.geo=USA.on?JSON.parse(JSON.stringify(USA.cfg)):{mode:'classic'};
     G.coach=window._coachDraft||null;G.saveId=null;window._coachDraft=null;setTimeout(()=>{try{saveGame(true);}catch(e){}},900);
     document.getElementById('setup').classList.add('hid');
@@ -70,8 +71,9 @@ function startGame(){
     checkAndFillRosters();
     _allClsDivs=null;_setupDivs=null;_mapOffers=[];for(const c of MAPC){c.offers=[];} // the setup map's lists: free them
     try{if(pcDraft)pcCreate(pcDraft);}catch(e){console.error('player career',e);}
+    if(G.pcLock)try{pcAutoSched();}catch(e){console.error('player career schedule',e);} // Player Career: the staff builds the schedule
     nav(G.myPlayerId!=null?'mine':'dash');
-    showTutorial();
+    showTutorial();if(G.pcLock){const i=TUT_PAGES.findIndex(x=>x.tab==='Player Career');if(i>=0)goTutTab(i);}
   });
 }
 // ═══════════ PLAYER CREATOR (Player Career): who he is, how he looks, what he wears and his starting ratings ═══════════

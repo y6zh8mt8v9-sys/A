@@ -91,7 +91,7 @@ const TUT_PAGES=[
       <li><strong>Menu</strong>: the Dashboard lists every section (Team, Season, League, Program) with its pages. A gold dot marks a page that needs you (new news, a schedule to build, practice, skill points). Each page opens on its own; <strong>‹ Home</strong> takes you back. Settings → Menu layout switches back to the classic tabs.</li>
       <li><strong>Job offers</strong>: after a good season other schools in your league call about their head coaching job. The offers sit on the Dashboard until your first game of the new season. A rebuild job comes with a bigger budget.</li>
       <li><strong>Division names</strong>: in a real-states world your home state uses its own class names (Texas 2A to 6A, Ohio Division VII to I, Class S to LL in Connecticut...).</li>
-      <li><strong>Player Career</strong>: pick a school on the map, then build your player: name, position, archetype, height and weight, up to 3 interests and 2 character traits, his look and his gear. Attribute points build a freshman between 40 and 55 overall. In Player Career mode the school already has a head coach, so you don't create one.</li>
+      <li><strong>Player Career</strong>: pick a school on the map, then build your player: name, position, archetype, height and weight, up to 3 interests and 2 character traits, his look and his gear. Attribute points build a freshman between 40 and 55 overall. In Player Career mode the school already has a head coach, so you don't create one: he runs the team for you.</li>
       <li><strong>Levels and skill points</strong>: every game earns your player XP (more for big games, wins and the playoffs). Each level gives 3 skill points to spend on any attribute on the My Player page. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 above 90.</li>
       <li><strong>Catch meter</strong>: in Player Career only your own player gets one.</li>
       <li><strong>Transfers</strong>: meet a scouted player any time. During the season a yes means he joins you next season (seniors can't, they graduate). Your own players may want to transfer out, depending on what they care about, their traits and morale; never more than 15% of your roster in a year. Talk to them from the Players leaving tile; they leave when offseason training ends.</li>
@@ -311,6 +311,7 @@ const TUT_PAGES=[
       <li><b>Coach trust</b> (0 to 100) goes up with good games and wins and down with turnovers, drops and losses. Trust also moves you up the depth chart.</li>
       <li><b>Call for the ball</b> (B key, Y / Triangle or the button) makes your quarterback look your way, and a running back gets a run called for him. Do not ask on every play: the coach notices.</li>
       <li><b>Transfer</b> from the Dashboard in the offseason, before the first game: you join a school in your league and start over with neutral trust.</li>
+      <li><b>The coach runs the team.</b> The schedule, depth chart, JV call-ups, practice, offseason training, skill points, captains, staff, facilities, recruiting and reclassification are all handled for you. You only play as your player: his games, his skill points, his commitment and his transfer.</li>
       <li>After your senior year, follow his college and pro career on <b>My Player</b>.</li>
     </ul>`},
   {tab:'Money & trophies',icon:'',title:'Ticket Sales and the Trophy Case',body:`

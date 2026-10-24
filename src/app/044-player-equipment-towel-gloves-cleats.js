@@ -194,7 +194,7 @@ function jobOffersGen(w,l,champ,divWon){
   if(!list.length)return;G.jobOffers={yr:G.yr+1,list};const nO=list.filter(o=>{const t=getS(o.sid);return t&&stOf(t)!==mySt;}).length;
   try{addNews('myteam',`${list.length} school${list.length>1?'s':''} want${list.length>1?'':'s'} to talk to you`,`After a ${w}-${l} season, ${list.map(o=>getS(o.sid)&&getS(o.sid).name).filter(Boolean).join(', ')} called about their coaching job${list.length>1?'s':''}.${nO?` ${nO} of them ${nO>1?'are':'is'} out of state.`:''}`);}catch(e){}
   try{addLog(`<span style="color:var(--gd)">Job offers: ${list.length} school${list.length>1?'s':''} called about a coaching job${nO?` (${nO} out of state)`:''}. See the dashboard.</span>`);}catch(e){}}
-function jobOffersLive(){const J=G.jobOffers;if(!J||J.yr!==G.yr||!J.list.length||pcActive())return null;
+function jobOffersLive(){const J=G.jobOffers;if(!J||J.yr!==G.yr||!J.list.length||pcActive()||pcAuto())return null;
   if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result))return null;return J;}
 function jobWhere(t){const os=stOf(t)!==clsSt(G.cls),d=clsNum(t.cls)-clsNum(G.cls);return`${os?'<b style="color:var(--te)">Out of state</b> · '+clsName(t.cls):clsL(t.cls)}${t.cls===G.cls?'':d>0?' · bigger school':d<0?' · smaller school':os?'':' · other classification'}`;}
 function jobPanel(){const J=jobOffersLive();if(!J)return'';

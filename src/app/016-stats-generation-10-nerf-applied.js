@@ -37,6 +37,8 @@ function genStats(players,teamScore,won,offScheme,defScheme,schId,oppId){
     const bo=b.depth&&b.depth[pos]!==undefined?b.depth[pos]:999;
     if(ao!==bo)return ao-bo;return b.rat-a.rat;
   });
+  // Player Career two-way player: he also lines up at his second position (a starter there when he starts, else by rating)
+  for(const p of players){if(!pcOwnPick(p)||!pcTwo(p))continue;const L=byPos[p.pos2]||(byPos[p.pos2]=[]);let i=L.findIndex(q=>q.rat<p.rat-4);try{if(pcRole(p).start)i=0;}catch(e){}L.splice(i<0?L.length:i,0,p);}
   const starter=(pos,n=0)=>byPos[pos]&&byPos[pos][n]?byPos[pos][n]:null;
   function sc(p,base,spread){if(!p)return 0;const r=(p.rat-55)/50;const sb=p.traits&&p.traits.includes('showboat')&&Math.random()<.35?1.25:1;return Math.max(0,Math.round((base+r*spread+rng(-Math.round(spread*.22),Math.round(spread*.22)))*sb*STAT_NERF));}
 
