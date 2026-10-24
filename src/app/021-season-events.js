@@ -4,15 +4,15 @@ function bEvPop(title,body,img,color){return`<div class="pc" style="border-top-c
 function tryEvent(sm,iWin,myScore,oppScore){
   const roll=Math.random();const pl=myP().filter(p=>p.inj===0&&(p.pos==='OL'||p.pos==='K'||p.seasStats.gp>0));if(!pl.length)return null;
   const blowout=Math.abs(myScore-oppScore)>=21;const upset=iWin&&teamOvr(G.sched[G.week]?.oppId||0)>=(G.offR+G.defR)/2+5;
-  if(iWin&&blowout&&roll<.5){G.budget+=4000;addNews('myteam',' Blowout Bonus Earned',`Dominant ${myScore}-${oppScore} victory earned your program $4,000!`);return bEvPop(' Blowout Win!',`A dominant ${myScore}-${oppScore} victory earned your program <strong>$4,000</strong>!`,null,'var(--gn)');}
-  if(iWin&&upset&&roll<.4){G.prestige=clamp(G.prestige+.2,1,5);addNews('upset',' Major Upset! Recruits Take Notice',`You toppled a heavy favorite. Prestige boost earned.`);return bEvPop(' Major Upset!',`You upset a heavily favored opponent! Prestige boost: recruits are noticing.`,null,'var(--gd)');}
+  if(iWin&&blowout&&roll<.5){G.budget+=4000;addNews('myteam','Blowout Bonus Earned',`Dominant ${myScore}-${oppScore} victory earned your program $4,000!`);return bEvPop('Blowout Win!',`A dominant ${myScore}-${oppScore} victory earned your program <strong>$4,000</strong>!`,null,'var(--gn)');}
+  if(iWin&&upset&&roll<.4){G.prestige=clamp(G.prestige+.2,1,5);addNews('upset','Major Upset! Recruits Take Notice',`You toppled a heavy favorite. Prestige boost earned.`);return bEvPop('Major Upset!',`You upset a heavily favored opponent! Prestige boost: recruits are noticing.`,null,'var(--gd)');}
   const prospects=myP().filter(p=>p.rat>=62&&p.yr>=10&&(p.pos==='OL'||p.pos==='K'||p.seasStats.gp>0));
-  if(prospects.length&&roll<.2){const p=prospects[Math.floor(Math.random()*prospects.length)];genOffers(p,true,[]);addNews('offer',` Scouts Watching ${p.fn} ${p.ln}`,`College scouts boosted offer chances for the ${p.pos}.`);return bEvPop(' Scouts Watching!',`College scouts were watching <strong>${p.fn} ${p.ln}</strong> (${p.pos}) this game! Offer chances increased.`,face(p.fs,48),'var(--b2)');}
+  if(prospects.length&&roll<.2){const p=prospects[Math.floor(Math.random()*prospects.length)];genOffers(p,true,[]);addNews('offer',`Scouts Watching ${p.fn} ${p.ln}`,`College scouts boosted offer chances for the ${p.pos}.`);return bEvPop('Scouts Watching!',`College scouts were watching <strong>${p.fn} ${p.ln}</strong> (${p.pos}) this game! Offer chances increased.`,face(p.fs,48),'var(--b2)');}
   const sorted2=Object.entries(sm).map(([pid,st])=>({p:getP(parseInt(pid)),st})).filter(x=>x.p&&x.p.sId===G.myId);
   sorted2.sort((a,b)=>{const scr=(s)=>(s.passYds||0)/15+(s.rushYds||0)/8+(s.recYds||0)/8+(s.passTD||0)*5+(s.rushTD||0)*5+(s.tackles||0)*1.5+(s.sacks||0)*4;return scr(b.st)-scr(a.st);});
-  if(sorted2.length&&roll<.25){const best=sorted2[0];const p=best.p;p.sp=(p.sp||0)+2;addNews('great',` Breakout Game: ${p.fn} ${p.ln}`,`Monster performance earned +2 SP for the ${p.pos}.`);return bEvPop(' Breakout Game!',`${p.fn} ${p.ln} had a monster game! <strong>+2 Skill Points</strong> earned.`,face(p.fs,48),'var(--gd)');}
-  if(!iWin&&roll<.12){const bad=myP().filter(p=>p.offers.length>0&&!p.committed&&!p.traits.includes('humble'));if(bad.length){const p=bad[Math.floor(Math.random()*bad.length)];p.offers.pop();addNews('bad',` Offer Withdrawn: ${p.fn} ${p.ln}`,`Lost an offer after the team's poor showing.`);return bEvPop(' Offer Withdrawn',`${p.fn} ${p.ln} lost an offer after the team's poor showing.`,face(p.fs,48),'var(--ac)');}}
-  if(roll<.07&&sorted2.length){const p=sorted2[0].p;const idx=DEV.indexOf(p.dev);if(idx<3){p.dev=DEV[idx+1];addNews('great',` Dev Surge! ${p.fn} ${p.ln}`,`Now showing ${p.dev} development potential!`);return bEvPop(' Dev Surge!',`${p.fn} ${p.ln} is showing <strong>${p.dev}</strong> development potential!`,face(p.fs,48),'var(--gn)');}}
+  if(sorted2.length&&roll<.25){const best=sorted2[0];const p=best.p;p.sp=(p.sp||0)+2;addNews('great',`Breakout Game: ${p.fn} ${p.ln}`,`Monster performance earned +2 SP for the ${p.pos}.`);return bEvPop('Breakout Game!',`${p.fn} ${p.ln} had a monster game! <strong>+2 Skill Points</strong> earned.`,face(p.fs,48),'var(--gd)');}
+  if(!iWin&&roll<.12){const bad=myP().filter(p=>p.offers.length>0&&!p.committed&&!p.traits.includes('humble'));if(bad.length){const p=bad[Math.floor(Math.random()*bad.length)];p.offers.pop();addNews('bad',`▼ Offer Withdrawn: ${p.fn} ${p.ln}`,`Lost an offer after the team's poor showing.`);return bEvPop('▼ Offer Withdrawn',`${p.fn} ${p.ln} lost an offer after the team's poor showing.`,face(p.fs,48),'var(--ac)');}}
+  if(roll<.07&&sorted2.length){const p=sorted2[0].p;const idx=DEV.indexOf(p.dev);if(idx<3){p.dev=DEV[idx+1];addNews('great',`▲ Dev Surge! ${p.fn} ${p.ln}`,`Now showing ${p.dev} development potential!`);return bEvPop('▲ Dev Surge!',`${p.fn} ${p.ln} is showing <strong>${p.dev}</strong> development potential!`,face(p.fs,48),'var(--gn)');}}
   return null;
 }
 
@@ -87,7 +87,7 @@ function buildPlayoffBracket(){
     G.trophies=G.trophies||[];
     G.trophies.push({type:'Division',yr:G.yr,rec:`${G.wins}-${G.losses}`});
     G.prestige=clamp(G.prestige+.2,1,5);
-    addLog(`<span style="color:var(--gd)"> Division Champion! ${G.wins}-${G.losses}</span>`);
+    addLog(`<span style="color:var(--gd)">Division Champion! ${G.wins}-${G.losses}</span>`);
   }
 
   G.playoff={
@@ -114,8 +114,8 @@ function buildPlayoffBracket(){
     if(noQChamp){
       G.playoff.stateChampId=noQChamp.id;
       const champRec=`${noQChamp.wins}-${noQChamp.losses}`;
-      addLog(`<span style="color:var(--gd)"> State champion: ${noQChamp.name} ${noQChamp.mascot} (${champRec})</span>`);
-      const noQPop=bEvPop(' State Champion Crowned',`Your team did not qualify for the playoffs.<br><br><strong style="color:var(--gd)">${noQChamp.name} ${noQChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(noQChamp,64),'var(--gd)');
+      addLog(`<span style="color:var(--gd)">State champion: ${noQChamp.name} ${noQChamp.mascot} (${champRec})</span>`);
+      const noQPop=bEvPop('State Champion Crowned',`Your team did not qualify for the playoffs.<br><br><strong style="color:var(--gd)">${noQChamp.name} ${noQChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(noQChamp,64),'var(--gd)');
       _popQ=[noQPop];_popI=0;_popCb=()=>nav('dash');showPop();
     }
     G.phase='postseason';
@@ -142,7 +142,7 @@ function setNextPlayoffGame(){
       G.trophies=G.trophies||[];
       G.trophies.push({type:'State',yr:G.yr,rec:`${G.wins}-${G.losses}`,cls:G.cls});
       G.prestige=clamp(G.prestige+.6,1,5);G.budget+=75000;
-      addLog(`<span style="color:var(--gd)"> State champions! ${G.wins}-${G.losses} +$75,000</span>`);
+      addLog(`<span style="color:var(--gd)">State champions! ${G.wins}-${G.losses} +$75,000</span>`);
     }
     const remainingSlots=G.sched.filter(g=>(g.type==='playoff'||g.type==='bye')&&!g.result);
     for(const s of remainingSlots){s.type='bye';s.result='bye';s.label='Bye Week';}
@@ -232,7 +232,7 @@ function advPlayoffWeek(){
   }
   const myTeam=myS();
   const roundName=poRoundName(slot.playoffRound)||`Playoff Round ${slot.playoffRound}`;
-  gdChoose('po',{slot,opp,label:roundName+': vs '+opp.name+' '+opp.mascot},()=>showLoading(` ${roundName}: vs ${opp.name}`,myTeam,12,()=>_doAdvPlayoffWeek(slot,opp)));
+  gdChoose('po',{slot,opp,label:roundName+': vs '+opp.name+' '+opp.mascot},()=>showLoading(`${roundName}: vs ${opp.name}`,myTeam,12,()=>_doAdvPlayoffWeek(slot,opp)));
 }
 function _doAdvPlayoffWeek(slot,opp,forced=null){
 
@@ -262,20 +262,20 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
   // Determine if this is the championship (final) game BEFORE simming the round
   const isFinal=G.playoff.bracket.length===2;
   if(iWin&&!isFinal){
-    pops.push(bEvPop(` ${roundName} WIN!`,`${myS().name} ${myS().mascot} defeat ${opp.name} ${opp.mascot} <strong>${myScore}–${oppScore}</strong>! Advance to next round!`,null,'var(--gd)'));
-    addNews('playoff',` Playoff Win! ${myS().mascot} vs ${opp.mascot} ${myScore}–${oppScore}`,`${roundName}, advancing to next round!`);
+    pops.push(bEvPop(`${roundName} WIN!`,`${myS().name} ${myS().mascot} defeat ${opp.name} ${opp.mascot} <strong>${myScore}–${oppScore}</strong>! Advance to next round!`,null,'var(--gd)'));
+    addNews('playoff',`Playoff Win! ${myS().mascot} vs ${opp.mascot} ${myScore}–${oppScore}`,`${roundName}, advancing to next round!`);
     G.prestige=clamp(G.prestige+.15,1,5);
     G.budget+=2000;
   } else if(iWin&&isFinal){
-    addNews('playoff',` State champions! ${myS().mascot} ${myScore}–${oppScore}`,`${myS().name} are the State Champions!`);
+    addNews('playoff',`State champions! ${myS().mascot} ${myScore}–${oppScore}`,`${myS().name} are the State Champions!`);
     G.prestige=clamp(G.prestige+.15,1,5);
     G.budget+=2000;
   } else {
-    pops.push(bEvPop(` Eliminated, ${roundName}`,`${myS().name} ${myS().mascot} lost to ${opp.name} ${opp.mascot} <strong>${oppScore}–${myScore}</strong>. Season is over.`,null,'var(--ac)'));
-    addNews('bad',` Eliminated: ${roundName}, ${opp.mascot} ${oppScore}–${myScore}`,`Season ends here. Rebuild for next year.`);
+    pops.push(bEvPop(`Eliminated, ${roundName}`,`${myS().name} ${myS().mascot} lost to ${opp.name} ${opp.mascot} <strong>${oppScore}–${myScore}</strong>. Season is over.`,null,'var(--ac)'));
+    addNews('bad',`Eliminated: ${roundName}, ${opp.mascot} ${oppScore}–${myScore}`,`Season ends here. Rebuild for next year.`);
   }
 
-  addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}"> ${roundName}: ${iWin?'Win':'Loss'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
+  addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}">${roundName}: ${iWin?'Win':'Loss'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
 
   simPlayoffRound(slot.playoffRound,slot,iWin);
 
@@ -293,19 +293,19 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
     if(stateChamp){
       G.playoff.stateChampId=stateChamp.id;
       const champRec=`${stateChamp.wins}-${stateChamp.losses}`;
-      addLog(`<span style="color:var(--gd)"> State champion: ${stateChamp.name} ${stateChamp.mascot} (${champRec})</span>`);
-      pops.push(bEvPop(' State Champion Crowned',`<strong style="color:var(--gd)">${stateChamp.name} ${stateChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(stateChamp,64),'var(--gd)'));
+      addLog(`<span style="color:var(--gd)">State champion: ${stateChamp.name} ${stateChamp.mascot} (${champRec})</span>`);
+      pops.push(bEvPop('State Champion Crowned',`<strong style="color:var(--gd)">${stateChamp.name} ${stateChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(stateChamp,64),'var(--gd)'));
     }
     G.phase='postseason';
   } else if(G.playoff.bracket.length<=1){
     // Call setNextPlayoffGame(), it correctly sets champ flag, pushes State trophy, awards prestige/budget
     setNextPlayoffGame();
     if(G.playoff.champ){
-      pops.push(bEvPop(' State champions! ',`Year ${2026+(G.yr-1)}, ${G.wins}-${G.losses} + Playoff Run!<br>Your program has won the State Championship! <strong style="color:var(--gd)">$75,000 bonus!</strong>`,null,'var(--gd)'));
+      pops.push(bEvPop('State champions!',`Year ${2026+(G.yr-1)}, ${G.wins}-${G.losses} + Playoff Run!<br>Your program has won the State Championship! <strong style="color:var(--gd)">$75,000 bonus!</strong>`,null,'var(--gd)'));
     } else {
       // Shouldn't happen (we just won), but guard anyway
       const champ=G.playoff.bracket[0];
-      if(champ)pops.push(bEvPop(' State Champion',`${champ.name} ${champ.mascot} are this year's state champions!`,sLogo(champ,52),'var(--mu)'));
+      if(champ)pops.push(bEvPop('State Champion',`${champ.name} ${champ.mascot} are this year's state champions!`,sLogo(champ,52),'var(--mu)'));
     }
     // phase is already set to 'postseason' by setNextPlayoffGame
   } else {
@@ -321,20 +321,20 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
       p.inj=inj.weeks;
       if(inj.isCareer){
         triggerCareerEndingInjury(p);
-        addNews('careerinjury',' Career-Ending Injury',`${p.fn} ${p.ln} (${p.pos}) suffered a ${inj.name} in the playoffs. Their career is over.`);
+        addNews('careerinjury','Career-Ending Injury',`${p.fn} ${p.ln} (${p.pos}) suffered a ${inj.name} in the playoffs. Their career is over.`);
       } else if(inj.isSeason){
         p.injSeason=true;
-        pops.push(bEvPop(' Season-Ending Injury!',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong> and is out for the rest of the playoffs.`,face(p.fs,52),'var(--rd)'));
-        addLog(`<span style="color:var(--rd)"> ${p.fn} ${p.ln}, ${inj.name} (Season-Ending)</span>`);
-        addNews('injury',' Playoff Injury (Season-Ending)',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out for the playoffs.`);
+        pops.push(bEvPop('Season-Ending Injury!',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong> and is out for the rest of the playoffs.`,face(p.fs,52),'var(--rd)'));
+        addLog(`<span style="color:var(--rd)">${p.fn} ${p.ln}, ${inj.name} (Season-Ending)</span>`);
+        addNews('injury','Playoff Injury (Season-Ending)',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out for the playoffs.`);
       } else {
-        pops.push(bEvPop(' Playoff Injury',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong>: out <strong>${inj.weeks} week${inj.weeks!==1?'s':''}</strong>.`,face(p.fs,52),'var(--ac)'));
-        addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln}, ${inj.name} (${inj.weeks}w)</span>`);
-        addNews('injury',' Playoff Injury',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out ${inj.weeks} week${inj.weeks!==1?'s':''}.`);
+        pops.push(bEvPop('Playoff Injury',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong>: out <strong>${inj.weeks} week${inj.weeks!==1?'s':''}</strong>.`,face(p.fs,52),'var(--ac)'));
+        addLog(`<span style="color:var(--te)">${p.fn} ${p.ln}, ${inj.name} (${inj.weeks}w)</span>`);
+        addNews('injury','Playoff Injury',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out ${inj.weeks} week${inj.weeks!==1?'s':''}.`);
       }
     }
   }
-  for(const p of myP()){if(p.inj>0&&!p.injSeason&&!p.injCareer){p.inj--;if(p.inj===0){const nm=p.injName;p.injName=null;p.injSeason=false;if(nm)pops.push(bEvPop(' Player Returns',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) has recovered from their <strong>${nm}</strong> and is back on the roster.`,face(p.fs,52),'var(--gn)'));if(nm)addLog(`<span style="color:var(--gn)"> ${p.fn} ${p.ln}, returned from ${nm}</span>`);}}}
+  for(const p of myP()){if(p.inj>0&&!p.injSeason&&!p.injCareer){p.inj--;if(p.inj===0){const nm=p.injName;p.injName=null;p.injSeason=false;if(nm)pops.push(bEvPop('Player Returns',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) has recovered from their <strong>${nm}</strong> and is back on the roster.`,face(p.fs,52),'var(--gn)'));if(nm)addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln}, returned from ${nm}</span>`);}}}
   for(const p of myP()){checkStarsOffers(p,pops,false);checkCommit(p);}
   try{colNeedsWeek(pops);}catch(e){console.error('college needs',e);}
 

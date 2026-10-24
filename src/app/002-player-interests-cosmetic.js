@@ -1,12 +1,12 @@
 // ═══════════ PLAYER INTERESTS (COSMETIC) ═══════════
 const INTERESTS=[
-  {k:'gaming',l:'Gaming',e:''},{k:'fishing',l:'Fishing',e:''},{k:'biking',l:'Biking',e:''},
-  {k:'weightroom',l:'Weightroom',e:''},{k:'reading',l:'Reading',e:''},{k:'music',l:'Music',e:''},
-  {k:'cooking',l:'Cooking',e:''},{k:'hunting',l:'Hunting',e:''},{k:'basketball',l:'Basketball',e:''},
-  {k:'baseball',l:'Baseball',e:''},{k:'drawing',l:'Drawing',e:''},{k:'cars',l:'Cars',e:''},
-  {k:'sneakers',l:'Sneakers',e:''},{k:'hiking',l:'Hiking',e:''},{k:'chess',l:'Chess',e:''},
-  {k:'movies',l:'Movies',e:''},{k:'wrestling',l:'Wrestling',e:''},{k:'skateboarding',l:'Skateboarding',e:''},
-  {k:'swimming',l:'Swimming',e:''},{k:'volunteering',l:'Volunteering',e:''},
+  {k:'gaming',l:'Gaming',e:''},{k:'fishing',l:'Fishing',e:''},{k:'biking',l:'Biking',e:''},
+  {k:'weightroom',l:'Weightroom',e:''},{k:'reading',l:'Reading',e:''},{k:'music',l:'Music',e:''},
+  {k:'cooking',l:'Cooking',e:''},{k:'hunting',l:'Hunting',e:''},{k:'basketball',l:'Basketball',e:''},
+  {k:'baseball',l:'Baseball',e:''},{k:'drawing',l:'Drawing',e:''},{k:'cars',l:'Cars',e:''},
+  {k:'sneakers',l:'Sneakers',e:''},{k:'hiking',l:'Hiking',e:''},{k:'chess',l:'Chess',e:''},
+  {k:'movies',l:'Movies',e:''},{k:'wrestling',l:'Wrestling',e:''},{k:'skateboarding',l:'Skateboarding',e:''},
+  {k:'swimming',l:'Swimming',e:''},{k:'volunteering',l:'Volunteering',e:''},
 ];
 
 function genInterests(){
@@ -122,13 +122,13 @@ window.showDevTraitPopup=function(pid){
   const ssNow=clamp(calcSS(p),0,120);
   let perfModNow=0;
   if(ssNow>=80)perfModNow=3;else if(ssNow>=55)perfModNow=2;else if(ssNow>=30)perfModNow=1;else if(ssNow>=15)perfModNow=0;else perfModNow=-1;
-  const perfLabel=ssNow>=80?' Elite':ssNow>=55?' Good':ssNow>=30?' Average':ssNow>=15?' Below Avg':' Poor';
+  const perfLabel=ssNow>=80?'Elite':ssNow>=55?'★ Good':ssNow>=30?'Average':ssNow>=15?'▼ Below Avg':'Poor';
   function dynSP(base){return Math.max(1,base+perfModNow+trainModNow);}
   const DEV_INFO={
-    'Normal':    {icon:'',color:'var(--mu)',desc:`Standard development pace. Base: <strong>3 SP</strong>/phase, adjusted by performance & training level.`,spPerPhase:dynSP(3)},
-    'Impact':    {icon:'',color:'var(--te)',desc:`Above-average development. Base: <strong>6 SP</strong>/phase, adjusted by performance & training level.`,spPerPhase:dynSP(6)},
-    'Star':      {icon:'',color:'var(--gd)',desc:`High-ceiling talent. Base: <strong>9 SP</strong>/phase, adjusted by performance & training level.`,spPerPhase:dynSP(9)},
-    'Elite Dev': {icon:'',color:'var(--gn)',desc:`Generational talent. Base: <strong>13 SP</strong>/phase, adjusted by performance & training level. Fastest star gains.`,spPerPhase:dynSP(13)},
+    'Normal':    {icon:'',color:'var(--mu)',desc:`Standard development pace. Base: <strong>3 SP</strong>/phase, adjusted by performance & training level.`,spPerPhase:dynSP(3)},
+    'Impact':    {icon:'',color:'var(--te)',desc:`Above-average development. Base: <strong>6 SP</strong>/phase, adjusted by performance & training level.`,spPerPhase:dynSP(6)},
+    'Star':      {icon:'★',color:'var(--gd)',desc:`High-ceiling talent. Base: <strong>9 SP</strong>/phase, adjusted by performance & training level.`,spPerPhase:dynSP(9)},
+    'Elite Dev': {icon:'',color:'var(--gn)',desc:`Generational talent. Base: <strong>13 SP</strong>/phase, adjusted by performance & training level. Fastest star gains.`,spPerPhase:dynSP(13)},
   };
   const info=DEV_INFO[p.dev]||DEV_INFO['Normal'];
   const DEV=['Normal','Impact','Star','Elite Dev'];
@@ -216,13 +216,13 @@ window.showDevTraitPopup=function(pid){
     </div>
     <div style="font-size:12px;color:var(--mu)">
       Performance likely to <strong style="color:${potDirection==='increase'?'var(--gn)':'var(--te)'}">${potDirection}</strong> the range by ~${potMag} pts.
-      ${(p.yr===9||p.yr===10)?'<span style="color:var(--gn)"> Fr/So, 70% protected from decreases.</span>':''}
+      ${(p.yr===9||p.yr===10)?'<span style="color:var(--gn)">Fr/So, 70% protected from decreases.</span>':''}
     </div>
     <div style="font-size:11px;color:var(--mu);margin-top:4px">Training facility unlocks <strong style="color:var(--tx)">${Math.round(trainFactor()*100)}%</strong> of ceiling. Upgrade to reach higher.</div>
   </div>
 
   <div style="background:var(--s3);border-left:3px solid var(--gd);padding:8px 12px;border-radius:0 4px 4px 0;font-size:11px;color:var(--gd)">
-     Potential ranges shift at <strong>season end</strong>. Great seasons raise the ceiling; poor seasons or inactivity lower it. Train hard and upgrade your facility to unlock full potential!
+    Potential ranges shift at <strong>season end</strong>. Great seasons raise the ceiling; poor seasons or inactivity lower it. Train hard and upgrade your facility to unlock full potential!
   </div>`);
 };
 

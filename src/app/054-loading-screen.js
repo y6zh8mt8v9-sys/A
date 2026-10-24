@@ -8,7 +8,7 @@ function showLoading(label,team,steps,cb){
   const fill=document.getElementById('loading-bar-fill');
   const pctEl=document.getElementById('loading-pct');
   // Set team identity
-  logoW.innerHTML=team?sLogo(team,110):'';
+  logoW.innerHTML=team?sLogo(team,110):'';
   nameEl.textContent=team?`${team.name} ${team.mascot}`:'';
   subEl.textContent=team?`${team.city||''} · ${team.cls?clsL(team.cls):''} · ${team.conf||''}`:'';
   lblEl.textContent=label||'Loading…';
@@ -67,7 +67,7 @@ function startGame(){
     G.coach=window._coachDraft||null;G.saveId=null;window._coachDraft=null;setTimeout(()=>{try{saveGame(true);}catch(e){}},900);
     document.getElementById('setup').classList.add('hid');
     document.getElementById('app').classList.remove('hid');
-    addLog(`<span style="color:var(--te)"> Welcome, ${coach}! ${2026+(G.yr-1)} Season &#8212; ${myS().name} ${myS().mascot}.</span>`);
+    addLog(`<span style="color:var(--te)">Welcome, ${coach}! ${2026+(G.yr-1)} Season &#8212; ${myS().name} ${myS().mascot}.</span>`);
     checkAndFillRosters();
     _allClsDivs=null;_setupDivs=null;_mapOffers=[];for(const c of MAPC){c.offers=[];} // the setup map's lists: free them
     try{if(pcDraft)pcCreate(pcDraft);}catch(e){console.error('player career',e);}

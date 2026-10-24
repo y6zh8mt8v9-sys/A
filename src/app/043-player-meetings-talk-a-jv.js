@@ -210,5 +210,5 @@ function spndSP(pid,stat,amt){
   notify(`+${amt} OVR applied! Attributes boosted.`);
   showPlayer(pid);
 }
-function commitNow(pid){const p=getP(pid);if(!p)return;const sel=document.getElementById('csel');if(!sel)return;const o=JSON.parse(sel.value),c=COL_BY[o.school+'|'+o.lvl];if(c&&!colRoom(c,p,false)){notify(`${o.school} already filled its ${p.pos} spots in this class.`,'w');return;}p.committed=o;colTakeCommit(p,o);addLog(`<span style="color:var(--gn)"> ${p.fn} ${p.ln} committed to ${p.committed.school}!</span>`);notify(`${p.fn} ${p.ln} committed!`);showPlayer(pid);}
+function commitNow(pid){const p=getP(pid);if(!p)return;const sel=document.getElementById('csel');if(!sel)return;const o=JSON.parse(sel.value),c=COL_BY[o.school+'|'+o.lvl];if(c&&!colRoom(c,p,false)){notify(`${o.school} already filled its ${p.pos} spots in this class.`,'w');return;}p.committed=o;colTakeCommit(p,o);addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} committed to ${p.committed.school}!</span>`);notify(`${p.fn} ${p.ln} committed!`);showPlayer(pid);}
 

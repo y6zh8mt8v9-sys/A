@@ -287,26 +287,26 @@ function renderStoryCard(p,compact){
   if((G.hofArchive||[]).some(x=>x.id===p.id)){try{return aiCareerCard(p,compact);}catch(err){console.error('aiCareerCard',err);}}
   // Only show story if 3+ years have passed since graduation
   const yearsOut=(G.yr-1)-(p.gradYr||0);
-  if(yearsOut<3)return`<div style="margin-top:8px;padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;font-size:11px;color:var(--mu)"> Story unlocks in ${3-yearsOut} year${3-yearsOut!==1?'s':''}</div>`;
+  if(yearsOut<3)return`<div style="margin-top:8px;padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;font-size:11px;color:var(--mu)">Story unlocks in ${3-yearsOut} year${3-yearsOut!==1?'s':''}</div>`;
   const st=generatePlayerStory(p);
   const cf=_genCollegeCareerFacts(p);
   if(compact){
     return`<div style="margin-top:8px;padding:8px 10px;background:rgba(47,111,237,.06);border:1px solid rgba(47,111,237,.2);border-radius:6px;cursor:pointer" onclick="event.stopPropagation();showPlayer(${p.id})">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span>${st.icon}</span><span style="font-family:var(--hd);font-weight:800;font-size:12px;color:var(--te)">${st.outcome}</span><span style="font-size:10px;color:var(--mu)">${st.storyYr}</span></div>
       <div style="font-size:11px;color:var(--tx);line-height:1.4">${st.headline}</div>
-      ${cf?`<div style="font-size:10px;color:var(--mu);margin-top:3px"> ${cf.school} (${cf.lvl}) · ${cf.statsBlock.split(' ').slice(0,4).join(' ')}…</div>`:''}
+      ${cf?`<div style="font-size:10px;color:var(--mu);margin-top:3px">${cf.school} (${cf.lvl}) · ${cf.statsBlock.split(' ').slice(0,4).join(' ')}…</div>`:''}
     </div>`;
   }
   // Build college career block
   const fbsPrestigeLabel=cf&&cf.lvl==='FBS'?(cf.fbsTier==='elite'?' <span style="color:var(--gd);font-size:10px">★ Elite Program</span>':cf.fbsTier==='good'?' <span style="color:var(--mu);font-size:10px">★ Major Program</span>':''):'';
   const collegeHtml=cf?`
     <div style="background:rgba(34,184,112,.05);border:1px solid rgba(34,184,112,.2);border-radius:8px;padding:12px 14px;margin-bottom:10px">
-      <div style="font-family:var(--hd);font-weight:900;font-size:13px;color:var(--gn);letter-spacing:.3px;margin-bottom:8px"> College Career, ${cf.school} (${cf.lvl})${fbsPrestigeLabel}</div>
-      ${cf.dreamNote?`<div style="font-size:11px;color:var(--gd);margin-bottom:6px;font-style:italic"> ${cf.dreamNote}</div>`:''}
-      <div style="font-size:12px;color:var(--tx);margin-bottom:6px"> <strong>Stats:</strong> ${cf.statsBlock}</div>
-      ${cf.awards.length?`<div style="font-size:12px;color:var(--gd);margin-bottom:6px"> <strong>Awards:</strong> ${cf.awards.join(', ')}</div>`:''}
-      ${cf.injury?`<div style="font-size:12px;color:var(--rd);margin-bottom:6px"> <strong>Injury:</strong> ${p.fn} ${cf.injury}.</div>`:''}
-      ${cf.scandal?`<div style="font-size:12px;color:#ff9900;margin-bottom:2px"> <strong>Incident:</strong> ${p.fn} ${cf.scandal}.</div>`:''}
+      <div style="font-family:var(--hd);font-weight:900;font-size:13px;color:var(--gn);letter-spacing:.3px;margin-bottom:8px">College Career, ${cf.school} (${cf.lvl})${fbsPrestigeLabel}</div>
+      ${cf.dreamNote?`<div style="font-size:11px;color:var(--gd);margin-bottom:6px;font-style:italic">★ ${cf.dreamNote}</div>`:''}
+      <div style="font-size:12px;color:var(--tx);margin-bottom:6px"><strong>Stats:</strong> ${cf.statsBlock}</div>
+      ${cf.awards.length?`<div style="font-size:12px;color:var(--gd);margin-bottom:6px"><strong>Awards:</strong> ${cf.awards.join(', ')}</div>`:''}
+      ${cf.injury?`<div style="font-size:12px;color:var(--rd);margin-bottom:6px"><strong>Injury:</strong> ${p.fn} ${cf.injury}.</div>`:''}
+      ${cf.scandal?`<div style="font-size:12px;color:#ff9900;margin-bottom:2px"><strong>Incident:</strong> ${p.fn} ${cf.scandal}.</div>`:''}
     </div>`:'';
   return`<div style="margin-top:10px">
     ${collegeHtml}
@@ -408,8 +408,8 @@ function pgHoF(){
     <button onclick="window._hofPage=Math.min(${totalPages-1},window._hofPage+1);nav('hof')" ${page>=totalPages-1?'disabled':''} style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 12px;color:var(--tx);cursor:pointer;opacity:${page>=totalPages-1?.4:1}">Next</button>
   </div>`:'';
 
-  return`<div class="pnl"><div class="ph"> Hall of Fame <span style="font-size:12px;font-weight:400;color:var(--mu)">${allHof.length} enshrined</span></div>
-  ${!allHof.length?'<div class="pb" style="color:var(--mu)">No players enshrined. Click  on any player to add them.</div>':
+  return`<div class="pnl"><div class="ph">Hall of Fame <span style="font-size:12px;font-weight:400;color:var(--mu)">${allHof.length} enshrined</span></div>
+  ${!allHof.length?'<div class="pb" style="color:var(--mu)">No players enshrined. Click on any player to add them.</div>':
   `<div class="pb">${aiHofFeed()}${searchBar}${!slice.length?`<div style="color:var(--mu)">No players match "${q}".</div>`:`<div style="display:flex;flex-wrap:wrap;gap:10px">${slice.map(p=>{const isGrad=!activeIds.has(p.id);return`<div style="background:var(--s2);border:1px solid var(--gd);border-radius:8px;padding:12px;min-width:200px;max-width:260px;cursor:pointer;position:relative;display:flex;flex-direction:column" onclick="showPlayer(${p.id})">
     ${faceCached(p.fs,36)}<div style="font-weight:700;font-size:12px;margin-top:5px">${p.fn} ${p.ln}</div>
     <div>${stars(p.stars)} ${rb(p.rat)}</div><div><span class="pb2">${p.pos}</span> ${yrL(p.yr)}</div>
@@ -427,7 +427,7 @@ function togHof(id){
   if(p){
     p.hof=!p.hof;
     if(!p.hof&&archIdx!==-1)G.hofArchive.splice(archIdx,1);
-    notify(p.hof?'Enshrined in HoF! ':'Removed.','w');
+    notify(p.hof?'Enshrined in HoF!':'Removed.','w');
   } else {
     G.hofArchive.splice(archIdx,1);
     notify('Removed from Hall of Fame.','w');
@@ -453,7 +453,7 @@ function pgHist(){
   window._setHistCls=function(cls){window._histClsFilter=cls;nav('hist');};
   const histClsBar=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
     <span style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
-    ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
+    ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;">${cls==='ALL'?'ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
   </div>`;
   function _awardCell(aw,icon,color){
     if(!aw)return`<td style="color:var(--mu)">–</td>`;
@@ -479,7 +479,7 @@ function pgHist(){
 
   const leagueHistHtml=!G.hist.length&&!otherLeagueLiveRows?'<div style="color:var(--mu);padding:10px 0">No seasons completed yet.</div>':
     histClsBar+`<div style="overflow-x:auto"><table style="margin-bottom:16px"><thead><tr>
-      <th>Season</th><th>Class</th><th> State Champion</th>${G.divisions.map(d=>`<th> ${d.name}</th>`).join('')}<th> Mr. Football</th><th> Fr. of Year</th>
+      <th>Season</th><th>Class</th><th>State Champion</th>${G.divisions.map(d=>`<th>${d.name}</th>`).join('')}<th>Mr. Football</th><th>★ Fr. of Year</th>
     </tr></thead>
     <tbody>
     ${otherLeagueLiveRows}
@@ -492,24 +492,24 @@ function pgHist(){
       const champCls=h.cls||G.cls;
       // Main state champ cell
       const champCell=h.stateChampName
-        ?`<td style="font-weight:700;color:${isMyStateChamp?'var(--gd)':'var(--tx)'}">${isMyStateChamp?' ':''}<span style="color:${isMyStateChamp?'var(--gd)':'var(--te)'}">${h.stateChampName}</span>${!isMyStateChamp&&_scRec?` <span style="color:var(--mu);font-size:10px">(${_scRec})</span>`:''}</td>`
-        :h.otherChampName?`<td style="color:var(--te);font-weight:700"> ${h.otherChampName}</td>`
+        ?`<td style="font-weight:700;color:${isMyStateChamp?'var(--gd)':'var(--tx)'}">${isMyStateChamp?'':''}<span style="color:${isMyStateChamp?'var(--gd)':'var(--te)'}">${h.stateChampName}</span>${!isMyStateChamp&&_scRec?` <span style="color:var(--mu);font-size:10px">(${_scRec})</span>`:''}</td>`
+        :h.otherChampName?`<td style="color:var(--te);font-weight:700">${h.otherChampName}</td>`
         :`<td style="color:var(--mu)">–</td>`;
       const divCells=(h.divWinners||[]).length
         ?G.divisions.map(div=>{
             const dw=(h.divWinners||[]).find(dv=>dv.divName===div.name);
             if(!dw)return`<td style="color:var(--mu)">–</td>`;
             const isMe=dw.id===G.myId;
-            return`<td style="font-weight:${isMe?700:400};color:${isMe?'var(--gd)':'var(--tx)'}">${isMe?' ':''}${dw.name} <span style="color:var(--mu);font-size:10px">${dw.rec}</span></td>`;
+            return`<td style="font-weight:${isMe?700:400};color:${isMe?'var(--gd)':'var(--tx)'}">${isMe?'':''}${dw.name} <span style="color:var(--mu);font-size:10px">${dw.rec}</span></td>`;
           }).join('')
         :G.divisions.map(()=>`<td style="color:var(--mu)">–</td>`).join('');
       const clsCell=`<td><span style="font-family:var(--hd);font-weight:700;color:var(--te)">${clsL(champCls)}</span></td>`;
-      return`<tr><td style="font-weight:700;color:var(--gd)">${yr}</td>${clsCell}${champCell}${divCells}${_awardCell(h.mrFootball,'','var(--gd)')}${_awardCell(h.freshmanOTY,'','var(--b2)')}</tr>`;
+      return`<tr><td style="font-weight:700;color:var(--gd)">${yr}</td>${clsCell}${champCell}${divCells}${_awardCell(h.mrFootball,'','var(--gd)')}${_awardCell(h.freshmanOTY,'★','var(--b2)')}</tr>`;
     }).join('')}${!histToShow.length&&!otherLeagueLiveRows?`<tr><td colspan="20" style="color:var(--mu);text-align:center;padding:14px">No history for this classification yet.</td></tr>`:''}</tbody></table></div>
 
     ${G.hist.length&&Object.values(G.hist.some(h=>h.otherLeagueChamps&&Object.keys(h.otherLeagueChamps).length>0)?G.hist:[])?`
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);">
-      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;"> All Classification Champions by Season</div>
+      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">All Classification Champions by Season</div>
       <div style="overflow-x:auto"><table><thead><tr>
         <th>Season</th>${['1A','2A','3A','4A','5A'].map(cls=>`<th${cls===G.cls?` style="color:var(--te)"`:''}>${clsL(cls)}${cls===G.cls?' ★':''}</th>`).join('')}
       </tr></thead><tbody>
@@ -522,7 +522,7 @@ function pgHist(){
             if(cls===(h.cls||G.cls)){
               const isMine=h.stateChamp;
               const nm=h.stateChampName||'–';
-              return`<td style="font-weight:${isMine?700:500};color:${isMine?'var(--gd)':'var(--tx)'}">${isMine?' ':''}${nm}</td>`;
+              return`<td style="font-weight:${isMine?700:500};color:${isMine?'var(--gd)':'var(--tx)'}">${isMine?'':''}${nm}</td>`;
             }
             const oc=othChamps[cls];
             return oc?`<td style="color:var(--te)">${oc.name} <span style="color:var(--mu);font-size:10px">${oc.rec}</span></td>`:`<td style="color:var(--mu)">–</td>`;
@@ -544,7 +544,7 @@ function pgHist(){
       return _histClsFilter==='ALL'?natT+stT:'';})()}
     ${(_histClsFilter==='ALL'&&G.allLeagues&&Object.keys(G.allLeagues).length)?`
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);">
-      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;"> All-Time State Champions by Classification</div>
+      <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">All-Time State Champions by Classification</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
         ${['1A','2A','3A','4A','5A'].map(cls=>{
           let champName='–';
@@ -570,11 +570,11 @@ function pgHist(){
     </div>`:''}
     `;
 
-  return`<div class="pnl"><div class="ph"> History: ${myS().name} ${myS().mascot}</div><div class="pb">
+  return`<div class="pnl"><div class="ph">History: ${myS().name} ${myS().mascot}</div><div class="pb">
     <div class="tabs" style="margin-bottom:12px">
       <button class="tab on" onclick="swRTab(this,'hist-my')">My Team</button>
       <button class="tab" onclick="swRTab(this,'hist-lg')">League History</button>
-      <button class="tab" onclick="swRTab(this,'hist-aw')"> Awards</button>
+      <button class="tab" onclick="swRTab(this,'hist-aw')">Awards</button>
       <button class="tab" onclick="swRTab(this,'hist-rc')">School Records</button>
     </div>
     <div id="hist-my">
@@ -583,18 +583,18 @@ function pgHist(){
     <tbody>${G.hist.map(h=>`<tr>
       <td>${2026+(h.yr-1)}</td><td>${recStr(h.wins,h.losses)}</td>
       <td><span style="font-family:var(--hd);font-weight:700;color:var(--te)">${clsL(h.cls||G.cls)}</span></td>
-      <td>${''.repeat(Math.round(h.prestige))}</td>
-      <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?' State Champion':h.champ?' Division Champ':'–'}</td>
+      <td>${'★'.repeat(Math.round(h.prestige))}</td>
+      <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?'State Champion':h.champ?'Division Champ':'–'}</td>
     </tr>`).join('')}</tbody></table>`}
-    ${G.trophies&&G.trophies.length?`<div style="margin-bottom:16px"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;"> Trophy Cabinet</div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'National champs':t.type==='State'?'State champs':'Division champs'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
+    ${G.trophies&&G.trophies.length?`<div style="margin-bottom:16px"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">Trophy Cabinet</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'National champs':t.type==='State'?'State champs':'Division champs'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
     </div>
     <div id="hist-lg" class="hid">${leagueHistHtml}</div>
     <div id="hist-aw" class="hid">${(()=>{
       if(!G.hist.length)return'<div style="color:var(--mu)">No seasons completed yet.</div>';
       const awClsBar=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
         <span style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-right:4px;">Filter Class:</span>
-        ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;">${cls==='ALL'?' ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
+        ${['ALL','1A','2A','3A','4A','5A'].map(cls=>`<button onclick="_setHistCls('${cls}')" style="background:${_histClsFilter===cls?'var(--ac)':'var(--s2)'};border:1px solid ${_histClsFilter===cls?'var(--ac)':'var(--bd)'};color:${_histClsFilter===cls?'var(--tOn,#fff)':'var(--tx)'};padding:3px 11px;border-radius:4px;cursor:pointer;font-family:var(--hd);font-weight:700;font-size:12px;">${cls==='ALL'?'ALL':clsL(cls)}${cls===G.cls?' ★':''}</button>`).join('')}
       </div>`;
       const awHistToShow=_histClsFilter==='ALL'?G.hist:G.hist.filter(h=>(h.cls||G.cls)===_histClsFilter);
       function awardDetailRow(aw, icon, color, label){
@@ -643,7 +643,7 @@ function pgHist(){
             <td style="font-size:11px;color:var(--tx)">${statStr||'–'}</td>
           </tr>`;
         }
-        return aRow(h.mrFootball,'','var(--gd)','Mr. Football')+aRow(h.freshmanOTY,'','var(--b2)','Fr. of Year');
+        return aRow(h.mrFootball,'','var(--gd)','Mr. Football')+aRow(h.freshmanOTY,'★','var(--b2)','Fr. of Year');
       }).join('')}${!awHistToShow.length?`<tr><td colspan="7" style="color:var(--mu);text-align:center;padding:14px">No awards history for this classification.</td></tr>`:''}
       </tbody></table></div>`;
     })()}</div>

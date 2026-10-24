@@ -120,20 +120,20 @@ function simGame(idx,silent=false,forced=null){
       p.inj=inj.weeks;
       if(inj.isCareer){
         if(!silent)triggerCareerEndingInjury(p);
-        addNews('careerinjury',' Career-Ending Injury',`${p.fn} ${p.ln} (${p.pos}) suffered a ${inj.name}. Their career is over.`);
+        addNews('careerinjury','Career-Ending Injury',`${p.fn} ${p.ln} (${p.pos}) suffered a ${inj.name}. Their career is over.`);
       } else if(inj.isSeason){
         p.injSeason=true;
-        if(!silent)weekPops.push(bEvPop(' Season-Ending Injury!',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong> and is out for the season.`,face(p.fs,52),'var(--rd)'));
-        addLog(`<span style="color:var(--rd)"> ${p.fn} ${p.ln}, ${inj.name} (Season-Ending)</span>`);
-        addNews('injury',' Season-Ending Injury',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out for the season.`);
+        if(!silent)weekPops.push(bEvPop('Season-Ending Injury!',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong> and is out for the season.`,face(p.fs,52),'var(--rd)'));
+        addLog(`<span style="color:var(--rd)">${p.fn} ${p.ln}, ${inj.name} (Season-Ending)</span>`);
+        addNews('injury','Season-Ending Injury',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out for the season.`);
       } else {
-        if(!silent)weekPops.push(bEvPop(' Injury',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong> and is out <strong>${inj.weeks} week${inj.weeks!==1?'s':''}</strong>.`,face(p.fs,52),'var(--ac)'));
-        addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln}, ${inj.name} (${inj.weeks}w)</span>`);
-        addNews('injury',' Injury Report',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out ${inj.weeks} week${inj.weeks!==1?'s':''}.`);
+        if(!silent)weekPops.push(bEvPop('Injury',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) suffered a <strong>${inj.name}</strong> and is out <strong>${inj.weeks} week${inj.weeks!==1?'s':''}</strong>.`,face(p.fs,52),'var(--ac)'));
+        addLog(`<span style="color:var(--te)">${p.fn} ${p.ln}, ${inj.name} (${inj.weeks}w)</span>`);
+        addNews('injury','Injury Report',`${p.fn} ${p.ln} (${p.pos}), ${inj.name}. Out ${inj.weeks} week${inj.weeks!==1?'s':''}.`);
       }
     }
   }
-  for(const p of myP()){if(p.inj>0&&!p.injSeason&&!p.injCareer){p.inj--;if(p.inj===0){const nm=p.injName;p.injName=null;p.injSeason=false;if(nm&&!silent)weekPops.push(bEvPop(' Player Returns',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) has recovered from their <strong>${nm}</strong> and is back on the roster.`,face(p.fs,52),'var(--gn)'));if(nm&&!silent){addLog(`<span style="color:var(--gn)"> ${p.fn} ${p.ln}, returned from ${nm}</span>`);addNews('return',' Player Returns',`${p.fn} ${p.ln} (${p.pos}) is back after recovering from a ${nm}.`);}}}}
+  for(const p of myP()){if(p.inj>0&&!p.injSeason&&!p.injCareer){p.inj--;if(p.inj===0){const nm=p.injName;p.injName=null;p.injSeason=false;if(nm&&!silent)weekPops.push(bEvPop('Player Returns',`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) has recovered from their <strong>${nm}</strong> and is back on the roster.`,face(p.fs,52),'var(--gn)'));if(nm&&!silent){addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln}, returned from ${nm}</span>`);addNews('return','Player Returns',`${p.fn} ${p.ln} (${p.pos}) is back after recovering from a ${nm}.`);}}}}
   for(const p of myP()){checkStarsOffers(p,silent?[]:weekPops,false);checkCommit(p);}
   try{campInviteWeek(game.wk,silent?null:weekPops);}catch(e){console.error('camps',e);}
 
@@ -157,7 +157,7 @@ function simGame(idx,silent=false,forced=null){
         for(const div of lg.divisions){
           const leader=[...div.teams].sort((a,b)=>(b.wins/(b.wins+b.losses||1))-(a.wins/(a.wins+a.losses||1)))[0];
           if(leader&&leader.wins>=4&&leader.losses===0){
-            _lgNews.push({type:'general',icon:'',headline:`${leader.name} ${leader.mascot} unbeaten in ${clsName(cls)}`,sub:`${leader.wins}-${leader.losses} through Week ${game.wk}. Best record in ${clsName(cls)}.`});
+            _lgNews.push({type:'general',icon:'',headline:`${leader.name} ${leader.mascot} unbeaten in ${clsName(cls)}`,sub:`${leader.wins}-${leader.losses} through Week ${game.wk}. Best record in ${clsName(cls)}.`});
             break;
           }
         }
@@ -210,14 +210,14 @@ function simGame(idx,silent=false,forced=null){
   // News: game result
   if(iWin){
     const margin=myScore-oppScore;
-    if(margin>=21)addNews('myteam',` Blowout! ${myS()?.mascot} ${myScore}–${oppScore}`,`Dominant win over ${opp.name} ${opp.mascot} in Week ${game.wk}.`);
-    else addNews('myteam',` Win vs ${opp.name} ${opp.mascot} ${myScore}–${oppScore}`,`${myS()?.mascot} improve to ${G.wins}-${G.losses} this season.`);
+    if(margin>=21)addNews('myteam',`Blowout! ${myS()?.mascot} ${myScore}–${oppScore}`,`Dominant win over ${opp.name} ${opp.mascot} in Week ${game.wk}.`);
+    else addNews('myteam',`Win vs ${opp.name} ${opp.mascot} ${myScore}–${oppScore}`,`${myS()?.mascot} improve to ${G.wins}-${G.losses} this season.`);
   } else {
-    addNews('bad',` Loss to ${opp.name} ${opp.mascot} ${oppScore}–${myScore}`,`${myS()?.mascot} fall to ${G.wins}-${G.losses}. Bounce back next week.`);
+    addNews('bad',`Loss to ${opp.name} ${opp.mascot} ${oppScore}–${myScore}`,`${myS()?.mascot} fall to ${G.wins}-${G.losses}. Bounce back next week.`);
   }
   // News: big individual performances
-  if(tQB&&tQB.st.passYds>=280){addNews('great',` ${tQB.p.fn} ${tQB.p.ln} Lights Up Scoreboard`,`${tQB.st.passYds} pass yds, ${tQB.st.passTD} TD in Week ${game.wk} ${iWin?'win':'loss'}.`);}
-  if(tRB&&tRB.st.rushYds>=150){addNews('great',` ${tRB.p.fn} ${tRB.p.ln} Rushes for ${tRB.st.rushYds} Yards`,`Dominant ground performance in Week ${game.wk}.`);}
+  if(tQB&&tQB.st.passYds>=280){addNews('great',`${tQB.p.fn} ${tQB.p.ln} Lights Up Scoreboard`,`${tQB.st.passYds} pass yds, ${tQB.st.passTD} TD in Week ${game.wk} ${iWin?'win':'loss'}.`);}
+  if(tRB&&tRB.st.rushYds>=150){addNews('great',`${tRB.p.fn} ${tRB.p.ln} Rushes for ${tRB.st.rushYds} Yards`,`Dominant ground performance in Week ${game.wk}.`);}
 
   G.week=game.wk;
   if(!silent&&weekPops.length){_popQ=weekPops;_popI=0;showPop();}

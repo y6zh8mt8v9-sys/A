@@ -82,11 +82,11 @@ function calcProjectedSOS(){
 }
 
 function sosTierLabel(sos){
-  if(sos>=80)return{label:'Elite',color:'var(--gd)',icon:''};
-  if(sos>=70)return{label:'Tough',color:'var(--ac)',icon:''};
-  if(sos>=60)return{label:'Average',color:'var(--tx)',icon:''};
-  if(sos>=50)return{label:'Easy',color:'var(--mu)',icon:''};
-  return{label:'Cupcake',color:'var(--rd)',icon:''};
+  if(sos>=80)return{label:'Elite',color:'var(--gd)',icon:''};
+  if(sos>=70)return{label:'Tough',color:'var(--ac)',icon:''};
+  if(sos>=60)return{label:'Average',color:'var(--tx)',icon:''};
+  if(sos>=50)return{label:'Easy',color:'var(--mu)',icon:''};
+  return{label:'Cupcake',color:'var(--rd)',icon:''};
 }
 
 // ─── SCHEDULE BUILDER UI ─────────────────────────────────────────────────────
@@ -128,25 +128,25 @@ function renderRivalryPicker(){
       ${sLogo(s,43)}
       <div style="flex:1;min-width:0">
         <div style="font-family:var(--hd);font-weight:800;font-size:14px">${s.name} ${s.mascot}</div>
-        <div style="font-size:10px;color:var(--mu)">${s.city} · ${s.wins||0}-${s.losses||0} last season${histCount?` · <span style="color:var(--gd)"> ${histCount} rivalry game${histCount!==1?'s':''}</span>`:''}</div>
+        <div style="font-size:10px;color:var(--mu)">${s.city} · ${s.wins||0}-${s.losses||0} last season${histCount?` · <span style="color:var(--gd)">${histCount} rivalry game${histCount!==1?'s':''}</span>`:''}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
         ${rb(ovr)}
         ${diffStr}
         ${isOldRival?'<span style="font-size:9px;background:rgba(245,192,48,.2);color:var(--gd);border-radius:3px;padding:1px 5px;font-weight:700">Ongoing rival</span>':''}
       </div>
-      ${isSel?'<span style="font-size:22px"></span>':''}
+      ${isSel?'<span style="font-size:11px;font-weight:800;color:var(--gn)">Selected</span>':''}
     </div>`;
   }).join('');
 
   const canContinue=!!G.seasonRivalId;
   const rivalInfo=currentRival?`<div style="background:rgba(245,192,48,.1);border:1px solid var(--gd);border-radius:6px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
     ${sLogo(currentRival,38)}
-    <div><div style="font-family:var(--hd);font-weight:800;font-size:14px;color:var(--gd)"> ${currentRival.name} ${currentRival.mascot}</div>
+    <div><div style="font-family:var(--hd);font-weight:800;font-size:14px;color:var(--gd)">${currentRival.name} ${currentRival.mascot}</div>
     <div style="font-size:11px;color:var(--mu)">Selected as your ${yr} Rivalry Game (Week 5)</div></div>
   </div>`:'';
 
-  openMo(`<h2> ${yr} Season, Pick Your Rivalry Game</h2>
+  openMo(`<h2>${yr} Season, Pick Your Rivalry Game</h2>
   <div style="font-size:12px;color:var(--mu);margin-bottom:14px">
     Every season you choose <strong style="color:var(--gd)">one division opponent</strong> as your <strong style="color:var(--gd)">Rivalry Game</strong> (always Week 5). Rivalry games carry extra prestige, affect recruiting, and can shift the season narrative. Choose wisely: your rival resets each year.
   </div>
@@ -157,7 +157,7 @@ function renderRivalryPicker(){
   <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;border-top:1px solid var(--bd);padding-top:12px;margin-top:4px">
     <button class="bgh" onclick="window._skipRivalryPick()" style="font-size:13px">Skip (auto-assign)</button>
     ${canContinue
-      ? `<button class="btn bgd" onclick="window._confirmRivalryPick()" style="font-size:14px;padding:9px 22px"> Continue → Build Schedule</button>`
+      ? `<button class="btn bgd" onclick="window._confirmRivalryPick()" style="font-size:14px;padding:9px 22px">Continue → Build Schedule</button>`
       : `<button class="btn" onclick="notify('Pick a rival first, or use Skip to auto-assign.','w')" style="font-size:14px;padding:9px 22px;background:var(--s3);border:2px solid var(--gd);color:var(--gd)">Continue</button>`
     }
   </div>`);
@@ -250,7 +250,7 @@ function renderScheduleBuilder(){
         <span style="font-family:var(--hd);font-weight:800;font-size:12px;color:var(--mu);min-width:22px">Wk${g.wk}</span>
         ${s?sLogo(s,32):''}
         <span style="font-size:12px;flex:1">${s?s.name+' '+s.mascot:'?'}</span>
-        ${g.isRivalry?'<span style="font-size:10px;font-weight:800;color:var(--gd)"> RIVALRY</span>':'<span style="font-size:10px;color:var(--te);font-weight:700">DIV</span>'}
+        ${g.isRivalry?'<span style="font-size:10px;font-weight:800;color:var(--gd)">RIVALRY</span>':'<span style="font-size:10px;color:var(--te);font-weight:700">DIV</span>'}
         ${s?`<span style="font-size:11px">${rb(teamOvr(s.id))}</span>`:''}
       </div>`;
     }
@@ -285,7 +285,7 @@ function renderScheduleBuilder(){
       ${emptySlots.length>0?`<div style="font-size:10px;color:var(--te);font-weight:700;background:rgba(47,111,237,.1);border-radius:3px;padding:3px 7px"> Click a week slot, then pick a team →</div><button class="bgh" onclick="sbAutoFill()" style="width:100%;font-size:13px;padding:7px">Auto-fill open slots</button>`:''}
       <div style="flex:1;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px">${schedPreview}</div>
       <button class="btn bgn" ${canFinish?'onclick="finalizeSchedule()"':'disabled style="opacity:.45"'} style="width:100%;font-size:14px;padding:9px">
-        ${canFinish?' Lock In Schedule →':'Fill all '+emptySlots.length+' open slots'}
+        ${canFinish?'Lock In Schedule →':'Fill all '+emptySlots.length+' open slots'}
       </button>
       ${canFinish?'':'<div style="font-size:11px;color:var(--mu);text-align:center">Fill all open slots to continue</div>'}
     </div>
@@ -316,7 +316,7 @@ function renderScheduleBuilder(){
             const diffStr=diff>0?`<span style="color:var(--rd);font-size:10px">+${diff}</span>`:diff<0?`<span style="color:var(--gn);font-size:10px">${diff}</span>`:`<span style="color:var(--mu);font-size:10px">EVEN</span>`;
             // SOS seeding impact badge
             const sosImpact=Math.round((ovr-65)*0.4); // scaled impact per game
-            const sosBadge=ovr>=75?`<span style="font-size:9px;background:rgba(245,192,48,.15);color:var(--gd);border-radius:3px;padding:1px 5px;font-weight:700">+SOS </span>`:ovr>=65?`<span style="font-size:9px;color:var(--mu)">avg SOS</span>`:`<span style="font-size:9px;color:var(--mu)">−SOS</span>`;
+            const sosBadge=ovr>=75?`<span style="font-size:9px;background:rgba(245,192,48,.15);color:var(--gd);border-radius:3px;padding:1px 5px;font-weight:700">+SOS</span>`:ovr>=65?`<span style="font-size:9px;color:var(--mu)">avg SOS</span>`:`<span style="font-size:9px;color:var(--mu)">−SOS</span>`;
             const divOfTeam=divOf(s.id);
             return`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 11px;cursor:pointer;transition:border-color .12s" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="addCustomGame(${s.id})">
               <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
@@ -341,7 +341,7 @@ function renderScheduleBuilder(){
 
   const rivalSch=G.seasonRivalId?getS(G.seasonRivalId):null;
   const yr2=2026+(G.yr-1);
-  openMo(`<h2> Build Your ${yr2} Schedule</h2>
+  openMo(`<h2>Build Your ${yr2} Schedule</h2>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:stretch">
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
       <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">Division Games (Locked)</div>
@@ -351,7 +351,7 @@ function renderScheduleBuilder(){
     ${rivalSch?`<div style="background:rgba(245,192,48,.08);border:1px solid var(--gd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px;display:flex;align-items:center;gap:10px">
       ${sLogo(rivalSch,38)}
       <div>
-        <div style="font-size:10px;color:var(--gd);letter-spacing:1px;font-weight:700;margin-bottom:2px"> Rivalry (Wk 5)</div>
+        <div style="font-size:10px;color:var(--gd);letter-spacing:1px;font-weight:700;margin-bottom:2px">Rivalry (Wk 5)</div>
         <div style="font-family:var(--hd);font-size:14px;font-weight:800">${rivalSch.name} ${rivalSch.mascot}</div>
         <div style="font-size:10px;color:var(--mu)">${rb(teamOvr(rivalSch.id))}</div>
       </div>
@@ -362,13 +362,13 @@ function renderScheduleBuilder(){
       <div style="font-size:11px;color:var(--mu)">${emptySlots.length} remaining · any class</div>
     </div>
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
-      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px"> Strength of Schedule</div>
+      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">Strength of Schedule</div>
       <div style="font-family:var(--hd);font-size:18px;font-weight:900;color:${sosTier.color}">${sosTier.icon} ${sosTier.label} (${projSOS||'?'} OVR)</div>
       <div style="font-size:11px;color:var(--mu)">Playoff seeding: ${sosSeedStr}</div>
     </div>
   </div>
   <div style="font-size:11px;color:var(--mu);margin-bottom:10px;background:var(--s3);border-radius:4px;padding:6px 10px;border-left:3px solid var(--gd)">
-     <strong style="color:var(--gd)">SOS matters in playoffs.</strong> Scheduling tougher opponents, especially from higher classifications, directly boosts your playoff seeding score. Two teams with the same record are separated by SOS.
+    <strong style="color:var(--gd)">SOS matters in playoffs.</strong> Scheduling tougher opponents, especially from higher classifications, directly boosts your playoff seeding score. Two teams with the same record are separated by SOS.
   </div>
   ${builderHtml}`);
 }

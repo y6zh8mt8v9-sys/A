@@ -87,12 +87,12 @@
       <!-- RIGHT: Setup form -->
       <div style="display:flex;flex-direction:column;gap:10px;min-width:300px;max-width:340px;">
         <div class="sbox" style="width:100%;">
-          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:4px;"> Coach Setup</div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:4px;">Coach Setup</div>
           <div class="fg"><label>Coach Name</label><input id="s-coach" value="Coach Smith"></div>
           <div class="fg"><label>Theme</label>
             <div style="display:flex;gap:8px;">
-              <button id="theme-dark-btn" class="btn" style="flex:1;background:var(--ac)" onclick="setTheme('dark')"> Dark</button>
-              <button id="theme-light-btn" class="bgh" style="flex:1" onclick="setTheme('light')"> Light</button>
+              <button id="theme-dark-btn" class="btn" style="flex:1;background:var(--ac)" onclick="setTheme('dark')">Dark</button>
+              <button id="theme-light-btn" class="bgh" style="flex:1" onclick="setTheme('light')">Light</button>
             </div>
           </div>
           <!-- Hidden fields still needed for compatibility -->
@@ -119,29 +119,29 @@
         </div>
         <!-- Your 9 Offers box -->
         <div class="sbox" style="width:100%;padding:14px 16px;">
-          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;"> Your Job Offers</div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;">Your Job Offers</div>
           <div id="offer-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
           <div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Your home state has offered you nine jobs and every other state a few. Scroll the country map, tap a state to zoom in, tap a highlighted county, then accept a school's offer. You can start your career in any of the 13 states.</div>
         </div>
         <!-- Selected school + rival picker -->
         <div id="selected-school-panel" class="sbox" style="width:100%;display:none;padding:14px 16px;">
-          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gn);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;"> Job Offer Accepted</div>
+          <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gn);border-bottom:1px solid var(--bd);padding-bottom:8px;margin-bottom:10px;">Job Offer Accepted</div>
           <div id="selected-school-info" style="margin-bottom:10px;"></div>
           <!-- Rivalry picker -->
           <div class="fg" id="rivalry-fg" style="display:none">
-            <label> Pick Rivalries <span style="font-weight:400;color:var(--mu)">(up to 3, optional)</span></label>
+            <label>Pick Rivalries <span style="font-weight:400;color:var(--mu)">(up to 3, optional)</span></label>
             <div id="rivalry-picker" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;max-height:100px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:6px 8px;"></div>
-            <div style="font-size:10px;color:var(--mu);margin-top:4px">Selected rivals get  Rivalry Week treatment.</div>
+            <div style="font-size:10px;color:var(--mu);margin-top:4px">Selected rivals get Rivalry Week treatment.</div>
           </div>
         </div>
         <!-- Action buttons -->
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <button class="btn bgn" id="btn-start" onclick="openCoachCreator()" style="width:100%;opacity:.4;cursor:not-allowed" disabled> Accept Job</button>
+          <button class="btn bgn" id="btn-start" onclick="openCoachCreator()" style="width:100%;opacity:.4;cursor:not-allowed" disabled>Accept Job</button>
           <div style="display:flex;gap:8px;">
-            <button class="bgh" onclick="showTitle(true)" style="flex:1"> Load Save</button>
-            <button class="bgh" onclick="openTeamBuilder()" style="flex:1;border-color:var(--b2);color:var(--te)"> Teams</button>
+            <button class="bgh" onclick="showTitle(true)" style="flex:1">Load Save</button>
+            <button class="bgh" onclick="openTeamBuilder()" style="flex:1;border-color:var(--b2);color:var(--te)">Teams</button>
             <button class="bgh" onclick="openWorldSetup()" style="flex:1;border-color:var(--gd);color:var(--gd)">League Setup</button>
-            <button class="bgh" onclick="openSettings()" style="flex:1"> Settings</button>
+            <button class="bgh" onclick="openSettings()" style="flex:1">Settings</button>
           </div>
         </div>
       </div>
@@ -160,10 +160,10 @@
     <div class="pill"><span>Off</span><strong id="tbof">–</strong></div>
     <div class="pill"><span>Def</span><strong id="tbdf">–</strong></div>
     <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-      <div class="pill"><span>Prestige</span><strong id="tbpr">1</strong></div>
+      <div class="pill"><span>Prestige</span><strong id="tbpr">★1</strong></div>
       <div class="pill"><span>Budget</span><strong id="tbbd" style="color:var(--gn)">$0</strong></div>
-      <button class="btn bsm bbl" onclick="saveGame()"> Save</button>
-      <button class="bgh bsm" onclick="openSettings()" title="Settings"> Settings</button>
+      <button class="btn bsm bbl" onclick="saveGame()">Save</button>
+      <button class="bgh bsm" onclick="openSettings()" title="Settings">Settings</button>
       <button class="btn-menu bsm" onclick="confirmMainMenu()" title="Return to Main Menu">Menu</button>
     </div>
   </div>
@@ -182,52 +182,52 @@
       </div>
       <!-- Home group -->
       <div class="nav-group">
-        <button class="nb on" id="nb-dash" onclick="nav('dash')"><span class="nb-icon"></span>Dashboard</button>
+        <button class="nb on" id="nb-dash" onclick="nav('dash')"><span class="nb-icon"></span>Dashboard</button>
         <button class="nb" id="nb-mine" onclick="nav('mine')" style="display:none"><span class="nb-icon"></span>My Player</button>
         <button class="nb" id="nb-college" onclick="nav('college')" style="display:none"><span class="nb-icon"></span>College</button>
         <button class="nb" id="nb-social" onclick="nav('social')" style="display:none"><span class="nb-icon"></span>Huddle</button>
-        <button class="nb" id="nb-news" onclick="nav('news')"><span class="nb-icon"></span>News<span class="nb-badge nb-news-badge" id="news-badge" style="display:none">!</span></button>
+        <button class="nb" id="nb-news" onclick="nav('news')"><span class="nb-icon"></span>News<span class="nb-badge nb-news-badge" id="news-badge" style="display:none">!</span></button>
       </div>
       <!-- Roster group -->
       <div class="nav-group">
-        <button class="nb" id="nb-roster" onclick="nav('roster')"><span class="nb-icon"></span>Roster</button>
-        <button class="nb" id="nb-jv" onclick="nav('jv')"><span class="nb-icon"></span>JV Team</button>
-        <button class="nb" id="nb-recr" onclick="nav('recr')"><span class="nb-icon"></span>Recruiting</button>
-        <button class="nb" id="nb-scout" onclick="nav('scout')"><span class="nb-icon"></span>Scouting</button>
-        <button class="nb" id="nb-depth" onclick="nav('depth')"><span class="nb-icon"></span>Depth Chart</button>
+        <button class="nb" id="nb-roster" onclick="nav('roster')"><span class="nb-icon"></span>Roster</button>
+        <button class="nb" id="nb-jv" onclick="nav('jv')"><span class="nb-icon"></span>JV Team</button>
+        <button class="nb" id="nb-recr" onclick="nav('recr')"><span class="nb-icon"></span>Recruiting</button>
+        <button class="nb" id="nb-scout" onclick="nav('scout')"><span class="nb-icon"></span>Scouting</button>
+        <button class="nb" id="nb-depth" onclick="nav('depth')"><span class="nb-icon"></span>Depth Chart</button>
       </div>
       <!-- Development group -->
       <div class="nav-group">
-        <button class="nb" id="nb-training" onclick="nav('training')"><span class="nb-icon"></span>Training</button>
-        <button class="nb" id="nb-staff" onclick="nav('staff')"><span class="nb-icon"></span>Staff</button>
-        <button class="nb" id="nb-cust" onclick="nav('cust')"><span class="nb-icon"></span>Customize</button>
+        <button class="nb" id="nb-training" onclick="nav('training')"><span class="nb-icon"></span>Training</button>
+        <button class="nb" id="nb-staff" onclick="nav('staff')"><span class="nb-icon"></span>Staff</button>
+        <button class="nb" id="nb-cust" onclick="nav('cust')"><span class="nb-icon"></span>Customize</button>
       </div>
       <!-- Season group -->
       <div class="nav-group">
-        <button class="nb" id="nb-sched" onclick="nav('sched')"><span class="nb-icon"></span>Schedule</button>
-        <button class="nb" id="nb-stand" onclick="nav('stand')"><span class="nb-icon"></span>Standings</button>
+        <button class="nb" id="nb-sched" onclick="nav('sched')"><span class="nb-icon"></span>Schedule</button>
+        <button class="nb" id="nb-stand" onclick="nav('stand')"><span class="nb-icon"></span>Standings</button>
         <button class="nb" id="nb-rank" onclick="nav('rank')"><span class="nb-icon"></span>Rankings</button>
-        <button class="nb" id="nb-playoff" onclick="nav('playoff')"><span class="nb-icon"></span>Playoffs</button>
+        <button class="nb" id="nb-playoff" onclick="nav('playoff')"><span class="nb-icon"></span>Playoffs</button>
       </div>
       <!-- League group -->
       <div class="nav-group">
-        <button class="nb" id="nb-teams" onclick="nav('teams')"><span class="nb-icon"></span>Teams</button>
-        <button class="nb" id="nb-leads" onclick="nav('leads')"><span class="nb-icon"></span>Leaders</button>
+        <button class="nb" id="nb-teams" onclick="nav('teams')"><span class="nb-icon"></span>Teams</button>
+        <button class="nb" id="nb-leads" onclick="nav('leads')"><span class="nb-icon">▲</span>Leaders</button>
         <button class="nb" id="nb-media" onclick="nav('media')"><span class="nb-icon"></span>Media</button>
       </div>
       <!-- Program / Archive group -->
       <div class="nav-group">
-        <button class="nb" id="nb-watch" onclick="nav('watch')"><span class="nb-icon"></span>Watchlist</button>
-        <button class="nb" id="nb-hof" onclick="nav('hof')"><span class="nb-icon"></span>Hall of Fame</button>
-        <button class="nb" id="nb-trophy" onclick="nav('trophy')"><span class="nb-icon"></span>Trophy Case</button>
+        <button class="nb" id="nb-watch" onclick="nav('watch')"><span class="nb-icon"></span>Watchlist</button>
+        <button class="nb" id="nb-hof" onclick="nav('hof')"><span class="nb-icon"></span>Hall of Fame</button>
+        <button class="nb" id="nb-trophy" onclick="nav('trophy')"><span class="nb-icon"></span>Trophy Case</button>
         <button class="nb" id="nb-advisor" onclick="nav('advisor')"><span class="nb-icon"></span>Assistant GM<span class="nb-badge" id="adv-badge" style="display:none">!</span></button>
-        <button class="nb" id="nb-hist" onclick="nav('hist')"><span class="nb-icon"></span>History</button>
-        <button class="nb" id="nb-recls" onclick="nav('recls')"><span class="nb-icon"></span>Reclassify</button>
+        <button class="nb" id="nb-hist" onclick="nav('hist')"><span class="nb-icon"></span>History</button>
+        <button class="nb" id="nb-recls" onclick="nav('recls')"><span class="nb-icon"></span>Reclassify</button>
       </div>
       <!-- Help / Settings -->
       <div class="nav-group" style="margin-left:auto">
-        <button class="nb" onclick="openSettings()"><span class="nb-icon"></span>Settings</button>
-        <button class="nb" onclick="showTutorial()" style="color:var(--gd)"><span class="nb-icon"></span>Help</button>
+        <button class="nb" onclick="openSettings()"><span class="nb-icon"></span>Settings</button>
+        <button class="nb" onclick="showTutorial()" style="color:var(--gd)"><span class="nb-icon"></span>Help</button>
       </div>
     </div>
     <div id="ct"></div>
@@ -240,25 +240,25 @@
 <div id="settings-modal" onclick="closeSettings(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;align-items:center;justify-content:center;">
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:10px;width:420px;max-width:95vw;padding:22px 24px;position:relative;" onclick="event.stopPropagation()">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div style="font-family:var(--hd);font-size:20px;font-weight:900;letter-spacing:.5px;color:var(--te)"> Settings</div>
+      <div style="font-family:var(--hd);font-size:20px;font-weight:900;letter-spacing:.5px;color:var(--te)">Settings</div>
       <button onclick="closeSettings()" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;line-height:1;padding:2px 5px;border-radius:3px" onmouseover="this.style.color='var(--rd)'" onmouseout="this.style.color='var(--mu)'">✕</button>
     </div>
 
     <!-- Theme -->
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:14px 16px;margin-bottom:12px">
-      <div style="font-family:var(--hd);font-size:12px;font-weight:800;letter-spacing:.8px;color:var(--mu);margin-bottom:10px"> Appearance</div>
+      <div style="font-family:var(--hd);font-size:12px;font-weight:800;letter-spacing:.8px;color:var(--mu);margin-bottom:10px">Appearance</div>
       <div style="display:flex;gap:8px">
-        <button id="set-dark-btn" class="btn" style="flex:1;background:var(--ac)" onclick="setTheme('dark')"> Dark Mode</button>
-        <button id="set-light-btn" class="bgh" style="flex:1" onclick="setTheme('light')"> Light Mode</button>
+        <button id="set-dark-btn" class="btn" style="flex:1;background:var(--ac)" onclick="setTheme('dark')">Dark Mode</button>
+        <button id="set-light-btn" class="bgh" style="flex:1" onclick="setTheme('light')">Light Mode</button>
       </div>
     </div>
 
     <!-- Unlimited Money -->
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:14px 16px;margin-bottom:20px">
-      <div style="font-family:var(--hd);font-size:12px;font-weight:800;letter-spacing:.8px;color:var(--mu);margin-bottom:10px"> Gameplay</div>
+      <div style="font-family:var(--hd);font-size:12px;font-weight:800;letter-spacing:.8px;color:var(--mu);margin-bottom:10px">Gameplay</div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <div>
-          <div style="font-size:13px;font-weight:700;color:var(--tx)"> Unlimited Money</div>
+          <div style="font-size:13px;font-weight:700;color:var(--tx)">Unlimited Money</div>
           <div style="font-size:11px;color:var(--mu);margin-top:2px">Bypass all budget costs. Budget display shows ∞.</div>
         </div>
         <button id="set-unlim-btn" onclick="toggleUnlimitedMoney()" style="min-width:70px;padding:6px 14px;border-radius:20px;font-family:var(--hd);font-size:13px;font-weight:800;letter-spacing:.4px;cursor:pointer;transition:all .15s;border:2px solid var(--bd);background:var(--s3);color:var(--mu)">OFF</button>
@@ -294,7 +294,7 @@
 <div id="div-editor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:600;align-items:center;justify-content:center;">
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:22px 26px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;position:relative;">
     <button onclick="closeDivEditor()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;">&#10005;</button>
-    <h2 style="font-family:var(--hd);font-size:19px;font-weight:900;color:var(--te);margin-bottom:4px;"> Rename Divisions</h2>
+    <h2 style="font-family:var(--hd);font-size:19px;font-weight:900;color:var(--te);margin-bottom:4px;">Rename Divisions</h2>
     <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">Edit the name of any division. Changes apply when you close this panel.</p>
     <div id="div-editor-list" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
@@ -309,16 +309,16 @@
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--b2);border-radius:8px;width:860px;max-width:98vw;max-height:94vh;overflow:hidden;display:flex;flex-direction:column;position:relative;">
     <div style="padding:16px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div>
-        <h2 style="font-family:var(--hd);font-size:21px;font-weight:900;color:var(--te);margin:0;"> Team Builder</h2>
+        <h2 style="font-family:var(--hd);font-size:21px;font-weight:900;color:var(--te);margin:0;">Team Builder</h2>
         <div style="font-size:11px;color:var(--mu);margin-top:2px;">Add, edit and manage teams in every state and division. Your changes are saved as you go, so you can stop and continue later.</div>
       </div>
       <button onclick="closeTeamBuilder()" style="background:none;border:none;color:var(--mu);font-size:22px;cursor:pointer;padding:4px 8px;">✕</button>
     </div>
     <!-- Tabs -->
     <div style="display:flex;border-bottom:1px solid var(--bd);padding:0 16px;background:var(--s2);flex-shrink:0;">
-      <button class="tb-nav-tab on" id="tb-tab-browse" onclick="tbTab('browse')"> Browse Teams</button>
-      <button class="tb-nav-tab" id="tb-tab-add" onclick="tbTab('add')"> Add Team</button>
-      <button class="tb-nav-tab" id="tb-tab-export" onclick="tbTab('export')"> Export / Import</button>
+      <button class="tb-nav-tab on" id="tb-tab-browse" onclick="tbTab('browse')">Browse Teams</button>
+      <button class="tb-nav-tab" id="tb-tab-add" onclick="tbTab('add')">Add Team</button>
+      <button class="tb-nav-tab" id="tb-tab-export" onclick="tbTab('export')">Export / Import</button>
     </div>
     <div style="overflow-y:auto;flex:1;padding:16px 20px;" id="tb-body">
       <!-- filled by JS -->
@@ -333,7 +333,7 @@
 <!-- CONFIRM MAIN MENU -->
 <div id="confirm-menu">
   <div id="confirm-box">
-    <h3> Return to Main Menu?</h3>
+    <h3>Return to Main Menu?</h3>
     <p>Your current game will <strong>not</strong> be saved automatically. Make sure to save before leaving, or your progress will be lost.</p>
     <div style="display:flex;gap:10px;justify-content:center;">
       <button class="btn" style="background:var(--rd)" onclick="goMainMenu()">Yes, Exit</button>
@@ -346,7 +346,7 @@
 <div id="tut-overlay">
   <div id="tut-box">
     <div id="tut-header">
-      <h2> Welcome to Gridiron 27!</h2>
+      <h2>Welcome to Gridiron 27!</h2>
       <button class="mc" style="position:static;font-size:18px;color:var(--mu)" onclick="closeTutorial()">&#10005;</button>
     </div>
     <div class="tut-tabs" id="tut-tab-bar"></div>

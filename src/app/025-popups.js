@@ -3,7 +3,7 @@ function bAwardPop(award, winner, runnerUp, cls, isMyPlayer, winnerSnap, ruSnap,
   const DEV_C2={'Elite Dev':'dev-e','Star':'dev-s','Impact':'dev-i','Normal':'dev-n'};
   const isMr=award==='mr';
   const awardName=label||(isMr?`Mr. Football (${clsL(cls)})`:`Freshman of the Year (${clsL(cls)})`);
-  const awardIcon=isMr?'':'';
+  const awardIcon=isMr?'':'★';
   const borderColor=isMr?'var(--gd)':'var(--b2)';
   const accentColor=isMr?'var(--gd)':'var(--b2)';
 
@@ -32,7 +32,7 @@ function bAwardPop(award, winner, runnerUp, cls, isMyPlayer, winnerSnap, ruSnap,
     </div>
 
     <div style="background:${isMyPlayer?'rgba(245,192,48,.07)':'var(--s2)'};border:${isMyPlayer?`2px solid ${borderColor}`:'1px solid var(--bd)'};border-radius:8px;padding:12px 14px;margin-bottom:12px">
-      <div style="font-size:10px;font-family:var(--hd);font-weight:800;color:${accentColor};margin-bottom:8px"> Winner</div>
+      <div style="font-size:10px;font-family:var(--hd);font-weight:800;color:${accentColor};margin-bottom:8px">Winner</div>
       <div style="display:flex;align-items:center;gap:12px">
         ${face(winner.fs,52)}
         <div style="flex:1">
@@ -44,11 +44,11 @@ function bAwardPop(award, winner, runnerUp, cls, isMyPlayer, winnerSnap, ruSnap,
           <div style="font-size:11px;color:var(--tx);margin-top:4px">${statLine(winner,winnerSnap)}</div>
         </div>
       </div>
-      ${isMyPlayer?`<div style="margin-top:10px;text-align:center;font-size:12px;color:${accentColor};font-weight:700"> Your player won the award!</div>`:''}
+      ${isMyPlayer?`<div style="margin-top:10px;text-align:center;font-size:12px;color:${accentColor};font-weight:700">★ Your player won the award!</div>`:''}
     </div>
 
     ${runnerUp?`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:10px 12px">
-      <div style="font-size:10px;font-family:var(--hd);font-weight:800;color:var(--mu);margin-bottom:6px"> Runner-Up</div>
+      <div style="font-size:10px;font-family:var(--hd);font-weight:800;color:var(--mu);margin-bottom:6px">Runner-Up</div>
       <div style="display:flex;align-items:center;gap:10px">
         ${face(runnerUp.fs,36)}
         <div>
@@ -62,9 +62,9 @@ function bAwardPop(award, winner, runnerUp, cls, isMyPlayer, winnerSnap, ruSnap,
     </div>`:''}
   </div>`;
 }
-function bSenPop(p){let msg='';if(p.committed){const e={FBS:'',FCS:'',D2:'',D3:'',JUCO:''}[p.committed.lvl]||'';msg=`${e} <strong>${p.fn} ${p.ln}</strong> → <strong style="color:var(--te)">${p.committed.school}</strong> (${p.committed.lvl})`;}else msg=` <strong>${p.fn} ${p.ln}</strong> (${p.pos}) will not play college football.`;return`<div class="pc"><h3> Signing Day</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div>${stars(p.stars)} ${rb(p.rat)}</div><div style="margin-top:10px;font-size:13px;line-height:1.6">${msg}</div>${p.offers.length?`<div style="margin-top:8px;font-size:11px;color:var(--mu)">${p.offers.length} total offer(s)</div>`:''}</div>`;}
-function bFrPop(p){const jvNote=p.onJV&&!pcAuto()?'<div style="margin-top:6px;background:#0a1a30;border:1px solid #336;border-radius:3px;padding:4px 8px;font-size:11px;color:#88ccff"> Starting on <strong>JV Team</strong>: call up to Varsity anytime</div>':'';return`<div class="pc"><h3> New Freshman!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:var(--hd);font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${stars(p.stars)} <span class="pb2">${p.pos}</span> ${rb(p.rat)} → <span style="color:var(--gn)">${p.potLo||p.pot}</span>–<span style="color:var(--pot,#f0b429)">${p.potHi||p.pot}</span> pot</div><div>${devB(p.dev)} ${(p.traits||[]).map(t=>trB(t)).join('')}</div><div style="margin-top:6px;font-size:12px;color:var(--mu)">GPA: ${gpaL(p.gpa)} | ${htf(p.ht)}, ${p.wt} lbs</div><div style="margin-top:6px">${interestBadges(p.interests)}</div>${jvNote}</div>`;}
-function bTrPop(p){return`<div class="pc" style="border-top-color:var(--te)"><h3 style="color:var(--te)"> Transfer!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:var(--hd);font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${yrL(p.yr)} <span class="pb2">${p.pos}</span> ${rb(p.rat)}</div><div>${devB(p.dev)}</div></div>`;}
+function bSenPop(p){let msg='';if(p.committed){const e={FBS:'',FCS:'',D2:'',D3:'',JUCO:''}[p.committed.lvl]||'';msg=`${e} <strong>${p.fn} ${p.ln}</strong> → <strong style="color:var(--te)">${p.committed.school}</strong> (${p.committed.lvl})`;}else msg=`<strong>${p.fn} ${p.ln}</strong> (${p.pos}) will not play college football.`;return`<div class="pc"><h3>Signing Day</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div>${stars(p.stars)} ${rb(p.rat)}</div><div style="margin-top:10px;font-size:13px;line-height:1.6">${msg}</div>${p.offers.length?`<div style="margin-top:8px;font-size:11px;color:var(--mu)">${p.offers.length} total offer(s)</div>`:''}</div>`;}
+function bFrPop(p){const jvNote=p.onJV&&!pcAuto()?'<div style="margin-top:6px;background:#0a1a30;border:1px solid #336;border-radius:3px;padding:4px 8px;font-size:11px;color:#88ccff">Starting on <strong>JV Team</strong>: call up to Varsity anytime</div>':'';return`<div class="pc"><h3>New Freshman!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:var(--hd);font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${stars(p.stars)} <span class="pb2">${p.pos}</span> ${rb(p.rat)} → <span style="color:var(--gn)">${p.potLo||p.pot}</span>–<span style="color:var(--pot,#f0b429)">${p.potHi||p.pot}</span> pot</div><div>${devB(p.dev)} ${(p.traits||[]).map(t=>trB(t)).join('')}</div><div style="margin-top:6px;font-size:12px;color:var(--mu)">GPA: ${gpaL(p.gpa)} | ${htf(p.ht)}, ${p.wt} lbs</div><div style="margin-top:6px">${interestBadges(p.interests)}</div>${jvNote}</div>`;}
+function bTrPop(p){return`<div class="pc" style="border-top-color:var(--te)"><h3 style="color:var(--te)">Transfer!</h3><div style="margin:10px 0">${face(p.fs,56)}</div><div style="font-family:var(--hd);font-size:18px;font-weight:800">${p.fn} ${p.ln}</div><div style="margin:6px 0">${yrL(p.yr)} <span class="pb2">${p.pos}</span> ${rb(p.rat)}</div><div>${devB(p.dev)}</div></div>`;}
 function showPop(){if(_popI>=_popQ.length){document.getElementById('pu').classList.remove('open');if(_popCb){const cb=_popCb;_popCb=null;cb();}return;}document.getElementById('pui').innerHTML=_popQ[_popI];document.getElementById('pun').textContent=_popI<_popQ.length-1?`Continue (${_popI+1}/${_popQ.length}) →`:'Done ✓';document.getElementById('pu').classList.add('open');}
 function nxp(){_popI++;if(_popI>=_popQ.length){document.getElementById('pu').classList.remove('open');_popQ=[];if(_popCb){const cb=_popCb;_popCb=null;cb();}}else{showPop();}}
 
@@ -181,7 +181,7 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
     try{document.getElementById('ct').innerHTML=renders[page](arg);}
     catch(err){
       console.error('pgHoF/nav render error:',err);
-      document.getElementById('ct').innerHTML=`<div class="pnl"><div class="ph"> Render Error</div><div class="pb" style="color:var(--rd)">Failed to load this page: <strong>${err.message}</strong><br><span style="color:var(--mu);font-size:11px">Check the browser console for details. Try loading the page again or re-loading your save.</span></div></div>`;
+      document.getElementById('ct').innerHTML=`<div class="pnl"><div class="ph">Render Error</div><div class="pb" style="color:var(--rd)">Failed to load this page: <strong>${err.message}</strong><br><span style="color:var(--mu);font-size:11px">Check the browser console for details. Try loading the page again or re-loading your save.</span></div></div>`;
     }
   }
   updateTb();

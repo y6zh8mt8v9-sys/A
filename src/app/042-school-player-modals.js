@@ -101,7 +101,7 @@ function showPlayer(id){
   const sch=getS(p.sId)||{name:'Alumni',id:p.sId,c1:'#333',c2:'#fff',mascot:'Alumni',abbr:'AL'};
   const isMe=p.sId===G.myId,ctl=isMe&&!pcAuto(),own=p.id===G.myPlayerId; // ctl: coach controls (none in Player Career)
   const isSpecialPos=(p.pos==='OL'||p.pos==='K');
-  const streakBadge=p.streak==='hot'?`<span style="background:#7f2d00;color:#ff9966;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700"> Hot Streak (${p.streakGamesLeft}g left)</span>`:p.streak==='cold'?`<span style="background:#0a2a3a;color:#4fc3f7;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700"> Cold Streak (${p.streakGamesLeft}g left)</span>`:'';
+  const streakBadge=p.streak==='hot'?`<span style="background:#7f2d00;color:#ff9966;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700">Hot Streak (${p.streakGamesLeft}g left)</span>`:p.streak==='cold'?`<span style="background:#0a2a3a;color:#4fc3f7;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700">Cold Streak (${p.streakGamesLeft}g left)</span>`:'';
   const archBadge=p.arch?`<span style="background:#0a2a10;border:1px solid #1a6030;color:#44dd88;border-radius:3px;padding:1px 7px;font-size:11px;font-weight:700">${p.arch}</span>`:'';
   const krL=s=>[...((s.krRet||0)>0?[['Kick Ret',`${s.krRet} · ${s.krYds||0} yds`],['KR Avg',fmtAvg(stEff(s).kr)],['KR TD',s.krTD||0]]:[]),...((s.prRet||0)>0?[['Punt Ret',`${s.prRet} · ${s.prYds||0} yds`],['PR Avg',fmtAvg((s.prYds||0)/s.prRet)],['PR TD',s.prTD||0]]:[])];
   const yacL=s=>(s.rec||0)>0?[['YAC',`${s.yac||0} (${fmtAvg((s.yac||0)/s.rec)} / catch)`]]:[];
@@ -141,7 +141,7 @@ function showPlayer(id){
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
         <div style="display:flex;align-items:center;gap:6px">${sLogo(sch,32)} <span style="font-size:12px;color:var(--mu)">${sch.name}</span></div>
         <button class="wbtn" onclick="togWl(${p.id})">${p.wl?'★':'☆'}</button>
-        ${isMe?`<button class="hbtn" onclick="togHof(${p.id})"></button>`:''}
+        ${isMe?`<button class="hbtn" onclick="togHof(${p.id})" title="Hall of Fame">HoF</button>`:''}
       </div>
       <h2 style="margin-bottom:4px">#${p.num} ${p.fn} ${p.ln}${p.mine?' <span style="font-size:11px;background:var(--gd);color:#111;border-radius:8px;padding:2px 8px;font-weight:900;vertical-align:middle">MY PLAYER</span>':''}${isGraduated?' <span style="font-size:12px;color:var(--gd);font-weight:400">Alumni</span>':''}</h2>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
@@ -150,8 +150,8 @@ function showPlayer(id){
         ${p.pos==='K'?'<span style="font-size:10px;color:var(--gd)">★ max 3</span>':''}
         ${p.pos==='OL'?'<span style="font-size:10px;color:var(--mu)">harder ★ gain</span>':''}
         ${injBadgePopup(p)}
-        ${p.committed?`<span style="color:var(--gn);font-size:11px"> ${p.committed.school} (${p.committed.lvl})</span>`:''}
-        ${(p.awards||[]).map(a=>a.type==='Mr. Football'?`<span style="background:#3a2800;border:1px solid var(--gd);color:var(--gd);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type}, ${clsL(a.cls)} '${String(2026+(a.yr-1)).slice(2)}</span>`:`<span style="background:#111a26;border:1px solid var(--b2);color:var(--te);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700"> ${a.type}, ${clsL(a.cls)} '${String(2026+(a.yr-1)).slice(2)}</span>`).join(' ')}
+        ${p.committed?`<span style="color:var(--gn);font-size:11px">${p.committed.school} (${p.committed.lvl})</span>`:''}
+        ${(p.awards||[]).map(a=>a.type==='Mr. Football'?`<span style="background:#3a2800;border:1px solid var(--gd);color:var(--gd);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700">${a.type}, ${clsL(a.cls)} '${String(2026+(a.yr-1)).slice(2)}</span>`:`<span style="background:#111a26;border:1px solid var(--b2);color:var(--te);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700">★ ${a.type}, ${clsL(a.cls)} '${String(2026+(a.yr-1)).slice(2)}</span>`).join(' ')}
       </div>
     </div>
   </div>
@@ -162,7 +162,7 @@ function showPlayer(id){
     <button class="tab" onclick="swMTab(this,'pv-cr')">Career</button>
     <button class="tab" onclick="swMTab(this,'pv-o')">Offers (${p.offers.length})</button>
     ${ctl&&(p.sp||0)>0?`<button class="tab" onclick="swMTab(this,'pv-sp')">Skill Points (${p.sp})</button>`:''}
-    ${isGraduated?`<button class="tab" onclick="swMTab(this,'pv-st')"> Story</button>`:''}
+    ${isGraduated?`<button class="tab" onclick="swMTab(this,'pv-st')">Story</button>`:''}
   </div>
   <div id="pv-b"><div class="g2">
     <div>
@@ -178,15 +178,15 @@ function showPlayer(id){
         <div>${interestBadges(p.interests)}</div>
       </div>
       ${p.dreamSchool?`<div style="margin-top:10px">
-        <div style="font-weight:700;font-size:12px;color:var(--gd);margin-bottom:4px"> DREAM SCHOOL</div>
+        <div style="font-weight:700;font-size:12px;color:var(--gd);margin-bottom:4px">★ DREAM SCHOOL</div>
         <div style="background:#1a1200;border:1px solid var(--gd);border-radius:5px;padding:6px 10px;font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gd)">${p.dreamSchool.school} <span style="font-size:11px;color:var(--mu);font-weight:400">${p.dreamSchool.lvl}</span></div>
-        ${p.committed&&p.committed.school===p.dreamSchool.school?'<div style="font-size:10px;color:var(--gn);margin-top:3px"> Dream fulfilled!</div>':'<div style="font-size:10px;color:var(--mu);margin-top:3px">If they offer, he commits instantly.</div>'}
+        ${p.committed&&p.committed.school===p.dreamSchool.school?'<div style="font-size:10px;color:var(--gn);margin-top:3px">★ Dream fulfilled!</div>':'<div style="font-size:10px;color:var(--mu);margin-top:3px">If they offer, he commits instantly.</div>'}
       </div>`:''}
     </div>
     <div>
       <div style="font-weight:700;font-size:12px;color:var(--te);margin-bottom:6px">PROFILE</div>
       <div class="dr"><span class="a">Archetype</span><span>${p.arch?`<span style="background:#0a2a10;border:1px solid #1a6030;color:#44dd88;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700">${p.arch}</span>`:'–'}</span></div>
-      ${p.streak?`<div class="dr"><span class="a">Streak</span><span>${p.streak==='hot'?` Hot (${p.streakGamesLeft}g)`:` Cold (${p.streakGamesLeft}g)`}</span></div>`:''}
+      ${p.streak?`<div class="dr"><span class="a">Streak</span><span>${p.streak==='hot'?`Hot (${p.streakGamesLeft}g)`:`Cold (${p.streakGamesLeft}g)`}</span></div>`:''}
       <div class="dr"><span class="a">GPA</span><span>${gpaL(p.gpa)}</span></div>
       <div class="dr"><span class="a">Dev Trait</span><span>${devBClickable(p)}</span></div>
       <div class="dr"><span class="a">Skill Points</span><span style="color:var(--te);font-weight:700">${p.sp||0}</span></div>
@@ -213,21 +213,21 @@ function showPlayer(id){
   <div id="pv-o" class="hid">
     <div style="font-size:12px;color:var(--mu);margin-bottom:8px">Rat: ${rb(p.rat)} | Stars: ${stars(p.stars)} | GPA: ${gpaL(p.gpa)} | Dev: ${devB(p.dev)}${isSpecialPos?' <span style="color:var(--te)">'+p.pos+': Stars based on rating & traits</span>':p.seasStats.gp===0?' <span style="color:var(--gd)">Must play games to earn stars!</span>':''}</div>
     ${p.dreamSchool?`<div style="background:#1a1200;border:1px solid var(--gd);border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-      <span style="font-size:18px"></span>
+      <span style="font-size:18px">★</span>
       <div>
         <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd)">DREAM SCHOOL: ${p.dreamSchool.school} (${p.dreamSchool.lvl})</div>
-        <div style="font-size:10px;color:var(--mu)">${p.committed&&p.committed.school===p.dreamSchool.school?' Dream fulfilled, committed!':'If they offer, he commits instantly.'}</div>
+        <div style="font-size:10px;color:var(--mu)">${p.committed&&p.committed.school===p.dreamSchool.school?'★ Dream fulfilled, committed!':'If they offer, he commits instantly.'}</div>
       </div>
     </div>`:''}
-    ${p.committed?`<div style="padding:8px;background:rgba(34,184,112,.1);border:1px solid rgba(34,184,112,.3);border-radius:4px;margin-bottom:10px;font-size:13px"> Committed to ${p.committed.school} (${p.committed.lvl})${p.dreamSchool&&p.committed.school===p.dreamSchool.school?'  Dream School!':''}</div>`:''}
+    ${p.committed?`<div style="padding:8px;background:rgba(34,184,112,.1);border:1px solid rgba(34,184,112,.3);border-radius:4px;margin-bottom:10px;font-size:13px">Committed to ${p.committed.school} (${p.committed.lvl})${p.dreamSchool&&p.committed.school===p.dreamSchool.school?' ★ Dream School!':''}</div>`:''}
     ${(ctl||(isMe&&own))&&!p.committed&&p.offers.length?`<div style="margin-bottom:10px">
       <select id="csel" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:4px;font-size:12px;margin-right:8px">
-        ${p.offers.map(o=>`<option value='${JSON.stringify(o)}'>${o.lvl}: ${o.school}${(()=>{const c=COL_BY[o.school+'|'+o.lvl];return c&&!colRoom(c,p,false)?' (spots filled)':'';})()}${p.dreamSchool&&o.school===p.dreamSchool.school?' ':''}</option>`).join('')}
+        ${p.offers.map(o=>`<option value='${JSON.stringify(o)}'>${o.lvl}: ${o.school}${(()=>{const c=COL_BY[o.school+'|'+o.lvl];return c&&!colRoom(c,p,false)?' (spots filled)':'';})()}${p.dreamSchool&&o.school===p.dreamSchool.school?' ★':''}</option>`).join('')}
       </select>
       <button class="btn bsm bgn" onclick="commitNow(${p.id})">Commit Now</button>
     </div>`:''}
     ${isMe&&p.yr>=10?`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Camps this year: ${campsUsed(p)}/${campCap()}${(p.camps||[]).length?' · '+p.camps.slice(-3).map(c=>`${c.name} (${c.grade}${c.offers?', '+c.offers+' offer'+(c.offers>1?'s':''):''})`).join(' · '):''}${ctl&&(G.campInv||[]).some(v=>v.pid===p.id)?' · <a href="#" onclick="clo();nav(\'recr\');return false" style="color:var(--te)">camp invite waiting</a>':''}</div>`:''}
-    <div style="display:flex;flex-wrap:wrap;gap:4px">${p.offers.map(o=>`<span class="ob ${(()=>{const m={FBS:'of',FCS:'oc',D2:'od',NAIA:'on',D3:'ot',JUCO:'oj'};return m[o.lvl]||'od';})()}">${p.dreamSchool&&o.school===p.dreamSchool.school?' ':''}${o.lvl==='JUCO'?'JUCO interest':o.lvl}: ${o.school}</span>`).join('')||'<span style="color:var(--mu)">No offers yet.</span>'}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">${p.offers.map(o=>`<span class="ob ${(()=>{const m={FBS:'of',FCS:'oc',D2:'od',NAIA:'on',D3:'ot',JUCO:'oj'};return m[o.lvl]||'od';})()}">${p.dreamSchool&&o.school===p.dreamSchool.school?'★ ':''}${o.lvl==='JUCO'?'JUCO interest':o.lvl}: ${o.school}</span>`).join('')||'<span style="color:var(--mu)">No offers yet.</span>'}</div>
   </div>
   ${ctl&&(p.sp||0)>0?`<div id="pv-sp" class="hid">
     <div style="font-size:12px;color:var(--mu);margin-bottom:10px">You have <strong style="color:var(--te)">${p.sp} skill points</strong>. Spending SP upgrades OVR and automatically boosts attributes.</div>
@@ -239,17 +239,17 @@ function showPlayer(id){
         ${p.sp>=3?`<button class="btn bsm bbl" onclick="spndSP(${p.id},'rat',3)" style="margin-top:3px">+3 OVR</button>`:''}
       </div>
       <div style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:10px;font-size:11px;color:var(--mu);flex:1;min-width:140px">
-        <div style="font-weight:700;color:var(--tx);margin-bottom:5px"> Current Attributes</div>
-        <div> Speed: <strong style="color:var(--tx)">${p.spd}</strong></div>
-        <div> Strength: <strong style="color:var(--tx)">${p.str}</strong></div>
-        <div> Awareness: <strong style="color:var(--tx)">${p.awr}</strong></div>
+        <div style="font-weight:700;color:var(--tx);margin-bottom:5px">▲ Current Attributes</div>
+        <div>Speed: <strong style="color:var(--tx)">${p.spd}</strong></div>
+        <div>Strength: <strong style="color:var(--tx)">${p.str}</strong></div>
+        <div>Awareness: <strong style="color:var(--tx)">${p.awr}</strong></div>
         <div style="margin-top:5px;font-style:italic">Attributes improve automatically when OVR is upgraded.</div>
       </div>
     </div>
     <button class="bgh bsm" onclick="autoSP(${p.id})">Auto-upgrade all SP</button>
   </div>`:''}
   ${ctl?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-    <button class="bgh bsm" onclick="clo();editPlayer(${p.id})"> Edit Player &amp; Equipment</button><button class="bgh bsm" onclick="capToggle(${p.id});clo();showPlayer(${p.id})">${captains().includes(p.id)?'Remove captain':'Name captain'}</button>${colFlipTarget(p)?`<button class="bgh bsm" onclick="pushFlip(${p.id})">Push him to flip to ${colFlipTarget(p).school}</button>`:''}${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
+    <button class="bgh bsm" onclick="clo();editPlayer(${p.id})">Edit Player &amp; Equipment</button><button class="bgh bsm" onclick="capToggle(${p.id});clo();showPlayer(${p.id})">${captains().includes(p.id)?'Remove captain':'Name captain'}</button>${colFlipTarget(p)?`<button class="bgh bsm" onclick="pushFlip(${p.id})">Push him to flip to ${colFlipTarget(p).school}</button>`:''}${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
   </div>`:''}
   ${!isMe&&!pcAuto()&&!isGraduated&&G.players.includes(p)&&getS(p.sId)&&!getS(p.sId).fp?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
     ${plScouted(p)?`<button class="btn bsm" onclick="meetOpen(${p.id})">Set up a meeting (transfer pitch)</button><span style="font-size:11px;color:var(--mu)">Cares most about ${PRIO_TXT[plPriority(p)]} · ${meetLeft()} meeting${meetLeft()===1?'':'s'} left · ${transferWindow()?'transfer window open':'transfers open in the offseason'}</span>`:`<button class="bgh bsm" onclick="clo();scoutPlayer(${p.id})">Scout him (${scoutLeft()} left)</button><span style="font-size:11px;color:var(--mu)">Scout a player to learn what he cares about; you can meet with him the season after.</span>`}

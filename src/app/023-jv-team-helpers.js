@@ -100,13 +100,13 @@ window.callUpToVarsity=function(pid){
       if(canBeOnJV(bump)){
         bump.onJV=true;
         G.jvRoster.push(bump.id);
-        addLog(`<span style="color:var(--gd)"> ${bump.fn} ${bump.ln} sent to JV to make room for ${p.fn} ${p.ln}.</span>`);
-        addNews('general',` Roster Move: ${p.fn} ${p.ln} Up, ${bump.fn} ${bump.ln} Down`,`${p.pos} depth shuffled, roster at ${MAX_VARSITY}.`);
+        addLog(`<span style="color:var(--gd)">${bump.fn} ${bump.ln} sent to JV to make room for ${p.fn} ${p.ln}.</span>`);
+        addNews('general',`Roster Move: ${p.fn} ${p.ln} Up, ${bump.fn} ${bump.ln} Down`,`${p.pos} depth shuffled, roster at ${MAX_VARSITY}.`);
       } else {
         G.players=G.players.filter(x=>x.id!==bump.id);
         if(G.benched)for(const pos of Object.keys(G.benched))G.benched[pos]=G.benched[pos].filter(id=>id!==bump.id);
-        addLog(`<span style="color:var(--rd)"> ${bump.fn} ${bump.ln} cut to make room, roster full (${MAX_VARSITY}).`);
-        addNews('general',` ${bump.fn} ${bump.ln} released`,`Roster at cap (${MAX_VARSITY}). ${p.fn} ${p.ln} (${p.pos}) called up from JV.`);
+        addLog(`<span style="color:var(--rd)">${bump.fn} ${bump.ln} cut to make room, roster full (${MAX_VARSITY}).`);
+        addNews('general',`${bump.fn} ${bump.ln} released`,`Roster at cap (${MAX_VARSITY}). ${p.fn} ${p.ln} (${p.pos}) called up from JV.`);
       }
     } else {
       notify(`Roster full (${MAX_VARSITY} players). No weaker ${p.pos} to displace.`,'e');
@@ -118,7 +118,7 @@ window.callUpToVarsity=function(pid){
   p.onJV=false;
   if(!p._talked&&myDepthRank(p)>1&&Math.random()<0.5){p.morale=clamp((p.morale||65)-8,0,100);addLog(`<span style="color:var(--gd)">${p.fn} ${p.ln} is not sure he is ready to sit on the varsity bench. (Talk to JV players first to keep them happy.)</span>`);}
   p._talked=0;
-  addLog(`<span style="color:var(--gn)"> ${p.fn} ${p.ln} called up from JV to Varsity!</span>`);
+  addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} called up from JV to Varsity!</span>`);
   notify(`${p.fn} ${p.ln} called up to Varsity!`);
   nav('jv');
 };
@@ -132,7 +132,7 @@ window.relegateToJV=function(pid){
   // Move from varsity to JV
   p.onJV=true;
   G.jvRoster.push(pid);
-  addLog(`<span style="color:var(--gd)"> ${p.fn} ${p.ln} sent down to JV.</span>`);
+  addLog(`<span style="color:var(--gd)">${p.fn} ${p.ln} sent down to JV.</span>`);
   notify(`${p.fn} ${p.ln} sent to JV.`);
   nav('jv');
 };
@@ -140,7 +140,7 @@ window.relegateToJV=function(pid){
 // ── CUT PLAYER ──
 window.confirmCutPlayer=function(pid){
   const p=G.players.find(x=>x.id===pid);if(!p)return;
-  openMo(`<h2 style="color:var(--rd)"> Cut Player</h2>
+  openMo(`<h2 style="color:var(--rd)">Cut Player</h2>
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     ${face(p.fs,52)}
     <div>
@@ -150,10 +150,10 @@ window.confirmCutPlayer=function(pid){
     </div>
   </div>
   <div style="background:rgba(204,34,34,.1);border:1px solid rgba(204,34,34,.4);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--tx)">
-     Cutting this player <strong>permanently removes them from your roster</strong>. This cannot be undone. They will not graduate or count toward your program history.
+    Cutting this player <strong>permanently removes them from your roster</strong>. This cannot be undone. They will not graduate or count toward your program history.
   </div>
   <div style="display:flex;gap:8px">
-    <button class="btn" style="flex:1;background:var(--rd)" onclick="cutPlayer(${pid})"> Confirm Cut</button>
+    <button class="btn" style="flex:1;background:var(--rd)" onclick="cutPlayer(${pid})">Confirm Cut</button>
     <button class="bgh" style="flex:1" onclick="clo()">Cancel</button>
   </div>`);
 };
@@ -168,7 +168,7 @@ window.cutPlayer=function(pid){
   if(G.benched){for(const pos of Object.keys(G.benched))G.benched[pos]=G.benched[pos].filter(id=>id!==pid);}
   // Remove from watchlist archive if present
   if(G.wlArchive)G.wlArchive=G.wlArchive.filter(x=>x.id!==pid);
-  addLog(`<span style="color:var(--rd)"> ${name} has been cut from the roster.</span>`);
+  addLog(`<span style="color:var(--rd)">${name} has been cut from the roster.</span>`);
   updateRats();
   clo();
   notify(`${name} cut from roster.`,'w');
@@ -220,7 +220,7 @@ function promoteJVAgeUp(){
     const varsity=myP();
     if(varsity.length<MAX_VARSITY){
       // Room on roster, promote cleanly
-      addLog(`<span style="color:var(--gn)"> ${p.fn} ${p.ln} (${p.pos}) promoted from JV, now a ${p.yr===11?'Junior':'Senior'} on Varsity!</span>`);
+      addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} (${p.pos}) promoted from JV, now a ${p.yr===11?'Junior':'Senior'} on Varsity!</span>`);
     } else {
       // Roster full, find weakest same-pos player on varsity
       const samePos=varsity.filter(v=>v.pos===p.pos&&v.id!==G.myPlayerId).sort((a,b)=>a.rat-b.rat); // your own player is never cut or sent down
@@ -229,17 +229,17 @@ function promoteJVAgeUp(){
         if(canBeOnJV(bump)){
           bump.onJV=true;
           G.jvRoster.push(bump.id);
-          addLog(`<span style="color:var(--gd)"> ${bump.fn} ${bump.ln} moved to JV, displaced by promoted ${p.fn} ${p.ln} (roster at ${MAX_VARSITY}).</span>`);
+          addLog(`<span style="color:var(--gd)">${bump.fn} ${bump.ln} moved to JV, displaced by promoted ${p.fn} ${p.ln} (roster at ${MAX_VARSITY}).</span>`);
         } else {
           G.players=G.players.filter(x=>x.id!==bump.id);
           if(G.benched)for(const pos of Object.keys(G.benched))G.benched[pos]=G.benched[pos].filter(id=>id!==bump.id);
-          addLog(`<span style="color:var(--rd)"> ${bump.fn} ${bump.ln} released, roster full, ${p.fn} ${p.ln} promoted from JV.</span>`);
+          addLog(`<span style="color:var(--rd)">${bump.fn} ${bump.ln} released, roster full, ${p.fn} ${p.ln} promoted from JV.</span>`);
         }
-        addLog(`<span style="color:var(--gn)"> ${p.fn} ${p.ln} (${p.pos}) promoted from JV, now a ${p.yr===11?'Junior':'Senior'} on Varsity!</span>`);
+        addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} (${p.pos}) promoted from JV, now a ${p.yr===11?'Junior':'Senior'} on Varsity!</span>`);
       } else {
         // No weaker player to displace, JV player gets cut instead
         G.players=G.players.filter(x=>x.id!==p.id);
-        addLog(`<span style="color:var(--rd)"> ${p.fn} ${p.ln} (${p.pos}) cut, roster full at ${MAX_VARSITY} and no weaker ${p.pos} to replace.</span>`);
+        addLog(`<span style="color:var(--rd)">${p.fn} ${p.ln} (${p.pos}) cut, roster full at ${MAX_VARSITY} and no weaker ${p.pos} to replace.</span>`);
       }
     }
   }

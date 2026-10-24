@@ -254,7 +254,7 @@ function tbTeamCard(t,dIdx,tIdx){
       <div style="font-size:10px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.mascot} · ${t.city}</div>
     </div>
     <div style="display:flex;gap:3px;flex-shrink:0;">
-      <button class="bgh" style="padding:2px 6px;font-size:10px;" onclick="tbEditTeam(${dIdx},${tIdx})" title="Edit team"></button>
+      <button class="bgh" style="padding:2px 6px;font-size:10px;" onclick="tbEditTeam(${dIdx},${tIdx})" title="Edit team">Edit</button>
       <button class="bgh" style="padding:2px 6px;font-size:10px;border-color:var(--rd);color:var(--rd);" onclick="tbDeleteTeam(${dIdx},${tIdx})" title="Remove team">✕</button>
     </div>
   </div>`;
@@ -267,7 +267,7 @@ function tbRenderAdd(dIdx){
   const selDiv=dIdx!==undefined?dIdx:0;
   const divs=tbGetDivs(_tbCls);
   return`<div style="max-width:520px;">
-    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:14px;"> Add New Team</div>
+    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:14px;">Add New Team</div>
     <div class="fg" style="margin-bottom:10px;">
       <label>Classification</label>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">
@@ -294,13 +294,13 @@ function tbRenderAdd(dIdx){
     <div class="fg" style="margin-bottom:10px;">
       <label>Prestige (1–5)</label>
       <select class="ei" id="tb-add-prestige">
-        ${[1,2,3,4,5].map(p=>`<option value="${p}"${p===3?' selected':''}>${''.repeat(p)} (${p})</option>`).join('')}
+        ${[1,2,3,4,5].map(p=>`<option value="${p}"${p===3?' selected':''}>${'★'.repeat(p)} (${p})</option>`).join('')}
       </select>
     </div>
     <div class="fg" style="margin-bottom:12px;">
       <label>Custom Logo (optional PNG/JPG)</label>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="bgh bsm" onclick="tbUploadLogo('add')" style="white-space:nowrap;"> Upload Image</button>
+        <button class="bgh bsm" onclick="tbUploadLogo('add')" style="white-space:nowrap;">Upload Image</button>
         <span id="tb-add-logo-name" style="font-size:11px;color:var(--mu);">No file chosen</span>
         <button class="bgh bsm" onclick="tbClearLogo('add')" style="display:none;" id="tb-add-logo-clear">✕ Clear</button>
       </div>
@@ -412,7 +412,7 @@ function tbEditTeam(dIdx,tIdx){
   tbOk(t);const allClsOptions=clsOfSt(clsSt(_tbCls)).map(cls=>`<optgroup label="${clsName(cls)}">${(tbGetDivs(cls)||[]).map((d,i)=>`<option value="${cls}|${i}"${cls===_tbCls&&i===dIdx?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</optgroup>`).join('');
   // Set active tab to browse context but show edit form inline
   body.innerHTML=`<div style="max-width:760px;">
-    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;"> Edit team: ${t.name} ${t.mascot} <span style="color:var(--te)">(${clsName(_tbCls)})</span></div>
+    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;">Edit team: ${t.name} ${t.mascot} <span style="color:var(--te)">(${clsName(_tbCls)})</span></div>
     <div class="g2" style="gap:10px;margin-bottom:10px;">
       <div class="fg"><label>School Name</label><input class="ei" id="tb-edit-name" value="${t.name}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-edit-mascot" value="${t.mascot}" oninput="tbPreviewLogo('edit')"></div>
@@ -431,13 +431,13 @@ function tbEditTeam(dIdx,tIdx){
     <div class="fg" style="margin-bottom:10px;">
       <label>Prestige (1–5)</label>
       <select class="ei" id="tb-edit-prestige">
-        ${[1,2,3,4,5].map(p=>`<option value="${p}"${p===(t.prestige||1)?' selected':''}>${''.repeat(p)} (${p})</option>`).join('')}
+        ${[1,2,3,4,5].map(p=>`<option value="${p}"${p===(t.prestige||1)?' selected':''}>${'★'.repeat(p)} (${p})</option>`).join('')}
       </select>
     </div>
     <div class="fg" style="margin-bottom:12px;">
       <label>Custom Logo</label>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="bgh bsm" onclick="tbUploadLogo('edit')" style="white-space:nowrap;"> Upload Image</button>
+        <button class="bgh bsm" onclick="tbUploadLogo('edit')" style="white-space:nowrap;">Upload Image</button>
         <span id="tb-edit-logo-name" style="font-size:11px;color:var(--mu);">${t.customLogo?'Custom logo set':'No custom logo'}</span>
         <button class="bgh bsm" onclick="tbClearLogo('edit')" id="tb-edit-logo-clear" style="${t.customLogo?'':'display:none;'}">✕ Clear</button>
       </div>
@@ -454,7 +454,7 @@ function tbEditTeam(dIdx,tIdx){
       <div id="tb-uni">${uniHostHtml(_tbUniT,tbUniRender,false)}</div>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn bgd" onclick="tbSaveEdit()" style="flex:1;"> Save Changes</button>
+      <button class="btn bgd" onclick="tbSaveEdit()" style="flex:1;">Save Changes</button>
       <button class="bgh" onclick="tbTab('browse')" style="flex:1;">Cancel</button>
     </div>
   </div>`;
@@ -510,7 +510,6 @@ function tbDeleteTeam(dIdx,tIdx){
   // Safe inline confirmation (avoid confirm() which fails in sandboxed iframes)
   const body=document.getElementById('tb-body');
   body.innerHTML=`<div style="max-width:420px;text-align:center;padding:20px 0;">
-    <div style="font-size:32px;margin-bottom:10px;"></div>
     <div style="font-family:var(--hd);font-size:18px;font-weight:900;color:var(--rd);margin-bottom:8px;">Remove Team?</div>
     <div style="font-size:13px;color:var(--tx);margin-bottom:6px;"><strong>${t.name} ${t.mascot}</strong></div>
     <div style="font-size:12px;color:var(--mu);margin-bottom:20px;">from ${divs[dIdx].name} [${_tbCls}] · This cannot be undone.</div>
@@ -555,7 +554,7 @@ function tbRenderExport(){
     return`<div class="dr"><span class="a">${stName(st)}${cl.includes(curCls)?' ★':''}</span><span style="font-weight:700">${tc} teams · ${cl.length} classification${cl.length===1?'':'s'}</span></div>`;
   }).join('')+(ST_ORDER.length>12?`<div class="dr"><span class="a">And ${ST_ORDER.length-12} more state${ST_ORDER.length-12===1?'':'s'}</span><span></span></div>`:'');
   return`<div style="max-width:560px;">
-    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;"> Export Team Pack</div>
+    <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;">Export Team Pack</div>
     <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">
       Save every school in this world (each state, classification, division name and logo) as a <strong>.json</strong> file. ★ marks the state you play in.
     </p>
@@ -564,16 +563,16 @@ function tbRenderExport(){
       <div class="dr"><span class="a">Total Teams</span><span style="font-weight:700;color:var(--gn)">${allTeamsCount}</span></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-      <button class="btn bgn" onclick="tbExportPack()" style="flex:1;min-width:140px;"> Export all schools</button>
-      <button class="btn bbl" onclick="tbExportCSV()" style="flex:1;min-width:140px;"> Export CSV (current class)</button>
+      <button class="btn bgn" onclick="tbExportPack()" style="flex:1;min-width:140px;">Export all schools</button>
+      <button class="btn bbl" onclick="tbExportCSV()" style="flex:1;min-width:140px;">Export CSV (current class)</button>
     </div>
     <div style="border-top:1px solid var(--bd);padding-top:16px;">
-      <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;"> Import Team Pack</div>
+      <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--te);margin-bottom:6px;">Import Team Pack</div>
       <p style="font-size:12px;color:var(--mu);margin-bottom:10px;">
         Schools load into the same state they were built in, and the other states stay as they are. That means you can stack packs: load a Michigan pack, then an Indiana pack, and play with both. Pick those states in League Setup first.
       </p>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <button class="btn" onclick="tbImportFromTab()" style="flex:1;min-width:140px;"> Load Team Pack (.json)</button>
+        <button class="btn" onclick="tbImportFromTab()" style="flex:1;min-width:140px;">Load Team Pack (.json)</button>
         <span style="font-size:11px;color:var(--mu);">To take the teams out of a career, use <b>Export teams</b> on that save in Load Game, then load the file here.</span>
       </div>
     </div>

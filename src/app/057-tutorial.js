@@ -1,6 +1,6 @@
 // ═══════════ TUTORIAL ═══════════
 const TUT_PAGES=[
-  {tab:'Welcome',icon:'',title:'Welcome to Gridiron 27!',body:`
+  {tab:'Welcome',icon:'',title:'Welcome to Gridiron 27!',body:`
     <p>You are the head coach and general manager of a high school football program. Your mission: build a dynasty from the ground up, develop raw talent into college prospects, win a State Championship and, one day, the National Championship.</p>
     <p>Every season runs through three phases:</p>
     <ul>
@@ -29,7 +29,7 @@ const TUT_PAGES=[
     <p>A dot on <b>Home</b> means unread news; a dot on <b>Program</b> means new alumni stories.</p>
     <div class="tip">Tip: "Begin Offseason" always asks first if games are left. It never sims your season by surprise.</div>
   `},
-  {tab:'Dashboard',icon:'',title:'Dashboard & News',body:`
+  {tab:'Dashboard',icon:'',title:'Dashboard & News',body:`
     <p>The <strong>Dashboard</strong> is your command center. Start here every week.</p>
     <ul>
       <li><strong>Advance Week</strong>: Simulates the next game or moves the offseason forward one phase. Everything flows from this button.</li>
@@ -38,9 +38,9 @@ const TUT_PAGES=[
       <li><strong>Activity Log</strong>: Every game result, injury, milestone, and event appears here in chronological order.</li>
     </ul>
     <p>The <strong>News</strong> tab keeps a filterable feed of league-wide events: upsets, other classification results, player milestones, and more. Check it to track your rivals and spot trends.</p>
-    <div class="tip"> Tip: During the offseason the Dashboard switches to show phase-by-phase controls. Each phase is a separate step, training, staff, recruiting, and schedule all happen in sequence.</div>
+    <div class="tip">Tip: During the offseason the Dashboard switches to show phase-by-phase controls. Each phase is a separate step, training, staff, recruiting, and schedule all happen in sequence.</div>
   `},
-  {tab:'Roster',icon:'',title:'Roster: Your Varsity Players',body:`
+  {tab:'Roster',icon:'',title:'Roster: Your Varsity Players',body:`
     <p>The <strong>Roster</strong> tab is your varsity squad, Juniors, Seniors, and any underclassmen you have called up from JV.</p>
     <ul>
       <li><strong>OVR</strong>: The combined rating driving game performance. Raw freshmen start around 30–50 depending on your classification; elite seniors can reach 90+.</li>
@@ -49,21 +49,21 @@ const TUT_PAGES=[
       <li><strong>INJ</strong>: Weeks remaining on an injury. Injured players are automatically skipped in games.</li>
       <li><strong>Click any player</strong> to open their full card: career stats, traits, archetype, interests, skill point upgrades, college offers, and more.</li>
     </ul>
-    <div class="tip"> Tip: Sort by OVR to quickly find your weakest position groups, those are your upgrade priorities in the offseason.</div>
+    <div class="tip">Tip: Sort by OVR to quickly find your weakest position groups, those are your upgrade priorities in the offseason.</div>
   `},
-  {tab:'JV Team',icon:'',title:'JV Team: Your Development Pipeline',body:`
+  {tab:'JV Team',icon:'',title:'JV Team: Your Development Pipeline',body:`
     <p>The <strong>JV Team</strong> is your feeder program, 8th graders, freshmen, and sophomores developing before they are ready for varsity. Think of it as your talent pipeline.</p>
     <ul>
       <li><strong>All incoming freshmen start on JV</strong> automatically. They arrive each offseason after seniors graduate.</li>
       <li><strong>Juniors auto-promote to varsity</strong>: when a JV player ages into Junior year, they move up automatically and you'll see a log entry announcing it.</li>
-      <li><strong>Call Up Early</strong>: If a freshman or sophomore is good enough right now, use the  Call Up button to move them to your varsity roster immediately.</li>
+      <li><strong>Call Up Early</strong>: If a freshman or sophomore is good enough right now, use the Call Up button to move them to your varsity roster immediately.</li>
       <li><strong>Send Down</strong>: You can also demote varsity freshmen or sophomores back to JV to let them develop with less pressure.</li>
-      <li><strong> PROSPECT</strong> badges mark your top-rated JV players, these are the ones worth watching and potentially calling up early.</li>
+      <li><strong>★ PROSPECT</strong> badges mark your top-rated JV players, these are the ones worth watching and potentially calling up early.</li>
     </ul>
     <p>There is no roster cap on JV, 8th graders are generated each offseason to keep the pipeline full. New 8th graders appear with wide OVR variance: most are raw, but a few standouts slip through every year.</p>
-    <div class="tip"> Tip: Check JV at the start of each season for newly arrived 8th graders with Star or Impact dev traits, they are worth fast-tracking to varsity.</div>
+    <div class="tip">Tip: Check JV at the start of each season for newly arrived 8th graders with Star or Impact dev traits, they are worth fast-tracking to varsity.</div>
   `},
-  {tab:'Depth Chart',icon:'',title:'Depth Chart: Who Starts',body:`
+  {tab:'Depth Chart',icon:'',title:'Depth Chart: Who Starts',body:`
     <p>The <strong>Depth Chart</strong> controls who takes the field at each position. The player at the top of each slot gets the snaps, earns the stats, and drives your team OVR.</p>
     <ul>
       <li>Players are auto-sorted by rating within each position group, but you can manually reorder to override.</li>
@@ -71,7 +71,7 @@ const TUT_PAGES=[
       <li><strong>Scheme fit matters</strong>: players whose archetype aligns with your offensive or defensive scheme get a performance multiplier in games.</li>
       <li>After a big offseason, lots of training gains or new call-ups from JV, always revisit the depth chart to make sure your best players are actually starting.</li>
     </ul>
-    <div class="tip"> Tip: A sophomore with a 65 OVR who fits your scheme will often outperform a 68 OVR senior who doesn't. Check the archetype column.</div>
+    <div class="tip">Tip: A sophomore with a 65 OVR who fits your scheme will often outperform a 68 OVR senior who doesn't. Check the archetype column.</div>
   `},
   {tab:'Program',icon:'',title:'Program: Morale, Chemistry, Captains',body:`
     <p>The <strong>Program</strong> panel sits at the top of the Depth Chart.</p>
@@ -121,7 +121,7 @@ const TUT_PAGES=[
       <li><strong>Earlier this beta</strong>: combined state packs, mixed conferences, defensive adjustments (keys V, Y and N), the Huddle feed, new celebrations and hairstyles.</li>
     </ul>
   `},
-  {tab:'Offseason',icon:'',title:'Offseason: Training & Development',body:`
+  {tab:'Offseason',icon:'',title:'Offseason: Training & Development',body:`
     <p>The <strong>Training</strong> tab is where your roster actually gets better. It unlocks after the final playoff game each season.</p>
     <ul>
       <li><strong>Skill Points (SP)</strong>: Every player earns SP each offseason phase based on their Dev Trait, performance, training level, and staff quality. SP permanently raises OVR.</li>
@@ -130,9 +130,9 @@ const TUT_PAGES=[
       <li><strong>Camps</strong>: Players earn camp invites with good games, stars, the right size for their position and steady play (bigger classifications and program prestige help). Several colleges watch each camp: a strong showing can earn offers and raise stars. Each player can attend one camp per year for every star of program prestige.</li>
       <li><strong>Potential Range</strong>: Every player has a floor and ceiling. Training level determines how much of that ceiling is reachable.</li>
     </ul>
-    <div class="tip"> Tip: Invest in Training Level early. It compounds: every player on your roster benefits from it every single offseason.</div>
+    <div class="tip">Tip: Invest in Training Level early. It compounds: every player on your roster benefits from it every single offseason.</div>
   `},
-  {tab:'Staff',icon:'',title:'Staff & Playbook',body:`
+  {tab:'Staff',icon:'',title:'Staff & Playbook',body:`
     <p>The <strong>Staff</strong> tab is where you hire coaches and lock in your schemes. Both decisions have direct on-field consequences.</p>
     <ul>
       <li><strong>Offensive Scheme</strong>: Choose from Pro Style, Spread, Air Raid, Wing-T, Option, or I-Formation. Each scheme amplifies specific player archetypes.</li>
@@ -142,9 +142,9 @@ const TUT_PAGES=[
       <li><strong>Recruiting Coordinator (RC)</strong>: Higher RC level increases the odds of getting Elite Dev and Star dev players in your incoming freshmen class.</li>
     </ul>
     <p>The <strong>Customize</strong> tab lets you edit your school name, mascot, colors, and upload a custom logo, purely cosmetic but great for immersion.</p>
-    <div class="tip"> Tip: Don't change your scheme mid-season unless you have to. Players who fit your scheme are already performing well, switching disrupts that.</div>
+    <div class="tip">Tip: Don't change your scheme mid-season unless you have to. Players who fit your scheme are already performing well, switching disrupts that.</div>
   `},
-  {tab:'Schedule',icon:'',title:'Schedule, Standings & Playoffs',body:`
+  {tab:'Schedule',icon:'',title:'Schedule, Standings & Playoffs',body:`
     <p>The <strong>Season</strong> group covers everything from Week 1 to the State Final.</p>
     <ul>
       <li><strong>Schedule</strong>: Built at the start of each season in two steps: first pick your rivalry game (Week 5), then fill custom slots with opponents from any classification, from the neighbor states of Wakota and Tierra Alta, or from the international academies. Strength of Schedule (SOS) directly affects playoff seeding.</li>
@@ -153,9 +153,9 @@ const TUT_PAGES=[
       <li><strong>National Championship</strong>: After the state playoffs, the top two teams in the final national poll meet at a neutral site. State champions get a lift in that final poll. If your team is one of the two, the dashboard shows a <strong>National Championship</strong> button and you play it like any other game.</li>
     </ul>
     <p>You can simulate games one at a time from the Dashboard, or use <strong>Sim All</strong> to fast-forward through all remaining regular season games at once.</p>
-    <div class="tip"> Tip: Schedule at least one tough out-of-classification or out-of-state opponent early. It tanks your win probability but boosts your SOS, which pays off in playoff seeding if you win your division.</div>
+    <div class="tip">Tip: Schedule at least one tough out-of-classification or out-of-state opponent early. It tanks your win probability but boosts your SOS, which pays off in playoff seeding if you win your division.</div>
   `},
-  {tab:'League',icon:'',title:'League, Leaders & Recruiting',body:`
+  {tab:'League',icon:'',title:'League, Leaders & Recruiting',body:`
     <p><strong>Rankings</strong> (Rankings tab): each of the 13 states has an <strong>All-State Top 25</strong> and the <strong>National Top 25</strong> ranks every team in the country on one scale. Rankings blend team rating, record (weighted more as the season goes on), strength of schedule, unbeaten teams and program prestige, and update after every week. Ranked teams show a badge next to their name: <span class="rkb rk-n">#2</span> in <strong>blue</strong> is the national rank and <span class="rkb rk-a">#3</span> in <strong>gold</strong> the rank in the team&#39;s own state. The national rank shows first; <strong>tap a badge</strong> to switch.</p>
     <p>The <strong>League</strong> group gives you visibility into the broader football world beyond your own program.</p>
     <ul>
@@ -163,17 +163,17 @@ const TUT_PAGES=[
       <li><strong>Leaders</strong>: Season-wide statistical leaderboards across all teams: rushing yards, passing TDs, receiving yards, tackles, sacks, interceptions, and more. See where your players rank.</li>
       <li><strong>Recruiting</strong>: Tracks college scholarship offers your players have earned. Higher-rated seniors and players with Academic traits attract FBS, FCS, D2, D3, NAIA offers and JUCO interest. Small colleges recruit mostly on production and character traits. Prestige matters: elite programs attract better scouts.</li>
     </ul>
-    <div class="tip"> Tip: Check the Leaders board mid-season to spot your breakout players, if someone is top-5 in their stat category, they are likely earning college offers and dev trait upgrades.</div>
+    <div class="tip">Tip: Check the Leaders board mid-season to spot your breakout players, if someone is top-5 in their stat category, they are likely earning college offers and dev trait upgrades.</div>
   `},
-  {tab:'History',icon:'',title:'Watchlist, Hall of Fame, History & Reclassify',body:`
+  {tab:'History',icon:'',title:'Watchlist, Hall of Fame, History & Reclassify',body:`
     <p>The <strong>Program</strong> group tracks your dynasty's legacy and long-term health.</p>
     <ul>
-      <li><strong>Watchlist</strong>: Flag any player for personal tracking. Useful for monitoring injury returns, breakout candidates, or JV call-up targets. Flagged players show a  icon on the roster.</li>
+      <li><strong>Watchlist</strong>: Flag any player for personal tracking. Useful for monitoring injury returns, breakout candidates, or JV call-up targets. Flagged players show a icon on the roster.</li>
       <li><strong>Hall of Fame</strong>: Players who reached elite status and graduated are enshrined here with their career stats. Every legend your program produces lives on in this tab.</li>
       <li><strong>History & Records</strong>: Season-by-season records, championship trophies, and all-time school records for every statistical category. Records are broken in real time during seasons.</li>
       <li><strong>Reclassify</strong>: If your program underperforms consistently, reclassification pressure builds. Hit 100% and you get demoted to a lower classification. You can also voluntarily move up if you've won a title and have the budget. Higher classifications mean tougher competition but bigger prestige rewards.</li>
     </ul>
-    <div class="tip"> Tip: Prestige compounds over time. Every championship, Hall of Famer, and dominant season raises your school's prestige, which in turn brings better incoming freshmen classes year after year.</div>
+    <div class="tip">Tip: Prestige compounds over time. Every championship, Hall of Famer, and dominant season raises your school's prestige, which in turn brings better incoming freshmen classes year after year.</div>
   `},
   {tab:'Advisor & Alumni',icon:'',title:'Assistant GM and Alumni Career Tracker',body:`
     <p>Gridiron 27 has a built-in AI. It runs entirely inside your browser: <strong>no API key, no internet and no account</strong>. It is a rules-and-simulation engine, not an online chatbot, and it can only see your own save.</p>
@@ -330,19 +330,19 @@ const TUT_PAGES=[
     <p>From the <b>Friends</b> tab you can <b>send a career save</b> to a friend; theirs show up under Account → Saves from friends, ready to add to Load Game.</p>
     <p>You can <b>block</b> or <b>report</b> any player. Account → <b>Delete my account</b> removes your account and everything stored with it; the privacy policy and terms of use are on the same page.</p>
   `},
-  {tab:'Tips',icon:'',title:'Key Tips & Strategies',body:`
+  {tab:'Tips',icon:'',title:'Key Tips & Strategies',body:`
     <p>Everything you need to build a dynasty, condensed:</p>
     <ul>
-      <li> <strong>Check JV every offseason.</strong> That's where your next stars are hiding. Call up Elite Dev prospects early, they have years to develop on varsity.</li>
-      <li> <strong>Upgrade Training Level first.</strong> It benefits every player on your roster, every season. It compounds faster than any single hire.</li>
-      <li> <strong>Hire the Recruiting Coordinator early.</strong> A high RC level dramatically improves the quality of your incoming freshman classes.</li>
-      <li> <strong>Build a smart schedule.</strong> Mix cupcakes (easy wins) with 1–2 tough opponents to spike your SOS for playoff seeding purposes.</li>
-      <li> <strong>Pick your rivalry game deliberately.</strong> Rivalry wins boost prestige and recruiting more than any other regular season game.</li>
-      <li> <strong>Save often.</strong> Download the .json file after every session. One browser refresh can erase an entire season.</li>
-      <li> <strong>Scheme fit is real.</strong> A player whose archetype matches your scheme performs noticeably better in games. Check it before the season starts.</li>
-      <li> <strong>Watch your reclassification pressure.</strong> A couple of bad seasons can start a countdown toward demotion. Win your division to reset it.</li>
+      <li><strong>Check JV every offseason.</strong> That's where your next stars are hiding. Call up Elite Dev prospects early, they have years to develop on varsity.</li>
+      <li><strong>Upgrade Training Level first.</strong> It benefits every player on your roster, every season. It compounds faster than any single hire.</li>
+      <li><strong>Hire the Recruiting Coordinator early.</strong> A high RC level dramatically improves the quality of your incoming freshman classes.</li>
+      <li><strong>Build a smart schedule.</strong> Mix cupcakes (easy wins) with 1–2 tough opponents to spike your SOS for playoff seeding purposes.</li>
+      <li><strong>Pick your rivalry game deliberately.</strong> Rivalry wins boost prestige and recruiting more than any other regular season game.</li>
+      <li><strong>Save often.</strong> Download the .json file after every session. One browser refresh can erase an entire season.</li>
+      <li><strong>Scheme fit is real.</strong> A player whose archetype matches your scheme performs noticeably better in games. Check it before the season starts.</li>
+      <li><strong>Watch your reclassification pressure.</strong> A couple of bad seasons can start a countdown toward demotion. Win your division to reset it.</li>
     </ul>
-    <div class="tip"> You can reopen this tutorial anytime using the <strong> Help</strong> button on the far right of the nav bar.</div>
+    <div class="tip">You can reopen this tutorial anytime using the <strong>Help</strong> button on the far right of the nav bar.</div>
   `},
 ];
 

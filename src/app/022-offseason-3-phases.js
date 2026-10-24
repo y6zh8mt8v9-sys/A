@@ -2,9 +2,9 @@
 function runOffseason(){
   if(pcAuto()){pcOffseason();return;}
   if(G.osPhase===0&&G.gradShown!==G.yr){G.gradShown=G.yr;seniorCeremony();return;}
-  if(G.osPhase===0){showOsPhase(0,' Winter Offseason','Dec–Feb: Weight training, film study, and recruiting visits.');return;}
-  if(G.osPhase===1){showOsPhase(1,' Spring Offseason','Mar–May: Spring practices, position training, and scouting camps.');return;}
-  if(G.osPhase===2){showOsPhase(2,' Summer Training Camp','Jun–Aug: Conditioning, depth charts finalized, and final prep.');return;}
+  if(G.osPhase===0){showOsPhase(0,'Winter Offseason','Dec–Feb: Weight training, film study, and recruiting visits.');return;}
+  if(G.osPhase===1){showOsPhase(1,'Spring Offseason','Mar–May: Spring practices, position training, and scouting camps.');return;}
+  if(G.osPhase===2){showOsPhase(2,'Summer Training Camp','Jun–Aug: Conditioning, depth charts finalized, and final prep.');return;}
   finalizeOffseason();
 }
 
@@ -101,7 +101,7 @@ function finalizeOffseason(){
   try{const F=finYr();F.sign=(F.sign||0)+budgetBonus;}catch(e){}
   {const nF=grad.filter(p=>p.committed&&p.committed.lvl==='FBS').length;if(nF)G.prestige=clamp((G.prestige||1)+Math.min(0.25,nF*0.03),1,5);}
   try{aiOnYearEnd(grad);}catch(err){console.error('Gridiron AI year hook failed',err);}
-  if(budgetBonus>0){G.budget+=budgetBonus;pops.push(bEvPop(' Signing Bonus!',`Your seniors earned your program <strong>$${budgetBonus.toLocaleString()}</strong> in college placement bonuses!`,null,'var(--gn)'));}
+  if(budgetBonus>0){G.budget+=budgetBonus;pops.push(bEvPop('Signing Bonus!',`Your seniors earned your program <strong>$${budgetBonus.toLocaleString()}</strong> in college placement bonuses!`,null,'var(--gn)'));}
   G.players=G.players.filter(p=>!(p.sId===G.myId&&p.yr===12));
   // FIX: Increment only user players here (not global, AI teams do it per-team after senior removal)
   {const ms=myS();for(const p of G.players.filter(p=>p.sId===G.myId))if(p.yr<12){p.yr++;bodyGrow(p,ms);}}
@@ -257,10 +257,10 @@ function finalizeOffseason(){
   for(const p of myP()){const chg=seasonDevCheck(p);if(chg)_devChanges.push({p,chg});}
   // Build dev/pot change popup (one combined card listing all changes)
   if(_devChanges.length){
-    const DEV_INFO2={'Normal':{icon:'',color:'var(--mu)'},'Impact':{icon:'',color:'var(--te)'},'Star':{icon:'',color:'var(--gd)'},'Elite Dev':{icon:'',color:'var(--gn)'}};
+    const DEV_INFO2={'Normal':{icon:'',color:'var(--mu)'},'Impact':{icon:'',color:'var(--te)'},'Star':{icon:'★',color:'var(--gd)'},'Elite Dev':{icon:'',color:'var(--gn)'}};
     const devRows=_devChanges.filter(x=>x.chg.devChanged).map(({p,chg})=>{
       const upColor=chg.devUp?'var(--gn)':'var(--ac)';
-      const arrow=chg.devUp?'':'';
+      const arrow=chg.devUp?'▲':'▼';
       const newInfo=DEV_INFO2[chg.newDev]||{icon:'',color:'var(--tx)'};
       return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)">
         ${face(p.fs,36)}
@@ -285,13 +285,13 @@ function finalizeOffseason(){
     const hasDevChanges=_devChanges.some(x=>x.chg.devChanged);
     const hasUpgrades=_devChanges.some(x=>x.chg.devUp||x.chg.potUp);
     const titleColor=hasUpgrades?'var(--gn)':'var(--ac)';
-    const titleIcon=hasUpgrades?'':'';
+    const titleIcon=hasUpgrades?'▲':'▼';
     const devChangePop=`<div class="pc" style="border-top-color:${titleColor};text-align:left">
       <h3 style="color:${titleColor};text-align:center">${titleIcon} Preseason Dev Report</h3>
       <div style="font-size:12px;color:var(--mu);text-align:center;margin-bottom:12px">Based on last season's performance, some players' dev traits and potentials have shifted.</div>
       ${devRows?`<div style="font-family:var(--hd);font-size:11px;font-weight:800;color:var(--te);margin-bottom:4px">Dev Trait Changes</div>${devRows}`:''}
       ${potRows?`<div style="font-family:var(--hd);font-size:11px;font-weight:800;color:var(--te);margin-top:10px;margin-bottom:4px">Potential Changes</div>${potRows}`:''}
-      <div style="margin-top:12px;font-size:11px;color:var(--mu);background:var(--s3);padding:7px 10px;border-radius:4px;border-left:3px solid var(--gd)"> Dev traits affect SP earned per offseason phase. Potential caps how high a player can grow.</div>
+      <div style="margin-top:12px;font-size:11px;color:var(--mu);background:var(--s3);padding:7px 10px;border-radius:4px;border-left:3px solid var(--gd)">Dev traits affect SP earned per offseason phase. Potential caps how high a player can grow.</div>
     </div>`;
     pops.push(devChangePop);
   }
@@ -349,7 +349,7 @@ function finalizeOffseason(){
   if(_mrWinner){
     const isMyPlayer=_mrWinner.sId===G.myId;
     pops.push(bAwardPop('mr',_mrWinner,_mrRunnerUp,G.cls,isMyPlayer,_aiSeasStatsSnap.get(_mrWinner.id),_mrRunnerUp?_aiSeasStatsSnap.get(_mrRunnerUp.id):null,`${stName(_myStK)} Player of the Year`));
-    if(isMyPlayer)addLog(`<span style="color:var(--gd)"> ${_mrWinner.fn} ${_mrWinner.ln} won Mr. Football (${clsL(G.cls)})!</span>`);
+    if(isMyPlayer)addLog(`<span style="color:var(--gd)">${_mrWinner.fn} ${_mrWinner.ln} won Mr. Football (${clsL(G.cls)})!</span>`);
     // Store award on player object for history
     if(!_mrWinner.awards)_mrWinner.awards=[];
     _mrWinner.awards.push({type:'Mr. Football',cls:G.cls,yr:G.yr});
@@ -357,7 +357,7 @@ function finalizeOffseason(){
   if(_frAwardWinner){
     const isMyPlayer=_frAwardWinner.sId===G.myId;
     pops.push(bAwardPop('fr',_frAwardWinner,_frAwardRunnerUp,G.cls,isMyPlayer,_aiSeasStatsSnap.get(_frAwardWinner.id),_frAwardRunnerUp?_aiSeasStatsSnap.get(_frAwardRunnerUp.id):null,`${stName(_myStK)} Freshman of the Year`));
-    if(isMyPlayer)addLog(`<span style="color:var(--te)"> ${_frAwardWinner.fn} ${_frAwardWinner.ln} won Freshman of the Year (${clsL(G.cls)})!</span>`);
+    if(isMyPlayer)addLog(`<span style="color:var(--te)">★ ${_frAwardWinner.fn} ${_frAwardWinner.ln} won Freshman of the Year (${clsL(G.cls)})!</span>`);
     if(!_frAwardWinner.awards)_frAwardWinner.awards=[];
     _frAwardWinner.awards.push({type:'Freshman of the Year',cls:G.cls,yr:G.yr});
   }
@@ -375,8 +375,8 @@ function finalizeOffseason(){
     for(const p of _sosSPPlayers){p.sp=(p.sp||0)+_sosSPBonus;}
     const _sosTierLabel=_sosSPVal>=80?'Elite':'Tough';
     if(_sosSPPlayers.length>0){
-      addLog(`<span style="color:var(--gd)"> ${_sosTierLabel} Schedule Bonus: ${_sosSPPlayers.length} player${_sosSPPlayers.length!==1?'s':''} earned +${_sosSPBonus} SP for competing against a tough schedule (SOS ${_sosSPVal}).</span>`);
-      _sosSPPops.push(bEvPop(` ${_sosTierLabel} Schedule Pays Off!`,`Your players earned <strong>+${_sosSPBonus} SP</strong> each for competing against a <strong>${_sosTierLabel} SOS (${_sosSPVal})</strong>.<br><br><strong>${_sosSPPlayers.length}</strong> player${_sosSPPlayers.length!==1?'s':''} with playing time benefited. Scheduling hard opponents develops your squad!`,null,'var(--gd)'));
+      addLog(`<span style="color:var(--gd)">${_sosTierLabel} Schedule Bonus: ${_sosSPPlayers.length} player${_sosSPPlayers.length!==1?'s':''} earned +${_sosSPBonus} SP for competing against a tough schedule (SOS ${_sosSPVal}).</span>`);
+      _sosSPPops.push(bEvPop(`${_sosTierLabel} Schedule Pays Off!`,`Your players earned <strong>+${_sosSPBonus} SP</strong> each for competing against a <strong>${_sosTierLabel} SOS (${_sosSPVal})</strong>.<br><br><strong>${_sosSPPlayers.length}</strong> player${_sosSPPlayers.length!==1?'s':''} with playing time benefited. Scheduling hard opponents develops your squad!`,null,'var(--gd)'));
     }
   }
 
@@ -419,7 +419,7 @@ function finalizeOffseason(){
   });
   // ── Other-classification championship news ──
   for(const [cls,champData] of Object.entries(_otherLeagueChamps)){
-    addNews('othercls',` ${cls} State Champion: ${champData.name}`.replace(cls+' State',clsName(cls)+' State'),`${champData.name} finish ${champData.rec} to claim the ${2026+(G.yr-1)} ${XCLS[cls]?clsName(cls):cls} title.`);
+    addNews('othercls',`${cls} State Champion: ${champData.name}`.replace(cls+' State',clsName(cls)+' State'),`${champData.name} finish ${champData.rec} to claim the ${2026+(G.yr-1)} ${XCLS[cls]?clsName(cls):cls} title.`);
   }
   addLog(`<span style="color:var(--mu)">━━ ${2026+(G.yr-1)}: ${G.wins}-${G.losses} ━━</span>`);
   const ratio=G.wins/(G.wins+G.losses||1);
@@ -430,8 +430,8 @@ function finalizeOffseason(){
   const divWon=_snapDivWinners.some(dw=>dw.id===G.myId&&dw.clear!==false);
   const divBonus=divWon?35000:0;
   if(divWon){
-    pops.push(bEvPop(' Division Champions!',`Your team won the division title! <strong style="color:var(--gd)">+$35,000 bonus!</strong>`,null,'var(--gd)'));
-    addLog(`<span style="color:var(--gd)"> Division champions! +$35,000</span>`);
+    pops.push(bEvPop('Division Champions!',`Your team won the division title! <strong style="color:var(--gd)">+$35,000 bonus!</strong>`,null,'var(--gd)'));
+    addLog(`<span style="color:var(--gd)">Division champions! +$35,000</span>`);
   }
   G.budget+=baseBudget+divBonus;
   // ── Snapshot record BEFORE resetting wins/losses for the new year ──
@@ -476,16 +476,16 @@ function finalizeOffseason(){
   if(_demResult.demoted){
     const reason=_demResult.reason==='roster'?`Your roster fell below the minimum for <strong>${clsL(G.cls)}</strong>.`
       :`Sustained poor performance drove demotion pressure to <strong>100%</strong>.`;
-    pops.push(bEvPop(' Reclassified Down',`${reason}<br><br>You have been moved down to <strong style="color:var(--te)">${clsL(_demResult.cls)}</strong>. Win more games to rebuild pressure resistance.`,null,'var(--ac)'));
+    pops.push(bEvPop('Reclassified Down',`${reason}<br><br>You have been moved down to <strong style="color:var(--te)">${clsL(_demResult.cls)}</strong>. Win more games to rebuild pressure resistance.`,null,'var(--ac)'));
   } else if(G.reclsLog&&G.reclsLog.length){
     // Show pressure update if pressure changed meaningfully
     const lastEntry=G.reclsLog[G.reclsLog.length-1];
     if(lastEntry&&Math.abs(lastEntry.delta)>=15){
       const pColor=lastEntry.delta>0?'var(--rd)':'var(--gn)';
-      const pIcon=lastEntry.delta>0?'':'';
+      const pIcon=lastEntry.delta>0?'▲':'▼';
       const clsIdx2=CLS_ORDER.indexOf(G.cls);
       pops.push(bEvPop(`${pIcon} Reclassification Pressure`,
-        `${lastEntry.reason}<br><br>Pressure: <strong style="color:var(--mu)">${lastEntry.prev}%</strong> → <strong style="color:${pColor}">${lastEntry.after}%</strong><br><br>${lastEntry.after>=75?'<span style="color:var(--rd)"> Pressure is in the danger zone. Sustained losses will force a demotion!</span>':lastEntry.after>=50?'<span style="color:var(--gd)">Pressure is building. Win seasons will reduce it.</span>':'<span style="color:var(--gn)">Good progress. Keep winning to stay safe.</span>'}`,
+        `${lastEntry.reason}<br><br>Pressure: <strong style="color:var(--mu)">${lastEntry.prev}%</strong> → <strong style="color:${pColor}">${lastEntry.after}%</strong><br><br>${lastEntry.after>=75?'<span style="color:var(--rd)">Pressure is in the danger zone. Sustained losses will force a demotion!</span>':lastEntry.after>=50?'<span style="color:var(--gd)">Pressure is building. Win seasons will reduce it.</span>':'<span style="color:var(--gn)">Good progress. Keep winning to stay safe.</span>'}`,
         null,pColor));
     }
   }
@@ -583,13 +583,13 @@ function checkClassification(snapDivWinners,endWins,endLosses){
     if(yearsAtNewCls<=3){
       // Still in grace period, cap pressure at 99 and inform player
       G.reclsPressure=99;
-      addLog(`<span style="color:var(--gd)"> Demotion immunity, ${3-yearsAtNewCls+1} year(s) of protection remaining after moving up to ${clsL(G.cls)}. Keep building!</span>`);
+      addLog(`<span style="color:var(--gd)">Demotion immunity, ${3-yearsAtNewCls+1} year(s) of protection remaining after moving up to ${clsL(G.cls)}. Keep building!</span>`);
       return {demoted:false};
     }
     const newCls=myClsOrder()[clsIdx-1];
     G.cls=newCls;ms.cls=newCls;
     G.reclsPressure=0;
-    addLog(`<span style="color:var(--te)"> Reclassified DOWN to ${newCls}, sustained poor performance (pressure reached 100%).</span>`);
+    addLog(`<span style="color:var(--te)">Reclassified DOWN to ${newCls}, sustained poor performance (pressure reached 100%).</span>`);
     return {demoted:true,cls:newCls,reason:'pressure'};
   }
   return {demoted:false};

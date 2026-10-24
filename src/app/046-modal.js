@@ -10,11 +10,11 @@ function updateTb(){
   document.getElementById('tbn').textContent=`${ms.name} ${ms.mascot}`;
   document.getElementById('tbr').innerHTML=recStr(G.wins,G.losses);
   document.getElementById('tbyr').textContent=curYr;
-  const phTxt=G.phase==='offseason'?`Off ${['','',''][G.osPhase]||''}`:G.phase==='playoffs'?'Playoffs ':G.phase==='postseason'?'Post-Season':G.phase.charAt(0).toUpperCase()+G.phase.slice(1);
+  const phTxt=G.phase==='offseason'?`Off ${['','',''][G.osPhase]||''}`:G.phase==='playoffs'?'Playoffs':G.phase==='postseason'?'Post-Season':G.phase.charAt(0).toUpperCase()+G.phase.slice(1);
   document.getElementById('tbph').textContent=phTxt;
   document.getElementById('tbwk').textContent=G.week||'–';
   document.getElementById('tbof').textContent=G.offR;document.getElementById('tbdf').textContent=G.defR;
-  document.getElementById('tbpr').textContent=''.repeat(Math.round(G.prestige));
+  document.getElementById('tbpr').textContent='★'.repeat(Math.round(G.prestige));
   document.getElementById('tbbd').textContent=G.unlimitedMoney?'∞':`$${(G.budget/1000).toFixed(0)}k`;
   updateSbCard();
 }
@@ -76,7 +76,7 @@ function saveGameLegacy(){
       // Browser save failed (private browsing or storage full), file download already worked, so just continue
       console.warn('Browser save skipped:',lsErr);
     }
-    notify('Game saved!  Check your Downloads folder.');
+    notify('Game saved! Check your Downloads folder.');
   }catch(e){
     // File download failed (rare, e.g. some mobile browsers)
     // Fall back to browser-only chunked save

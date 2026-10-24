@@ -134,7 +134,7 @@ function checkRecs(sm,wk){
     for(const k of keys){
       const v=st[k]||0;if(v<=0)continue;
       const gRec=G.schoolRecs.game[k];
-      if(v>(gRec?.val||0)){G.schoolRecs.game[k]={val:v,pid:p.id,name:`${p.fn} ${p.ln}`,yr:G.yr,pos:p.pos,date:fmtDate(wk-1)};_popQ.push(bEvPop(` Game Record!`,`${p.fn} ${p.ln} set a new single-game school record in <strong>${lbl[k]}</strong>: <strong>${v}</strong>!`,face(p.fs,48),'var(--gd)'));}
+      if(v>(gRec?.val||0)){G.schoolRecs.game[k]={val:v,pid:p.id,name:`${p.fn} ${p.ln}`,yr:G.yr,pos:p.pos,date:fmtDate(wk-1)};_popQ.push(bEvPop(`Game Record!`,`${p.fn} ${p.ln} set a new single-game school record in <strong>${lbl[k]}</strong>: <strong>${v}</strong>!`,face(p.fs,48),'var(--gd)'));}
       const sVal=p.seasStats[k]||0;const sRec=G.schoolRecs.season[k];
       if(sVal>(sRec?.val||0))G.schoolRecs.season[k]={val:sVal,pid:p.id,name:`${p.fn} ${p.ln}`,yr:G.yr,pos:p.pos,date:`${2026+(G.yr-1)}`};
       const cVal=p.carStats[k]||0;const cRec=G.schoolRecs.career[k];

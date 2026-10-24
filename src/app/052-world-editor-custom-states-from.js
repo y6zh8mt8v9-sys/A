@@ -368,7 +368,7 @@ window.onCountyClick=function(id){
   const title=document.getElementById('offer-county-title');
   const schoolsDiv=document.getElementById('offer-county-schools');
   panel.style.display='';
-  title.textContent=` ${cntyLbl(county)}, ${offers.length} Job Offer${offers.length>1?'s':''}`;
+  title.textContent=`${cntyLbl(county)}, ${offers.length} Job Offer${offers.length>1?'s':''}`;
   schoolsDiv.innerHTML=offers.map(o=>{
     const t=o.team;
     const clsCol=offCol(t.cls);
@@ -386,7 +386,7 @@ window.onCountyClick=function(id){
           <div style="font-size:10px;color:var(--mu)">${qualLabel}</div>
         </div>
       </div>
-      ${isSelected?`<div style="font-size:10px;color:var(--gn);margin-top:4px;font-weight:700"> Selected, scroll right to confirm</div>`:''}
+      ${isSelected?`<div style="font-size:10px;color:var(--gn);margin-top:4px;font-weight:700">Selected, scroll right to confirm</div>`:''}
     </div>`;
   }).join('');
 };
@@ -403,9 +403,9 @@ function renderOfferPopup(){
   const clsCol=offCol(t.cls);
   const clsBg=clsCol+'26';
   const clsName=offLbl(t.cls)+(clsSt(t.cls)!=='CF'?' · '+stName(clsSt(t.cls)):'');
-  const tierLabel=t.tier==='bad'?' Rebuilding':t.tier==='avg'?' Developing':' Established';
+  const tierLabel=t.tier==='bad'?'Rebuilding':t.tier==='avg'?'▲ Developing':'★ Established';
   const tierCol=t.tier==='bad'?'#cc7a3a':t.tier==='avg'?'var(--mu)':'var(--gd)';
-  const stars=''.repeat(t.prestige||1)+'☆'.repeat(5-(t.prestige||1));
+  const stars='★'.repeat(t.prestige||1)+'☆'.repeat(5-(t.prestige||1));
   const c1=t.c1||'#333',c2=t.c2||'#fff';
   const logoSvg=sLogo(t,56);
 
@@ -447,16 +447,16 @@ function renderOfferPopup(){
     <div class="offer-popup-scheme-row">
       <div class="offer-popup-scheme">
         <div class="offer-popup-scheme-l">Offensive Scheme</div>
-        <div class="offer-popup-scheme-v"> ${t.offS||'Pro Style'}</div>
+        <div class="offer-popup-scheme-v">${t.offS||'Pro Style'}</div>
       </div>
       <div class="offer-popup-scheme">
         <div class="offer-popup-scheme-l">Defensive Scheme</div>
-        <div class="offer-popup-scheme-v"> ${t.defS||'4-3'}</div>
+        <div class="offer-popup-scheme-v">${t.defS||'4-3'}</div>
       </div>
     </div>
     <div class="offer-popup-btns">
       <button class="btn ${isSelected?'':'bgn'}" style="${isSelected?'background:var(--gn);color:#000':''}flex:1;font-size:14px;" onclick="selectOfferSchool(${t.id},${o.countyId});closeOfferPopup(null,true);setTimeout(openCoachCreator,80)">
-        ${isSelected?' Selected, Confirm →':' Accept Job Offer'}
+        ${isSelected?'Selected, Confirm →':'Accept Job Offer'}
       </button>
     </div>
     ${_offerPopupOffers.length>1?`
@@ -543,7 +543,7 @@ function renderOfferList(){
           <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name} ${t.mascot}</div>
           <div style="font-size:10px;color:var(--mu)">${cntyLbl(county)} · <span style="color:${clsCol}">${clsL(t.cls)}</span></div>
         </div>
-        ${isSelected?`<div style="font-size:11px;color:var(--gn);font-weight:700"></div>`:''}
+        ${isSelected?`<div style="font-size:11px;color:var(--gn);font-weight:700"></div>`:''}
       </div>
     </div>`;
   }).join('');

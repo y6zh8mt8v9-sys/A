@@ -219,3 +219,26 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 .pob-cm b{font:800 18px/1.05 var(--hd)}.pob-cm small{font-size:11px;color:var(--mu)}
 .pob-cm.pob-me{box-shadow:none;border-color:var(--post)}
 @media (max-width:600px){.pob-col{width:168px;flex-basis:168px}.pob-g{gap:24px}.pob-pr::after,.pob-col:not(.pob-ch) .pob-m::after{right:-13px}.pob-in .pob-m::before{left:-13px}.pob-col:not(.pob-ch) .pob-m::after,.pob-in .pob-m::before{width:12px}}
+/* post-game box score */
+.bx-top{display:flex;align-items:baseline;gap:8px;font:900 24px/1 var(--hd);margin-bottom:8px}
+.bx-top span{font:800 12px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--post)}
+.bx-fin{display:flex;margin:0 -2px 6px}
+.bx-f{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:10px 20px 10px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+.bx-f2{flex-direction:row-reverse;padding:10px 12px 10px 20px;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%)}
+.bx-fn{flex:1;min-width:0;font:800 clamp(16px,3.6vw,22px)/1 var(--hd);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bx-f2 .bx-fn{text-align:right}
+.bx-fs{font:900 clamp(30px,7vw,44px)/.9 var(--hd);font-variant-numeric:tabular-nums;opacity:.72}
+.bx-f.won .bx-fs{opacity:1}
+.bx-note{font-size:12px;color:var(--mu);margin-bottom:10px}
+.bx-cols{display:flex;gap:14px;flex-wrap:wrap}
+.bx-col{flex:1 1 240px;min-width:0;background:var(--s1);border-top:3px solid var(--tA);padding:8px 10px 10px}
+.bx-team{display:flex;align-items:center;gap:8px;font:800 19px/1 var(--hd)}
+.bx-h{font:800 11px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:12px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--bd)}
+.bx-r{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:3px 0}
+.bx-r i{font-style:normal;color:var(--mu)}
+.bx-r b{font-variant-numeric:tabular-nums;text-align:right}
+.bx-sub{margin-top:14px;font:800 19px/1 var(--hd)}
+.bx-xp{display:flex;flex-wrap:wrap;gap:6px}
+.bx-xp span{font-size:12px;padding:3px 9px;background:var(--s2);border-left:3px solid var(--post)}
+.bx-xp span b{color:var(--te)}.bx-xp span b+b{color:var(--gn)}
+.news-icon:empty,.nb-icon:empty{display:none}

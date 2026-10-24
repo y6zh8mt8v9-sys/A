@@ -12,7 +12,7 @@ function pgDash(){
   let actionBtn='';
   const hasEmptySlots=G.sched.some(g=>g.custom&&g._empty);
   if(hasEmptySlots){
-    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="openScheduleBuilder()"> Build Your Schedule</button>`;
+    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="openScheduleBuilder()">Build Your Schedule</button>`;
   } else if(G.phase==='offseason'&&no&&nextUnplayed&&nextUnplayed.type==='regular'){
     // a new season that has not started yet: the next step is week 1, not the offseason
     actionBtn=`<button class="btn" style="padding:8px 18px;font-size:14px" onclick="advWk()">Play Week ${nextUnplayed.wk}</button>`;
@@ -24,7 +24,7 @@ function pgDash(){
     actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="startPlayoffs()">State Playoffs</button>`;
   } else if(G.phase==='playoffs'&&playoffSlot&&playoffOpp){
     const _prn=poRoundName(playoffSlot.playoffRound)||`Round ${playoffSlot.playoffRound}`;
-    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="advPlayoffWeek()"> ${_prn}</button>`;
+    actionBtn=`<button class="btn bgd" style="padding:8px 18px;font-size:14px" onclick="advPlayoffWeek()">${_prn}</button>`;
   } else if(G.phase==='postseason'){
     try{natEnsure();}catch(e){console.error('natl',e);}
     actionBtn=natMine()?`<button class="btn bgd" style="padding:8px 18px;font-size:14px;animation:pulse 1.2s infinite" onclick="natPlay()">National Championship</button>`
@@ -34,7 +34,7 @@ function pgDash(){
   }
 
   const phaseLabel={offseason:'Offseason',regular:`Week ${G.week||0}`,playoffs:'Playoffs',postseason:'Postseason'}[G.phase]||G.phase;
-  const presStars=''.repeat(Math.round(G.prestige));
+  const presStars='★'.repeat(Math.round(G.prestige));
 
   // Next game block
   let nextGameBlock='';
@@ -44,7 +44,7 @@ function pgDash(){
     const favStr=myOvr>oppOvr?`<span style="color:var(--gn);font-size:11px">▲ Favored +${myOvr-oppOvr}</span>`:myOvr<oppOvr?`<span style="color:var(--te);font-size:11px">▼ Underdog −${oppOvr-myOvr}</span>`:`<span style="color:var(--mu);font-size:11px">Even matchup</span>`;
     nextGameBlock=`<div class="dash-next-game${nextUnplayed.isRivalry?' rivalry':''}">
       <div class="dash-ng-header">
-        <span class="dash-ng-title">${nextUnplayed.isRivalry?' Rivalry week, ':''}${hcIs(nextUnplayed.wk)?'Homecoming, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
+        <span class="dash-ng-title">${nextUnplayed.isRivalry?'Rivalry week, ':''}${hcIs(nextUnplayed.wk)?'Homecoming, ':''}Week ${nextUnplayed.wk} · ${nextUnplayed.date||''}</span>
         ${favStr}
       </div>
       ${(()=>{const w=gdWxFor('reg',{idx:G.sched.indexOf(nextUnplayed),opp:no});return w?`<div class="dash-ng-wx" title="${wxEffects(w)}">${wxIcon(w,16)}<span><b>Forecast:</b> ${wxLine(w)}</span></div>`:'';})()}
@@ -63,7 +63,7 @@ function pgDash(){
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button class="bgh bsm" onclick="viewSchool(${no.id})">View</button>
           ${pracAvailable()?`<button class="bgh bsm" onclick="pracOpen()">Practice</button>`:`<span style="font-size:11px;color:var(--mu);align-self:center">Practiced</span>`}
-          <button class="btn${nextUnplayed.isRivalry?' bgd':''}" style="padding:7px 16px" onclick="advWk()">${nextUnplayed.isRivalry?' Play Rivalry':'Play Game'}</button>
+          <button class="btn${nextUnplayed.isRivalry?' bgd':''}" style="padding:7px 16px" onclick="advWk()">${nextUnplayed.isRivalry?'Play Rivalry':'Play Game'}</button>
         </div>
       </div>
     </div>`;
@@ -71,7 +71,7 @@ function pgDash(){
     const prn=poRoundName(playoffSlot.playoffRound)||playoffSlot.label;
     nextGameBlock=`<div class="dash-next-game playoff-game">
       <div class="dash-ng-header">
-        <span class="dash-ng-title"> ${prn}</span>
+        <span class="dash-ng-title">${prn}</span>
         <span style="font-size:11px;color:var(--gd);font-weight:700">State Playoffs</span>
       </div>
       ${(()=>{const w=gdWxFor('po',{slot:playoffSlot,opp:playoffOpp});return w?`<div class="dash-ng-wx" title="${wxEffects(w)}">${wxIcon(w,16)}<span><b>Forecast:</b> ${wxLine(w)}</span></div>`:'';})()}
@@ -87,7 +87,7 @@ function pgDash(){
             <div style="font-size:10px;color:var(--mu)">${rb(teamOvr(playoffOpp.id))} · Win to advance!</div>
           </div></div>
         </div>
-        <button class="btn bgd" style="padding:7px 16px;flex-shrink:0" onclick="advPlayoffWeek()"> Play</button>
+        <button class="btn bgd" style="padding:7px 16px;flex-shrink:0" onclick="advPlayoffWeek()">Play</button>
       </div>
     </div>`;
   }
@@ -165,7 +165,7 @@ function pgDash(){
       </div>
     </div>
     <div class="pnl">
-      <div class="ph"> Latest News <button class="bgh bsm" style="font-size:10px" onclick="nav('news')">View All</button></div>
+      <div class="ph">Latest News <button class="bgh bsm" style="font-size:10px" onclick="nav('news')">View All</button></div>
       <div class="pb">
         <div class="news-feed">${newsPreview}</div>
       </div>

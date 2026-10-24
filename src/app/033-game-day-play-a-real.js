@@ -245,16 +245,16 @@ function splitsAdd(sp){
 function splitsHtml(sp,title){
   if(!sp)return'';const row=(n,a,def)=>`<tr><td style="text-align:left">${n}${a.k?` <span style="color:var(--mu);font-size:10px">${a.k}</span>`:''}</td><td>${a.n}</td><td>${(a.yds/a.n).toFixed(1)}</td><td>${a.yds}</td><td>${a.td||0}</td><td>${def?(a.to||0):(a.fd||0)}</td></tr>`;
   const sec=(k,lbl,def)=>{const L=Object.entries(sp[k]||{}).sort((a,b)=>b[1].n-a[1].n);if(!L.length)return'';
-    return`<div style="font-size:11px;font-weight:900;color:var(--mu);margin:10px 0 4px">${lbl}</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th style="text-align:left">Call</th><th>Runs</th><th>Avg</th><th>Yds</th><th>TD</th><th>${def?'TO':'1st'}</th></tr></thead><tbody>${L.map(([n,a])=>row(n,a,def)).join('')}</tbody></table></div>`;};
+    return`<div class="bx-h">${lbl}</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th style="text-align:left">Call</th><th>Runs</th><th>Avg</th><th>Yds</th><th>TD</th><th>${def?'TO':'1st'}</th></tr></thead><tbody>${L.map(([n,a])=>row(n,a,def)).join('')}</tbody></table></div>`;};
   const h=sec('o','Offense: Plays run',false)+sec('d','Defense: What each call gave up',true);
-  return h?`<div style="margin-top:10px;font-weight:900;font-size:14px">${title}</div>${h}`:'';
+  return h?`<div class="bx-sub">${title}</div>${h}`:'';
 }
 function gdBoxHtml(res,me,opp){
   const rows={0:[],1:[]};
   for(const mid in(res.stats||{})){const p=getP(+mid);if(!p)continue;const t=p.sId===me.id?0:p.sId===opp.id?1:-1;if(t<0)continue;rows[t].push({p,s:res.stats[mid]});}
   const sec=(t,title,f,line)=>{const L=rows[t].filter(r=>f(r.s)).sort((a,b)=>line(b.s)[0]-line(a.s)[0]).slice(0,4);if(!L.length)return'';
-    return`<div style="font-size:11px;font-weight:900;color:var(--mu);margin:8px 0 2px">${title}</div>`+L.map(r=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:2px 0"><span>#${r.p.num} ${r.p.fn[0]}. ${r.p.ln} <span style="color:var(--mu)">${r.p.pos}</span></span><b>${line(r.s)[1]}</b></div>`).join('');};
-  const col=(t,s)=>`<div style="flex:1 1 240px;min-width:0"><div style="display:flex;align-items:center;gap:8px;font-weight:900">${sLogo(s,30)}${s.mascot}</div>
+    return`<div class="bx-h">${title}</div>`+L.map(r=>`<div class="bx-r"><span>#${r.p.num} ${r.p.fn[0]}. ${r.p.ln} <i>${r.p.pos}</i></span><b>${line(r.s)[1]}</b></div>`).join('');};
+  const col=(t,s)=>`<div class="bx-col" style="--tA:${_hx(s.c1)?s.c1:'#33415c'}"><div class="bx-team">${sLogo(s,30)}${s.mascot}</div>
     ${sec(t,'Passing',x=>x.passAtt,x=>[x.passYds||0,`${x.passCmp||0}/${x.passAtt} (${Math.round((x.passCmp||0)/x.passAtt*100)}%) · ${x.passYds||0} yds · ${x.passTD||0} TD${x.passInt?' · '+x.passInt+' INT':''}`])}
     ${sec(t,'Rushing',x=>x.rushAtt,x=>[x.rushYds||0,`${x.rushAtt} car · ${x.rushYds||0} yds · ${((x.rushYds||0)/x.rushAtt).toFixed(1)} avg${x.rushTD?' · '+x.rushTD+' TD':''}`])}
     ${sec(t,'Receiving',x=>x.rec||x.drops,x=>[x.recYds||0,`${x.rec||0} rec · ${x.recYds||0} yds${x.rec?' · '+((x.recYds||0)/x.rec).toFixed(1)+' avg':''}${x.yac?' · '+x.yac+' YAC':''}${x.recTD?' · '+x.recTD+' TD':''}${x.drops?' · '+x.drops+' drop'+(x.drops>1?'s':''):''}`])}
@@ -265,8 +265,9 @@ function gdBoxHtml(res,me,opp){
     ${sec(t,'Blocking',x=>x.pancakes||x.sacksA,x=>[(x.pancakes||0)*2-(x.sacksA||0)*3,`${x.pancakes||0} pancake${(x.pancakes||0)===1?'':'s'}${x.sacksA?' · '+x.sacksA+' sack'+(x.sacksA>1?'s':'')+' allowed':''}`])}
     ${sec(t,'Kicking',x=>x.fga||x.xpa,x=>[x.fgm||0,`FG ${x.fgm||0}/${x.fga||0} · XP ${x.xpm||0}/${x.xpa||0}`])}</div>`;
   const xpL=(res.xp||[]).filter(r=>r.xp>0).sort((a,b)=>b.xp-a.xp).slice(0,8);
-  const xpH=xpL.length?`<div style="font-size:11px;font-weight:900;color:var(--mu);margin:12px 0 4px">XP EARNED (10 XP = 1 skill point)</div><div style="display:flex;flex-wrap:wrap;gap:6px">${xpL.map(r=>`<span style="font-size:12px;padding:3px 9px;border-radius:8px;background:var(--s3);border:1px solid var(--bd)">${r.p.fn[0]}. ${r.p.ln} <b style="color:var(--te)">+${r.xp}</b>${r.sp?` <b style="color:var(--gn)">+${r.sp} SP</b>`:''}</span>`).join('')}</div>`:'';
-  return`<div style="font-weight:900;font-size:19px;margin-bottom:4px">Box score</div><div style="font-size:13px;color:var(--mu);margin-bottom:6px">${me.mascot} ${res.score[0]}, ${opp.mascot} ${res.score[1]} · these stats were added to every player's season and career totals</div>
-    <div style="display:flex;gap:18px;flex-wrap:wrap">${col(0,me)}${col(1,opp)}</div>${splitsHtml(res.splits&&res.splits[0],'This game: your play calls')}${xpH}<div style="text-align:right;margin-top:12px"><button class="btn" onclick="clo()">Done</button></div>`;
+  const xpH=xpL.length?`<div class="bx-h">XP earned (10 XP = 1 skill point)</div><div class="bx-xp">${xpL.map(r=>`<span>${r.p.fn[0]}. ${r.p.ln} <b style="color:var(--te)">+${r.xp}</b>${r.sp?` <b style="color:var(--gn)">+${r.sp} SP</b>`:''}</span>`).join('')}</div>`:'';
+  const fin=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',w=res.score[i]>res.score[1-i];return`<div class="bx-f${i?' bx-f2':''}${w?' won':''}" style="background:${c};color:${_lm(c)>.55?'#0f241a':'#fff'}">${sLogo(s,40)}<span class="bx-fn">${s.mascot}</span><span class="bx-fs">${res.score[i]}</span></div>`;};
+  return`<div class="bx"><div class="bx-top"><span>Final</span>Box score</div><div class="bx-fin">${fin(me,0)}${fin(opp,1)}</div><div class="bx-note">These stats were added to every player's season and career totals.</div>
+    <div class="bx-cols">${col(0,me)}${col(1,opp)}</div>${splitsHtml(res.splits&&res.splits[0],'This game: your play calls')}${xpH}<div style="text-align:right;margin-top:12px"><button class="btn" onclick="clo()">Done</button></div></div>`;
 }
 

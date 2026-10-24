@@ -204,7 +204,7 @@ function toggleUnlimitedMoney(){
   if(!G)return;
   G.unlimitedMoney=!G.unlimitedMoney;
   syncUnlimBtn();
-  notify(G.unlimitedMoney?' Unlimited Money ON, budget costs bypassed!':' Unlimited Money OFF','w');
+  notify(G.unlimitedMoney?'Unlimited Money ON, budget costs bypassed!':'Unlimited Money OFF','w');
 }
 // Helper: returns true if unlimited money is active, use this before every budget check
 function hasFunds(cost){return !!(G&&G.unlimitedMoney)||((G&&G.budget)||0)>=cost;}

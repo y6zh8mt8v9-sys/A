@@ -261,7 +261,7 @@ function generatePlayerStory(p){
   // ── Story narrative variant selector, adds real variation to body text ──
   const narrativeVariant=Math.floor(rng(30)*4); // 0-3, determines sentence structure
 
-  let headline='', body='', icon='', outcome='';
+  let headline='', body='', icon='', outcome='';
 
   if(tier==='elite'&&!proTierPenalty){
     const fbsTier=lvl==='FBS'?_fbsPrestigeTier(school||''):null;
@@ -272,7 +272,7 @@ function generatePlayerStory(p){
     const draftPick=_claimDraftSlot(gradYr,draftRound,basePick,rng);
     const overallPick=draftRound===1?draftPick:(draftRound-1)*32+draftPick;
     const draftTeam=_claimDraftTeam(gradYr,Math.floor(rng(10)*_STORY_DRAFT_TEAMS.length),rng);
-    icon='';
+    icon='';
     headline=`${p.fn} ${p.ln} drafted Round ${draftRound}, Pick ${draftPick} (No. ${overallPick} overall) by the ${draftTeam}`;
     outcome=`NGL Draft: Round ${draftRound}`;
     const draftSlotDesc=_draftSlotDesc(draftRound,draftPick,overallPick);
@@ -314,7 +314,7 @@ function generatePlayerStory(p){
     const overallPick=64+draftPick;
     const draftTeam=_claimDraftTeam(gradYr,Math.floor(rng(10)*_STORY_DRAFT_TEAMS.length),rng);
     const tragic=_STORY_TRAGIC[Math.floor(rng(12)*_STORY_TRAGIC.length)];
-    icon='';
+    icon='';
     headline=`${p.fn} ${p.ln} drafted Round 3 by the ${draftTeam}, career cut short`;
     outcome='NGL Draft Pick';
     if(narrativeVariant<2){
@@ -329,7 +329,7 @@ function generatePlayerStory(p){
 
   } else if(tier==='good'&&hasIntl){
     const intlLeague=_STORY_JOBS_INTL[Math.floor(rng(13)*_STORY_JOBS_INTL.length)];
-    icon='';
+    icon='';
     headline=`${p.fn} ${p.ln} takes his game overseas, ${intlLeague}`;
     outcome='International Pro';
     if(narrativeVariant<2){
@@ -348,7 +348,7 @@ function generatePlayerStory(p){
   } else if(tier==='good'){
     const proJob=_STORY_JOBS.good[Math.floor(rng(15)*_STORY_JOBS.good.length)];
     const posFlavorGood=_pickPosGood(rng(22));
-    icon='';
+    icon='';
     // More varied headlines based on college level and path
     if(lvl==='FBS'){
       headline=`${p.fn} ${p.ln} fights his way onto an NGL roster as a ${proJob}`;
@@ -383,7 +383,7 @@ function generatePlayerStory(p){
     const keepPlaying=rng(17)<0.5;
     if(keepPlaying){
       const avgjob=_STORY_JOBS.avg[Math.floor(rng(18)*_STORY_JOBS.avg.length)];
-      icon='';
+      icon='';
       headline=`${p.fn} ${p.ln} keeps playing, ${avgjob}`;
       outcome='Semi-Pro Career';
       if(narrativeVariant<2){
@@ -396,7 +396,7 @@ function generatePlayerStory(p){
           (broadcastLine?'He '+broadcastLine+'.':'He still has game tape from those years and watches it with his kids.');
       }
     } else {
-      icon='';
+      icon='';
       // Varied endings for avg players who leave football
       const leaveVariant=Math.floor(rng(31)*3);
       if(leaveVariant===0){
@@ -422,7 +422,7 @@ function generatePlayerStory(p){
   } else {
     // Low tier, more diverse endings
     const lowVariant=Math.floor(rng(32)*4);
-    icon='';
+    icon='';
     if(lowVariant===0){
       headline=`${p.fn} ${p.ln} finds a calling as a ${civilianJob}`;
       outcome='New Chapter';
@@ -431,21 +431,21 @@ function generatePlayerStory(p){
         `He still shows up on Friday nights and sometimes helps with the JV squad.`;
     } else if(lowVariant===1){
       const tragi=_STORY_TRAGIC[Math.floor(rng(20)*_STORY_TRAGIC.length)];
-      icon='';
+      icon='';
       headline=`${p.fn} ${p.ln} moves on from football`;
       outcome='Life After Football';
       body=`${p.fn} gave everything he had on the field. In the end, ${tragi}. `+
         `By ${storyYr}, he had built a new life as a ${civilianJob} and ${familyEvent} ${cityRef}. `+
         `He speaks warmly about his time at ${mySchoolName} and what the game taught him about himself.`;
     } else if(lowVariant===2){
-      icon='';
+      icon='';
       headline=`${p.fn} ${p.ln} gives back, coaching and community`;
       outcome='Giving Back';
       body=`Life after football took ${p.fn} in an unexpected direction. He became a ${civilianJob} ${cityRef} and threw himself into giving back to youth sports in his community. `+
         `He ${familyEvent} and by ${storyYr} had coached over a hundred young athletes through summer programs. `+
         `Former teammates describe him as the person they'd call in a tough spot.`;
     } else {
-      icon='';
+      icon='';
       headline=`${p.fn} ${p.ln}, where the game took him`;
       outcome='Life After Football';
       body=`Not every football story ends on a big stage. ${p.fn} played hard every time he laced up at ${mySchoolName}, and that drive followed him into civilian life. `+

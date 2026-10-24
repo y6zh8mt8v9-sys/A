@@ -105,7 +105,7 @@ function advWk(){
     G.phase='regular';
     simGame(idx);
     nav('dash');
-    if(!_popQ.length){notify(`Week ${game.wk}: ${game.result==='W'?'Victory! ':'Defeat '} ${game.my}-${game.opp}`);}
+    if(!_popQ.length){notify(`Week ${game.wk}: ${game.result==='W'?'Victory!':'Defeat'} ${game.my}-${game.opp}`);}
   }));
 }
 
@@ -155,7 +155,7 @@ function _doOffseason(){
         glSet(slot.wk,opp,myScore,oppScore,'po');try{applyStats(sm);}finally{_glCtx=null;}gateAfter(opp,'po',slot.wk);
   try{progAfterGame(iWin,{playoff:true,sm,margin:myScore-oppScore});}catch(e){console.error('program',e);}try{checkStreaks(sm,[],true);}catch(e){}
         const roundName=poRoundName(slot.playoffRound)||`Round ${slot.playoffRound}`;
-        addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}"> ${roundName}: ${iWin?'Win':'Loss'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
+        addLog(`<span style="color:${iWin?'var(--gd)':'var(--te)'}">${roundName}: ${iWin?'Win':'Loss'} vs ${opp.name} ${opp.mascot} ${myScore}-${oppScore}</span>`);
         simPlayoffRound(slot.playoffRound,slot,iWin);
         if(!iWin){
           G.playoff.myElim=true;
@@ -178,7 +178,7 @@ function _doOffseason(){
     const _doOsChampSch=getS(_doOsChampId);
     if(_doOsChampSch){
       const _doOsChampRec=`${_doOsChampSch.wins}-${_doOsChampSch.losses}`;
-      _osPops.push(bEvPop(' State Champion Crowned',`<strong style="color:var(--gd)">${_doOsChampSch.name} ${_doOsChampSch.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${_doOsChampRec}</strong> on the season.`,sLogo(_doOsChampSch,64),'var(--gd)'));
+      _osPops.push(bEvPop('State Champion Crowned',`<strong style="color:var(--gd)">${_doOsChampSch.name} ${_doOsChampSch.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${_doOsChampRec}</strong> on the season.`,sLogo(_doOsChampSch,64),'var(--gd)'));
     }
   }
   // v2.00: the National Championship (top two of the final national poll) is played before the offseason starts

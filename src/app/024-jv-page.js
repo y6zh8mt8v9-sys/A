@@ -18,14 +18,14 @@ function pgJV(){
     return`
     <tr${isStandout?' style="background:rgba(245,192,48,.07)"':''}>
       <td style="color:var(--mu)">${p.num}</td>
-      <td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,26)}<span>${p.fn} ${p.ln}${isStandout?' <span style="font-size:9px;color:var(--gd);font-weight:800"> PROSPECT</span>':''}</span></div></td>
+      <td><div style="display:flex;align-items:center;gap:6px">${face(p.fs,26)}<span>${p.fn} ${p.ln}${isStandout?' <span style="font-size:9px;color:var(--gd);font-weight:800">★ PROSPECT</span>':''}</span></div></td>
       <td><span class="pb2">${p.pos}</span></td>
       <td>${yrLabel[p.yr]||yrL(p.yr)}</td>
       <td>${rb(p.rat)}</td>
       <td>${devB(p.dev)}</td>
       <td style="font-size:11px;color:var(--mu)">${(p.traits||[]).map(t=>trB(t)).join('')}</td>
       <td>
-        <button class="btn bgn bxs" onclick="callUpToVarsity(${p.id})" title="Call up to Varsity"> Call Up</button><button class="bgh bxs" onclick="talkOpen(${p.id})" title="Talk him into moving up">Talk</button>
+        <button class="btn bgn bxs" onclick="callUpToVarsity(${p.id})" title="Call up to Varsity">Call Up</button><button class="bgh bxs" onclick="talkOpen(${p.id})" title="Talk him into moving up">Talk</button>
       </td>
     </tr>`;
   }).join('');
@@ -39,7 +39,7 @@ function pgJV(){
       <td>${devB(p.dev)}</td>
       <td style="font-size:11px;color:var(--mu)">${(p.traits||[]).map(t=>trB(t)).join('')}</td>
       <td>
-        <button class="btn bsm" style="background:var(--gd);color:#000;padding:2px 7px;font-size:10px" onclick="relegateToJV(${p.id})" title="Send to JV"> JV</button>
+        <button class="btn bsm" style="background:var(--gd);color:#000;padding:2px 7px;font-size:10px" onclick="relegateToJV(${p.id})" title="Send to JV">JV</button>
       </td>
     </tr>`).join('');
   const cnt8=jvPl.filter(p=>p.yr===8).length;
@@ -49,13 +49,13 @@ function pgJV(){
   const atCap=varsityCount>=MAX_VARSITY;
   return`
   <div class="pnl" style="margin-bottom:14px">
-    <div class="ph"> JV Team <span style="font-size:12px;color:var(--mu);font-weight:400">${jvPl.length} players</span>
+    <div class="ph">JV Team <span style="font-size:12px;color:var(--mu);font-weight:400">${jvPl.length} players</span>
       <div style="display:flex;gap:6px;align-items:center">
         <span style="background:#0a1a30;border:1px solid #336;color:#88ccff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">8th: ${cnt8}</span>
         <span class="rb rb-l">Fr: ${cntFr}</span>
         <span class="rb rb-m">So: ${cntSo}</span>
-        ${standouts>0?`<span class="rb rb-h" title="Standout prospects"> ${standouts} standout${standouts!==1?'s':''}</span>`:''}
-        <span style="background:${atCap?'rgba(204,34,34,.18)':'rgba(34,184,112,.12)'};border:1px solid ${atCap?'var(--rd)':'var(--gn)'};color:${atCap?'var(--rd)':'var(--gn)'};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700" title="Varsity roster vs 85-player limit">Varsity: ${varsityCount}/${MAX_VARSITY}${atCap?'  AT CAP':''}</span>
+        ${standouts>0?`<span class="rb rb-h" title="Standout prospects">★ ${standouts} standout${standouts!==1?'s':''}</span>`:''}
+        <span style="background:${atCap?'rgba(204,34,34,.18)':'rgba(34,184,112,.12)'};border:1px solid ${atCap?'var(--rd)':'var(--gn)'};color:${atCap?'var(--rd)':'var(--gn)'};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700" title="Varsity roster vs 85-player limit">Varsity: ${varsityCount}/${MAX_VARSITY}${atCap?' AT CAP':''}</span>
       </div>
     </div>
     <div class="pb" style="font-size:12px;color:var(--mu);margin-bottom:6px">
@@ -70,7 +70,7 @@ function pgJV(){
     </div>
   </div>
   <div class="pnl">
-    <div class="ph"> Varsity Players Eligible for JV Demotion
+    <div class="ph">Varsity Players Eligible for JV Demotion
       <span style="font-size:11px;color:var(--mu);font-weight:400">(Fr/So on varsity)</span>
     </div>
     <div class="pb" style="font-size:12px;color:var(--mu);margin-bottom:6px">
@@ -97,7 +97,7 @@ function pgRecls(){
   const nextDown=canGoDown?myClsOrder()[clsIdx-1]:null;
   const nextUp=canGoUp?myClsOrder()[clsIdx+1]:null;
   const pressureColor=pressure>=75?'var(--rd)':pressure>=50?'var(--gd)':pressure>=25?'#f59e0b':'var(--gn)';
-  const pressureLabel=pressure>=75?' CRITICAL':pressure>=50?' High':pressure>=25?' Moderate':' Low';
+  const pressureLabel=pressure>=75?'CRITICAL':pressure>=50?'High':pressure>=25?'Moderate':'Low';
   const barPct=pressure.toFixed(0);
   // 3-year immunity status
   const yearsAtNewCls=G.promotedYr>0?G.yr-G.promotedYr:999;
@@ -152,7 +152,6 @@ function pgRecls(){
   const canAffordUp=G.unlimitedMoney||G.budget>=moveUpCost;
   return`
   ${immunityActive?`<div style="background:#0a2a12;border:2px solid var(--gn);border-radius:7px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
-    <span style="font-size:20px"></span>
     <div>
       <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gn);">Demotion Immunity Active</div>
       <div style="font-size:11px;color:var(--mu);margin-top:2px">You moved up to <strong style="color:var(--tx)">${clsL(G.cls)}</strong>: you cannot be relegated for <strong style="color:var(--gn)">${immunityYearsLeft} more season${immunityYearsLeft!==1?'s':''}</strong>. Use this time to build your program.</div>
@@ -161,7 +160,7 @@ function pgRecls(){
   <div class="g2" style="margin-bottom:14px;align-items:start">
     <div>
       <div class="pnl" style="margin-bottom:14px">
-        <div class="ph"> Reclassification Status</div>
+        <div class="ph">Reclassification Status</div>
         <div class="pb">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
             <div style="flex:1">
@@ -185,15 +184,15 @@ function pgRecls(){
             <div style="background:var(--s3);border-radius:6px;height:14px;overflow:hidden;border:1px solid var(--bd)">
               <div style="height:100%;width:${barPct}%;background:${pressureColor};border-radius:6px;transition:width .4s;${pressure>=100?'animation:pulse 1s infinite':''}"></div>
             </div>
-            <div style="font-size:11px;color:var(--mu);margin-top:4px">${immunityActive?`<span style="color:var(--gn)"> Immune from demotion for ${immunityYearsLeft} more season${immunityYearsLeft!==1?'s':''}, keep building!</span>`:pressure>=100?'<span style="color:var(--rd);font-weight:700"> Pressure at 100%, demotion occurs at season end!</span>':pressure>=75?'<span style="color:var(--rd)">Danger zone: win games to reduce pressure.</span>':pressure>=50?'<span style="color:var(--gd)">Elevated pressure: a strong season will help.</span>':'Pressure is manageable.'}</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:4px">${immunityActive?`<span style="color:var(--gn)">Immune from demotion for ${immunityYearsLeft} more season${immunityYearsLeft!==1?'s':''}, keep building!</span>`:pressure>=100?'<span style="color:var(--rd);font-weight:700">Pressure at 100%, demotion occurs at season end!</span>':pressure>=75?'<span style="color:var(--rd)">Danger zone: win games to reduce pressure.</span>':pressure>=50?'<span style="color:var(--gd)">Elevated pressure: a strong season will help.</span>':'Pressure is manageable.'}</div>
           </div>
           <div style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:8px 12px;font-size:12px;color:var(--mu)">
-            ${canGoDown?(immunityActive?`<strong style="color:var(--gn)"> Immunity:</strong> After moving up you cannot be demoted for 3 seasons. Then pressure applies normally.`:`<strong style="color:var(--tx)"> Demotion:</strong> Pressure hits 100% → auto-demotion to <strong>${nextDown}</strong>. Bad seasons add pressure; wins reduce it.`):'<strong style="color:var(--tx)">Lowest classification</strong>: cannot be demoted further.'}
+            ${canGoDown?(immunityActive?`<strong style="color:var(--gn)">Immunity:</strong> After moving up you cannot be demoted for 3 seasons. Then pressure applies normally.`:`<strong style="color:var(--tx)">Demotion:</strong> Pressure hits 100% → auto-demotion to <strong>${nextDown}</strong>. Bad seasons add pressure; wins reduce it.`):'<strong style="color:var(--tx)">Lowest classification</strong>: cannot be demoted further.'}
         </div>
       </div>
 
       <div class="pnl">
-        <div class="ph"> Move Up</div>
+        <div class="ph">Move Up</div>
         <div class="pb">
           ${canGoUp?`<div style="font-size:12px;color:var(--mu);margin-bottom:10px">
             Voluntarily move up to <strong style="color:var(--gn)">${nextUp}</strong> classification.
@@ -204,7 +203,7 @@ function pgRecls(){
             <div class="dr"><span class="a">State Champ at ${clsL(G.cls)}</span><span style="color:${champAtCurrent?'var(--gn)':'var(--rd)'};font-weight:700">${champAtCurrent?'✓ Earned':' Not yet'}</span></div>
             <div class="dr"><span class="a">Budget needed</span><span style="color:${canAffordUp?'var(--gn)':'var(--rd)'};font-weight:700">$${(moveUpCost/1000).toFixed(0)}k (have $${(G.budget/1000).toFixed(0)}k)</span></div>
           </div>
-          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%"> Move Up to ${nextUp}</button>`}`
+          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%">Move Up to ${nextUp}</button>`}`
           :`<div style="font-size:12px;color:var(--mu)">Already in the highest classification (${myClsOrder().slice(-1)[0]}).</div>`}
         </div>
       </div>
@@ -212,19 +211,19 @@ function pgRecls(){
 
     <div>
       <div class="pnl" style="margin-bottom:14px">
-        <div class="ph"> Pressure Rules</div>
+        <div class="ph">Pressure Rules</div>
         <div class="pb">${ruleRows}
           <div style="margin-top:8px;padding:7px 10px;background:var(--s3);border-left:3px solid var(--ac);border-radius:0 4px 4px 0;font-size:11px;color:var(--mu)">Pressure accumulates over multiple bad seasons. A single turnaround season can significantly reduce it.</div>
         </div>
       </div>
       <div class="pnl" style="margin-bottom:14px">
-        <div class="ph"> SOS Modifier</div>
+        <div class="ph">SOS Modifier</div>
         <div class="pb">${sosRuleRows}
           <div style="margin-top:8px;padding:7px 10px;background:var(--s3);border-left:3px solid var(--gd);border-radius:0 4px 4px 0;font-size:11px;color:var(--mu)">Scheduling tough opponents only pays off if you <em>win</em>. A losing record ignores SOS entirely.</div>
         </div>
       </div>
       <div class="pnl">
-        <div class="ph"> Pressure History</div>
+        <div class="ph">Pressure History</div>
         <div class="pb">${logRows||'<div style="color:var(--mu);font-size:12px">No history yet: complete a season to see your first entry.</div>'}</div>
       </div>
     </div>
@@ -245,12 +244,12 @@ function buildMoveUpPop(){
   if(!champAtCurrent){
     // Show info pop, not yet eligible
     return `<div class="pc" style="border-top-color:var(--mu)">
-      <h3 style="color:var(--mu)"> Reclassification</h3>
+      <h3 style="color:var(--mu)">Reclassification</h3>
       <div style="font-size:13px;line-height:1.7;margin-top:10px">
         <div style="margin-bottom:10px">You are currently in <strong style="color:var(--te)">${clsL(G.cls)}</strong>.</div>
         <div style="margin-bottom:10px">To move up to <strong>${nextCls}</strong> you need:</div>
-        <div style="margin-bottom:6px"> <strong>1 State Championship</strong> at ${clsL(G.cls)} <span style="color:var(--te)">not yet achieved</span></div>
-        <div> <strong>$${(cost/1000).toFixed(0)}k budget</strong> to reclassify</div>
+        <div style="margin-bottom:6px"><strong>1 State Championship</strong> at ${clsL(G.cls)} <span style="color:var(--te)">not yet achieved</span></div>
+        <div><strong>$${(cost/1000).toFixed(0)}k budget</strong> to reclassify</div>
       </div>
       <div style="margin-top:12px;font-size:11px;color:var(--mu)">Win a State title to unlock the move-up option.</div>
     </div>`;
@@ -258,15 +257,15 @@ function buildMoveUpPop(){
   const canAfford=G.unlimitedMoney||G.budget>=cost;
   const popId='moveup-pop-'+Date.now();
   return `<div class="pc" style="border-top-color:var(--gd)">
-    <h3 style="color:var(--gd)"> Move Up to ${nextCls}?</h3>
+    <h3 style="color:var(--gd)">Move Up to ${nextCls}?</h3>
     <div style="font-size:13px;line-height:1.7;margin-top:10px">
       <div style="margin-bottom:10px">You've won a State Championship at <strong style="color:var(--gd)">${clsL(G.cls)}</strong>! You're eligible to move up.</div>
-      <div style="margin-bottom:6px"> <strong>Next class:</strong> ${nextCls}</div>
-      <div style="margin-bottom:6px"> <strong>Cost:</strong> $${(cost/1000).toFixed(0)}k ${canAfford?'<span style="color:var(--gd)">✓</span>':'<span style="color:var(--te)">(insufficient funds)</span>'}</div>
+      <div style="margin-bottom:6px">▲ <strong>Next class:</strong> ${nextCls}</div>
+      <div style="margin-bottom:6px"><strong>Cost:</strong> $${(cost/1000).toFixed(0)}k ${canAfford?'<span style="color:var(--gd)">✓</span>':'<span style="color:var(--te)">(insufficient funds)</span>'}</div>
       <div style="margin-bottom:12px;font-size:11px;color:var(--mu)">Moving up means tougher competition, larger rosters, and bigger recruiting classes.</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn" style="flex:1;font-size:13px" onclick="confirmMoveUp()" ${canAfford?'':'disabled'}> Move Up</button>
+      <button class="btn" style="flex:1;font-size:13px" onclick="confirmMoveUp()" ${canAfford?'':'disabled'}>Move Up</button>
       <button class="bgh" style="flex:1;font-size:13px" onclick="declineMoveUp()">Stay in ${clsL(G.cls)}</button>
     </div>
   </div>`;
@@ -323,7 +322,7 @@ function moveUpDo(){
   // Reset division win-loss records for the new league
   for(const div of G.divisions)for(const t of div.teams){t.wins=0;t.losses=0;}
 
-  addLog(`<span style="color:var(--gd)"> Reclassified UP to ${nextCls}! Joined the <strong>${targetDiv.name}</strong> division. You have 3 years of demotion immunity to adjust.</span>`);
+  addLog(`<span style="color:var(--gd)">Reclassified UP to ${nextCls}! Joined the <strong>${targetDiv.name}</strong> division. You have 3 years of demotion immunity to adjust.</span>`);
   return true;
 }
 
@@ -403,7 +402,7 @@ function seasonDevCheck(p){
   // Log notable dev changes for the player's team only
   if(p.sId===G.myId){
     if(devChanged){
-      addLog(`<span style="color:${devUp?'var(--gd)':'var(--te)'}">${devUp?'':''} ${p.fn} ${p.ln} dev ${devUp?'upgraded':'downgraded'}: ${prevDev} → ${p.dev}</span>`);
+      addLog(`<span style="color:${devUp?'var(--gd)':'var(--te)'}">${devUp?'▲':'▼'} ${p.fn} ${p.ln} dev ${devUp?'upgraded':'downgraded'}: ${prevDev} → ${p.dev}</span>`);
     }
   }
 
