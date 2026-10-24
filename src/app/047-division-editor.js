@@ -411,7 +411,7 @@ function tbEditTeam(dIdx,tIdx){
   // Gather all divisions across all classes for cross-class move
   tbOk(t);const allClsOptions=clsOfSt(clsSt(_tbCls)).map(cls=>`<optgroup label="${clsName(cls)}">${(tbGetDivs(cls)||[]).map((d,i)=>`<option value="${cls}|${i}"${cls===_tbCls&&i===dIdx?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</optgroup>`).join('');
   // Set active tab to browse context but show edit form inline
-  body.innerHTML=`<div style="max-width:520px;">
+  body.innerHTML=`<div style="max-width:760px;">
     <div style="font-family:var(--hd);font-size:14px;font-weight:800;color:var(--gd);margin-bottom:14px;"> Edit team: ${t.name} ${t.mascot} <span style="color:var(--te)">(${clsName(_tbCls)})</span></div>
     <div class="g2" style="gap:10px;margin-bottom:10px;">
       <div class="fg"><label>School Name</label><input class="ei" id="tb-edit-name" value="${t.name}" oninput="tbPreviewLogo('edit')"></div>
