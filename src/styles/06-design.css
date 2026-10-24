@@ -1,27 +1,27 @@
-/* ════════ Gridiron 27 design: Painted field ════════
-   The game seen from the sideline: turf, chalk lines and hash marks, goalpost yellow for the numbers that matter,
-   and the team's own colors for everything you press. Sections sit on painted yard lines instead of boxed cards;
-   corners are clipped like a jersey number plate. Every older visual layer is overridden here, so this file is
-   the one place to change the look. Sentence case everywhere. */
+/* ════════ Gridiron 27 design: Red and black ════════
+   Black surfaces, white text, red for the numbers and buttons that matter, and the team's own colors for
+   everything you press. Sections sit on painted yard lines instead of boxed cards; corners are clipped like a
+   jersey number plate. Every older visual layer is overridden here, so this file is the one place to change
+   the look. Sentence case everywhere. */
 :root{
-  --pitch:#0b1f16;--sod:#12301f;--sod2:#183c28;--yard:#24503a;--line:rgba(225,240,228,.10);--line2:rgba(225,240,228,.22);
-  --chalk:#f1f5ef;--mute:#a7bcae;--post:#f2c230;--go:#46d17f;--flag:#ff7a5c;--board:#081710;
-  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#21482f;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
+  --pitch:#0a0a0b;--sod:#141416;--sod2:#1c1c20;--yard:#2a2a30;--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.22);
+  --chalk:#f4f4f5;--mute:#a1a1aa;--post:#ef2d38;--go:#46d17f;--flag:#ff7a5c;--board:#050506;
+  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#26262b;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
   --gn:var(--go);--gd:var(--post);--rd:var(--flag);--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);--te:var(--tT,#9fc0f2);
   --hd:'Alumni Sans','Arial Narrow',sans-serif;--head:var(--hd);
   --font:'Archivo','Segoe UI',system-ui,sans-serif;--rad:4px;--cut:14px;--shadow:none;--glass:none;
-  --pop:0 28px 80px rgba(0,8,4,.6);
+  --pop:0 28px 80px rgba(0,0,0,.6);
   /* mowing stripes, the field under everything */
   --mow:repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 120px,transparent 120px 240px);
   /* a painted yard line with hash marks under it */
   --yardline:linear-gradient(var(--line2),var(--line2)) top/100% 2px no-repeat,repeating-linear-gradient(90deg,var(--line2) 0 2px,transparent 2px 22px) 0 6px/100% 6px no-repeat;
 }
 :root.light{
-  --pitch:#f2f5ef;--sod:#ffffff;--sod2:#eaf0e8;--yard:#cfdccf;--line:rgba(15,36,26,.12);--line2:rgba(15,36,26,.24);
-  --chalk:#0f241a;--mute:#4f6658;--post:#8a6400;--go:#167a45;--flag:#b8341b;--board:#0f241a;
-  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#dde7dc;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:#167a45;--gd:#8a6400;--rd:#b8341b;--te:var(--tT,#1f56b0);--pop:0 24px 60px rgba(15,36,26,.2);--pot:#8a6400;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
-  --mow:repeating-linear-gradient(90deg,rgba(15,36,26,.022) 0 120px,transparent 120px 240px);
+  --pitch:#f4f4f5;--sod:#ffffff;--sod2:#ececef;--yard:#d4d4d8;--line:rgba(17,17,19,.12);--line2:rgba(17,17,19,.24);
+  --chalk:#111113;--mute:#5b5b63;--post:#c8101e;--go:#167a45;--flag:#b8341b;--board:#111113;
+  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#e4e4e7;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
+  --gn:#167a45;--gd:#c8101e;--rd:#b8341b;--te:var(--tT,#1f56b0);--pop:0 24px 60px rgba(17,17,19,.2);--pot:#c8101e;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
+  --mow:repeating-linear-gradient(90deg,rgba(17,17,19,.022) 0 120px,transparent 120px 240px);
 }
 :root.light .yf{color:#167a45}:root.light .ys{color:#1f63b0}
 /* type: no all caps, no tracking (logos are SVG and keep their own lettering) */
@@ -47,8 +47,8 @@ html body .dr{border-bottom:1px solid var(--bd)}html body .dr .a{color:var(--mu)
 html body .btn{background:var(--ac)!important;background-image:none!important;color:var(--tOn,#fff)!important;border:0!important;border-bottom:3px solid rgba(0,0,0,.28)!important;
   border-radius:var(--rad)!important;box-shadow:none!important;text-shadow:none!important;font:650 14px/1.15 var(--font)!important;padding:10px 16px;cursor:pointer;transition:filter .12s,transform .06s}
 html body .btn:hover{filter:brightness(1.1)}html body .btn:active,html body .bgh:active{transform:translateY(1px)}
-html body .btn.bgn{background:#1f8a4c!important;color:#fff!important}
-html body .btn.bgd{background:var(--post)!important;color:#1a1400!important}:root.light body .btn.bgd{background:#e8b52b!important;color:#1a1400!important}
+html body .btn.bgn{background:#f4f4f5!important;color:#111113!important}
+html body .btn.bgd{background:var(--post)!important;color:#ffffff!important}:root.light body .btn.bgd{background:#c8101e!important;color:#ffffff!important}
 html body .btn.bbl{background:var(--s3)!important;color:var(--tx)!important}
 html body .bgh{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:var(--rad)!important;box-shadow:none!important;font:600 13px/1.15 var(--font)!important;cursor:pointer}
 html body .bgh:hover{background:var(--s2)!important;border-color:var(--mu)!important}
@@ -80,9 +80,9 @@ html body .rb{border-radius:3px!important;font:700 12px/1.3 var(--font)!importan
 
 /* numbers that matter: painted in goalpost yellow */
 html body .dash-stat-v,html body .dt-big,html body .nav-record,html body .dt-chips b{font-family:var(--hd)!important;font-weight:900!important;color:var(--post)!important;-webkit-text-fill-color:currentColor;background:none!important}
-html body .dt-chips span{background:var(--board)!important;color:#cfe0d4!important;border-radius:var(--rad)!important;padding:6px 10px!important;font-size:13px!important}
+html body .dt-chips span{background:var(--board)!important;color:#d4d4d8!important;border-radius:var(--rad)!important;padding:6px 10px!important;font-size:13px!important}
 html body .dt-chips b{font-size:24px!important;color:var(--post)!important;margin-left:2px}
-:root.light body .dt-chips span{background:#0f241a!important;color:#d5e3d8!important}:root.light body .dt-chips b{color:#f2c230!important}
+:root.light body .dt-chips span{background:#111113!important;color:#d4d4d8!important}:root.light body .dt-chips b{color:#ef2d38!important}
 
 /* top of the app */
 html body #tb,html body #nav-bar,html body #nav-prim{background:var(--s1)!important;border-color:var(--bd)!important;box-shadow:none!important;backdrop-filter:none!important}
@@ -100,8 +100,8 @@ html body .dt-crest{background:var(--bg)!important;box-shadow:none!important;bor
 html body .dt-tools button{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:var(--rad)!important;font:600 13px/1 var(--font)!important}
 html body .dt-tools button:hover{background:var(--s2)!important}
 html body .dt-club .dt-go button,html body .dt-club .dt-go button.btn,html body .dt-club .dt-go button.btn.bgd,html body .dt-club .dt-go button.btn.bgn{
-  background:var(--post)!important;color:#1a1400!important;font:700 17px/1 var(--font)!important;border-radius:var(--rad)!important;border-bottom:4px solid rgba(0,0,0,.3)!important;padding:14px 22px!important;box-shadow:none!important;animation:none!important}
-html body .dt-strip{background:var(--board)!important;color:#dceade!important;border-radius:0 0 var(--rad) var(--rad)!important;margin:0 10px 16px!important}
+  background:var(--post)!important;color:#ffffff!important;font:700 17px/1 var(--font)!important;border-radius:var(--rad)!important;border-bottom:4px solid rgba(0,0,0,.3)!important;padding:14px 22px!important;box-shadow:none!important;animation:none!important}
+html body .dt-strip{background:var(--board)!important;color:#e4e4e7!important;border-radius:0 0 var(--rad) var(--rad)!important;margin:0 10px 16px!important}
 html body .dt-strip b{font:700 16px/1.2 var(--font)!important}
 html body .dt-pill{background:rgba(255,255,255,.08)!important;border-radius:var(--rad)!important;font-family:var(--hd)!important;font-size:18px!important;font-weight:800!important}
 :root.light body .dt-pill{background:rgba(255,255,255,.12)!important}
@@ -126,7 +126,7 @@ html body.cnav:not(.cnav-dash) #nav-bar .nb.on{background:none!important;color:v
 html body.cnav:not(.cnav-dash) #nav-bar .nb.nb-home{color:var(--tx)!important}
 
 /* dialogs and popups: a plate with the clipped corner and the team color along the top */
-html body #mo,html body #pu,html body #confirm-menu,html body #settings-modal{background:rgba(2,10,6,.74)!important}
+html body #mo,html body #pu,html body #confirm-menu,html body #settings-modal{background:rgba(0,0,0,.74)!important}
 html body #mb,html body #pui,html body #tut-box,html body .offer-popup-box,html body #settings-modal>div{background:var(--s1)!important;color:var(--tx);border:0!important;border-top:5px solid var(--ac)!important;
   border-radius:0!important;box-shadow:var(--pop)!important;clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
 html body #mo.open #mb,html body #pu.open #pui{animation:g27in .16s ease-out}
@@ -138,8 +138,8 @@ html body .tut-pane h3{font:800 28px/1 var(--hd)!important;color:var(--tx)!impor
 html body #nf{background:var(--s2)!important;color:var(--tx)!important;border:0!important;border-left:4px solid var(--post)!important;border-radius:var(--rad)!important;box-shadow:var(--pop)!important;font:600 14px/1.35 var(--font)!important}
 
 /* title screen: the field at night, painted yard numbers */
-html body #title{background:linear-gradient(180deg,rgba(11,31,22,0) 40%,var(--pitch) 92%),repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(241,245,239,.07) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
-:root.light body #title{background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(15,36,26,.08) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
+html body #title{background:linear-gradient(180deg,rgba(12,12,14,0) 40%,var(--pitch) 92%),repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(255,255,255,.07) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
+:root.light body #title{background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(17,17,19,.08) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
 html body #title .tt-name{font:900 clamp(64px,15vw,136px)/.82 var(--hd)!important;color:var(--chalk)!important}
 html body #title .tt-name .a{color:var(--chalk)!important;-webkit-text-fill-color:var(--chalk)!important;background:none!important}
 /* "27" is painted like a field number: goalpost yellow with a dark offset under it */
@@ -149,7 +149,7 @@ html body #title .tt-ver{color:var(--mute)!important;opacity:.85;text-shadow:non
 html body #title .tt-btns{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;gap:8px!important}
 html body #title .tt-btn{background:var(--sod)!important;border:0!important;border-left:4px solid var(--yard)!important;border-radius:0!important;box-shadow:none!important;color:var(--chalk)!important;font:650 17px/1.15 var(--font)!important;text-align:left!important;padding:15px 18px!important;text-shadow:none!important}
 html body #title .tt-btn:hover{background:var(--sod2)!important;border-left-color:var(--post)!important}
-html body #title .tt-btn.pri{background:var(--post)!important;color:#1a1400!important;border-left-color:#1a1400!important}
+html body #title .tt-btn.pri{background:var(--post)!important;color:#ffffff!important;border-left-color:#ffffff!important}
 html body #title .tt-btn small{display:block;font:400 13px/1.3 var(--font)!important;color:inherit!important;opacity:.75}
 html body #title .tt-legal button{color:var(--mute)!important;text-shadow:none!important}
 html body .tt-panel,html body .tt-list>*{background:var(--sod)!important;border-color:var(--line)!important;border-radius:var(--rad)!important;box-shadow:none!important;color:var(--chalk)}
@@ -248,7 +248,7 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 .vs-b{flex-direction:row-reverse;text-align:right;padding:8px 8px 8px 18px;clip-path:polygon(12px 0,100% 0,100% 100%,0 100%)}
 .vs-h div{min-width:0}.vs-h b{display:block;font:800 19px/1 var(--hd);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vs-h small{display:block;font-size:11px;opacity:.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vs-x{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;font:900 13px/1 var(--hd);text-transform:uppercase;background:#081710;color:#f2c230;padding:4px 6px}
+.vs-x{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;font:900 13px/1 var(--hd);text-transform:uppercase;background:#050506;color:#ef2d38;padding:4px 6px}
 /* Free Practice and Online Play screens */
 html body #fp,html body #ol{background:var(--mow),var(--bg)}
 #fp .fp-head h2,#ol .fp-head h2{font:900 28px/1 var(--hd)}

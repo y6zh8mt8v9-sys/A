@@ -103,7 +103,7 @@ function dtChips(r){return`<div class="dt-chips"><span>OFF: <b>${r[0]}</b></span
 function dtTile(title,go,body,cls){return`<div class="dt${cls?' '+cls:''}" role="button" tabindex="0" onclick="${go}"><div class="dt-h"><span>${title}</span><svg viewBox="0 0 24 24"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></div><div class="dt-b">${body}</div></div>`;}
 window.dtMenu=function(){openMo(`<h2>Menu</h2>${cnavHub(true)}<div style="text-align:right"><button class="bgh" onclick="clo()">Close</button></div>`);};
 // two teams side by side in their own colors, meeting at a slanted seam
-function vsStrip(a,b,subA,subB){const h=(s,sub,i)=>{const c=_hx(s.c1)?s.c1:'#33415c';return`<div class="vs-h${i?' vs-b':''}" style="background:${c};color:${_lm(c)>.55?'#0f241a':'#fff'}">${sLogo(s,44)}<div><b>${s.mascot}</b><small>${sub}</small></div></div>`;};
+function vsStrip(a,b,subA,subB){const h=(s,sub,i)=>{const c=_hx(s.c1)?s.c1:'#33415c';return`<div class="vs-h${i?' vs-b':''}" style="background:${c};color:${_lm(c)>.55?'#111113':'#fff'}">${sLogo(s,44)}<div><b>${s.mascot}</b><small>${sub}</small></div></div>`;};
   return`<div class="vs">${h(a,subA,0)}<span class="vs-x">vs</span>${h(b,subB,1)}</div>`;}
 function dashTiles(o){
   const{ms,pl,nextUnplayed,no,playoffSlot,playoffOpp,actionBtn,curYear,phaseLabel,newsItems}=o,T=cnavTodo(),dot=k=>T[k]?'<i class="dt-dot"></i>':'';

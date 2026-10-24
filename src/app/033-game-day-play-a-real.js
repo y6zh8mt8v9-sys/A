@@ -266,7 +266,7 @@ function gdBoxHtml(res,me,opp){
     ${sec(t,'Kicking',x=>x.fga||x.xpa,x=>[x.fgm||0,`FG ${x.fgm||0}/${x.fga||0} · XP ${x.xpm||0}/${x.xpa||0}`])}</div>`;
   const xpL=(res.xp||[]).filter(r=>r.xp>0).sort((a,b)=>b.xp-a.xp).slice(0,8);
   const xpH=xpL.length?`<div class="bx-h">XP earned (10 XP = 1 skill point)</div><div class="bx-xp">${xpL.map(r=>`<span>${r.p.fn[0]}. ${r.p.ln} <b style="color:var(--te)">+${r.xp}</b>${r.sp?` <b style="color:var(--gn)">+${r.sp} SP</b>`:''}</span>`).join('')}</div>`:'';
-  const fin=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',w=res.score[i]>res.score[1-i];return`<div class="bx-f${i?' bx-f2':''}${w?' won':''}" style="background:${c};color:${_lm(c)>.55?'#0f241a':'#fff'}">${sLogo(s,40)}<span class="bx-fn">${s.mascot}</span><span class="bx-fs">${res.score[i]}</span></div>`;};
+  const fin=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',w=res.score[i]>res.score[1-i];return`<div class="bx-f${i?' bx-f2':''}${w?' won':''}" style="background:${c};color:${_lm(c)>.55?'#111113':'#fff'}">${sLogo(s,40)}<span class="bx-fn">${s.mascot}</span><span class="bx-fs">${res.score[i]}</span></div>`;};
   return`<div class="bx"><div class="bx-top"><span>Final</span>Box score</div><div class="bx-fin">${fin(me,0)}${fin(opp,1)}</div><div class="bx-note">These stats were added to every player's season and career totals.</div>
     <div class="bx-cols">${col(0,me)}${col(1,opp)}</div>${splitsHtml(res.splits&&res.splits[0],'This game: your play calls')}${xpH}<div style="text-align:right;margin-top:12px"><button class="btn" onclick="clo()">Done</button></div></div>`;
 }

@@ -370,12 +370,12 @@ function gdPreviewHtml(me,opp,homeIdx){
   const logo=s=>{const L=sLogoStandalone(s,64);return L;};
   // broadcast matchup strip: each half in its team's color, meeting at a slanted seam
   const rkTxt=i=>rk[i].n&&rk[i].n<=25?` · #${rk[i].n} national`:rk[i].a&&rk[i].a<=25?` · #${rk[i].a} ${stName(stOf(T[i]))}`:rk[i].c&&rk[i].c<=25?` · #${rk[i].c} in class`:'';
-  const col=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',ink=_lm(c)>.55?'#0f241a':'#ffffff';
+  const col=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',ink=_lm(c)>.55?'#111113':'#ffffff';
     return`<div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;${i?'flex-direction:row-reverse;text-align:right;':''}padding:12px ${i?'14px 12px 22px':'22px 12px 14px'};background:${c};color:${ink};clip-path:${i?'polygon(16px 0,100% 0,100% 100%,0 100%)':'polygon(0 0,100% 0,calc(100% - 16px) 100%,0 100%)'}">${logo(s)}<div style="min-width:0"><div style="font:900 clamp(20px,4.6vw,28px)/.92 'Alumni Sans','Arial Narrow',sans-serif">${s.name.replace(/\s+High.*$/,'')} ${s.mascot}</div><div style="font-size:12px;opacity:.9;margin-top:3px">${rec(s)}${rkTxt(i)}</div></div></div>`;};
   const row=(l,a,b)=>`<tr><td style="text-align:right;padding:3px 8px;font-weight:800">${a}</td><td style="text-align:center;opacity:.7;font-size:11px;padding:3px 8px">${l}</td><td style="text-align:left;padding:3px 8px;font-weight:800">${b}</td></tr>`;
-  const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:4px;border-left:3px solid rgba(242,194,48,.7);background:rgba(255,255,255,.06);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
+  const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:4px;border-left:3px solid rgba(225,29,42,.7);background:rgba(255,255,255,.06);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
   const stars=T.map(s=>_gdStars(s).map(p=>star(p,s)).join(''));
-  return`<div style="font-family:Archivo,'Segoe UI',system-ui,sans-serif;color:#f1f5ef">
+  return`<div style="font-family:Archivo,'Segoe UI',system-ui,sans-serif;color:#f4f4f5">
     <div style="display:flex;align-items:stretch;gap:0;margin:-2px -4px 12px">${col(me,0)}${col(opp,1)}</div>
     <table style="margin:0 auto 10px;border-collapse:collapse;font-size:13px">${row('Record',rec(me),rec(opp))}${row('Last 3',form(logs[0]),form(logs[1]))}${row('Points for / game',ppg(logs[0],'us'),ppg(logs[1],'us'))}${row('Points against / game',ppg(logs[0],'them'),ppg(logs[1],'them'))}${row('Team rating',ovr(me),ovr(opp))}</table>
     <div style="font:800 19px/1 'Alumni Sans','Arial Narrow',sans-serif;margin-bottom:4px">Keys to the game</div>

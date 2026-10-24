@@ -69,10 +69,10 @@ function drawTags(list){
     for(let g=0;g<6&&placed.some(r=>Math.abs(r[0]-p.sx)<(r[2]+w)/2&&Math.abs(r[1]-y)<(r[3]+hh)/2);g++)y-=hh;placed.push([p.sx,y,w,hh]);
     ctx.save();ctx.translate(p.sx,y);ctx.scale(k,k);
     // a dark plate with the team color down the left edge, like the app's plates
-    ctx.fillStyle='rgba(11,31,22,.9)';ctx.beginPath();ctx.roundRect(-w0/2,-5,w0,10,1.5);ctx.fill();
+    ctx.fillStyle='rgba(12,12,14,.9)';ctx.beginPath();ctx.roundRect(-w0/2,-5,w0,10,1.5);ctx.fill();
     ctx.fillStyle=S.team===0?'#3f6fc0':'#c0404f';ctx.fillRect(-w0/2,-5,1.6,10);
     if(sw)gpStarBadge(-w0/2+7.5,0,S.star,true);
-    ctx.font='700 6px Archivo, sans-serif';ctx.fillStyle='#f1f5ef';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(S.tag,sw/2,0.4);ctx.restore();}
+    ctx.font='700 6px Archivo, sans-serif';ctx.fillStyle='#f4f4f5';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(S.tag,sw/2,0.4);ctx.restore();}
 }
 function football2(rot,len,phase,lw){
   const L=6.6*len,Wd=3.9,m0=ctx.getTransform();ctx.rotate(rot);
