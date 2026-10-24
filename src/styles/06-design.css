@@ -1,172 +1,187 @@
-/* ════════ Gridiron 27 design: Friday night ════════
-   A stadium at night: navy sky, chalk lines, the team's colors, and the scoreboard.
-   Scoreboard amber ("lamp") is kept for numbers that matter (scores, records, ratings);
-   the team color is identity (club bar, selected tab, main buttons). Sentence case everywhere.
-   Every older visual layer is overridden here, so this file is the one place to change the look. */
+/* ════════ Gridiron 27 design: Painted field ════════
+   The game seen from the sideline: turf, chalk lines and hash marks, goalpost yellow for the numbers that matter,
+   and the team's own colors for everything you press. Sections sit on painted yard lines instead of boxed cards;
+   corners are clipped like a jersey number plate. Every older visual layer is overridden here, so this file is
+   the one place to change the look. Sentence case everywhere. */
 :root{
-  --night:#0e1a2b;--field:#15253a;--raised:#1c2f48;--line:rgba(214,228,245,.11);--line2:rgba(214,228,245,.2);
-  --chalk:#f2f5f7;--mute:#a3b3c6;--lamp:#ffb547;--turf:#3fbf6e;--flag:#ff6b5e;--board:#0a1422;
-  --bg:var(--night);--s1:var(--field);--s2:var(--raised);--s3:#243a57;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:#4fd07f;--gd:var(--lamp);--rd:var(--flag);--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);--te:var(--tT,#8fb6f0);
-  --hd:'Big Shoulders Display','Barlow Condensed','Arial Narrow',sans-serif;--head:var(--hd);
-  --font:'Barlow','Segoe UI',system-ui,sans-serif;--rad:10px;--shadow:none;--glass:none;
-  --pop:0 24px 70px rgba(2,8,18,.55);
+  --pitch:#0b1f16;--sod:#12301f;--sod2:#183c28;--yard:#24503a;--line:rgba(225,240,228,.10);--line2:rgba(225,240,228,.22);
+  --chalk:#f1f5ef;--mute:#a7bcae;--post:#f2c230;--go:#46d17f;--flag:#ff7a5c;--board:#081710;
+  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#21482f;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
+  --gn:var(--go);--gd:var(--post);--rd:var(--flag);--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);--te:var(--tT,#9fc0f2);
+  --hd:'Alumni Sans','Arial Narrow',sans-serif;--head:var(--hd);
+  --font:'Archivo','Segoe UI',system-ui,sans-serif;--rad:4px;--cut:14px;--shadow:none;--glass:none;
+  --pop:0 28px 80px rgba(0,8,4,.6);
+  /* mowing stripes, the field under everything */
+  --mow:repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 120px,transparent 120px 240px);
+  /* a painted yard line with hash marks under it */
+  --yardline:linear-gradient(var(--line2),var(--line2)) top/100% 2px no-repeat,repeating-linear-gradient(90deg,var(--line2) 0 2px,transparent 2px 22px) 0 6px/100% 6px no-repeat;
 }
 :root.light{
-  --night:#f4f6f9;--field:#ffffff;--raised:#eef2f7;--line:rgba(16,32,47,.11);--line2:rgba(16,32,47,.2);
-  --chalk:#10202f;--mute:#536273;--lamp:#8a5200;--turf:#1b7a3a;--flag:#b42828;
-  --bg:var(--night);--s1:var(--field);--s2:var(--raised);--s3:#e1e7ef;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:#1b7a3a;--gd:#8a5d00;--rd:#b42828;--te:var(--tT,#1f56b0);--pop:0 22px 60px rgba(16,32,47,.22);--pot:#8a5d00;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
+  --pitch:#f2f5ef;--sod:#ffffff;--sod2:#eaf0e8;--yard:#cfdccf;--line:rgba(15,36,26,.12);--line2:rgba(15,36,26,.24);
+  --chalk:#0f241a;--mute:#4f6658;--post:#8a6400;--go:#167a45;--flag:#b8341b;--board:#0f241a;
+  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#dde7dc;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
+  --gn:#167a45;--gd:#8a6400;--rd:#b8341b;--te:var(--tT,#1f56b0);--pop:0 24px 60px rgba(15,36,26,.2);--pot:#8a6400;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
+  --mow:repeating-linear-gradient(90deg,rgba(15,36,26,.022) 0 120px,transparent 120px 240px);
 }
 :root.light .yf{color:#167a45}:root.light .ys{color:#1f63b0}
 /* type: no all caps, no tracking (logos are SVG and keep their own lettering) */
 html body *:not(svg):not(svg *){text-transform:none!important;letter-spacing:normal!important}
-html body{background:var(--bg)!important;color:var(--tx);font:400 14px/1.45 var(--font);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+html body{background:var(--mow),var(--bg)!important;color:var(--tx);font:400 14.5px/1.5 var(--font);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 html body::before{display:none!important}
-html body h1,html body h2,html body h3,html body .logo,html body .win-title{font-family:var(--hd)!important;font-weight:800!important;line-height:1.05;color:var(--tx)}
-html body h2{font-size:24px}html body h3{font-size:19px}
-::selection{background:color-mix(in srgb,var(--ac) 45%,transparent)}
+html body h1,html body h2,html body h3,html body .logo,html body .win-title{font-family:var(--hd)!important;font-weight:800!important;line-height:1;color:var(--tx)}
+html body h2{font-size:30px}html body h3{font-size:23px}
+::selection{background:color-mix(in srgb,var(--post) 40%,transparent)}
 
-/* surfaces */
+/* sections: a painted yard line on top, no box around */
 html body .pnl,html body .dash-hero,html body .dash-stat,html body .win-panel,html body .dash-next-game,html body .sbox,html body .cnav-card,html body .dt{
-  background:var(--s1)!important;border:1px solid var(--bd)!important;border-radius:var(--rad)!important;box-shadow:none!important}
-html:root body .ph.ph,html body .dt-h{background:transparent!important;color:var(--tx)!important;font:700 19px/1.15 var(--hd)!important;padding:13px 16px 11px!important;border-bottom:1px solid var(--bd)!important;border-radius:var(--rad) var(--rad) 0 0}
-html:root body .ph.ph small,html:root body .ph.ph span{font-family:var(--font)}
+  background:var(--s1)!important;border:0!important;border-radius:0 0 var(--rad) var(--rad)!important;box-shadow:none!important;
+  border-top:2px solid var(--line2)!important;position:relative}
+html:root body .ph.ph,html body .dt-h{background:var(--yardline)!important;background-position:0 calc(100% - 1px),0 100%!important;color:var(--tx)!important;
+  font:800 25px/1 var(--hd)!important;padding:12px 16px 14px!important;border-bottom:0!important;border-radius:0}
+html:root body .ph.ph small,html:root body .ph.ph span{font-family:var(--font);font-size:13px}
 html body .pb{color:var(--tx)}
-html body .tip{background:var(--s2)!important;border:0!important;border-left:3px solid var(--lamp)!important;border-radius:6px!important;color:var(--tx)!important}
+html body .tip{background:var(--s2)!important;border:0!important;border-left:3px solid var(--post)!important;border-radius:var(--rad)!important;color:var(--tx)!important}
 html body .dr{border-bottom:1px solid var(--bd)}html body .dr .a{color:var(--mu)}
 
-/* buttons: team color for the main action, outline for the rest */
-html body .btn{background:var(--ac)!important;background-image:none!important;color:var(--tOn,#fff)!important;border:0!important;border-radius:8px!important;box-shadow:none!important;text-shadow:none!important;
-  font:600 14px/1.15 var(--font)!important;padding:10px 16px;cursor:pointer;transition:filter .12s,transform .06s}
-html body .btn:hover{filter:brightness(1.08)}html body .btn:active,html body .bgh:active{transform:translateY(1px)}
-html body .btn.bgn{background:#23824a!important;color:#fff!important}
-html body .btn.bgd{background:var(--lamp)!important;color:#1d1300!important}:root.light body .btn.bgd{background:#e3a43a!important;color:#1d1300!important}
+/* buttons: the main action wears the team color, with a heavier bottom edge like a printed plate */
+html body .btn{background:var(--ac)!important;background-image:none!important;color:var(--tOn,#fff)!important;border:0!important;border-bottom:3px solid rgba(0,0,0,.28)!important;
+  border-radius:var(--rad)!important;box-shadow:none!important;text-shadow:none!important;font:650 14px/1.15 var(--font)!important;padding:10px 16px;cursor:pointer;transition:filter .12s,transform .06s}
+html body .btn:hover{filter:brightness(1.1)}html body .btn:active,html body .bgh:active{transform:translateY(1px)}
+html body .btn.bgn{background:#1f8a4c!important;color:#fff!important}
+html body .btn.bgd{background:var(--post)!important;color:#1a1400!important}:root.light body .btn.bgd{background:#e8b52b!important;color:#1a1400!important}
 html body .btn.bbl{background:var(--s3)!important;color:var(--tx)!important}
-html body .bgh{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:8px!important;box-shadow:none!important;font:600 13px/1.15 var(--font)!important;cursor:pointer}
+html body .bgh{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:var(--rad)!important;box-shadow:none!important;font:600 13px/1.15 var(--font)!important;cursor:pointer}
 html body .bgh:hover{background:var(--s2)!important;border-color:var(--mu)!important}
 html body .bsm{font-size:13px!important;padding:7px 12px!important}html body .bxs{font-size:12px!important;padding:5px 9px!important}
 html body button:disabled,html body .btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
-html body :focus-visible{outline:2px solid var(--chalk)!important;outline-offset:2px}
+html body :focus-visible{outline:2px solid var(--post)!important;outline-offset:2px}
 
-/* tabs: underline, not pills */
+/* tabs: chalk underline */
 html body .tabs{gap:2px;border-bottom:1px solid var(--bd)}
-html body .tab{background:none!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;color:var(--mu)!important;font:600 14px/1 var(--font)!important;padding:10px 12px 9px!important;margin-bottom:-1px}
+html body .tab{background:none!important;border:0!important;border-bottom:3px solid transparent!important;border-radius:0!important;color:var(--mu)!important;font:600 14px/1 var(--font)!important;padding:11px 12px 9px!important;margin-bottom:-1px}
 html body .tab:hover{color:var(--tx)!important}
 html body .tab.on{color:var(--tx)!important;border-bottom-color:var(--ac)!important;background:none!important}
-html body .pill,html body .pb2{background:var(--s2)!important;border:1px solid var(--bd)!important;border-radius:6px!important}
+html body .pill,html body .pb2{background:var(--s2)!important;border:1px solid var(--bd)!important;border-radius:var(--rad)!important}
 
 /* forms */
 html body input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html body select,html body textarea{
-  background:var(--bg)!important;color:var(--tx)!important;border:1px solid var(--line2)!important;border-radius:8px!important;box-shadow:none!important;font:400 14px/1.3 var(--font)}
-html body input:focus,html body select:focus,html body textarea:focus{border-color:var(--ac)!important;outline:none}
+  background:var(--bg)!important;color:var(--tx)!important;border:1px solid var(--line2)!important;border-radius:var(--rad)!important;box-shadow:none!important;font:400 14px/1.3 var(--font)}
+html body input:focus,html body select:focus,html body textarea:focus{border-color:var(--post)!important;outline:none}
 html body label,html body .fg>label{color:var(--mu);font-weight:600}
 html body input[type=range]{accent-color:var(--ac)}html body input[type=checkbox],html body input[type=radio]{accent-color:var(--ac)}
 
-/* tables: quiet rows, numbers line up */
+/* tables: a stat sheet, ruled rows, numbers line up */
 html body table{border-collapse:collapse}
-html body table th{background:var(--s1)!important;color:var(--mu)!important;font:600 12px/1.2 var(--font)!important;border-bottom:1px solid var(--line2)!important;text-align:left}
+html body table th{background:transparent!important;color:var(--mu)!important;font:600 12px/1.2 var(--font)!important;border-bottom:2px solid var(--line2)!important;text-align:left;padding-top:10px}
 html body table td{border-bottom:1px solid var(--bd)}
 html body #ct tbody tr:nth-child(even) td{background:transparent}
 html body #ct tbody tr:hover td{background:var(--s2)!important}
-html body .rb{border-radius:5px!important;font:700 12px/1.3 var(--font)!important}
+html body .rb{border-radius:3px!important;font:700 12px/1.3 var(--font)!important}
 
-/* the scoreboard: big numbers that matter */
-html body .dash-stat-v,html body .dt-big,html body .nav-record,html body .dt-chips b{font-family:var(--hd)!important;font-weight:800!important;color:var(--lamp)!important;-webkit-text-fill-color:currentColor;background:none!important}
-html body .dt-chips span{background:var(--board)!important;color:#c9d6e6!important;border-radius:6px!important;padding:6px 10px!important;font-size:13px!important}
-html body .dt-chips b{font-size:20px!important;color:var(--lamp)!important;margin-left:2px}
-:root.light body .dt-chips span{background:#13233a!important;color:#cdd8e6!important}:root.light body .dt-chips b{color:#ffb547!important}
+/* numbers that matter: painted in goalpost yellow */
+html body .dash-stat-v,html body .dt-big,html body .nav-record,html body .dt-chips b{font-family:var(--hd)!important;font-weight:900!important;color:var(--post)!important;-webkit-text-fill-color:currentColor;background:none!important}
+html body .dt-chips span{background:var(--board)!important;color:#cfe0d4!important;border-radius:var(--rad)!important;padding:6px 10px!important;font-size:13px!important}
+html body .dt-chips b{font-size:24px!important;color:var(--post)!important;margin-left:2px}
+:root.light body .dt-chips span{background:#0f241a!important;color:#d5e3d8!important}:root.light body .dt-chips b{color:#f2c230!important}
 
 /* top of the app */
 html body #tb,html body #nav-bar,html body #nav-prim{background:var(--s1)!important;border-color:var(--bd)!important;box-shadow:none!important;backdrop-filter:none!important}
 html body .nb{color:var(--mu)!important;font:600 14px/1 var(--font)!important;border-radius:0!important;background:none!important}
 html body .nb:hover{color:var(--tx)!important}
 html body .nb.on{color:var(--tx)!important;background:none!important;box-shadow:inset 0 -3px 0 var(--ac)!important}
-html body #nav-prim .np{font:600 12px/1.1 var(--font)!important;color:var(--mu)!important;background:none!important;border-radius:8px!important}
+html body #nav-prim .np{font:600 12px/1.1 var(--font)!important;color:var(--mu)!important;background:none!important;border-radius:var(--rad)!important}
 html body #nav-prim .np.on{color:var(--tx)!important;background:var(--s2)!important;box-shadow:inset 0 -3px 0 var(--ac)!important}
 
-/* club bar: the school's identity, a colored stripe on a dark plate */
-html body .dt-club{background:var(--s1)!important;color:var(--tx)!important;border:1px solid var(--bd);border-top:5px solid var(--ac);border-radius:var(--rad)!important;box-shadow:none!important}
-html body .dt-name{font:800 30px/1.02 var(--hd)!important;color:var(--tx)}html body .dt-name small{font:500 13px/1.35 var(--font)!important;color:var(--mu);opacity:1}
-html body .dt-crest{background:var(--bg)!important;box-shadow:none!important;border:1px solid var(--bd)}
-html body .dt-tools button{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:8px!important;font:600 13px/1 var(--font)!important}
+/* club bar: the school's plate, clipped corner, its color down the left edge */
+html body .dt-club{background:linear-gradient(90deg,var(--ac) 0 8px,transparent 8px),var(--s1)!important;color:var(--tx)!important;border:0!important;
+  border-radius:0!important;box-shadow:none!important;clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
+html body .dt-name{font:900 40px/.92 var(--hd)!important;color:var(--tx)}html body .dt-name small{font:500 13px/1.35 var(--font)!important;color:var(--mu);opacity:1}
+html body .dt-crest{background:var(--bg)!important;box-shadow:none!important;border:2px solid var(--line2)}
+html body .dt-tools button{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:var(--rad)!important;font:600 13px/1 var(--font)!important}
 html body .dt-tools button:hover{background:var(--s2)!important}
 html body .dt-club .dt-go button,html body .dt-club .dt-go button.btn,html body .dt-club .dt-go button.btn.bgd,html body .dt-club .dt-go button.btn.bgn{
-  background:var(--ac)!important;color:var(--tOn,#fff)!important;font:700 17px/1 var(--font)!important;border-radius:8px!important;padding:14px 22px!important;box-shadow:none!important;animation:none!important}
-html body .dt-strip{background:var(--board)!important;color:#dfe8f2!important;border-radius:0 0 var(--rad) var(--rad)!important;margin:0 10px 16px!important}
+  background:var(--post)!important;color:#1a1400!important;font:700 17px/1 var(--font)!important;border-radius:var(--rad)!important;border-bottom:4px solid rgba(0,0,0,.3)!important;padding:14px 22px!important;box-shadow:none!important;animation:none!important}
+html body .dt-strip{background:var(--board)!important;color:#dceade!important;border-radius:0 0 var(--rad) var(--rad)!important;margin:0 10px 16px!important}
 html body .dt-strip b{font:700 16px/1.2 var(--font)!important}
-html body .dt-pill{background:rgba(255,255,255,.08)!important;border-radius:6px!important;font-family:var(--hd)!important;font-size:15px!important}
-:root.light body .dt-pill{background:rgba(255,255,255,.1)!important}
-html body .dt{transition:border-color .12s}html body .dt:hover{border-color:var(--line2)!important}
+html body .dt-pill{background:rgba(255,255,255,.08)!important;border-radius:var(--rad)!important;font-family:var(--hd)!important;font-size:18px!important;font-weight:800!important}
+:root.light body .dt-pill{background:rgba(255,255,255,.12)!important}
+html body .dt{transition:background-color .12s}html body .dt:hover{background:var(--s2)!important}
 html body .dt-h svg,html body .cnav-h svg{stroke:var(--mu)!important}
 html body .dt-sub,html body .dt-mu{color:var(--mu)}
 html body .dt-list .me{color:var(--te)}
-html body .cnav-h{font:700 18px/1 var(--hd)!important}
-html body .cnav-sub button{background:var(--s2)!important;border:1px solid var(--bd)!important;border-radius:8px!important;font:600 13px/1.2 var(--font)!important;color:var(--tx)!important}
+html body .cnav-h{font:800 23px/1 var(--hd)!important}
+html body .cnav-sub button{background:var(--s2)!important;border:1px solid var(--bd)!important;border-radius:var(--rad)!important;font:600 13px/1.2 var(--font)!important;color:var(--tx)!important}
 html body .cnav-sub button:hover{border-color:var(--line2)!important}
 
-/* inner pages: the same plate as the dashboard, not a colored banner */
-html body.cnav:not(.cnav-dash) #nav-bar{background:var(--s1)!important;color:var(--tx)!important;border:1px solid var(--bd)!important;border-top:4px solid var(--ac)!important;border-radius:var(--rad)!important;box-shadow:none!important}
+/* inner pages: the same plate as the dashboard */
+html body.cnav:not(.cnav-dash) #nav-bar{background:linear-gradient(90deg,var(--ac) 0 6px,transparent 6px),var(--s1)!important;color:var(--tx)!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
 html body.cnav:not(.cnav-dash) #nav-team-strip{border-right:1px solid var(--bd)!important}
 html body.cnav:not(.cnav-dash) #nav-team-strip #sb-logo-sm{background:var(--bg)!important;border:1px solid var(--bd)}
-html body.cnav:not(.cnav-dash) .nav-team-name{font:800 19px/1.05 var(--hd)!important;color:var(--tx)!important}
+html body.cnav:not(.cnav-dash) .nav-team-name{font:900 25px/.95 var(--hd)!important;color:var(--tx)!important}
 html body.cnav:not(.cnav-dash) .nav-team-sub{color:var(--mu)!important;opacity:1}
 html body.cnav:not(.cnav-dash) #nav-bar .nb{color:var(--mu)!important;background:none!important;border:0!important;border-radius:0!important;margin:0 2px!important;padding:12px 10px!important;font:600 14px/1 var(--font)!important}
 html body.cnav:not(.cnav-dash) #nav-bar .nb:hover{background:none!important;color:var(--tx)!important}
-html body.cnav:not(.cnav-dash) #nav-bar .nb.on{background:none!important;color:var(--tx)!important;box-shadow:inset 0 -3px 0 var(--ac)!important;border:0!important}
+html body.cnav:not(.cnav-dash) #nav-bar .nb.on{background:none!important;color:var(--tx)!important;box-shadow:inset 0 -3px 0 var(--post)!important;border:0!important}
 html body.cnav:not(.cnav-dash) #nav-bar .nb.nb-home{color:var(--tx)!important}
 
-/* dialogs and popups */
-html body #mo,html body #pu,html body #confirm-menu,html body #settings-modal{background:rgba(5,11,20,.72)!important}
-html body #mb,html body #pui,html body #tut-box,html body .offer-popup-box,html body #settings-modal>div{background:var(--s1)!important;color:var(--tx);border:1px solid var(--bd)!important;border-top:4px solid var(--ac)!important;border-radius:14px!important;box-shadow:var(--pop)!important}
+/* dialogs and popups: a plate with the clipped corner and the team color along the top */
+html body #mo,html body #pu,html body #confirm-menu,html body #settings-modal{background:rgba(2,10,6,.74)!important}
+html body #mb,html body #pui,html body #tut-box,html body .offer-popup-box,html body #settings-modal>div{background:var(--s1)!important;color:var(--tx);border:0!important;border-top:5px solid var(--ac)!important;
+  border-radius:0!important;box-shadow:var(--pop)!important;clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
 html body #mo.open #mb,html body #pu.open #pui{animation:g27in .16s ease-out}
-@keyframes g27in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes g27in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 html body .tut-tabs,html body #tut-footer{background:var(--s2)!important;border-color:var(--bd)!important}
 html body .tut-tab{font:600 13px/1 var(--font)!important;color:var(--mu)!important}
 html body .tut-tab.on{color:var(--tx)!important;border-bottom-color:var(--ac)!important}
-html body .tut-pane h3{font:700 22px/1.1 var(--hd)!important;color:var(--tx)!important}
-html body #nf{background:var(--raised)!important;color:var(--tx)!important;border:1px solid var(--line2)!important;border-radius:10px!important;box-shadow:var(--pop)!important;font:600 14px/1.35 var(--font)!important}
+html body .tut-pane h3{font:800 28px/1 var(--hd)!important;color:var(--tx)!important}
+html body #nf{background:var(--s2)!important;color:var(--tx)!important;border:0!important;border-left:4px solid var(--post)!important;border-radius:var(--rad)!important;box-shadow:var(--pop)!important;font:600 14px/1.35 var(--font)!important}
 
-/* title screen */
-html body #title{background:var(--night)!important}
-html body #title .tt-name{font:900 clamp(56px,13vw,112px)/.9 var(--hd)!important;color:var(--chalk)!important}
+/* title screen: the field at night, painted yard numbers */
+html body #title{background:linear-gradient(180deg,rgba(11,31,22,0) 40%,var(--pitch) 92%),repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(241,245,239,.07) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
+:root.light body #title{background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(15,36,26,.08) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
+html body #title .tt-name{font:900 clamp(64px,15vw,136px)/.82 var(--hd)!important;color:var(--chalk)!important}
 html body #title .tt-name .a{color:var(--chalk)!important;-webkit-text-fill-color:var(--chalk)!important;background:none!important}
-/* "27" is lit like scoreboard bulbs */
-html body #title .tt-name .b{background:radial-gradient(circle at 50% 50%,#ffc264 0 42%,rgba(255,181,71,.18) 46%,transparent 52%) 0 0/7px 7px!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;-webkit-text-fill-color:transparent!important;filter:drop-shadow(0 0 10px rgba(255,181,71,.35))}
-html body #title .tt-tag{font:500 17px/1.4 var(--font)!important;color:var(--mute)!important;text-shadow:none!important;max-width:30ch;margin-left:auto;margin-right:auto}
-html body #title .tt-ver{color:var(--mute)!important;opacity:.8;text-shadow:none!important}
+/* "27" is painted like a field number: goalpost yellow with a dark offset under it */
+html body #title .tt-name .b{color:var(--post)!important;-webkit-text-fill-color:var(--post)!important;background:none!important;text-shadow:3px 4px 0 rgba(0,0,0,.35)!important;filter:none!important}
+html body #title .tt-tag{font:500 17px/1.45 var(--font)!important;color:var(--mute)!important;text-shadow:none!important;max-width:32ch;margin-left:auto;margin-right:auto}
+html body #title .tt-ver{color:var(--mute)!important;opacity:.85;text-shadow:none!important}
 html body #title .tt-btns{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;gap:8px!important}
-html body #title .tt-btn{background:var(--field)!important;border:1px solid var(--line)!important;border-radius:10px!important;box-shadow:none!important;color:var(--chalk)!important;font:600 17px/1.15 var(--font)!important;text-align:left!important;padding:15px 18px!important;text-shadow:none!important}
-html body #title .tt-btn:hover{background:var(--raised)!important;border-color:var(--line2)!important}
-html body #title .tt-btn.pri{background:var(--chalk)!important;color:var(--night)!important;border-color:transparent!important}
-html body #title .tt-btn small{display:block;font:400 13px/1.3 var(--font)!important;color:inherit!important;opacity:.72}
+html body #title .tt-btn{background:var(--sod)!important;border:0!important;border-left:4px solid var(--yard)!important;border-radius:0!important;box-shadow:none!important;color:var(--chalk)!important;font:650 17px/1.15 var(--font)!important;text-align:left!important;padding:15px 18px!important;text-shadow:none!important}
+html body #title .tt-btn:hover{background:var(--sod2)!important;border-left-color:var(--post)!important}
+html body #title .tt-btn.pri{background:var(--post)!important;color:#1a1400!important;border-left-color:#1a1400!important}
+html body #title .tt-btn small{display:block;font:400 13px/1.3 var(--font)!important;color:inherit!important;opacity:.75}
 html body #title .tt-legal button{color:var(--mute)!important;text-shadow:none!important}
-html body .tt-panel,html body .tt-list>*{background:var(--field)!important;border-color:var(--line)!important;border-radius:10px!important;box-shadow:none!important;color:var(--chalk)}
-html body #loading-screen{background:var(--night)!important}
-html body #loading-bar-fill{background:var(--lamp)!important}
+html body .tt-panel,html body .tt-list>*{background:var(--sod)!important;border-color:var(--line)!important;border-radius:var(--rad)!important;box-shadow:none!important;color:var(--chalk)}
+html body #loading-screen{background:var(--mow),var(--pitch)!important}
+html body #loading-bar-fill{background:var(--post)!important}
 
 /* setup, coach and player creators */
-html body #setup h1{font:900 46px/.95 var(--hd)!important}
+html body #setup h1{font:900 56px/.9 var(--hd)!important}
 html body #setup h1 .r,html body #setup h1 .b{color:var(--tx)!important;-webkit-text-fill-color:currentColor!important;background:none!important}
+html body #setup h1 .b{color:var(--post)!important}
 html body #setup h1+p{color:var(--mu)!important}
-html body .offer-card{background:var(--s2)!important;border-color:var(--bd)!important;border-radius:8px!important}
+html body .offer-card{background:var(--s2)!important;border:0!important;border-left:4px solid var(--yard)!important;border-radius:0!important}
+html body .offer-card.sel-offer{border-left-color:var(--post)!important;box-shadow:none!important}
 html body #county-svg{border-radius:var(--rad)}
-html body #coachc,html body #team-builder>div{background:var(--bg)!important}
+html body #coachc,html body #team-builder>div{background:var(--mow),var(--bg)!important}
 html body .cc-wrap,html body .cc-head{background:transparent!important}
-html body .cc-head h2,html body .cc-wrap h2{font:800 30px/1 var(--hd)!important}
-html body .cc-seg{border-radius:8px!important;font:600 13px/1 var(--font)!important}
-html body .tb-nav-tab{font:600 14px/1 var(--font)!important;border-radius:0!important;background:none!important;border:0!important;border-bottom:2px solid transparent!important;color:var(--mu)!important}
+html body .cc-head h2,html body .cc-wrap h2{font:900 38px/.95 var(--hd)!important}
+html body .cc-seg{border-radius:var(--rad)!important;font:600 13px/1 var(--font)!important}
+html body .tb-nav-tab{font:600 14px/1 var(--font)!important;border-radius:0!important;background:none!important;border:0!important;border-bottom:3px solid transparent!important;color:var(--mu)!important}
 html body .tb-nav-tab.on{color:var(--tx)!important;border-bottom-color:var(--ac)!important}
 
 /* filter chips (positions, stat boards) */
 html body .pfl{gap:6px!important}
-html body .pfb{min-height:32px!important;padding:5px 11px!important;border-radius:6px!important;font:600 13px/1 var(--font)!important;background:var(--s2)!important;border:1px solid var(--bd)!important;color:var(--mu)!important}
+html body .pfb{min-height:32px!important;padding:5px 11px!important;border-radius:var(--rad)!important;font:600 13px/1 var(--font)!important;background:var(--s2)!important;border:1px solid var(--bd)!important;color:var(--mu)!important}
 html body .pfb:hover{color:var(--tx)!important;border-color:var(--line2)!important;background:var(--s2)!important}
 html body .pfb.on{background:var(--tx)!important;color:var(--bg)!important;border-color:var(--tx)!important}
-/* phones: the page bar sits at the bottom, quiet, with the team color marking the current page */
+/* phones: the page bar sits at the bottom, quiet, with goalpost yellow marking the current page */
 @media (max-width:768px){
- html body.cnav:not(.cnav-dash) #nav-bar{border:0!important;border-top:1px solid var(--bd)!important;border-radius:0!important;margin:0!important;padding:0 4px env(safe-area-inset-bottom)!important}
- html body.cnav:not(.cnav-dash) #nav-bar .nb.on{box-shadow:inset 0 3px 0 var(--ac)!important}
+ html body.cnav:not(.cnav-dash) #nav-bar{clip-path:none!important;background:var(--s1)!important;border:0!important;border-top:1px solid var(--bd)!important;border-radius:0!important;margin:0!important;padding:0 4px env(safe-area-inset-bottom)!important}
+ html body.cnav:not(.cnav-dash) #nav-bar .nb.on{box-shadow:inset 0 3px 0 var(--post)!important}
+ html body .dt-name{font-size:32px!important}
+ html body #mb,html body #pui{clip-path:none!important}
 }
 
 /* feeds */
