@@ -170,36 +170,39 @@ function bulkApply(){
   for(const p of L){ovrSync(p,true);const f=v=>clamp(Math.round(how==='add'?v+n:how==='set'?n:Math.max(v,n)),1,99);for(const k of ks){if(k==='sta')p.at.sta=f(p.at.sta);else if(k==='skills'){for(const a in(OVR_W[p.pos]||{}))if(!ATOP.has(a)&&a!=='sta')p.at[a]=f(p.at[a]);}else{const v=p[k]||0;p[k]=f(v);}}if(ks.includes('rat')&&!ks.includes('skills')){}else if(!ks.includes('rat'))p._rc=p.rat;ovrSync(p);
     if(p.pot<p.rat)p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}
   try{updateRats();}catch(e){}clo();nav(G._page,G._arg);notify(`${L.length} player${L.length===1?'':'s'} updated`);}
-// job offers: a good season gets your name around. Other schools in your league call after the season;
-// the offers stand through the offseason, until the first game of the new season.
+// job offers: a good season gets your name around. Schools call after the season: from your league, from bigger and
+// smaller classifications and from other states. The offers stand through the offseason, until the first game of the new season.
 function jobOffersGen(w,l,champ,divWon){
   G.jobOffers=null;if(pcActive()||G.pcLock)return;const me=myS();if(!me)return;
   const ratio=w/Math.max(1,w+l),sc=ratio*2+(champ?1.5:0)+(divWon?0.5:0)+(G.prestige||1)*0.2;
   // teams you created or edited always call; good seasons also bring head coach and coordinator offers
   const cust=[];for(const d of G.divisions||[])for(const t of d.teams)if(t.id!==G.myId&&!t.intl&&teamIsCustom(t))cust.push({sid:t.id,kind:'custom'});
-  const n=sc>=2.6?3:sc>=1.8?2:sc>=1.1?1:Math.random()<0.2?1:0;if(!n&&!cust.length)return;
+  const n=sc>=2.6?6:sc>=1.8?4:sc>=1.1?3:Math.random()<0.5?1:0;if(!n&&!cust.length)return;
   if(!n){G.jobOffers={yr:G.yr+1,list:cust.slice(0,3)};try{addNews('myteam','Your teams are calling',`${cust.length} of the programs you built want you as head coach.`);}catch(e){}return;}
-  const pool=[];for(const d of G.divisions||[])for(const t of d.teams)if(t.id!==G.myId&&!t.intl&&!t.lite)pool.push(t);if(!pool.length)return;
-  const myO=teamOvr(G.myId),pr=t=>t.prestige||1,used=new Set(),list=[];
-  // better jobs first (more prestige or a stronger roster), then a rebuild with a bigger budget
-  const up=pool.filter(t=>pr(t)>=(G.prestige||1)-0.25||teamOvr(t.id)>myO+1).sort(()=>Math.random()-0.5);
-  const down=pool.filter(t=>pr(t)<(G.prestige||1)).sort(()=>Math.random()-0.5);
-  for(const t of up){if(list.length>=n-(n>=2?1:0))break;used.add(t.id);list.push({sid:t.id,kind:'up'});}
-  for(const t of down.concat(up)){if(list.length>=n)break;if(used.has(t.id))continue;used.add(t.id);list.push({sid:t.id,kind:pr(t)<(G.prestige||1)?'rebuild':'up'});}
+  const P0=G.prestige||1,myN=clsNum(G.cls),mySt=clsSt(G.cls),myF=clsFmt(G.cls),pr=t=>t.prestige||1,cn=t=>clsNum(t.cls||G.cls);
+  // how big a jump the season earns: a title run can get you a school two classifications up and a stronger program
+  const upPr=sc>=2.6?1.5:sc>=1.8?1:0.5,upN=sc>=2.6?2:sc>=1.8?1:0;
+  const pool=[];for(const t of allSchoolsAll()){if(t.id===G.myId||t.intl||t.lite||!isUSSchool(t))continue;const f=clsFmt(t.cls||G.cls);if(f!==11&&f!==myF)continue;if(pr(t)>P0+upPr||cn(t)>myN+upN)continue;pool.push(t);}
+  if(!pool.length)return;for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  const used=new Set(),list=[],is={same:t=>t.cls===G.cls,oos:t=>stOf(t)!==mySt,up:t=>stOf(t)===mySt&&cn(t)>myN,down:t=>stOf(t)===mySt&&cn(t)<myN,any:()=>true};
+  const take=k=>{const t=pool.find(x=>!used.has(x.id)&&is[k](x));if(!t)return false;used.add(t.id);list.push({sid:t.id,kind:pr(t)<P0-0.5?'rebuild':'up'});return true;};
+  for(const k of['same','oos','up','down','oos','same','up'].slice(0,n))if(!take(k))take('any');
   // a coordinator job at a bigger program: run one side of the ball, then go for the top job
-  {const big=pool.filter(t=>!used.has(t.id)&&pr(t)>=(G.prestige||1)+1).sort((a,b)=>pr(b)-pr(a))[0];if(big&&G.role!=='OC'&&G.role!=='DC'&&Math.random()<0.7){used.add(big.id);list.push({sid:big.id,kind:Math.random()<0.5?'OC':'DC'});}}
-  for(const c of cust)if(!list.some(o=>o.sid===c.sid)&&list.length<6)list.unshift(c);
-  if(!list.length)return;G.jobOffers={yr:G.yr+1,list};
-  try{addNews('myteam',`${list.length} school${list.length>1?'s':''} want${list.length>1?'':'s'} to talk to you`,`After a ${w}-${l} season, ${list.map(o=>getS(o.sid)&&getS(o.sid).name).filter(Boolean).join(', ')} called about their head coaching job.`);}catch(e){}
-  try{addLog(`<span style="color:var(--gd)">Job offers: ${list.length} school${list.length>1?'s':''} called about their head coaching job. See the dashboard.</span>`);}catch(e){}}
+  {const big=allSchoolsAll().filter(t=>t.id!==G.myId&&!used.has(t.id)&&!t.intl&&!t.lite&&isUSSchool(t)&&clsFmt(t.cls||G.cls)===myF&&pr(t)>=P0+1&&cn(t)<=myN+1).sort((a,b)=>pr(b)-pr(a)).slice(0,8);const t=big[Math.floor(Math.random()*big.length)];
+    if(t&&G.role!=='OC'&&G.role!=='DC'&&Math.random()<0.7){used.add(t.id);list.push({sid:t.id,kind:Math.random()<0.5?'OC':'DC'});}}
+  for(const c of cust)if(!list.some(o=>o.sid===c.sid)&&list.length<9)list.unshift(c);
+  if(!list.length)return;G.jobOffers={yr:G.yr+1,list};const nO=list.filter(o=>{const t=getS(o.sid);return t&&stOf(t)!==mySt;}).length;
+  try{addNews('myteam',`${list.length} school${list.length>1?'s':''} want${list.length>1?'':'s'} to talk to you`,`After a ${w}-${l} season, ${list.map(o=>getS(o.sid)&&getS(o.sid).name).filter(Boolean).join(', ')} called about their coaching job${list.length>1?'s':''}.${nO?` ${nO} of them ${nO>1?'are':'is'} out of state.`:''}`);}catch(e){}
+  try{addLog(`<span style="color:var(--gd)">Job offers: ${list.length} school${list.length>1?'s':''} called about a coaching job${nO?` (${nO} out of state)`:''}. See the dashboard.</span>`);}catch(e){}}
 function jobOffersLive(){const J=G.jobOffers;if(!J||J.yr!==G.yr||!J.list.length||pcActive())return null;
   if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result))return null;return J;}
+function jobWhere(t){const os=stOf(t)!==clsSt(G.cls),d=clsNum(t.cls)-clsNum(G.cls);return`${os?'<b style="color:var(--te)">Out of state</b> · '+clsName(t.cls):clsL(t.cls)}${t.cls===G.cls?'':d>0?' · bigger school':d<0?' · smaller school':os?'':' · other classification'}`;}
 function jobPanel(){const J=jobOffersLive();if(!J)return'';
-  const rows=J.list.map(o=>{const t=getS(o.sid);if(!t)return'';return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:160px"><b style="cursor:pointer" onclick="viewSchool(${t.id})">${t.name} ${t.mascot}</b><div style="font-size:11px;color:var(--mu)">${o.kind==='OC'?'<b style="color:var(--gd)">Offensive Coordinator</b> · ':o.kind==='DC'?'<b style="color:var(--gd)">Defensive Coordinator</b> · ':o.kind==='custom'?'<b style="color:var(--gd)">Your team</b> · ':''}${clsL(t.cls)} · OVR ${teamOvr(t.id)} · ${stars(Math.round(t.prestige||1))}${o.kind==='rebuild'?' · rebuild job, bigger budget':o.kind==='OC'?' · you run the offense':o.kind==='DC'?' · you run the defense':' · head coach'}</div></span><span style="display:flex;gap:6px"><button class="btn bgn" style="font-size:12px" onclick="jobAccept(${t.id})">Accept</button><button class="bgh" style="font-size:12px" onclick="jobDecline(${t.id})">Decline</button></span></div>`;}).join('');
-  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Job Offers</div><div class="pb"><div style="font-size:12px;color:var(--mu);margin-bottom:6px">Other programs want you as their head coach. Offers stand until your first game of the season. Your record, trophies and history come with you.</div>${rows}</div></div>`;}
+  const rows=J.list.map(o=>{const t=getS(o.sid);if(!t)return'';return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:160px"><b style="cursor:pointer" onclick="viewSchool(${t.id})">${t.name} ${t.mascot}</b><div style="font-size:11px;color:var(--mu)">${o.kind==='OC'?'<b style="color:var(--gd)">Offensive Coordinator</b> · ':o.kind==='DC'?'<b style="color:var(--gd)">Defensive Coordinator</b> · ':o.kind==='custom'?'<b style="color:var(--gd)">Your team</b> · ':''}${jobWhere(t)} · OVR ${teamOvr(t.id)} · ${stars(Math.round(t.prestige||1))}${o.kind==='rebuild'?' · rebuild job, bigger budget':o.kind==='OC'?' · you run the offense':o.kind==='DC'?' · you run the defense':' · head coach'}</div></span><span style="display:flex;gap:6px"><button class="btn bgn" style="font-size:12px" onclick="jobAccept(${t.id})">Accept</button><button class="bgh" style="font-size:12px" onclick="jobDecline(${t.id})">Decline</button></span></div>`;}).join('');
+  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">Job Offers</div><div class="pb"><div style="font-size:12px;color:var(--mu);margin-bottom:6px">Other programs want you as their coach, in your league, in other classifications and in other states. Offers stand until your first game of the season. Your record, trophies and history come with you.</div>${rows}</div></div>`;}
 window.jobAccept=function(sid){const t=getS(sid),os=myS();if(!t||!jobOffersLive())return;
   if(!confirm(`Leave ${os.name} and take the head coaching job at ${t.name} ${t.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
-  const kd=(G.jobOffers.list.find(o=>o.sid===sid)||{}).kind,rb=kd==='rebuild';G.jobOffers=null;coachTakeOver(sid,true);if(rb){G.budget+=25000;notify('Rebuild bonus: +$25,000 budget');}
+  const kd=(G.jobOffers.list.find(o=>o.sid===sid)||{}).kind,rb=kd==='rebuild';if(coachTakeOver(sid,true,true)===false)return;G.jobOffers=null;if(rb){G.budget+=25000;notify('Rebuild bonus: +$25,000 budget');}
   G.role=kd==='OC'||kd==='DC'?kd:'HC';const job=G.role==='OC'?'offensive coordinator':G.role==='DC'?'defensive coordinator':'head coach';
   addLog(`<span style="color:var(--gd)">New job: you are the ${job} at ${t.name} ${t.mascot}.${G.role!=='HC'?' On Game Day you run your side of the ball; head coaching offers follow a strong season.':''}</span>`);};
 window.jobDecline=function(sid){const J=jobOffersLive();if(!J)return;J.list=J.list.filter(o=>o.sid!==sid);const t=getS(sid);if(t)addLog(`<span style="color:var(--mu)">You turned down ${t.name}.</span>`);nav(G._page||'dash',G._arg);};
@@ -268,11 +271,16 @@ function gameInviteResolve(wk,pops){const I=G.gameInv;if(!I||I.yr!==G.yr||I.wk!=
 // ── a neutral site for the state final: the flagship college stadium of your state ──
 function stateFinalVenue(){try{_colStReady();}catch(e){}const st=clsSt(G.cls),c=COLLEGES.filter(x=>x.lvl==='FBS'&&x.st===st).sort((a,b)=>b.pr-a.pr)[0];return c?`${c.school} Stadium`:`${stName(st)} Championship Stadium`;}
 // v2.16 coach any school: take over another program in the offseason, before its first game
-function coachTakeOver(sid,quiet){
-  const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return;G.role='HC';
-  if(ns.intl||!G.divisions.some(d=>d.teams.some(t=>t.id===ns.id))){notify('You can only take over a school in your league.','e');return;}
-  if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result)){notify('Coaching changes happen in the offseason, before the first game of a season.','w');return;}
-  if(!quiet&&!confirm(`Leave ${os.name} and become the head coach of ${ns.name} ${ns.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return;
+function coachTakeOver(sid,quiet,anyLg){
+  const ns=getS(sid),os=myS();if(!ns||!os||ns.id===G.myId)return false;
+  const inLive=G.divisions.some(d=>d.teams.some(t=>t.id===ns.id)),L=!inLive&&G.allLeagues?G.allLeagues[ns.cls]:null;
+  if(ns.intl||ns.lite||(!inLive&&!(anyLg&&L&&L.divisions.some(d=>d.teams.some(t=>t.id===ns.id))))){notify('You can only take over a school in your league.','e');return false;}
+  if(G.phase!=='offseason'||G.sched.some(g=>g.type==='regular'&&g.result)){notify('Coaching changes happen in the offseason, before the first game of a season.','w');return false;}
+  if(!quiet&&!confirm(`Leave ${os.name} and become the head coach of ${ns.name} ${ns.mascot}? Your record, trophies and history come with you; the roster, staff and facilities are theirs.`))return false;
+  G.role='HC';
+  // a job in another classification or state: that league becomes the one you play in, yours joins the others
+  if(!inLive){G.allLeagues[G.cls]={divisions:G.divisions,champId:null,champName:null};G.divisions=L.divisions;delete G.allLeagues[ns.cls];
+    G.reclsPressure=0;G.reclsLog=[];G.promotedYr=0;G.chosenRivals=[];G.lsch=null;try{_RK=null;_rkNames=null;}catch(e){}}
   os.prestige=G.prestige;os.trainLevel=G.trainLevel;os.isP=false;os.staff=G.staff;os.fac=G.fac;
   ns.isP=true;ns.staff=ns.staff||genStaff(true);ns.fac=ns.fac||{weight:1,film:1,train:1,med:1};
   G.myId=ns.id;G.cls=ns.cls;G.prestige=ns.prestige||1;G.offS=ns.offS;G.defS=ns.defS;G.staff=ns.staff;G.fac=ns.fac;G.trainLevel=ns.trainLevel||1;

@@ -328,6 +328,24 @@ function checkStarsOffers(p,pops,isAI=false){
   if(p.committed)return;
   if(p.yr>=11||(p.yr===10&&(p.sg||0)>=4))genOffers(p,isAI&&Math.random()<0.12,pops);
   try{smallOffers(p,pops);}catch(e){console.error('smallOffers',e);}
+  if(p.id===G.myPlayerId)try{pcOfferSpread(p,pops);}catch(e){console.error('pcOfferSpread',e);}
+}
+// Player Career: like a real recruit, your player hears from more than one rung of the ladder and more than one state:
+// a reach offer one level up now and then, schools a level or two down that would love to have him, and staffs from other states
+function pcOfferSpread(p,pops){
+  if(p.committed||p.yr<10||(p.yr===10&&(p.sg||0)<3))return;p.offers=p.offers||[];_colStReady();
+  const gp=(p.seasStats&&p.seasStats.gp)||0,cg=(p.carStats&&p.carStats.gp)||0;if(gp<1&&cg<3&&p.pos!=='OL'&&p.pos!=='K')return;
+  const L=recLevel(p);if(L<-5&&!((p.gpa||0)>=3.3||recCrazy(p)))return;
+  const st=plSt(p),O=p.offers,jr=p.yr===12?1:p.yr===11?0.75:0.45,sg=p.sg||0,have=new Set(O.map(o=>o.school+'|'+o.lvl));
+  const ok=c=>c&&!have.has(c.school+'|'+c.lvl)&&colRoom(c,p,true)&&(!c.acad||(p.gpa||0)>=c.acad)&&!((p.gpa||0)<2.0&&c.lvl==='FBS');
+  const pickIn=(lo,hi,f)=>{const A=colRange(lo,hi).filter(c=>ok(c)&&(!f||f(c)));return A.length?A[Math.floor(Math.random()*A.length)]:null;};
+  const Lc=Math.max(2,L),nUp=O.filter(o=>colPr(o)>Lc+9).length,nDn=O.filter(o=>colPr(o)<Lc-12).length,nOut=O.filter(o=>{const c=COL_BY[o.school+'|'+o.lvl];return c&&c.st!==st;}).length;
+  // reach: rare, and the bigger the jump the rarer (a 2-star sees an FBS offer or two at most)
+  if(nUp<2&&Math.random()<0.035*jr){const c=pickIn(Lc+8,Lc+18);if(c)addOffer(p,c,pops,'reach offer');}
+  // a level or two down: steady interest from schools where he would start early (blue-chip recruits rarely hear from them)
+  if(nDn<4&&Math.random()<(sg>=4?0.015:sg>=3?0.06:0.1)*jr){const c=pickIn(Math.max(0,Lc-32),Lc-13);if(c)addOffer(p,c,pops,'');}
+  // out of state: staffs from other states recruit him at his level
+  if(st&&O.length>=2&&nOut<O.length*0.45&&Math.random()<0.12*jr){const c=pickIn(Lc-9,Lc+7,x=>x.st!==st);if(c)addOffer(p,c,pops,'out-of-state staff');}
 }
 // where a player sits on the college ladder (0 = D3 bottom, 100 = blue blood)
 function recLevel(p){const T=starThr(p.yr),sc=recScore(p);
@@ -390,7 +408,7 @@ function addOffer(p,c,pops,why){
     else if(c.lvl==='FCS')addNews('offer',` FCS Offer! ${p.fn} ${p.ln} → ${c.school}`,`${p.pos} • OVR ${p.rat}`);
     else if(c.lvl==='JUCO')addNews('offer',` JUCO Interest: ${p.fn} ${p.ln}`,`${c.school} wants the ${p.pos}.`);
     else addNews('offer',` ${c.lvl} Offer: ${p.fn} ${p.ln} → ${c.school}`,`${p.pos} • OVR ${p.rat}`);
-    addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln} → ${c.lvl}: ${c.school}${why?''+why:''}</span>`);}
+    addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln} → ${c.lvl}: ${c.school}${why?' ('+why+')':''}</span>`);}
   if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&colRoom(COL_BY[o.school+'|'+o.lvl],p,false)){p.committed=o;colTakeCommit(p,o);
     if(p.sId===G.myId){if(pops)pops.push(bEvPop(' Dream School Commit!',`${p.fn} ${p.ln} instantly committed to his dream school, <strong>${o.school}</strong> (${o.lvl})!`,face(p.fs,52),'var(--gd)'));
       addNews('offer',` Dream School! ${p.fn} ${p.ln} → ${o.school}`,`Instant commit: ${p.pos} always dreamed of playing there.`);}}
