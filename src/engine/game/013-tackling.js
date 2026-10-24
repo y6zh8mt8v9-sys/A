@@ -280,7 +280,7 @@ function updateLive(dt){
     if(e.lunge>0&&c){
       e.lunge-=dt;if(e.lt==='jump')e.jz=Math.max(0,Math.sin(Math.PI*clamp(1-e.lunge/(e.lungeDur||0.26),0,1))*0.9);
       const K=UTK[e.lt],aim=K||e.tkL>2.8,cs=Math.hypot(c.vx,c.vy),s=K?Math.max(K.v*(e.tkSpr?1.05:1),cs+(e.lt==='bite'?1.8:0.8)):e.tkL>2.8?Math.max(6.8,cs+1):e.lt==='hit'?7:6.6;
-      const ld=aim?gpIntercept(e,c,s,0.6):0,dx=c.x+c.vx*ld-e.x,dy=c.y+c.vy*ld-e.y,l=Math.hypot(dx,dy)||1;e.vx=dx/l*s;e.vy=dy/l*s;
+      const ld=aim?gpIntercept(e,c,s,e.lunge+0.15):0,dx=c.x+c.vx*ld-e.x,dy=c.y+c.vy*ld-e.y,l=Math.hypot(dx,dy)||1;e.vx=dx/l*s;e.vy=dy/l*s;
       if(e.lunge<=0){if(e.lt==='form'){e.stun=0.35;e.vx*=0.4;e.vy*=0.4;}else{e.down=true;e.downT=e.lt==='bite'?0.9:0.8;e.downAnim='tackle_dive';dust(e.x,e.y,4);}e.tkL=0;}
       continue;
     }
