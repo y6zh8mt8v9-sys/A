@@ -32,6 +32,57 @@ function pcCreate(d){
 // ── Player Career mode: coach trust, playing time and transfers ──
 const PC_STARTERS={QB:1,RB:1,WR:3,TE:1,OL:5,DL:4,LB:3,CB:2,S:2,K:1,P:1};
 function pcActive(){const p=myPlayer();return!!(G&&G.pcLock&&p&&G.players.includes(p)&&p.sId===G.myId&&!p.grad)?p:null;}
+// ── Player Career mode runs the team for you: the head coach handles schedule, depth chart, training, staff and recruiting ──
+function pcAuto(){return!!(typeof G!=='undefined'&&G&&G.pcLock);}
+// coach pages are hidden; in college the high school team's pages go too
+function pcHidePg(pg){return pcAuto()&&(['depth','jv','recr','scout','training','staff','cust','advisor'].includes(pg)||(ccOn()&&['roster','sched','recls'].includes(pg)));}
+// run a coach action without its toasts and page changes
+function pcQuiet(fn){const n=nav,nt=notify;nav=function(){};notify=function(){};try{return fn();}finally{nav=n;notify=nt;}}
+// the schedule: the rival in week 5 (an ongoing rival from the division, or the usual one), the open dates filled with fair
+// opponents, then locked in (no builder)
+function pcAutoSched(){if(!G||!Array.isArray(G.sched))return;const C=G.sched.filter(g=>g.custom),E=C.filter(g=>g._empty);
+  if(E.length&&E.length===C.length&&!G.sched.some(g=>g.result)){const md=myDiv(),cr=md&&(G.chosenRivals||[]).find(id=>id!==G.myId&&md.teams.some(t=>t.id===id)),r=md?getRival(G.myId,md):null;
+    G.seasonRivalId=cr||(r?r.id:null);genSched();}
+  if(G.sched.some(g=>g.custom&&g._empty)){sbFill();schedLock();}G.customSchedPending=false;}
+function pcAutoSP(){let n=0;for(const p of G.players)if(p.sId===G.myId&&!p.grad&&p.sp>0){spApply(p);n++;}if(n)try{updateRats();}catch(e){}}
+// captains: the best upperclassmen (leaders first) when a spot is open
+function pcAutoCaptains(){const c=captains();if(c.length>=3)return;const sc=p=>p.rat+(p.yr===12?3:0)+((p.traits||[]).includes('leader')?5:0);
+  const L=myP().filter(p=>p.yr>=11&&!c.includes(p.id)&&!p.xferOut).sort((a,b)=>sc(b)-sc(a));while(c.length<3&&L.length)c.push(L.shift().id);}
+// money: a sponsor and a fundraiser every season, the summer camp in the offseason
+function pcAutoMoney(){const F=finYr();try{if(!F.sponsDone)pcQuiet(()=>finSponsor());if(!F.fundDone)pcQuiet(()=>finFund());if(!F.campDone&&G.phase==='offseason')pcQuiet(()=>finCamp());}catch(e){console.error('player career money',e);}}
+// staff, facilities and training level, bought in the Assistant GM's order of value (facilities once training is maxed:
+// a training upgrade resets them), keeping a little money in the bank
+function pcAutoBudget(){const keep=10000,all=G.players.filter(p=>p.sId===G.myId);
+  for(let i=0;i<60;i++){const tl=getTrainLevel(),o=aiBudgetOpts({all}).find(x=>x.ok&&x.id&&(x.id[0]!=='f'||tl>=20)&&(G.unlimitedMoney||G.budget-x.c>=keep));if(!o)break;const b=G.budget;
+    pcQuiet(()=>o.id[0]==='t'?upgradeTrainLevel():o.id[0]==='s'?upgSt(o.id[1],o.c):upgFac(o.id[1],o.c));if(!G.unlimitedMoney&&G.budget===b)break;
+    addLog(`<span style="color:var(--gn)">Program upgrade: ${o.k} for $${o.c.toLocaleString()}.</span>`);}}
+// reclassification: the school moves up when it can (state title and the money)
+function pcMoveUp(){const O=myClsOrder(),i=O.indexOf(G.cls);if(i<0||i>=O.length-1||!moveUpChamp()||!hasFunds(CLS_MOVEUP_COST[clsEq(G.cls)]||0))return null;
+  const old=G.cls;if(!moveUpDo())return null;return bEvPop('Moving up',`After the state title the school moves up from <strong>${clsL(old)}</strong> to <strong style="color:var(--gd)">${clsL(G.cls)}</strong>.`,null,'var(--gd)');}
+// his college: in Player Career only you commit him (never the dream school, the AI or signing day on its own)
+function pcOwnPick(p){return!!(p&&typeof G!=='undefined'&&G&&G.pcLock&&G.myPlayerId!=null&&p.id===G.myPlayerId);}
+function pcOffers(p){return colOpenOffers(p).slice().sort((a,b)=>colPr(b)-colPr(a));}
+function pcOfferRows(p){const L=pcOffers(p);return L.length?L.map((o,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="flex:1;min-width:0">${ofB(o)}${p.dreamSchool&&o.school===p.dreamSchool.school&&o.lvl===p.dreamSchool.lvl?' <span style="font-size:11px;color:var(--gd)">Dream school</span>':''}</span><button class="btn bsm bgn" onclick="pcCommit(${i})">Commit</button></div>`).join(''):'<div style="color:var(--mu);font-size:13px">No open offers right now.</div>';}
+window.pcCommit=function(i){const p=pcActive();if(!p||p.committed)return;const o=pcOffers(p)[i];if(!o)return;const c=COL_BY[o.school+'|'+o.lvl];if(c&&!colRoom(c,p,false)){notify(`${o.school} already filled its ${p.pos} spots in this class.`,'w');return;}
+  if(!confirm(`Commit to ${o.school} (${o.lvl})?`))return;p.committed=o;colTakeCommit(p,o);addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} committed to ${o.school} (${o.lvl}).</span>`);try{addNews('offer',`${p.fn} ${p.ln} commits to ${o.school}`,`${p.pos} · ${o.lvl}`);}catch(e){}
+  notify(`${p.fn} ${p.ln} committed to ${o.school}`);clo();const cb=window._pcSignCb;window._pcSignCb=null;if(cb)cb();else nav(G._page||'mine',G._arg);};
+// signing day: a senior with open offers and no commitment chooses before the offseason goes on
+function pcSignAsk(then){const p=pcActive();if(!p||p.yr!==12||p.committed||p.pcNoCol===G.yr||!pcOffers(p).length)return false;window._pcSignCb=then;
+  openMo(`<h2>Signing Day</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.fn} ${p.ln} has not committed yet. Choose where he plays college football, or go without an offer (he walks on at a smaller college).</div><div style="max-height:52vh;overflow-y:auto">${pcOfferRows(p)}</div>
+    <div style="text-align:right;margin-top:12px"><button class="bgh" onclick="pcNoCollege()">No commitment, walk on</button></div>`);return true;}
+window.pcNoCollege=function(){const p=pcActive();if(p)p.pcNoCol=G.yr;clo();const cb=window._pcSignCb;window._pcSignCb=null;if(cb)cb();};
+// two-way: your player can also line up on the other side of the ball
+function pcUnitOf(pos){return['QB','RB','WR','TE','OL'].includes(pos)?'o':['DL','LB','CB','S'].includes(pos)?'d':'k';}
+function pcTwo(p){return!!(p&&p.pos2&&p.pos2!==p.pos&&pcUnitOf(p.pos)!=='k'&&pcUnitOf(p.pos2)!=='k'&&pcUnitOf(p.pos2)!==pcUnitOf(p.pos));}
+window.pcSetPos2=function(v){const p=myPlayer();if(!p)return;p.pos2=v&&v!==p.pos&&pcUnitOf(v)!==pcUnitOf(p.pos)?v:null;notify(p.pos2?`${p.fn} ${p.ln} also plays ${p.pos2}`:`${p.fn} ${p.ln} plays only ${p.pos}`);nav(G._page||'mine',G._arg);};
+function pcTwoPanel(p){if(pcUnitOf(p.pos)==='k')return'';const O=(pcUnitOf(p.pos)==='o'?['DL','LB','CB','S']:['QB','RB','WR','TE']);
+  return`<div class="pnl"><div class="ph">Two-way player</div><div class="pb" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:13px">Also plays</span><select style="width:auto;min-height:0" onchange="pcSetPos2(this.value)"><option value="">Nothing else</option>${O.map(x=>`<option value="${x}"${p.pos2===x?' selected':''}>${x}</option>`).join('')}</select><span style="font-size:11px;color:var(--mu)">A two-way player is on the field for offense and defense, on Game Day and in simulated games.</span></div></div>`;}
+// on every page change: nothing the coach would handle is left waiting
+function pcAutoTick(){if(!pcAuto()||ccOn()||!G.myId||!myS()||!Array.isArray(G.players))return;
+  if(!G.pcAutoV){G.pcAutoV=1;G.benched={};for(const p of G.players)if(p.sId===G.myId)p.depth={};} // older saves: the hand-set depth chart goes
+  else if(G.benched&&Object.keys(G.benched).some(k=>(G.benched[k]||[]).length))G.benched={};
+  if(Array.isArray(G.sched)&&G.sched.some(g=>g.custom&&g._empty))pcAutoSched();
+  pcAutoSP();pcAutoCaptains();pcAutoMoney();}
 // ═══════════ COLLEGE CAREER ═══════════
 // Player Career goes on after high school: you play for the college you signed with. Every college fields the high school
 // players it signed (rated for college: 15 to 30 overall lower than in high school, less for the best players and big stat
@@ -192,6 +243,7 @@ function ccGenLine(p,start,share,edge){const r=p.rat,f=start?1:share*0.6,e=clamp
   else if(p.pos==='CB'){o.tackles=ccPois(4*f);o.pbu=ccPois(0.9*f*r/72);o.ints=ccPois(0.15*f*r/72);}
   else if(p.pos==='S'){o.tackles=ccPois(6*f);o.ints=ccPois(0.15*f);o.pbu=ccPois(0.5*f);}
   else if(p.pos==='K'){o.fga=start?ccPois(2):0;o.fgm=Math.min(o.fga,Math.round(o.fga*clamp(0.6+(r-60)*0.01,0.4,0.95)));o.xpm=start?ccPois(3):0;}
+  if(pcTwo(p)){const d=ccGenLine(Object.assign({},p,{pos:p.pos2,pos2:null,rat:r-4}),start,share,edge);for(const k in d)o[k]=(o[k]||0)+d[k];} // two-way: his snaps on the other side
   return o;}
 const CC_SK=['passAtt','passCmp','passYds','passTD','passInt','rushAtt','rushYds','rushTD','rec','recYds','recTD','tackles','sacks','ints','pbu','pancakes','fga','fgm','xpm'];
 function ccAddSt(a,b){for(const k of CC_SK)if(b[k])a[k]=(a[k]||0)+b[k];return a;}
@@ -304,7 +356,7 @@ window.ccGdStart=function(){const x=window._ccG;if(!x)return;const{g,plvl}=x,C=G
   let wx=null;try{wx=wxMake(colInfo(Hk).st,GAME_DATES[Math.min(GAME_DATES.length-1,C.wk)]||null,ccH('wx',G.yr,C.wk,C.k)>>>0);}catch(e){}
   window.__GP={mode:'all',rival:false,big:!!plvl,teams:[t1,t2],home:homeIdx,weather:wx,stadium:si,ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff',neutral:hs===2};
   window.__GP.previewHtml=`<div style="text-align:center;font-weight:800">${g.n||('Week '+(C.wk+1))} · ${ccConfName(C.k)}</div>`;
-  const r=ccRole();if(!ccRsLocked())window.__GP.pc={mid:C.p.id,pos:C.p.pos,start:r.start,share:r.share,two:false};
+  const r=ccRole();if(!ccRsLocked())window.__GP.pc={mid:C.p.id,pos:C.p.pos,start:r.start,share:r.share,two:pcTwo(C.p)};
   _gdCtx={kind:'col',info:{g,plvl,opp:op}};gdLaunch();};
 function ccGdDone(res,ctx){const{g,plvl}=ctx.info,C=G.cc;let my=res.score[0],op=res.score[1];if(my===op){if(Math.random()<.5)my+=3;else op+=3;}
   const raw=(res.stats||{})[C.p.id]||null,st=raw?gdConv(raw):{},played=(res.played||[]).map(Number).includes(C.p.id)||!!raw;

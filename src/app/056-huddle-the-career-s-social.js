@@ -34,14 +34,15 @@ function pgSocial(){const S=soc(),p=myPlayer();if(!S||!p)return`<div class="pnl"
     <div class="pb" style="border-top:1px solid var(--bd)"><div style="font-size:13px;font-weight:800;margin-bottom:6px">Post something</div><div style="display:flex;gap:6px;flex-wrap:wrap">${SOC_OWN.map((t,i)=>`<button class="bgh bsm" onclick="socMine(${i})">${t}</button>`).join('')}</div></div></div>
    <div class="pnl"><div class="ph">Feed</div><div class="pb" style="padding:0">${S.posts.length?S.posts.map(o=>`<article class="soc-post"><div>${socAv(o)}</div><div style="flex:1;min-width:0"><div style="font-size:13px"><b>${o.a==='me'?p.fn+' '+p.ln:o.h.slice(1)}</b>${o.v?' <span class="soc-v" title="Verified outlet">verified</span>':''} <span style="color:var(--mu)">${o.h} · ${o.w}</span></div><div style="margin:4px 0 6px;font-size:14px;line-height:1.4">${o.txt}</div>
       <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--mu)"><button class="soc-like${S.liked[o.id]?' on':''}" onclick="socLike(${o.id})" aria-label="Like"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.2 3 4.5 6.6 4.5c2.1 0 3.6 1.2 5.4 3.2 1.8-2 3.3-3.2 5.4-3.2 3.6 0 5.8 3.7 4.2 7.3C19.5 16.4 12 21 12 21z" fill="currentColor"/></svg> ${socK(o.likes)}</button><span>${socK(o.rp)} reposts</span></div></div></article>`).join(''):'<div style="padding:14px;color:var(--mu)">No posts yet. Play a game and the reactions come in.</div>'}</div></div>`;}
-function pcRole(p){const rel=p.rel==null?50:p.rel,sc=q=>q.rat+((q.id===p.id?rel:50)-50)/6;
-  const mates=myP().filter(q=>q.pos===p.pos&&!(q.inj>0)).sort((a,b)=>sc(b)-sc(a)),rank=Math.max(0,mates.findIndex(q=>q.id===p.id)),n=PC_STARTERS[p.pos]||1;
+function pcRole(p){const rel=p.rel==null?50:p.rel,sc=q=>q.rat+((q.id===p.id?rel:50)-50)/6,dp=q=>q.depth&&q.depth[p.pos]!=null?q.depth[p.pos]:999,bn=(G.benched&&G.benched[p.pos])||[];
+  // the depth chart first (as on the Depth Chart page and in simulated games), then rating and coach trust
+  const mates=myP().filter(q=>q.pos===p.pos&&!(q.inj>0)&&(q.id===p.id||!bn.includes(q.id))).sort((a,b)=>dp(a)-dp(b)||sc(b)-sc(a)),rank=Math.max(0,mates.findIndex(q=>q.id===p.id)),n=PC_STARTERS[p.pos]||1;
   return{start:rank<n,rank:rank+1,n,share:clamp(0.25+(rel-40)/90,0.15,0.9)};}
 function pcRelMsg(r){return r>=85?'Team leader: the coach builds the game plan around you':r>=70?'Trusted: the coach counts on you':r>=50?'Earning it: good games move you up':r>=35?'On thin ice: the coach wants to see more':'In the doghouse: practice hard and take your chances';}
 function pcGP(ctx){
   if(!window.__GP||!G.pcLock||!['reg','po','playoff','nat','s7'].includes(ctx.kind))return;const p=pcActive();if(!p||p.inj>0)return;
   if(ctx.kind==='s7'&&!(G.s7&&G.s7.picks.includes(p.id)))return;
-  const r=pcRole(p);window.__GP.pc={mid:p.id,pos:p.pos,start:ctx.kind==='s7'||r.start,share:r.share,two:false};window.__GP.mode='all';}
+  const r=pcRole(p);window.__GP.pc={mid:p.id,pos:p.pos,start:ctx.kind==='s7'||r.start,share:r.share,two:ctx.kind!=='s7'&&pcTwo(p)};window.__GP.mode='all';}
 function pcAfterGame(res,ctx){
   if(!G||!G.pcLock||!ctx||!['reg','po','playoff','nat'].includes(ctx.kind))return;const p=pcActive();if(!p)return;
   const st=gdConv(((res&&res.stats)||{})[p.id]||{}),win=res&&res.score&&res.score[0]>res.score[1];
@@ -111,11 +112,11 @@ function pgMine(){
     <div style="display:flex;flex-direction:column;gap:6px"><button class="btn" onclick="showPlayer(${p.id})">Player card</button></div>
   </div></div>`;
   const season=active?`<div class="pnl"><div class="ph">This season</div><div class="pb"><div style="font-size:13px;margin-bottom:8px">${s.gp?statLine(p,s):'<span style="color:var(--mu)">No games yet this season.</span>'}</div>${gameLogHtml(p)}</div></div>`:'';
-  const recruit=active?`<div class="pnl"><div class="ph">Recruiting</div><div class="pb">${p.committed?`<div style="font-weight:800;color:var(--gn)">Committed to ${p.committed.school} (${p.committed.lvl})</div>`:''}${(p.offers||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${p.offers.map(o=>ofB(o)).join('')}</div>`:`<div style="color:var(--mu);font-size:13px">No offers yet. Big games, camps and stars bring the colleges.</div>`}${p.dreamSchool?`<div style="font-size:12px;margin-top:8px">Dream school: <b>${p.dreamSchool.school}</b> (${p.dreamSchool.lvl})</div>`:''}</div></div>`:'';
+  const recruit=active?`<div class="pnl"><div class="ph">Recruiting</div><div class="pb">${p.committed?`<div style="font-weight:800;color:var(--gn)">Committed to ${p.committed.school} (${p.committed.lvl})</div>`:''}${G.pcLock&&!p.committed&&pcOffers(p).length?`<div style="font-size:12px;color:var(--mu);margin-bottom:6px">Your choice: nobody commits for you. Pick a school when you are ready (by signing day at the latest).</div>${pcOfferRows(p)}`:(p.offers||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${p.offers.map(o=>ofB(o)).join('')}</div>`:`<div style="color:var(--mu);font-size:13px">No offers yet. Big games, camps and stars bring the colleges.</div>`}${p.dreamSchool?`<div style="font-size:12px;margin-top:8px">Dream school: <b>${p.dreamSchool.school}</b> (${p.dreamSchool.lvl})</div>`:''}</div></div>`:'';
   const career=`<div class="pnl"><div class="ph">High school career</div><div class="pb">${careerHtml(p)}</div></div>`;
   let after='';if(!active&&G.cc&&!G.cc.on&&G.cc.stage==='college'&&G.cc.phase==='start')after=`<div class="pnl"><div class="ph">College</div><div class="pb"><div style="margin-bottom:8px">${p.fn} ${p.ln} signed with ${ccName(G.cc.k)}. Play his college career yourself: the dashboard becomes his college dashboard while the high school world goes on in the background.</div><button class="btn bgn" onclick="ccOptIn()">Follow him to college</button></div></div>`;
   if(!active&&!after){try{after=`<div class="pnl"><div class="ph">After high school</div><div class="pb">${renderStoryCard(p,false)||'<span style="color:var(--mu)">His college story begins next season.</span>'}</div></div>`;}catch(e){}}
-  let skill='';if(active)try{skill=pcSkillPanel(p);}catch(e){}
+  let skill='';if(active)try{skill=pcSkillPanel(p)+(G.pcLock?pcTwoPanel(p):'');}catch(e){}
   return head+skill+season+recruit+career+after;
 }
 

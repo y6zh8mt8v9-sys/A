@@ -693,12 +693,18 @@ function autoSubs(T){
         const r=pool.sort((a,b)=>b.stamina-a.stamina)[0];if(r){inUse.delete(cur.id);T.lineup[s]=r.id;inUse.add(r.id);}
         continue;
       }
+      const dep=p=>p.dep!=null&&p.pos===pos; // a depth-chart starter (from the app)
+      // the depth chart's quarterback gets his job back once he is healthy again
+      if(s==='QB'&&T.auto&&!(T.lock&&T.lock[s])&&!dep(cur)){const b=pool.filter(dep).sort((a,b)=>a.dep-b.dep)[0];if(b){inUse.delete(cur.id);T.lineup[s]=b.id;inUse.add(b.id);}continue;}
       if(!T.auto||s==='QB'||(T.lock&&T.lock[s]))continue;
       if(cur.stamina<52){
         const r=pool.filter(p=>p.stamina>78).sort((a,b)=>b.ovr-a.ovr)[0];
         if(r){inUse.delete(cur.id);T.lineup[s]=r.id;inUse.add(r.id);}
+      }else if(dep(cur)){
+        // he keeps his spot while he has legs
       }else{
-        const better=pool.filter(p=>p.stamina>88&&p.ovr>cur.ovr+2).sort((a,b)=>b.ovr-a.ovr)[0];
+        const back=pool.filter(p=>dep(p)&&p.stamina>80).sort((a,b)=>a.dep-b.dep)[0];
+        const better=back||pool.filter(p=>p.stamina>88&&p.ovr>cur.ovr+2).sort((a,b)=>b.ovr-a.ovr)[0];
         if(better){inUse.delete(cur.id);T.lineup[s]=better.id;inUse.add(better.id);}
       }
     }

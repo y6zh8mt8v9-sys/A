@@ -72,7 +72,7 @@ function colNeedsWeek(pops){_colStReady();
 }
 // an FBS offer late in the year: the best fitting senior committed to a smaller program usually flips (about 3 in 4 do)
 function colFlip(c,pos,A,pops){if(!A||!A.length)return false;const lv=Math.min(c.pr-24,44);
-  const pool=A.filter(([r,p])=>r>=lv&&r<=c.pr+6&&p.committed&&p.committed.lvl!=='FBS'&&!p.offers.some(x=>x.school===c.school&&x.lvl===c.lvl));if(!pool.length)return false;
+  const pool=A.filter(([r,p])=>r>=lv&&r<=c.pr+6&&p.committed&&!pcOwnPick(p)&&p.committed.lvl!=='FBS'&&!p.offers.some(x=>x.school===c.school&&x.lvl===c.lvl));if(!pool.length)return false;
   pool.sort((a,b)=>b[0]-a[0]);const P=pool[Math.floor(Math.random()*Math.min(4,pool.length))][1];if(!colRoom(c,P,false))return false;
   addOffer(P,c,P.sId===G.myId?pops:null,'filling a need');if(Math.random()>0.75)return true;
   const old=P.committed,oc=COL_BY[old.school+'|'+old.lvl];if(oc){const S=colCls(oc,colClassYr(P));if(S.com[P.pos]>0)S.com[P.pos]--;}
@@ -89,7 +89,7 @@ function ncampMake(){_colStReady();
     for(const x of pick){const pos=x.pos.sort((a,b)=>b[1]-a[1]).slice(0,1+Math.floor(Math.random()*2)),spots=Math.min(4,pos.reduce((a,b)=>a+b[1],0));
       L.push({id:'n'+G.yr+'_'+(n++),host:x.c.school,lvl:x.c.lvl,pr:x.c.pr,st:x.c.st,pos:pos.map(a=>a[0]),spots,fee:ncampFee(x.c),att:[],mine:[],done:false,res:null});}}
   // other high schools send their own seniors at those positions
-  const S=G.players.filter(p=>!p.grad&&p.yr===12&&!p.committed&&p.sId&&p.sId!==G.myId&&p.pos!=='K');
+  const S=G.players.filter(p=>!p.grad&&p.yr===12&&!p.committed&&p.sId&&(p.sId!==G.myId||pcAuto())&&p.pos!=='K'); // Player Career: your school sends its seniors like the others
   for(const C of L){const cand=S.filter(p=>C.pos.includes(p.pos)),near=cand.map(p=>[Math.abs(recLevel(p)-(C.pr-6)),p]).filter(a=>a[0]<16).sort((a,b)=>a[0]-b[0]).slice(0,C.spots*12);
     const want=C.spots*(3+Math.floor(Math.random()*3));for(const[,p]of near.sort(()=>Math.random()-.5)){if(C.att.length>=want)break;if(plSt(p)!==C.st&&Math.random()>0.45)continue;C.att.push(p.id);}}
   return L;}
@@ -97,8 +97,8 @@ function ncampActive(){return G.ncamp&&G.ncamp.yr===G.yr&&!G.ncamp.done;}
 function ncampTick(left,pops){
   if(G.phase!=='regular'&&G.phase!=='offseason')return;
   if(left<=2&&left>0&&(!G.ncamp||G.ncamp.yr!==G.yr)){G.ncamp={yr:G.yr,done:false,list:ncampMake()};
-    addNews('offer',' College needs camps',`${G.ncamp.list.length} colleges with open spots hold camps over the final two weeks. Send a senior from the Recruiting page.`);
-    if(pops)pops.push(bEvPop(' Needs Camps Open',`${G.ncamp.list.length} colleges still have open spots and are holding camps over the <strong>final two weeks</strong> of the season. You can pay to send a senior at a position they need; other schools send theirs too, and only the host college can offer.<div style="margin-top:6px;font-size:12px;color:var(--mu)">Open the Recruiting page to send players.</div>`,null,'var(--b2)'));}
+    addNews('offer',' College needs camps',`${G.ncamp.list.length} colleges with open spots hold camps over the final two weeks.${pcAuto()?'':' Send a senior from the Recruiting page.'}`);
+    if(pops&&!pcAuto())pops.push(bEvPop(' Needs Camps Open',`${G.ncamp.list.length} colleges still have open spots and are holding camps over the <strong>final two weeks</strong> of the season. You can pay to send a senior at a position they need; other schools send theirs too, and only the host college can offer.<div style="margin-top:6px;font-size:12px;color:var(--mu)">Open the Recruiting page to send players.</div>`,null,'var(--b2)'));}
   if(left===0&&ncampActive())ncampResolve(pops);
 }
 function ncampSend(cid,pid){

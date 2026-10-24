@@ -96,6 +96,7 @@ let _sbStep=0; // 0 = pick rivalry, 1 = pick custom games
 let _sbTargetWk=null; // which week slot is currently selected for filling
 
 function openScheduleBuilder(){
+  if(pcAuto()||window._pcNewCareer){pcAutoSched();return;} // Player Career: the coaching staff builds it
   G.customSchedPending=false;
   _sbCls=G.cls; // default to own classification
   _sbSearch='';window._sbShow=60;
@@ -403,14 +404,17 @@ window.addCustomGame=function(schId){
 
 // v2.14: fill every open slot in one tap with fair opponents from your own classification (closest in strength first)
 window.sbAutoFill=function(){
+  if(!G.sched.some(g=>g.custom&&g._empty))return;sbFill();
+  _sbTargetWk=null;renderScheduleBuilder();
+};
+function sbFill(){
   const empty=G.sched.filter(g=>g.custom&&g._empty);if(!empty.length)return;
   const myO=Math.round((G.offR+G.defR)/2),taken=new Set(G.sched.filter(g=>g.oppId).map(g=>g.oppId));taken.add(G.myId);
   const _f=clsFmt(G.cls);let pool=allSchools().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)===G.cls);
   if(pool.length<empty.length)pool=pool.concat(allSchoolsAll().filter(x=>!taken.has(x.id)&&(x.cls||G.cls)!==G.cls&&clsFmt(x.cls)===_f));
   pool=pool.map(x=>({x,d:Math.abs(teamOvr(x.id)-myO)+Math.random()*6})).sort((a,b)=>a.d-b.d);
   for(const g of empty){const c=pool.shift();if(!c)break;g.oppId=c.x.id;g._empty=false;g.isRivalry=!!(G.chosenRivals&&G.chosenRivals.includes(c.x.id));g.date=fmtDate(g.wk-1);}
-  _sbTargetWk=null;renderScheduleBuilder();
-};
+}
 window.removeCustomGame=function(wk){
   const slot=G.sched.find(g=>g.wk===wk&&g.custom);
   if(!slot)return;
@@ -420,6 +424,12 @@ window.removeCustomGame=function(wk){
 };
 
 window.finalizeSchedule=function(){
+  schedLock();
+  clo();
+  nav('dash');
+  notify('Schedule locked in! Season begins.');
+};
+function schedLock(){
   // Auto-fill any remaining empty slots with random in-classification teams (shouldn't happen)
   const scheduled=new Set(G.sched.filter(g=>g.oppId).map(g=>g.oppId));
   scheduled.add(G.myId);
@@ -433,10 +443,7 @@ window.finalizeSchedule=function(){
   const playoffSlots=G.sched.filter(g=>g.type==='bye');
   const regLen=regGames.length;
   playoffSlots.forEach((g,i)=>{g.wk=regLen+i+1;g.date=fmtDate(regLen+i);});
-  clo();
-  nav('dash');
-  notify('Schedule locked in! Season begins.');
-};
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 function regSched(){return G.sched.filter(g=>g.type==='regular'&&!g._empty);}

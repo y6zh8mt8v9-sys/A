@@ -1,5 +1,6 @@
 // ═══════════ OFFSEASON (3 PHASES) ═══════════
 function runOffseason(){
+  if(pcAuto()){pcOffseason();return;}
   if(G.osPhase===0&&G.gradShown!==G.yr){G.gradShown=G.yr;seniorCeremony();return;}
   if(G.osPhase===0){showOsPhase(0,' Winter Offseason','Dec–Feb: Weight training, film study, and recruiting visits.');return;}
   if(G.osPhase===1){showOsPhase(1,' Spring Offseason','Mar–May: Spring practices, position training, and scouting camps.');return;}
@@ -28,10 +29,20 @@ window.selectOsFocus=function(f){
   const btn=document.getElementById('os-confirm');if(btn){btn.disabled=false;btn.style.opacity='1';}
 };
 window.confirmOsPhase=function(phase){
-  G.tFocus=_osFocusSel;applyPhaseTrain(phase);G.osPhase=phase+1;clo();
-  if(phase===0){const pops=[];for(const p of myP())try{campInviteCheck(p,null,true);}catch(e){}const n=(G.campInv||[]).length;if(n)addNews('offer',` ${n} Spring Camp Invite${n>1?'s':''}`,'College camps want your players. Check the Recruiting page.');}
+  osPhaseDo(phase);clo();
   if(G.osPhase<3)runOffseason();else finalizeOffseason();
 };
+function osPhaseDo(phase){
+  G.tFocus=_osFocusSel;applyPhaseTrain(phase);G.osPhase=phase+1;
+  if(phase===0){const pops=[];for(const p of myP())try{campInviteCheck(p,null,true);}catch(e){}const n=(G.campInv||[]).length;if(n&&!pcAuto())addNews('offer',` ${n} Spring Camp Invite${n>1?'s':''}`,'College camps want your players. Check the Recruiting page.');}
+}
+// Player Career: senior night, the three training phases (balanced focus) and the new season, no coach screens
+function pcOffseason(){
+  if(pcSignAsk(pcOffseason))return; // signing day choice first
+  if(G.osPhase===0&&G.gradShown!==G.yr){G.gradShown=G.yr;if(myP().some(p=>p.yr===12))seniorHonor();}
+  _osFocusSel='balanced';for(let ph=G.osPhase||0;ph<3;ph++)osPhaseDo(ph);
+  finalizeOffseason();
+}
 
 function applyPhaseTrain(phase){
   const foc=_osFocusSel;const ocB=G.staff.oc.lvl;const dcB=G.staff.dc.lvl;
@@ -479,7 +490,9 @@ function finalizeOffseason(){
     }
   }
   // MOVE-UP: offer at end of season if eligible (and not just demoted)
-  const _moveUpPop=(!_demResult.demoted)?buildMoveUpPop():null;
+  const _pcA=pcAuto()&&!ccOn(); // Player Career: the school decides, then the staff builds the schedule and spends the budget
+  const _moveUpPop=(!_demResult.demoted)?(_pcA?pcMoveUp():buildMoveUpPop()):null;
+  if(_pcA){try{pcAutoSched();pcAutoBudget();pcAutoSP();pcAutoCaptains();}catch(e){console.error('player career auto',e);}}
   const _frPops=newFr.slice(0,5).map(p=>bFrPop(p));
   const _trPops=newTr.map(p=>bTrPop(p));
   _popQ=[...pops,..._frPops,..._trPops,...(_sosSPPops||[]),...(_moveUpPop?[_moveUpPop]:[])];
