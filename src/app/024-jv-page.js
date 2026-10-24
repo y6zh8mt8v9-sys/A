@@ -427,7 +427,7 @@ function updDev(p){
 
 function jucoFallback(p){if(p.rat>=48&&Math.random()<.3){const sc=jucoPick(p);if(sc){p.committed={lvl:'JUCO',school:sc};colTakeCommit(p,p.committed);}}}
 function commitPlayer(p){
-  if(p.committed)return;
+  if(p.committed||pcOwnPick(p))return; // Player Career: no signing day pick for your player
   if(!p.offers.length){jucoFallback(p);return;}
   const sorted=colOpenOffers(p).sort((a,b)=>colPr(b)-colPr(a));
   if(!sorted.length){jucoFallback(p);return;} // every program filled the spot

@@ -5129,6 +5129,8 @@ function genStats(players,teamScore,won,offScheme,defScheme,schId,oppId){
     const bo=b.depth&&b.depth[pos]!==undefined?b.depth[pos]:999;
     if(ao!==bo)return ao-bo;return b.rat-a.rat;
   });
+  // Player Career two-way player: he also lines up at his second position (a starter there when he starts, else by rating)
+  for(const p of players){if(!pcOwnPick(p)||!pcTwo(p))continue;const L=byPos[p.pos2]||(byPos[p.pos2]=[]);let i=L.findIndex(q=>q.rat<p.rat-4);try{if(pcRole(p).start)i=0;}catch(e){}L.splice(i<0?L.length:i,0,p);}
   const starter=(pos,n=0)=>byPos[pos]&&byPos[pos][n]?byPos[pos][n]:null;
   function sc(p,base,spread){if(!p)return 0;const r=(p.rat-55)/50;const sb=p.traits&&p.traits.includes('showboat')&&Math.random()<.35?1.25:1;return Math.max(0,Math.round((base+r*spread+rng(-Math.round(spread*.22),Math.round(spread*.22)))*sb*STAT_NERF));}
 
@@ -6114,7 +6116,8 @@ function addOffer(p,c,pops,why){
     else if(c.lvl==='JUCO')addNews('offer',` JUCO Interest: ${p.fn} ${p.ln}`,`${c.school} wants the ${p.pos}.`);
     else addNews('offer',` ${c.lvl} Offer: ${p.fn} ${p.ln} → ${c.school}`,`${p.pos} • OVR ${p.rat}`);
     addLog(`<span style="color:var(--te)"> ${p.fn} ${p.ln} → ${c.lvl}: ${c.school}${why?''+why:''}</span>`);}
-  if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&colRoom(COL_BY[o.school+'|'+o.lvl],p,false)){p.committed=o;colTakeCommit(p,o);
+  if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&pcOwnPick(p)){try{addNews('offer',`Dream school offer: ${o.school}`,`${p.fn} ${p.ln} can commit on My Player.`);}catch(e){}} // Player Career: your choice
+  else if(!p.committed&&p.dreamSchool&&o.lvl===p.dreamSchool.lvl&&o.school===p.dreamSchool.school&&colRoom(COL_BY[o.school+'|'+o.lvl],p,false)){p.committed=o;colTakeCommit(p,o);
     if(p.sId===G.myId){if(pops)pops.push(bEvPop(' Dream School Commit!',`${p.fn} ${p.ln} instantly committed to his dream school, <strong>${o.school}</strong> (${o.lvl})!`,face(p.fs,52),'var(--gd)'));
       addNews('offer',` Dream School! ${p.fn} ${p.ln} → ${o.school}`,`Instant commit: ${p.pos} always dreamed of playing there.`);}}
   return o;
@@ -6142,6 +6145,7 @@ window.pushFlip=function(pid){const p=getP(pid);if(!p||p.sId!==G.myId)return;con
   if(Math.random()<ch){plFlip(p,o,true);notify(`${p.fn} flips to ${o.school}!`);}else{p.morale=clamp((p.morale||65)-4,0,100);notify(`${p.fn} is sticking with ${p.committed.school}.`,'w');}
   clo();showPlayer(pid);};
 function checkCommit(p){
+  if(pcOwnPick(p))return; // Player Career: your player commits (and flips) only when you choose
   if(p.committed){colAutoFlip(p);return;}
   if(!p.offers||!p.offers.length||p.yr<11)return;
   const isSenior=p.yr===12,wk=G.week||0,urgency=isSenior?Math.min(0.22,0.07+wk*0.015):0.04;
@@ -6296,7 +6300,7 @@ function colNeedsWeek(pops){_colStReady();
 }
 // an FBS offer late in the year: the best fitting senior committed to a smaller program usually flips (about 3 in 4 do)
 function colFlip(c,pos,A,pops){if(!A||!A.length)return false;const lv=Math.min(c.pr-24,44);
-  const pool=A.filter(([r,p])=>r>=lv&&r<=c.pr+6&&p.committed&&p.committed.lvl!=='FBS'&&!p.offers.some(x=>x.school===c.school&&x.lvl===c.lvl));if(!pool.length)return false;
+  const pool=A.filter(([r,p])=>r>=lv&&r<=c.pr+6&&p.committed&&!pcOwnPick(p)&&p.committed.lvl!=='FBS'&&!p.offers.some(x=>x.school===c.school&&x.lvl===c.lvl));if(!pool.length)return false;
   pool.sort((a,b)=>b[0]-a[0]);const P=pool[Math.floor(Math.random()*Math.min(4,pool.length))][1];if(!colRoom(c,P,false))return false;
   addOffer(P,c,P.sId===G.myId?pops:null,'filling a need');if(Math.random()>0.75)return true;
   const old=P.committed,oc=COL_BY[old.school+'|'+old.lvl];if(oc){const S=colCls(oc,colClassYr(P));if(S.com[P.pos]>0)S.com[P.pos]--;}
@@ -6822,6 +6826,7 @@ function osPhaseDo(phase){
 }
 // Player Career: senior night, the three training phases (balanced focus) and the new season, no coach screens
 function pcOffseason(){
+  if(pcSignAsk(pcOffseason))return; // signing day choice first
   if(G.osPhase===0&&G.gradShown!==G.yr){G.gradShown=G.yr;if(myP().some(p=>p.yr===12))seniorHonor();}
   _osFocusSel='balanced';for(let ph=G.osPhase||0;ph<3;ph++)osPhaseDo(ph);
   finalizeOffseason();
@@ -8063,7 +8068,7 @@ function updDev(p){
 
 function jucoFallback(p){if(p.rat>=48&&Math.random()<.3){const sc=jucoPick(p);if(sc){p.committed={lvl:'JUCO',school:sc};colTakeCommit(p,p.committed);}}}
 function commitPlayer(p){
-  if(p.committed)return;
+  if(p.committed||pcOwnPick(p))return; // Player Career: no signing day pick for your player
   if(!p.offers.length){jucoFallback(p);return;}
   const sorted=colOpenOffers(p).sort((a,b)=>colPr(b)-colPr(a));
   if(!sorted.length){jucoFallback(p);return;} // every program filled the spot
@@ -11135,6 +11140,8 @@ function gdTeam(s,kind,kitOv,opt){
     let k=0;while(need()>0){let n=pos==='OL'?60+k:pos==='DL'?90+k:pos==='LB'?45+k:pos==='TE'?85+k:20+k;while(used.has(n))n++;used.add(n);
       const w=gdPlayer({id:null,pos,rat:Math.round(avg-8),fn:GD_WALKON[k%GD_WALKON.length],ln:'(walk-on)',num:n,fs:(s.id*31+k)},roster.length);w.mid=null;roster.push(w);cnt[pos]=(cnt[pos]||0)+1;k++;}
   }
+  // your depth chart's starters start on Game Day too (your own career player follows his playing time instead)
+  if(isMe&&!scout)try{const n={};for(const p of getStarters(G.myId)){const i=n[p.pos]=(n[p.pos]||0)+1;if(p.id===_gdPc)continue;const q=roster.find(x=>x.mid===p.id&&x.pos===p.pos);if(q)q.dep=i-1;}}catch(e){}
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
   for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);
@@ -17525,6 +17532,24 @@ function pcAutoBudget(){const keep=10000,all=G.players.filter(p=>p.sId===G.myId)
 // reclassification: the school moves up when it can (state title and the money)
 function pcMoveUp(){const O=myClsOrder(),i=O.indexOf(G.cls);if(i<0||i>=O.length-1||!moveUpChamp()||!hasFunds(CLS_MOVEUP_COST[clsEq(G.cls)]||0))return null;
   const old=G.cls;if(!moveUpDo())return null;return bEvPop('Moving up',`After the state title the school moves up from <strong>${clsL(old)}</strong> to <strong style="color:var(--gd)">${clsL(G.cls)}</strong>.`,null,'var(--gd)');}
+// his college: in Player Career only you commit him (never the dream school, the AI or signing day on its own)
+function pcOwnPick(p){return!!(p&&typeof G!=='undefined'&&G&&G.pcLock&&G.myPlayerId!=null&&p.id===G.myPlayerId);}
+function pcOffers(p){return colOpenOffers(p).slice().sort((a,b)=>colPr(b)-colPr(a));}
+function pcOfferRows(p){const L=pcOffers(p);return L.length?L.map((o,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="flex:1;min-width:0">${ofB(o)}${p.dreamSchool&&o.school===p.dreamSchool.school&&o.lvl===p.dreamSchool.lvl?' <span style="font-size:11px;color:var(--gd)">Dream school</span>':''}</span><button class="btn bsm bgn" onclick="pcCommit(${i})">Commit</button></div>`).join(''):'<div style="color:var(--mu);font-size:13px">No open offers right now.</div>';}
+window.pcCommit=function(i){const p=pcActive();if(!p||p.committed)return;const o=pcOffers(p)[i];if(!o)return;const c=COL_BY[o.school+'|'+o.lvl];if(c&&!colRoom(c,p,false)){notify(`${o.school} already filled its ${p.pos} spots in this class.`,'w');return;}
+  if(!confirm(`Commit to ${o.school} (${o.lvl})?`))return;p.committed=o;colTakeCommit(p,o);addLog(`<span style="color:var(--gn)">${p.fn} ${p.ln} committed to ${o.school} (${o.lvl}).</span>`);try{addNews('offer',`${p.fn} ${p.ln} commits to ${o.school}`,`${p.pos} · ${o.lvl}`);}catch(e){}
+  notify(`${p.fn} ${p.ln} committed to ${o.school}`);clo();const cb=window._pcSignCb;window._pcSignCb=null;if(cb)cb();else nav(G._page||'mine',G._arg);};
+// signing day: a senior with open offers and no commitment chooses before the offseason goes on
+function pcSignAsk(then){const p=pcActive();if(!p||p.yr!==12||p.committed||p.pcNoCol===G.yr||!pcOffers(p).length)return false;window._pcSignCb=then;
+  openMo(`<h2>Signing Day</h2><div style="font-size:13px;color:var(--mu);margin-bottom:10px">${p.fn} ${p.ln} has not committed yet. Choose where he plays college football, or go without an offer (he walks on at a smaller college).</div><div style="max-height:52vh;overflow-y:auto">${pcOfferRows(p)}</div>
+    <div style="text-align:right;margin-top:12px"><button class="bgh" onclick="pcNoCollege()">No commitment, walk on</button></div>`);return true;}
+window.pcNoCollege=function(){const p=pcActive();if(p)p.pcNoCol=G.yr;clo();const cb=window._pcSignCb;window._pcSignCb=null;if(cb)cb();};
+// two-way: your player can also line up on the other side of the ball
+function pcUnitOf(pos){return['QB','RB','WR','TE','OL'].includes(pos)?'o':['DL','LB','CB','S'].includes(pos)?'d':'k';}
+function pcTwo(p){return!!(p&&p.pos2&&p.pos2!==p.pos&&pcUnitOf(p.pos)!=='k'&&pcUnitOf(p.pos2)!=='k'&&pcUnitOf(p.pos2)!==pcUnitOf(p.pos));}
+window.pcSetPos2=function(v){const p=myPlayer();if(!p)return;p.pos2=v&&v!==p.pos&&pcUnitOf(v)!==pcUnitOf(p.pos)?v:null;notify(p.pos2?`${p.fn} ${p.ln} also plays ${p.pos2}`:`${p.fn} ${p.ln} plays only ${p.pos}`);nav(G._page||'mine',G._arg);};
+function pcTwoPanel(p){if(pcUnitOf(p.pos)==='k')return'';const O=(pcUnitOf(p.pos)==='o'?['DL','LB','CB','S']:['QB','RB','WR','TE']);
+  return`<div class="pnl"><div class="ph">Two-way player</div><div class="pb" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:13px">Also plays</span><select style="width:auto;min-height:0" onchange="pcSetPos2(this.value)"><option value="">Nothing else</option>${O.map(x=>`<option value="${x}"${p.pos2===x?' selected':''}>${x}</option>`).join('')}</select><span style="font-size:11px;color:var(--mu)">A two-way player is on the field for offense and defense, on Game Day and in simulated games.</span></div></div>`;}
 // on every page change: nothing the coach would handle is left waiting
 function pcAutoTick(){if(!pcAuto()||ccOn()||!G.myId||!myS()||!Array.isArray(G.players))return;
   if(!G.pcAutoV){G.pcAutoV=1;G.benched={};for(const p of G.players)if(p.sId===G.myId)p.depth={};} // older saves: the hand-set depth chart goes
@@ -17691,6 +17716,7 @@ function ccGenLine(p,start,share,edge){const r=p.rat,f=start?1:share*0.6,e=clamp
   else if(p.pos==='CB'){o.tackles=ccPois(4*f);o.pbu=ccPois(0.9*f*r/72);o.ints=ccPois(0.15*f*r/72);}
   else if(p.pos==='S'){o.tackles=ccPois(6*f);o.ints=ccPois(0.15*f);o.pbu=ccPois(0.5*f);}
   else if(p.pos==='K'){o.fga=start?ccPois(2):0;o.fgm=Math.min(o.fga,Math.round(o.fga*clamp(0.6+(r-60)*0.01,0.4,0.95)));o.xpm=start?ccPois(3):0;}
+  if(pcTwo(p)){const d=ccGenLine(Object.assign({},p,{pos:p.pos2,pos2:null,rat:r-4}),start,share,edge);for(const k in d)o[k]=(o[k]||0)+d[k];} // two-way: his snaps on the other side
   return o;}
 const CC_SK=['passAtt','passCmp','passYds','passTD','passInt','rushAtt','rushYds','rushTD','rec','recYds','recTD','tackles','sacks','ints','pbu','pancakes','fga','fgm','xpm'];
 function ccAddSt(a,b){for(const k of CC_SK)if(b[k])a[k]=(a[k]||0)+b[k];return a;}
@@ -17803,7 +17829,7 @@ window.ccGdStart=function(){const x=window._ccG;if(!x)return;const{g,plvl}=x,C=G
   let wx=null;try{wx=wxMake(colInfo(Hk).st,GAME_DATES[Math.min(GAME_DATES.length-1,C.wk)]||null,ccH('wx',G.yr,C.wk,C.k)>>>0);}catch(e){}
   window.__GP={mode:'all',rival:false,big:!!plvl,teams:[t1,t2],home:homeIdx,weather:wx,stadium:si,ez:_gdDark(H.c1||'#1c3766',.25),ezText:_gdLum(H.c2||'#fff')>.35?(H.c2||'#ffffff'):'#ffffff',neutral:hs===2};
   window.__GP.previewHtml=`<div style="text-align:center;font-weight:800">${g.n||('Week '+(C.wk+1))} · ${ccConfName(C.k)}</div>`;
-  const r=ccRole();if(!ccRsLocked())window.__GP.pc={mid:C.p.id,pos:C.p.pos,start:r.start,share:r.share,two:false};
+  const r=ccRole();if(!ccRsLocked())window.__GP.pc={mid:C.p.id,pos:C.p.pos,start:r.start,share:r.share,two:pcTwo(C.p)};
   _gdCtx={kind:'col',info:{g,plvl,opp:op}};gdLaunch();};
 function ccGdDone(res,ctx){const{g,plvl}=ctx.info,C=G.cc;let my=res.score[0],op=res.score[1];if(my===op){if(Math.random()<.5)my+=3;else op+=3;}
   const raw=(res.stats||{})[C.p.id]||null,st=raw?gdConv(raw):{},played=(res.played||[]).map(Number).includes(C.p.id)||!!raw;
@@ -18050,14 +18076,15 @@ function pgSocial(){const S=soc(),p=myPlayer();if(!S||!p)return`<div class="pnl"
     <div class="pb" style="border-top:1px solid var(--bd)"><div style="font-size:13px;font-weight:800;margin-bottom:6px">Post something</div><div style="display:flex;gap:6px;flex-wrap:wrap">${SOC_OWN.map((t,i)=>`<button class="bgh bsm" onclick="socMine(${i})">${t}</button>`).join('')}</div></div></div>
    <div class="pnl"><div class="ph">Feed</div><div class="pb" style="padding:0">${S.posts.length?S.posts.map(o=>`<article class="soc-post"><div>${socAv(o)}</div><div style="flex:1;min-width:0"><div style="font-size:13px"><b>${o.a==='me'?p.fn+' '+p.ln:o.h.slice(1)}</b>${o.v?' <span class="soc-v" title="Verified outlet">verified</span>':''} <span style="color:var(--mu)">${o.h} · ${o.w}</span></div><div style="margin:4px 0 6px;font-size:14px;line-height:1.4">${o.txt}</div>
       <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--mu)"><button class="soc-like${S.liked[o.id]?' on':''}" onclick="socLike(${o.id})" aria-label="Like"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.2 3 4.5 6.6 4.5c2.1 0 3.6 1.2 5.4 3.2 1.8-2 3.3-3.2 5.4-3.2 3.6 0 5.8 3.7 4.2 7.3C19.5 16.4 12 21 12 21z" fill="currentColor"/></svg> ${socK(o.likes)}</button><span>${socK(o.rp)} reposts</span></div></div></article>`).join(''):'<div style="padding:14px;color:var(--mu)">No posts yet. Play a game and the reactions come in.</div>'}</div></div>`;}
-function pcRole(p){const rel=p.rel==null?50:p.rel,sc=q=>q.rat+((q.id===p.id?rel:50)-50)/6;
-  const mates=myP().filter(q=>q.pos===p.pos&&!(q.inj>0)).sort((a,b)=>sc(b)-sc(a)),rank=Math.max(0,mates.findIndex(q=>q.id===p.id)),n=PC_STARTERS[p.pos]||1;
+function pcRole(p){const rel=p.rel==null?50:p.rel,sc=q=>q.rat+((q.id===p.id?rel:50)-50)/6,dp=q=>q.depth&&q.depth[p.pos]!=null?q.depth[p.pos]:999,bn=(G.benched&&G.benched[p.pos])||[];
+  // the depth chart first (as on the Depth Chart page and in simulated games), then rating and coach trust
+  const mates=myP().filter(q=>q.pos===p.pos&&!(q.inj>0)&&(q.id===p.id||!bn.includes(q.id))).sort((a,b)=>dp(a)-dp(b)||sc(b)-sc(a)),rank=Math.max(0,mates.findIndex(q=>q.id===p.id)),n=PC_STARTERS[p.pos]||1;
   return{start:rank<n,rank:rank+1,n,share:clamp(0.25+(rel-40)/90,0.15,0.9)};}
 function pcRelMsg(r){return r>=85?'Team leader: the coach builds the game plan around you':r>=70?'Trusted: the coach counts on you':r>=50?'Earning it: good games move you up':r>=35?'On thin ice: the coach wants to see more':'In the doghouse: practice hard and take your chances';}
 function pcGP(ctx){
   if(!window.__GP||!G.pcLock||!['reg','po','playoff','nat','s7'].includes(ctx.kind))return;const p=pcActive();if(!p||p.inj>0)return;
   if(ctx.kind==='s7'&&!(G.s7&&G.s7.picks.includes(p.id)))return;
-  const r=pcRole(p);window.__GP.pc={mid:p.id,pos:p.pos,start:ctx.kind==='s7'||r.start,share:r.share,two:false};window.__GP.mode='all';}
+  const r=pcRole(p);window.__GP.pc={mid:p.id,pos:p.pos,start:ctx.kind==='s7'||r.start,share:r.share,two:ctx.kind!=='s7'&&pcTwo(p)};window.__GP.mode='all';}
 function pcAfterGame(res,ctx){
   if(!G||!G.pcLock||!ctx||!['reg','po','playoff','nat'].includes(ctx.kind))return;const p=pcActive();if(!p)return;
   const st=gdConv(((res&&res.stats)||{})[p.id]||{}),win=res&&res.score&&res.score[0]>res.score[1];
@@ -18127,11 +18154,11 @@ function pgMine(){
     <div style="display:flex;flex-direction:column;gap:6px"><button class="btn" onclick="showPlayer(${p.id})">Player card</button></div>
   </div></div>`;
   const season=active?`<div class="pnl"><div class="ph">This season</div><div class="pb"><div style="font-size:13px;margin-bottom:8px">${s.gp?statLine(p,s):'<span style="color:var(--mu)">No games yet this season.</span>'}</div>${gameLogHtml(p)}</div></div>`:'';
-  const recruit=active?`<div class="pnl"><div class="ph">Recruiting</div><div class="pb">${p.committed?`<div style="font-weight:800;color:var(--gn)">Committed to ${p.committed.school} (${p.committed.lvl})</div>`:''}${(p.offers||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${p.offers.map(o=>ofB(o)).join('')}</div>`:`<div style="color:var(--mu);font-size:13px">No offers yet. Big games, camps and stars bring the colleges.</div>`}${p.dreamSchool?`<div style="font-size:12px;margin-top:8px">Dream school: <b>${p.dreamSchool.school}</b> (${p.dreamSchool.lvl})</div>`:''}</div></div>`:'';
+  const recruit=active?`<div class="pnl"><div class="ph">Recruiting</div><div class="pb">${p.committed?`<div style="font-weight:800;color:var(--gn)">Committed to ${p.committed.school} (${p.committed.lvl})</div>`:''}${G.pcLock&&!p.committed&&pcOffers(p).length?`<div style="font-size:12px;color:var(--mu);margin-bottom:6px">Your choice: nobody commits for you. Pick a school when you are ready (by signing day at the latest).</div>${pcOfferRows(p)}`:(p.offers||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${p.offers.map(o=>ofB(o)).join('')}</div>`:`<div style="color:var(--mu);font-size:13px">No offers yet. Big games, camps and stars bring the colleges.</div>`}${p.dreamSchool?`<div style="font-size:12px;margin-top:8px">Dream school: <b>${p.dreamSchool.school}</b> (${p.dreamSchool.lvl})</div>`:''}</div></div>`:'';
   const career=`<div class="pnl"><div class="ph">High school career</div><div class="pb">${careerHtml(p)}</div></div>`;
   let after='';if(!active&&G.cc&&!G.cc.on&&G.cc.stage==='college'&&G.cc.phase==='start')after=`<div class="pnl"><div class="ph">College</div><div class="pb"><div style="margin-bottom:8px">${p.fn} ${p.ln} signed with ${ccName(G.cc.k)}. Play his college career yourself: the dashboard becomes his college dashboard while the high school world goes on in the background.</div><button class="btn bgn" onclick="ccOptIn()">Follow him to college</button></div></div>`;
   if(!active&&!after){try{after=`<div class="pnl"><div class="ph">After high school</div><div class="pb">${renderStoryCard(p,false)||'<span style="color:var(--mu)">His college story begins next season.</span>'}</div></div>`;}catch(e){}}
-  let skill='';if(active)try{skill=pcSkillPanel(p);}catch(e){}
+  let skill='';if(active)try{skill=pcSkillPanel(p)+(G.pcLock?pcTwoPanel(p):'');}catch(e){}
   return head+skill+season+recruit+career+after;
 }
 
@@ -19822,7 +19849,7 @@ function gpTeam(id,c){
   if(c.kit)KITS[id]=kitOf(c.kit);
   if(c.pack)PACK_TEAMS[id]=c.pack;
   const roster=c.players.map(q=>{const ht=q.ht||74,wt=q.wt||210,bmi=wt*703/(ht*ht);
-    const p={id:PID++,mid:q.mid,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
+    const p={id:PID++,mid:q.mid,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
       ...Object.fromEntries('dac,tup,car,elu,btk,cit,rte,jmp,pbk,rbk,pmv,fmv,bsh,hpw,mcv,zcv,prs,end'.split(',').filter(k=>q[k]!=null).map(k=>[k,q[k]])),
       stamina:100,inj:null,body:{hs:1+(ht-74)*0.012,ws:clamp(1+(bmi-26)*0.04,0.88,1.5),belly:clamp((bmi-31)*0.09,0,0.65)},
       look:{pk:q.pk,skin:tone(q.skin||'#c68a5e'),sleeve:q.pos==='OL'||q.pos==='DL'?null:(q.sl===1?tone('#111820'):q.sl===2?tone('#ffffff'):null),visor:!!q.visor,longSock:!!q.ls,band:!!q.band,eq:q.eq||null,hair:q.hair||null,hst:q.hst||null},ovr:q.ovr,stars:q.stars>=2?Math.min(5,q.stars|0):0};
@@ -19831,7 +19858,9 @@ function gpTeam(id,c){
   // v2.16 two-way players: a second position makes him eligible there too (a little behind the specialists)
   T.byPos=pos=>roster.filter(p=>p.pos===pos||p.pos2===pos).sort((a,b)=>(b.ovr-(b.pos===pos?0:4))-(a.ovr-(a.pos===pos?0:4)));
   T.get=pid=>roster.find(p=>p.id===pid);
-  for(const set of[OSLOTS,DSLOTS]){const used=new Set();for(const[s,pos]of set){const pl=T.byPos(pos).find(p=>!used.has(p.id))||roster.find(p=>!used.has(p.id))||roster[0];used.add(pl.id);T.lineup[s]=pl.id;}}
+  // the depth chart's starters (dep, from the app) take the first spots, then the best by rating
+  const dk=(p,pos)=>p.dep!=null&&p.pos===pos?p.dep:99,first=pos=>T.byPos(pos).sort((a,b)=>dk(a,pos)-dk(b,pos));
+  for(const set of[OSLOTS,DSLOTS]){const used=new Set();for(const[s,pos]of set){const pl=first(pos).find(p=>!used.has(p.id))||roster.find(p=>!used.has(p.id))||roster[0];used.add(pl.id);T.lineup[s]=pl.id;}}
   return T;
 }
 function gpTrack(S,r){
@@ -20613,12 +20642,18 @@ function autoSubs(T){
         const r=pool.sort((a,b)=>b.stamina-a.stamina)[0];if(r){inUse.delete(cur.id);T.lineup[s]=r.id;inUse.add(r.id);}
         continue;
       }
+      const dep=p=>p.dep!=null&&p.pos===pos; // a depth-chart starter (from the app)
+      // the depth chart's quarterback gets his job back once he is healthy again
+      if(s==='QB'&&T.auto&&!(T.lock&&T.lock[s])&&!dep(cur)){const b=pool.filter(dep).sort((a,b)=>a.dep-b.dep)[0];if(b){inUse.delete(cur.id);T.lineup[s]=b.id;inUse.add(b.id);}continue;}
       if(!T.auto||s==='QB'||(T.lock&&T.lock[s]))continue;
       if(cur.stamina<52){
         const r=pool.filter(p=>p.stamina>78).sort((a,b)=>b.ovr-a.ovr)[0];
         if(r){inUse.delete(cur.id);T.lineup[s]=r.id;inUse.add(r.id);}
+      }else if(dep(cur)){
+        // he keeps his spot while he has legs
       }else{
-        const better=pool.filter(p=>p.stamina>88&&p.ovr>cur.ovr+2).sort((a,b)=>b.ovr-a.ovr)[0];
+        const back=pool.filter(p=>dep(p)&&p.stamina>80).sort((a,b)=>a.dep-b.dep)[0];
+        const better=back||pool.filter(p=>p.stamina>88&&p.ovr>cur.ovr+2).sort((a,b)=>b.ovr-a.ovr)[0];
         if(better){inUse.delete(cur.id);T.lineup[s]=better.id;inUse.add(better.id);}
       }
     }
@@ -21788,7 +21823,9 @@ function pcDrive(){const u=pcUnit(),mine=G.poss===G.me,on=GP.pc.two?true:u==='d'
   G.pcSer=(G.pcSer||0)+1;const n=G.pcSer,sh=clamp(GP.pc.share||0.3,0.1,1);G.pcIn=n===1||Math.floor(n*sh)>Math.floor((n-1)*sh);
   G.pcRot=!G.pcIn;return G.pcIn;}
 function pcLineup(){if(!pcOn()||!G.pcIn)return;const T=G.teams[G.me],rp=T.roster.find(p=>p.mid===GP.pc.mid&&healthy(p));if(!rp)return;
-  const all=OSLOTS.concat(DSLOTS);if(all.some(([x])=>T.lineup[x]===rp.id))return;const sl=all.find(([x,pos])=>pos===rp.pos);if(sl)T.lineup[sl[0]]=rp.id;}
+  // a two-way player lines up at the position of the side that is on the field
+  const U=p=>['QB','RB','WR','TE','OL'].includes(p)?'o':['DL','LB','CB','S'].includes(p)?'d':'k',side=GP.pc.two?(G.poss===G.me?'o':'d'):null,pos=side&&rp.pos2&&U(rp.pos2)===side?rp.pos2:rp.pos;
+  const set=side?(side==='o'?OSLOTS:DSLOTS):OSLOTS.concat(DSLOTS);if(set.some(([x])=>T.lineup[x]===rp.id))return;const sl=set.find(([x,ps])=>ps===pos);if(sl)T.lineup[sl[0]]=rp.id;}
 // a simulated series you are not part of: your player goes to the bench so the stats go to whoever really played
 function pcBenchOut(){const T=G.teams[G.me];if(!T||!T.lineup)return;const rp=T.roster.find(p=>p.mid===GP.pc.mid);if(!rp)return;
   const used=new Set(Object.values(T.lineup));

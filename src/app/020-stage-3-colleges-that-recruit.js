@@ -72,7 +72,7 @@ function colNeedsWeek(pops){_colStReady();
 }
 // an FBS offer late in the year: the best fitting senior committed to a smaller program usually flips (about 3 in 4 do)
 function colFlip(c,pos,A,pops){if(!A||!A.length)return false;const lv=Math.min(c.pr-24,44);
-  const pool=A.filter(([r,p])=>r>=lv&&r<=c.pr+6&&p.committed&&p.committed.lvl!=='FBS'&&!p.offers.some(x=>x.school===c.school&&x.lvl===c.lvl));if(!pool.length)return false;
+  const pool=A.filter(([r,p])=>r>=lv&&r<=c.pr+6&&p.committed&&!pcOwnPick(p)&&p.committed.lvl!=='FBS'&&!p.offers.some(x=>x.school===c.school&&x.lvl===c.lvl));if(!pool.length)return false;
   pool.sort((a,b)=>b[0]-a[0]);const P=pool[Math.floor(Math.random()*Math.min(4,pool.length))][1];if(!colRoom(c,P,false))return false;
   addOffer(P,c,P.sId===G.myId?pops:null,'filling a need');if(Math.random()>0.75)return true;
   const old=P.committed,oc=COL_BY[old.school+'|'+old.lvl];if(oc){const S=colCls(oc,colClassYr(P));if(S.com[P.pos]>0)S.com[P.pos]--;}

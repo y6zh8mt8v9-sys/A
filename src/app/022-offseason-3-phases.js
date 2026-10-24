@@ -38,6 +38,7 @@ function osPhaseDo(phase){
 }
 // Player Career: senior night, the three training phases (balanced focus) and the new season, no coach screens
 function pcOffseason(){
+  if(pcSignAsk(pcOffseason))return; // signing day choice first
   if(G.osPhase===0&&G.gradShown!==G.yr){G.gradShown=G.yr;if(myP().some(p=>p.yr===12))seniorHonor();}
   _osFocusSel='balanced';for(let ph=G.osPhase||0;ph<3;ph++)osPhaseDo(ph);
   finalizeOffseason();
