@@ -85,7 +85,8 @@ function setCtl(){
   }else if(G.phase==='live'&&G.ballState==='qb'&&!isAI(G.offTeam)&&G.offTeam===G.me&&P.kind==='scrimmage'&&P.off.kind==='pass'){
     G.hint='Pull back to aim, release to throw. Tap the screen (or Space) to switch between a bullet and a lob; every play starts with a bullet. Drag from the QB to step around the pocket.';
     btn(box,'Pass: '+PT_N[G.lob?'lob':'bullet'],G.lob?'alt':'go',gpCyclePT,'Space');btn(box,'QB run','alt',scramble,kb('scramble'));
-    {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[6,'Scramble'],[7,'Pass type']]));}
+    {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[7,'Hold + receiver: lead pass'],[4,'Pass type'],[6,'Scramble']]));}
+    if(GPC)G.hint+=' Keys 1-5 throw to a receiver, Shift + the number throws a lead pass out in front of him.';
   }
   if(G.phase==='presnap'&&P&&pcOn()&&!G.meter){if(pcAIQB()&&G.offTeam===G.me)padLegend(box,[[3,'Call for ball']]);}
   else if(G.phase==='presnap'&&P&&!isAI(G.me)&&!G.meter){if(G.offTeam===G.me&&P.kind==='scrimmage')padLegend(box,[[0,'Snap'],[9,'Pause']].filter(x=>x[0]<8));else if(gpDefending(G.me))padLegend(box,[[6,'Switch player']]);}

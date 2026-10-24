@@ -68,6 +68,7 @@ G.spr=null;
 function packBuild(pl){if(!pl)return'referee';const p=pl.pos;if(p==='OL'||(p==='DL'&&pl.wt>=275))return'line';if(p==='TE'||p==='LB'||p==='DL')return'big';return'skill';}
 function packSkin(look){if(look&&look.pk!=null)return look.pk;const i=SKINS.indexOf(look.skin);return SKIN_PACK[i<0?1:i];}
 function packMeta(sheet,anim){return G.spr.ATLAS.sheets[sheet].anims[anim];}
+const GP_KNEEL_U=0.55;
 function animFor(e,sheet){
   const M=n=>packMeta(sheet,n);
   const A=(n,u)=>{const m=M(n)||M(sheet==='referee'?'ref_idle':'idle');return[m===M(n)?n:(sheet==='referee'?'ref_idle':'idle'),clamp(Math.floor(clamp(u,0,0.999)*m.frames),0,m.frames-1)];};
@@ -101,6 +102,7 @@ function animFor(e,sheet){
     {const gd=e.guDur||0.7;if(e.downT>0&&e.downT<gd)return A('getup',gpGetupU(e,1-e.downT/gd));}
     return A(e.downAnim||'tackled',1);
   }
+  if(P&&P.special==='kneel'&&e===G.qb&&(G.phase==='live'&&G.t>0.2||dead))return A('getup',GP_KNEEL_U); // victory formation: the QB goes down on one knee
   if(e.lunge>0)return A(e.lt==='shoe'||e.lt==='dive'||e.lt==='ankle'||e.lt==='low'?'tackle_dive':'tackle',1-e.lunge/(e.lungeDur||0.3));
   if(ca){const u=ca.t/ca.dur;
     if(ca.drop)return A('catch_hands',Math.min(u,0.3));

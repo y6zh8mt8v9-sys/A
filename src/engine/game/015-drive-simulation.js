@@ -6,10 +6,10 @@ function drivePrompt(){
     [['Play it','go',()=>{G.offTeam=G.poss;openCall();}],['Sim drive','alt',()=>startSim()]]);
 }
 function spotTxt(los){los=Math.round(los);return los===50?'midfield':los<50?`${G.teams[G.poss].abbr} ${los}`:`${G.teams[1-G.poss].abbr} ${100-los}`;}
-function startSim(auto){
+function startSim(auto,first){
   G.simAuto=!!auto;G.simming=true;G.simTeam=G.poss;G.simQ=G.q;G.simPrevAI=[...G.ai];G.ai=[true,true];G.simLog=[];G.simStart={score:[...G.score],los:G.los,clock:G.clock,q:G.q};
-  $('simTitle').textContent=`Simulating ${G.teams[G.poss].name} drive…`;$('simList').innerHTML='';$('simSum').textContent='';$('simGo').hidden=true;show('simBox');
-  G.noDraw=true;G.offTeam=G.poss;openCall();simChunk();
+  $('simTitle').textContent=`Simulating ${G.teams[G.poss].name} ${first?'try':'drive'}…`;$('simList').innerHTML='';$('simSum').textContent='';$('simGo').hidden=true;show('simBox');
+  G.noDraw=true;G.offTeam=G.poss;if(first)first();else openCall();simChunk();
 }
 function simChunk(){
   if(!G.simming)return;

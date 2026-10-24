@@ -21726,7 +21726,9 @@ function gpPcFlip(){const me=G.ents.find(e=>pcMe(e));if(G.phase!=='presnap'||!me
 function pcCallBall(){if(!pcOn()||G.offTeam!==G.me||pcMe(G.qb)||G.pcWant)return;G.pcWant=true;G.pcAsks=(G.pcAsks||0)+1;flash('Calling for the ball!');setCtl();if(G.phase==='presnap')setTray('presnap');}
 function coachOn(){return!!(G.coachMode&&!ON&&!(GP&&GP.practice))&&!pcOn();}
 function userDecides(t){return!G.test&&!pcOn()&&(!isAI(t)||(coachOn()&&t===G.me));}
-function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;if(pcOn()){const sk=!pcDrive();if(sk)pcBenchOut();return sk;}const m=G.playMode||'all';return m==='off'?G.poss!==G.me:m==='def'?G.poss===G.me:false;}
+function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;if(pcOn()){const sk=!pcDrive();if(sk)pcBenchOut();return sk;}return gpAutoSimTeam(G.poss);}
+// offense-only ('off') games never put you on defense and defense-only ('def') games never on offense: that side's snaps are simulated
+function gpAutoSimTeam(t){if(ON||G.test||(GP&&GP.practice)||pcOn()||t==null)return false;const m=G.playMode||'all';return m==='off'?t!==G.me:m==='def'?t===G.me:false;}
 function gpSetCoach(on){
   if(ON||(GP&&GP.practice))return;G.coachMode=!!on;
   if(!G.simming)G.ai[G.me]=!!on;else if(G.simPrevAI)G.simPrevAI[G.me]=!!on;
@@ -23476,7 +23478,7 @@ function periodEnd(){
   const q=G.q;try{SFX.whistle();}catch(e){}
   if(q===1||q===3){G.q++;G.clock=QLEN;G.clockRun=false;flash(`End of the ${q===1?'1st':'3rd'} quarter`);nextSnap();return;}
   if(q===2){G.q=SEVENS()?4:3;G.clock=QLEN;G.clockRun=false;G.to=[3,3];G.next='kickoff';G.kickTeam=G.openRecv;G.kickSpot=35;G.conv=null;
-    const _htx=`${scoreLine()}. ${G.teams[G.openRecv].name} received the opening kickoff, so they kick off to start the second half.`+(!ON&&G.openRecv===G.me?' You start this half on defense.':!ON?' You get the ball first this half.':'');
+    const _htx=`${scoreLine()}. ${G.teams[G.openRecv].name} received the opening kickoff, so they kick off to start the second half.`+(!ON&&gpAutoSimTeam(1-G.openRecv)?` ${1-G.openRecv===G.me?'Your':'Their'} first drive is simulated.`:!ON&&G.openRecv===G.me?' You start this half on defense.':!ON?' You get the ball first this half.':'');
     olInfo('Halftime',_htx);
     showModal('Halftime',_htx,[['Start 2nd half','go',nextSnap]]);if(ON)olAutoGo(12);return;}
   if(G.score[0]===G.score[1]){startOT();return;}
@@ -23519,12 +23521,17 @@ function nextSnap(){
   }
   if(G.next==='conv'){
     const t=G.conv.team;G.offTeam=G.poss=t;
+    // offense-only / defense-only games: the other side's try is simulated too (a pick six used to put you on defense for the two-point try)
+    if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&!pcOn()&&gpAutoSimTeam(t)){G.drivePoss=t;startSim(true,nextSnap);return;}
     const sp=G.conv.los||97,go=two=>{if(two){G.los=sp;G.down=1;G.toGo=100-sp;G.conv.two=true;openCall();}else{G.conv.two=false;G.los=sp;setupFG('xp');toPresnap();}};
     if(G.conv.force2||G.conv.rep||SEVENS()){go(true);return;}
     if(userDecides(t)&&!G.simming){olAsk(t,'Conversion','Kick the extra point from the 3, or go for two?',[['Extra point','go'],['Go for two','alt']],i=>go(i===1));return;}
     const d=G.score[t]-G.score[1-t];go(G.q>=4&&[-2,-5,-10,1,-1].includes(d)&&Math.random()<0.8);return;
   }
-  if(G.simming&&(G.poss!==G.simTeam||G.q!==G.simQ&&G.q===3)){endSim();return;}
+  if(G.simming&&(G.poss!==G.simTeam||G.q!==G.simQ&&G.q===3&&!(G.simAuto&&gpAutoSimTeam(G.poss)))){endSim();return;}
+  // offense-only / defense-only: checked every snap, not only when the ball changes hands. A drive simulated into halftime used to hand
+  // you the other side's second-half drive (same team with the ball, so no new drive was seen) with no way to simulate it
+  if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&!pcOn()&&gpAutoSimTeam(G.poss)){G.drivePoss=G.poss;startSim(true);return;}
   // Player Career: checked every snap, not only when the ball changes hands, so a series without your unit is always simulated
   if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&pcOn()){if(G.poss!==G.drivePoss){G.drivePoss=G.poss;pcDrive();}if(!G.pcIn){pcBenchOut();startSim(true);if(G.pcRot)$('simTitle').textContent='Rotation: the coach gives your backup this series';return;}}
   else if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&G.poss!==G.drivePoss){G.drivePoss=G.poss;if(!ON){if(gpAutoSimDrive()){startSim(true);return;}drivePrompt();return;}}
@@ -23548,10 +23555,10 @@ function drivePrompt(){
     [['Play it','go',()=>{G.offTeam=G.poss;openCall();}],['Sim drive','alt',()=>startSim()]]);
 }
 function spotTxt(los){los=Math.round(los);return los===50?'midfield':los<50?`${G.teams[G.poss].abbr} ${los}`:`${G.teams[1-G.poss].abbr} ${100-los}`;}
-function startSim(auto){
+function startSim(auto,first){
   G.simAuto=!!auto;G.simming=true;G.simTeam=G.poss;G.simQ=G.q;G.simPrevAI=[...G.ai];G.ai=[true,true];G.simLog=[];G.simStart={score:[...G.score],los:G.los,clock:G.clock,q:G.q};
-  $('simTitle').textContent=`Simulating ${G.teams[G.poss].name} drive…`;$('simList').innerHTML='';$('simSum').textContent='';$('simGo').hidden=true;show('simBox');
-  G.noDraw=true;G.offTeam=G.poss;openCall();simChunk();
+  $('simTitle').textContent=`Simulating ${G.teams[G.poss].name} ${first?'try':'drive'}…`;$('simList').innerHTML='';$('simSum').textContent='';$('simGo').hidden=true;show('simBox');
+  G.noDraw=true;G.offTeam=G.poss;if(first)first();else openCall();simChunk();
 }
 function simChunk(){
   if(!G.simming)return;
@@ -23797,7 +23804,8 @@ function setCtl(){
   }else if(G.phase==='live'&&G.ballState==='qb'&&!isAI(G.offTeam)&&G.offTeam===G.me&&P.kind==='scrimmage'&&P.off.kind==='pass'){
     G.hint='Pull back to aim, release to throw. Tap the screen (or Space) to switch between a bullet and a lob; every play starts with a bullet. Drag from the QB to step around the pocket.';
     btn(box,'Pass: '+PT_N[G.lob?'lob':'bullet'],G.lob?'alt':'go',gpCyclePT,'Space');btn(box,'QB run','alt',scramble,kb('scramble'));
-    {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[6,'Scramble'],[7,'Pass type']]));}
+    {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[7,'Hold + receiver: lead pass'],[4,'Pass type'],[6,'Scramble']]));}
+    if(GPC)G.hint+=' Keys 1-5 throw to a receiver, Shift + the number throws a lead pass out in front of him.';
   }
   if(G.phase==='presnap'&&P&&pcOn()&&!G.meter){if(pcAIQB()&&G.offTeam===G.me)padLegend(box,[[3,'Call for ball']]);}
   else if(G.phase==='presnap'&&P&&!isAI(G.me)&&!G.meter){if(G.offTeam===G.me&&P.kind==='scrimmage')padLegend(box,[[0,'Snap'],[9,'Pause']].filter(x=>x[0]<8));else if(gpDefending(G.me))padLegend(box,[[6,'Switch player']]);}
@@ -24441,6 +24449,7 @@ G.spr=null;
 function packBuild(pl){if(!pl)return'referee';const p=pl.pos;if(p==='OL'||(p==='DL'&&pl.wt>=275))return'line';if(p==='TE'||p==='LB'||p==='DL')return'big';return'skill';}
 function packSkin(look){if(look&&look.pk!=null)return look.pk;const i=SKINS.indexOf(look.skin);return SKIN_PACK[i<0?1:i];}
 function packMeta(sheet,anim){return G.spr.ATLAS.sheets[sheet].anims[anim];}
+const GP_KNEEL_U=0.55;
 function animFor(e,sheet){
   const M=n=>packMeta(sheet,n);
   const A=(n,u)=>{const m=M(n)||M(sheet==='referee'?'ref_idle':'idle');return[m===M(n)?n:(sheet==='referee'?'ref_idle':'idle'),clamp(Math.floor(clamp(u,0,0.999)*m.frames),0,m.frames-1)];};
@@ -24474,6 +24483,7 @@ function animFor(e,sheet){
     {const gd=e.guDur||0.7;if(e.downT>0&&e.downT<gd)return A('getup',gpGetupU(e,1-e.downT/gd));}
     return A(e.downAnim||'tackled',1);
   }
+  if(P&&P.special==='kneel'&&e===G.qb&&(G.phase==='live'&&G.t>0.2||dead))return A('getup',GP_KNEEL_U); // victory formation: the QB goes down on one knee
   if(e.lunge>0)return A(e.lt==='shoe'||e.lt==='dive'||e.lt==='ankle'||e.lt==='low'?'tackle_dive':'tackle',1-e.lunge/(e.lungeDur||0.3));
   if(ca){const u=ca.t/ca.dur;
     if(ca.drop)return A('catch_hands',Math.min(u,0.3));
@@ -25149,12 +25159,30 @@ function gpThrowTargets(){
   // v2.16 online guest: the receivers are the host's players at their live spots (the guest's own copy of the field doesn't move)
   if(G.client){const F=OL.lastF;if(!F||!OL.recvN)return[];return OL.recvN.filter(r=>F.ents.some(S=>S.nk===r.n)).map(r=>{const e=olProxyOf(r.n,G.me,F);e.route={name:r.r,col:r.c};return e;});}
   return(G.recv||[]).filter(r=>r.route&&!r.block&&!r.down);}
-function gpKeyThrow(i){
-  if(!passingUser())return false;const r=gpThrowTargets()[i];if(!r)return false;
-  if(G.client){olCmd('throwr',{n:r.nk,b:G.bullet?1:0,l:G.lob?1:0});return true;}
-  const q=G.qb,D0=dist(q,r),lb=!!G.lob&&D0>=8,bul=G.bullet||D0<12&&!lb,f=flight(D0,bul,lb);
-  throwTo(r.x+r.vx*f.T,r.y+r.vy*f.T+(D0>16?0.6:0.2),bul,0.8,userThrowMeter,lb);return true;
+// v2.17 button and key throws lead the receiver like a touch throw: the ball goes where he will be when it comes down (the windup and the
+// longer flight to that spot count too; it used to be aimed at where he was, so deep balls landed behind him and turned into 50/50 balls).
+// A lead pass (hold RT / R2, or Shift with the number) puts it a few yards farther out in front of him, into open grass away from his man.
+function gpLeadPt(q,r,bul,lb,lead){
+  let tx=r.x,ty=r.y;
+  for(let k=0;k<4;k++){const D=Math.max(1,Math.hypot(tx-q.x,ty-q.y)),M=gpMotion(q,bul,D,lb),t=M.dur*M.rel+flight(D,bul,lb).T;tx=r.x+r.vx*t;ty=r.y+r.vy*t;}
+  const sp=Math.hypot(r.vx,r.vy);
+  if(lead){let ux,uy,ex;
+    if(sp>1.5){ux=r.vx/sp;uy=r.vy/sp;ex=clamp((lb?3.2:2.2)+sp*0.15,1.5,5);}
+    else{let d=null,bd=6;for(const o of G.ents)if(o.side!==r.side&&!o.down){const k=dist(o,r);if(k<bd){bd=k;d=o;}}ux=d?(r.x>=d.x?1:-1):(r.x<CX?-1:1);uy=0;ex=1.6;} // a receiver sitting down: away from his man
+    tx+=ux*ex;ty+=uy*ex;}
+  else ty+=0.2;
+  return[clamp(tx,1,FW-1),Math.min(ty,119)];
 }
+function gpKeyThrow(i,lead){
+  if(!passingUser())return false;const r=gpThrowTargets()[i];if(!r)return false;
+  if(G.client){olCmd('throwr',{n:r.nk,b:G.bullet?1:0,l:G.lob?1:0,ld:lead?1:0});return true;}
+  const q=G.qb,D0=dist(q,r),lb=!!G.lob&&D0>=8,bul=G.bullet||D0<12&&!lb,[tx,ty]=gpLeadPt(q,r,bul,lb,!!lead);
+  G.leadThrow=lead?{r,tx,ty}:null;
+  throwTo(tx,ty,bul,0.8,userThrowMeter,lb);if(lead)try{flash(lb?'Lead lob':'Lead bullet');}catch(e){}return true;
+}
+// Shift + 1-5 on the keyboard: a lead pass (Shift changes the key itself, so the key's position is read)
+addEventListener('keydown',ev=>{if(!ev.shiftKey||KB.wait||G.paused||G.phase!=='live')return;const m=/^Digit([1-5])$/.exec(ev.code||'');if(!m||!passingUser())return;
+  if(gpKeyThrow(+m[1]-1,true)){ev.preventDefault();ev.stopImmediatePropagation();}},true);
 function drawKeyBadges(){
   gpThrowTargets().forEach((r,i)=>{if(i>4)return;const[wx,wy]=toW(r.x,r.y),p=proj(wx,wy,0),z=p.k*0.0212,y=p.sy-132*z;
     ctx.save();ctx.translate(p.sx,y);ctx.beginPath();ctx.arc(0,0,5.4,0,Math.PI*2);ctx.fillStyle=(r.route&&r.route.col)||'#fff';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='#0d2a43';ctx.stroke();
@@ -25169,6 +25197,7 @@ function gpControlsHtml(){
     <div>${K('T')} timeout<\/div><div>${K('P')} or ${K('Esc')} pause<\/div>
     <div class="ctlh">Passing<\/div>
     <div>${K('1')}–${K('5')} throw to that receiver (numbers float over them)<\/div><div>Mouse / finger: pull back like a slingshot, let go to throw<\/div>
+    <div>${K('Shift')} + ${K('1')}–${K('5')}: lead pass, a few yards out in front of him (bullet or lob)<\/div>
     <div>${K('Space')} or a quick tap: switch bullet / lob (every play starts with a bullet)<\/div><div>${B('scramble')} or the QB run button: tuck it and run<\/div>
     <div class="ctlh">Ball carrier<\/div>
     <div>${K('↑')}${K('↓')}${K('←')}${K('→')} steer your runner (full speed every way)<\/div><div>${B('jukeU')}/${B('jukeD')} juke · ${B('dive')} dive · ${B('slow')} slow down<\/div>
@@ -25184,7 +25213,8 @@ function gpControlsHtml(){
     <div>${K('Space')} or click: stop the kick meters<\/div><div>${K('Space')} or click: catch meter (hit the green)<\/div>
     <div>${B('fair')} fair catch on punts<\/div><div>${K('1')}–${K('9')} pick a touchdown celebration<\/div>
     <div class="ctlh">Controller<\/div>
-    <div>Left stick: move · ${K('A')} snap / tackle / meters<\/div><div>${K('A')}${K('B')}${K('X')}${K('Y')}${K('RB')}: throw to receivers 1–5<\/div>
+    <div>Left stick: move · ${K('A')} snap / tackle / meters<\/div><div>${K('A')}${K('B')}${K('X')}${K('Y')}${K('RB')}: throw to receivers 1–5 (the ball leads him)<\/div>
+    <div>Hold ${K('RT')} + a receiver's button: lead pass, out in front of him<\/div><div>Tap ${K('RT')} or ${K('LB')}: switch bullet / lob<\/div>
     <div>Ball carrier: ${K('X')} spin · ${K('B')} stiff arm · ${K('Y')} hurdle · ${K('RB')} truck · ${K('RT')} dive · ${K('LB')} juke<\/div><div>${K('LT')} tuck and run / switch player · ${K('Start')} pause · d-pad and ${K('A')} in menus<\/div>
   <\/div>`;
 }
@@ -25271,7 +25301,11 @@ function padGameStep(){
     }else if(ph==='live'){
       if(G.ballState==='air'&&pr(0)&&(G.cm||G.im)){if(G.cm&&G.cm.target&&G.cm.target.team===G.me)catchMeterTap();else intMeterTap();}
       else if(pcAIQB()&&G.ballState==='qb'){if(pr(3))pcCallBall();}
-      else if(passingUser()){[0,1,2,3,5].forEach((k,i)=>{if(pr(k))gpKeyThrow(i);});if(pr(6))scramble();if(pr(7))gpCyclePT();}
+      else if(passingUser()){
+        // hold RT / R2 and press a receiver's button for a lead pass; a tap of RT on its own (or LB) still switches bullet / lob
+        const ld=!!b[7];if(pr(7)){PADN.rtUsed=false;try{setCtl();}catch(e){}}
+        [0,1,2,3,5].forEach((k,i)=>{if(pr(k)&&gpKeyThrow(i,ld)&&ld)PADN.rtUsed=true;});if(pr(6))scramble();if(pr(4))gpCyclePT();
+        if(!b[7]&&P[7]&&!PADN.rtUsed&&passingUser())gpCyclePT();}
       else if(userCarrier()){{const mi=[[2,1],[1,2],[3,4],[5,3],[7,5],[4,0]].find(([b])=>pr(b));if(mi&&G.mwMark)G.mwMark(mi[1]);}if(pr(2))trySpin();if(pr(1))tryStiff();if(pr(3))tryHurdle();if(pr(5))tryTruck();if(pr(7))tryDive();if(pr(4))gpAutoJuke();if(pr(6))trySlow();if(pr(0)&&G.kneelOK>0)olKneel();
         const ry=g.axes[3]||0,fl=ry<-0.75?-1:ry>0.75?1:0;if(fl&&fl!==PADN.flick)tryJuke(fl*(G.flip?-1:1));PADN.flick=fl;}
       else if(G.uctl&&G.uctl.team===G.me&&gpDefending(G.me)){if(pr(0))userTackle();if(pr(6)||pr(8))switchUser();}
@@ -25633,7 +25667,7 @@ function olRemote(m){
         P.kres=kickResult(kk,clamp(num(m.p,0.8),0,1),clamp(num(m.a,0),-1,1));G.rmeter=null;doSnap();return;}
       case 'throw':{if(!passingUser())return;const dx=num(m.dx,0),dy=num(m.dy,1),l=Math.hypot(dx,dy)||1;
         G.aim={run:false,dx:dx/l,dy:dy/l,D:clamp(num(m.D,10),4,gpMaxD())};const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;userThrow();G.aim=null;G.bullet=b0;G.lob=l0;return;}
-      case 'throwr':{if(!passingUser())return;const T=gpThrowTargets(),i=T.findIndex(e=>e.nk===m.n&&e.team===R);if(i<0)return;const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;gpKeyThrow(i);G.bullet=b0;G.lob=l0;return;}
+      case 'throwr':{if(!passingUser())return;const T=gpThrowTargets(),i=T.findIndex(e=>e.nk===m.n&&e.team===R);if(i<0)return;const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;gpKeyThrow(i,!!m.ld);G.bullet=b0;G.lob=l0;return;}
       case 'scr':if(passingUser())scramble();return;
       case 'repass':if(gpScrambling()&&G.offTeam===R){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}return;
       case 'mv':{if(!userCarrier())return;const f={juke:()=>tryJuke(Math.sign(num(m.d,1))||1),spin:trySpin,stiff:tryStiff,truck:tryTruck,hurdle:tryHurdle,dive:tryDive,slow:trySlow}[m.mv];

@@ -203,7 +203,7 @@ function olRemote(m){
         P.kres=kickResult(kk,clamp(num(m.p,0.8),0,1),clamp(num(m.a,0),-1,1));G.rmeter=null;doSnap();return;}
       case 'throw':{if(!passingUser())return;const dx=num(m.dx,0),dy=num(m.dy,1),l=Math.hypot(dx,dy)||1;
         G.aim={run:false,dx:dx/l,dy:dy/l,D:clamp(num(m.D,10),4,gpMaxD())};const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;userThrow();G.aim=null;G.bullet=b0;G.lob=l0;return;}
-      case 'throwr':{if(!passingUser())return;const T=gpThrowTargets(),i=T.findIndex(e=>e.nk===m.n&&e.team===R);if(i<0)return;const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;gpKeyThrow(i);G.bullet=b0;G.lob=l0;return;}
+      case 'throwr':{if(!passingUser())return;const T=gpThrowTargets(),i=T.findIndex(e=>e.nk===m.n&&e.team===R);if(i<0)return;const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;gpKeyThrow(i,!!m.ld);G.bullet=b0;G.lob=l0;return;}
       case 'scr':if(passingUser())scramble();return;
       case 'repass':if(gpScrambling()&&G.offTeam===R){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}return;
       case 'mv':{if(!userCarrier())return;const f={juke:()=>tryJuke(Math.sign(num(m.d,1))||1),spin:trySpin,stiff:tryStiff,truck:tryTruck,hurdle:tryHurdle,dive:tryDive,slow:trySlow}[m.mv];

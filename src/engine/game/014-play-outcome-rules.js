@@ -276,7 +276,7 @@ function periodEnd(){
   const q=G.q;try{SFX.whistle();}catch(e){}
   if(q===1||q===3){G.q++;G.clock=QLEN;G.clockRun=false;flash(`End of the ${q===1?'1st':'3rd'} quarter`);nextSnap();return;}
   if(q===2){G.q=SEVENS()?4:3;G.clock=QLEN;G.clockRun=false;G.to=[3,3];G.next='kickoff';G.kickTeam=G.openRecv;G.kickSpot=35;G.conv=null;
-    const _htx=`${scoreLine()}. ${G.teams[G.openRecv].name} received the opening kickoff, so they kick off to start the second half.`+(!ON&&G.openRecv===G.me?' You start this half on defense.':!ON?' You get the ball first this half.':'');
+    const _htx=`${scoreLine()}. ${G.teams[G.openRecv].name} received the opening kickoff, so they kick off to start the second half.`+(!ON&&gpAutoSimTeam(1-G.openRecv)?` ${1-G.openRecv===G.me?'Your':'Their'} first drive is simulated.`:!ON&&G.openRecv===G.me?' You start this half on defense.':!ON?' You get the ball first this half.':'');
     olInfo('Halftime',_htx);
     showModal('Halftime',_htx,[['Start 2nd half','go',nextSnap]]);if(ON)olAutoGo(12);return;}
   if(G.score[0]===G.score[1]){startOT();return;}
@@ -319,12 +319,17 @@ function nextSnap(){
   }
   if(G.next==='conv'){
     const t=G.conv.team;G.offTeam=G.poss=t;
+    // offense-only / defense-only games: the other side's try is simulated too (a pick six used to put you on defense for the two-point try)
+    if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&!pcOn()&&gpAutoSimTeam(t)){G.drivePoss=t;startSim(true,nextSnap);return;}
     const sp=G.conv.los||97,go=two=>{if(two){G.los=sp;G.down=1;G.toGo=100-sp;G.conv.two=true;openCall();}else{G.conv.two=false;G.los=sp;setupFG('xp');toPresnap();}};
     if(G.conv.force2||G.conv.rep||SEVENS()){go(true);return;}
     if(userDecides(t)&&!G.simming){olAsk(t,'Conversion','Kick the extra point from the 3, or go for two?',[['Extra point','go'],['Go for two','alt']],i=>go(i===1));return;}
     const d=G.score[t]-G.score[1-t];go(G.q>=4&&[-2,-5,-10,1,-1].includes(d)&&Math.random()<0.8);return;
   }
-  if(G.simming&&(G.poss!==G.simTeam||G.q!==G.simQ&&G.q===3)){endSim();return;}
+  if(G.simming&&(G.poss!==G.simTeam||G.q!==G.simQ&&G.q===3&&!(G.simAuto&&gpAutoSimTeam(G.poss)))){endSim();return;}
+  // offense-only / defense-only: checked every snap, not only when the ball changes hands. A drive simulated into halftime used to hand
+  // you the other side's second-half drive (same team with the ball, so no new drive was seen) with no way to simulate it
+  if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&!pcOn()&&gpAutoSimTeam(G.poss)){G.drivePoss=G.poss;startSim(true);return;}
   // Player Career: checked every snap, not only when the ball changes hands, so a series without your unit is always simulated
   if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&pcOn()){if(G.poss!==G.drivePoss){G.drivePoss=G.poss;pcDrive();}if(!G.pcIn){pcBenchOut();startSim(true);if(G.pcRot)$('simTitle').textContent='Rotation: the coach gives your backup this series';return;}}
   else if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&G.poss!==G.drivePoss){G.drivePoss=G.poss;if(!ON){if(gpAutoSimDrive()){startSim(true);return;}drivePrompt();return;}}
