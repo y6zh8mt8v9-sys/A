@@ -64,6 +64,7 @@ function ovrSync(p,force){
   if(!p.at){if(!force&&!(G&&p.sId===G.myId))return;const v=atVirtual(p);p.at={};for(const k in v){if(k[0]==='_')p[k.slice(1)]=v[k];else p.at[k]=v[k];}p.rat=ovrCalc(p);p._rc=p.rat;return;}
   if(p._rc!=null&&p.rat!==p._rc){const t=clamp(ovrCalc(p)+(p.rat-p._rc),1,99);attrShift(p,t);}  // progression moved the overall: spread it over the skills
   p.rat=ovrCalc(p);p._rc=p.rat;
+  if(p.pot!=null&&p.rat>p.pot){p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.rat)p.potHi=p.rat;}  // skills trained past the ceiling: the ceiling moves up, the rating stays
 }
 function ovrSyncAll(){if(!G||!G.players)return;const me=G.myId;for(const p of G.players)if(!p.grad&&(p.at||p.sId===me))ovrSync(p);}
 // which three skills matter most for a position (shown on the card next to the overall)
