@@ -40,6 +40,22 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 ## What's new
 
 ### Latest update
+- **New look, from scratch ("Painted field"):** turf greens, chalk text, goalpost gold, yard-line section headers and clipped-corner plates. Headings use Alumni Sans and body text uses Archivo. Light mode is a chalk-paper version of the same look.
+  - Game Day: new panels, buttons, score bug numbers, toasts and player name tags.
+  - The matchup preview opens with a broadcast strip in both teams' colors, and so do the dashboard's Next game tile and the post-game box score.
+  - Free Practice and Online Play use the same background.
+  - Old emoji icons that showed as empty boxes are gone; icon-only buttons now have text.
+- **Faster on PC:** pages with many faces or rank badges open 2 to 4 times faster (Scouting about 520 ms to 130 ms). One unused font download was removed.
+- **Team logos:** realistic high school marks, every school's logo is 1 of 1. A mascot art pipeline is ready in `tools/mascots/` (see its README; it needs a Gemini key set as an environment variable).
+- **Player Career:** no team management; the coach and staff run the team. Career offers come from every division, and your player no longer auto-commits by mistake.
+- **Gear:** spats, medium socks, eyeblack, 7v7 tank tops, editable endzone fonts. Team Builder edits uniforms for every team.
+- **Game Day:** faster slants, lunge tackles, form tackle, hit stick and ankle bite, a defensive move wheel, defensive sprint, AI dive trips, realistic personal fouls, lead passes, a real QB option read, free camera, touchdown card, mercy rule, rankings on the score bug, and correct 6, 8 and 9-man special teams counts.
+- **Fixes:** dream school names, offense-only mode on defense, punt direction, kneel downs, the wheel side, potential resetting, and the QB being benched after the first quarter.
+- **Program:** a real playoff bracket, power rankings like the real prep polls, homecoming week, post-game talks, story scenes, college tours and official visits, an NFL-style combine, invites that scale with your program, and more job offers including out of state and other divisions.
+- **Audio:** plays alongside Spotify or other music apps.
+- **Legal:** a copyright notice on the title screen, in Terms and in the code.
+
+### Previous update
 - **New look, all of it:** every screen was redrawn in one "Friday night" style: deep navy surfaces, chalk text, stadium-lamp amber for numbers, and your team's colors on buttons, tabs and the club bar. Headings use Big Shoulders Display and body text uses Barlow. Text is in sentence case everywhere, and light mode got the same treatment.
 - **Game Day menus** (matchup preview, pause, play calling) use the same style.
 - **Title screen:** a short intro animation (made with GSAP) plays once per visit and is skipped when your device asks for reduced motion.
@@ -51,7 +67,7 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 - **Text clean-up:** leftover emoji-style symbols and dashes were removed from the game's text.
 - **For developers:** the code is now split into small files under `src/` (see Building from source below).
 
-### Previous update
+### Earlier update
 - **Combine states from different packs:** team packs now record which state each school belongs to. A pack built with Michigan as the home state loads into Michigan in any world, so you can load a Michigan pack and an Indiana pack into one league and keep both. Team Builder edits move with their state when you change your states; edits for a state you remove are kept and come back when you add it again.
 - **Mixed-classification conferences:** Team Builder → a division → Bring in a school puts any school in the state into that division.
 - **Guide:** Help → States & conferences (or How it works next to Choose states) walks through picking states, real teams, custom conferences and loading packs.

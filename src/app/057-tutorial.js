@@ -111,14 +111,15 @@ const TUT_PAGES=[
       <li><strong>Colleges</strong>: every college has a mascot, colors and a logo. Edit any of them (name, mascot, colors, logo icon, uploaded logo, state, prestige, conference) from its profile or in League Setup.</li>
     </ul>
   `},
-  {tab:'New this update',icon:'',title:'A new look, new team logos and fewer crashes',body:`
+  {tab:'New this update',icon:'',title:'A new look, faster menus and lots of new football',body:`
     <ul>
-      <li><strong>New look</strong>: every screen uses one Friday night style, with your team's colors on buttons, tabs and the club bar. Light mode got the same treatment.</li>
-      <li><strong>Game Day menus</strong>: the matchup preview, pause menu and play calling match the new style.</li>
-      <li><strong>Team logos</strong>: every school and college has a new patch logo in its colors, with the mascot or a monogram inside. They stay clear at small sizes.</li>
-      <li><strong>Title screen</strong>: a short intro plays once per visit. It is skipped if your device asks for reduced motion.</li>
-      <li><strong>Fewer crashes on PC</strong>: replays use much less memory, and if Game Day runs into repeated errors it now finishes the game by simulation instead of freezing.</li>
-      <li><strong>Earlier this beta</strong>: combined state packs, mixed conferences, defensive adjustments (keys V, Y and N), the Huddle feed, new celebrations and hairstyles.</li>
+      <li><strong>New look</strong>: every screen, popup and Game Day panel was redrawn in turf greens, chalk text and goalpost gold. Matchups show both teams in their colors.</li>
+      <li><strong>Faster on PC</strong>: pages with many players open 2 to 4 times faster.</li>
+      <li><strong>Defense</strong>: lunge tackles, hit stick, ankle bite, a defensive move wheel and sprint.</li>
+      <li><strong>Offense</strong>: faster slants, lead passes and a real option read.</li>
+      <li><strong>Program</strong>: a playoff bracket, real-style power rankings, homecoming, visits, a combine and more job offers.</li>
+      <li><strong>Gear</strong>: spats, medium socks, eyeblack, 7v7 tank tops and endzone fonts.</li>
+      <li><strong>Player Career</strong>: the coaches run the team, so you just play.</li>
     </ul>
   `},
   {tab:'Offseason',icon:'',title:'Offseason: Training & Development',body:`
