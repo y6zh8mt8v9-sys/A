@@ -26087,7 +26087,7 @@ function fit(){
 function newGame(){
   PID=0;G.teams=GP?[gpTeam(0,GP.teams[0]),gpTeam(1,GP.teams[1])]:[mkTeam(0,'Harbor','Gulls','HAR'),mkTeam(1,'Ironwood','Elk','IRN')];G.st={};G.played={};G.splits=null;G.gpDone=false;
   Object.assign(G,{score:[0,0],q:1,clock:QLEN,clockRun:false,restartReady:false,to:[3,3],poss:0,los:25,down:1,toGo:10,next:null,conv:null,ot:null,
-    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false,koPen:null,gs:{},drivePoss:null});
+    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false,koPen:null,gs:{},drivePoss:null,simming:false,simAuto:false});try{hide('simBox');}catch(e){}
   if(SEVENS())G.q=s7Q()===1?4:2;
   G.offTeam=0;setupScrimmage({kind:'pass',data:PASSES[1]},DCALLS[3]);G.phase='menu';
   const[wx,wy]=toW(0,G.linesW.los);G.camY=wy+3.5;

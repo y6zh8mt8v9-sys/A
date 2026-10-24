@@ -70,9 +70,9 @@ test('offense only: three full games, never on defense',async p=>{
         if(passingUser()&&G.t>1.2)gpKeyThrow(0);
         if(G.phase==='call'&&!$('call').hidden){const c=$('cCards').querySelector('.pcard');if(c)c.click();}
         G.noDraw=true;step(1/30);if(i%20000===0)await new Promise(r=>setTimeout(r,0));}
-      if(G.phase==='over')games++;else bad.push('stuck '+[G.phase,G.q,G.clock|0,G.simming,G.offTeam,G.ballState].join());}
+      if(G.phase==='over')games++;else bad.push('stuck '+[G.phase,G.q,G.clock|0,G.simming,G.offTeam,G.ballState,G.snapIn|0,!!G.motion,!!G.meter,G.paused,G.ai,G.play&&G.play.kind,G.playClock|0,$('modal').hidden,$('mT').textContent].join());}
     window.toPresnap=tp;window.showCall=sc;return{bad:bad.slice(0,5),n:bad.length,games};});
-  ok(r.games===3,'games finished: '+r.games);ok(!r.n,'on defense: '+JSON.stringify(r.bad));},{timeout:600000});
+  ok(r.games===3,'games finished: '+r.games+' '+JSON.stringify(r.bad));ok(!r.n,'on defense: '+JSON.stringify(r.bad));},{timeout:600000});
 
 /* 3. switch ends each quarter: punts and kicks fly the way the team was driving */
 test('switch each quarter: punts go toward the end the punting team was attacking',async p=>{
