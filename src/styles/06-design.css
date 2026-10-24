@@ -218,4 +218,4 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 .pob-cm{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;text-align:center;background:var(--s1);border:2px solid var(--post)}
 .pob-cm b{font:800 18px/1.05 var(--hd)}.pob-cm small{font-size:11px;color:var(--mu)}
 .pob-cm.pob-me{box-shadow:none;border-color:var(--post)}
-@media (max-width:600px){.pob-col{width:158px;flex-basis:158px}.pob-g{gap:24px}.pob-pr::after,.pob-col:not(.pob-ch) .pob-m::after{right:-13px}.pob-in .pob-m::before{left:-13px}.pob-col:not(.pob-ch) .pob-m::after,.pob-in .pob-m::before{width:12px}}
+@media (max-width:600px){.pob-col{width:168px;flex-basis:168px}.pob-g{gap:24px}.pob-pr::after,.pob-col:not(.pob-ch) .pob-m::after{right:-13px}.pob-in .pob-m::before{left:-13px}.pob-col:not(.pob-ch) .pob-m::after,.pob-in .pob-m::before{width:12px}}

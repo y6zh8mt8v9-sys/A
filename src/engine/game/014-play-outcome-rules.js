@@ -250,9 +250,9 @@ function aiTimeout(){
     const diff=G.score[t]-G.score[1-t];
     if(G.to[t]>0&&(diff<0||(diff===0&&G.q===4))&&G.poss===t||(G.to[t]>0&&diff<0&&G.poss!==t&&G.clock<40)){callTimeout(t);return;}}
 }
-// mercy rule (high school): a lead of GP.mercy points in the second half keeps the clock running except after scores
-function gpMercy(S){if(!GP||!GP.mercy||GP.practice||G.ot||G.q<3||G.q>4||S.td!=null||G.conv)return;if(Math.abs(G.score[0]-G.score[1])<GP.mercy)return;
-  if(G.clockRun||G.restartReady){if(!G.mercyOn){G.mercyOn=true;setTimeout(()=>{try{flash('Mercy rule: running clock');}catch(e){}},1200);}G.clockRun=true;G.restartReady=false;}}
+// mercy rule (high school): a lead of GP.mercy points in the second half keeps the clock running, even after incompletions and out of bounds (not after scores)
+function gpMercy(S){if(!GP||!GP.mercy||GP.practice||G.ot||G.q<3||G.q>4||S.td!=null||G.conv||G.next==='kickoff')return;if(Math.abs(G.score[0]-G.score[1])<GP.mercy)return;
+  if(!G.mercyOn){G.mercyOn=true;setTimeout(()=>{try{flash('Mercy rule: running clock');}catch(e){}},1200);}G.clockRun=true;G.restartReady=false;}
 function callTimeout(t){
   if(G.to[t]<=0)return false;
   if(G.client){olCmd('to');return false;}
