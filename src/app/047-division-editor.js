@@ -305,7 +305,7 @@ function tbRenderAdd(dIdx){
         <button class="bgh bsm" onclick="tbClearLogo('add')" style="display:none;" id="tb-add-logo-clear">✕ Clear</button>
       </div>
     </div>
-    <!-- Logo Preview -->
+
     <div style="display:flex;align-items:center;gap:14px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:12px 16px;margin-bottom:14px;">
       <div id="tb-add-preview-logo" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;"></div>
       <div>

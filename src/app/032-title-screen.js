@@ -7,7 +7,7 @@ function showTitle(openLoad){
 }
 // the title screen's one moment of motion: the name rises in, the 27 lights up like scoreboard bulbs, the menu follows.
 // Once per visit, under a second, and not at all when the device asks for reduced motion
-function ttIntro(){if(window._ttIntroDone)return;window._ttIntroDone=1;
+function ttIntro(){if(window._ttIntroDone)return;if(window.__ks&&!window.__ks.done){window.__ks.after=ttIntro;return;}window._ttIntroDone=1;
   try{if(!window.gsap||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const g=window.gsap,q=s=>document.querySelectorAll('#tt-main '+s);
     const tl=g.timeline({defaults:{ease:'power3.out'}});
     tl.from(q('.tt-name .a'),{y:28,opacity:0,duration:.45})

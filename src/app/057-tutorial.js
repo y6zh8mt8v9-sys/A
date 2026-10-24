@@ -113,6 +113,8 @@ const TUT_PAGES=[
   `},
   {tab:'New this update',icon:'',title:'A new look, faster menus and lots of new football',body:`
     <ul>
+      <li><strong>Catches</strong>: one-handed, diving and contested grabs now land about half the time, like real football. Routine catches stay sure.</li>
+      <li><strong>Other teams' jerseys</strong>: open any school and tap Edit to change its uniforms.</li>
       <li><strong>New look</strong>: every screen, popup and Game Day panel was redrawn in turf greens, chalk text and goalpost gold. Matchups show both teams in their colors.</li>
       <li><strong>Faster on PC</strong>: pages with many players open 2 to 4 times faster.</li>
       <li><strong>Defense</strong>: lunge tackles, hit stick, ankle bite, a defensive move wheel and sprint.</li>

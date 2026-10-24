@@ -626,7 +626,10 @@ function gpRecordReplay(){
   $('rbar').classList.add('recording');$('rPlay').textContent='Recording…';
   rec.start(250);
 }
-function gpRecTick(){const P=G.replay,V=G.recVid;if(!V||!P||!P.recording)return;
+// saved replay videos carry the game's mark in the corner
+function gpMark(){const c=MAINCTX;c.save();c.setTransform(SC*DPR,0,0,SC*DPR,0,0);c.font="700 9px Archivo,'Segoe UI',sans-serif";c.textAlign='right';c.textBaseline='bottom';
+  c.fillStyle='rgba(0,0,0,.45)';c.fillText('Gridiron 27 \u00b7 \u00a9 Kanra Digital',W-5,H-4);c.fillStyle='rgba(255,255,255,.82)';c.fillText('Gridiron 27 \u00b7 \u00a9 Kanra Digital',W-6,H-5);c.restore();}
+function gpRecTick(){const P=G.replay,V=G.recVid;if(!V||!P||!P.recording)return;gpMark();
   if(!P.playing){P.recording=false;setTimeout(()=>{try{V.rec.stop();}catch(e){}$('rbar').classList.remove('recording');exitReplay();},350);}}
 function gpVidReady(blob,name){
   const el=$('vidReady');if(!el)return;G.vidBlob=blob;G.vidName=name;

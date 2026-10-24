@@ -171,7 +171,7 @@ function gdLaunchFrame(){
   ov.innerHTML=`<iframe id="gd-if" title="Game Day" allow="autoplay; web-share; fullscreen"></iframe>`;
   document.body.appendChild(ov);
   const src=document.getElementById('gd-src');if(!src){notify('Game Day is missing from this file','e');ov.remove();return;}
-  const BS=String.fromCharCode(92),html=src.textContent.split('<'+BS+'/').join('</').split('<'+BS+'!--').join('<!--');
+  const BS=String.fromCharCode(92),html=src.textContent.split('<'+BS+'/').join('</').split('<'+BS+'!--').join('<'+'!--');
   const f=document.getElementById('gd-if');window._gdErr=null;
   // write the game straight into the frame (more reliable on iOS/Safari than a huge srcdoc attribute)
   try{const w=f.contentWindow,d=f.contentDocument||w.document;d.open();try{w.onerror=function(m){window._gdErr=String(m);};}catch(e){}d.write(html);d.close();}
@@ -192,7 +192,7 @@ function ttDemoOn(){
   const f=document.createElement('iframe');f.id='tt-demo';f.setAttribute('data-demo','1');f.setAttribute('aria-hidden','true');f.tabIndex=-1;f.title='Touchdown highlights';
   const sh=document.createElement('div');sh.id='tt-demo-sh';
   T.insertBefore(sh,T.firstChild);T.insertBefore(f,T.firstChild);
-  const BS=String.fromCharCode(92),html=src.textContent.split('<'+BS+'/').join('</').split('<'+BS+'!--').join('<!--');
+  const BS=String.fromCharCode(92),html=src.textContent.split('<'+BS+'/').join('</').split('<'+BS+'!--').join('<'+'!--');
   try{const w=f.contentWindow,d=f.contentDocument||w.document;d.open();d.write(html);d.close();}catch(e){try{f.srcdoc=html;}catch(_){}}
 }
 function ttDemoOff(){const f=document.getElementById('tt-demo');if(f){try{f.contentWindow.__G.demo=null;}catch(e){}f.remove();}const s=document.getElementById('tt-demo-sh');if(s)s.remove();}

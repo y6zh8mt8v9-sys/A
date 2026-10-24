@@ -278,7 +278,7 @@ function renderScheduleBuilder(){
 
   const builderHtml=`
   <div style="display:flex;gap:16px;height:72vh;min-height:400px">
-    <!-- LEFT: current schedule -->
+
     <div style="width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
       <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te)">Your Schedule</div>
       <div style="font-size:11px;color:var(--mu)">${filled.length}/${totalCustom} custom slots filled · ${emptySlots.length} remaining</div>
@@ -289,7 +289,7 @@ function renderScheduleBuilder(){
       </button>
       ${canFinish?'':'<div style="font-size:11px;color:var(--mu);text-align:center">Fill all open slots to continue</div>'}
     </div>
-    <!-- RIGHT: team picker -->
+
     <div style="flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden">
       <div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te)">Pick Opponents</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">

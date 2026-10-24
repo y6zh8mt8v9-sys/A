@@ -99,8 +99,8 @@ function eqLib(){
   if(_eqLibP)return _eqLibP;
   _eqLibP=new Promise((res,rej)=>{try{
     if(window.GridironSprites&&window._eqLibReady)return res(window._eqLibReady);
-    const src=document.getElementById('gd-src');if(!src)return rej('no game');const BS=String.fromCharCode(92),html=src.textContent.split('<'+BS+'/').join('</').split('<'+BS+'!--').join('<!--');
-    const a=html.indexOf('<script>/*!'),b=html.indexOf('</'+'script>',a);if(a<0||b<0)return rej('no sprites');(0,eval)(html.slice(a+8,b));
+    const src=document.getElementById('gd-src');if(!src)return rej('no game');const BS=String.fromCharCode(92),html=src.textContent.split('<'+BS+'/').join('</').split('<'+BS+'!--').join('<'+'!--');
+    const a=html.indexOf('<script>/*!'),b=html.indexOf('</'+'script>',a);if(a<0||b<0)return rej('no sprites');{const el=document.createElement('script');el.textContent=html.slice(a+8,b);document.head.appendChild(el);el.remove();}
     window.GridironSprites.load().then(lib=>{for(const sh of['player_skill','player_big','player_line'])try{lib.improveHelmets(sh);}catch(e){}window._eqLibReady=lib;res(lib);}).catch(rej);
   }catch(e){rej(e);}});
   _eqLibP.catch(()=>{_eqLibP=null;});return _eqLibP;
