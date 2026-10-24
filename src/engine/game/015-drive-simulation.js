@@ -6,10 +6,10 @@ function drivePrompt(){
     [['Play it','go',()=>{G.offTeam=G.poss;openCall();}],['Sim drive','alt',()=>startSim()]]);
 }
 function spotTxt(los){los=Math.round(los);return los===50?'midfield':los<50?`${G.teams[G.poss].abbr} ${los}`:`${G.teams[1-G.poss].abbr} ${100-los}`;}
-function startSim(auto){
+function startSim(auto,first){
   G.simAuto=!!auto;G.simming=true;G.simTeam=G.poss;G.simQ=G.q;G.simPrevAI=[...G.ai];G.ai=[true,true];G.simLog=[];G.simStart={score:[...G.score],los:G.los,clock:G.clock,q:G.q};
-  $('simTitle').textContent=`Simulating ${G.teams[G.poss].name} drive…`;$('simList').innerHTML='';$('simSum').textContent='';$('simGo').hidden=true;show('simBox');
-  G.noDraw=true;G.offTeam=G.poss;openCall();simChunk();
+  $('simTitle').textContent=`Simulating ${G.teams[G.poss].name} ${first?'try':'drive'}…`;$('simList').innerHTML='';$('simSum').textContent='';$('simGo').hidden=true;show('simBox');
+  G.noDraw=true;G.offTeam=G.poss;if(first)first();else openCall();simChunk();
 }
 function simChunk(){
   if(!G.simming)return;
@@ -51,7 +51,9 @@ function aiOffCall(){
   const ly=G.los,d=G.down,tg=G.toGo,t=G.offTeam,diff=G.score[t]-G.score[1-t];
   if(SEVENS()){const r=Math.random();if(r<0.3){const f=pick(['trips','tripsTE']);return{kind:'pass',data:{...pick(TRIPS_PLAYS),f}};}if(r<0.55){const f=pick(['empty','emptyTE']);return{kind:'pass',data:{...pick(EMPTY_PLAYS),f}};}return{kind:'pass',data:pick(PASSES)};}
   if(G.conv)return Math.random()<0.5?{kind:'run',data:pick(RUNS.slice(0,4))}:{kind:'pass',data:pick(PASSES)};
-  if(!G.ot&&(G.q===2||G.q===4)&&diff>0&&G.clock<35&&G.clockRun)return{kind:'kneel'};
+  // victory formation only when the kneels can really run the clock out (one takes about 27 seconds late in the game, 12 before the half,
+  // and every timeout the other side still has costs one), never from his own 2 (that is a safety) and never on 4th down with time to give it back
+  if(!G.ot&&(G.q===2||G.q===4)&&diff>0&&G.clockRun&&ly>2&&G.clock<=Math.max(0,4-d-(G.to[1-t]||0))*(G.q===4?27:12)+2)return{kind:'kneel'};
   if(d===4&&!G.ot){
     // fourth down like a real coach: short yardage past midfield goes for it, inches go for it almost anywhere but deep in his own end,
     // trailing late goes for it, a field goal only when it's the right call
@@ -108,7 +110,9 @@ function applyCall(o,d){
   else if(o.kind==='fg'){setupFG('fg');}
   else if(o.kind==='fakepunt'){setupPunt(G.offTeam,G.los);G.play.fake='punt';gpFakeLineup();}
   else if(o.kind==='fakefg'){setupFG('fg');G.play.fake='fg';gpFakeLineup();}
-  else if(o.kind==='kneel'||o.kind==='spike'){setupScrimmage({kind:'pass',data:PASSES[3]},d);G.play.special=o.kind;}
+  else if(o.kind==='kneel'||o.kind==='spike'){setupScrimmage({kind:'pass',data:PASSES[3]},d);G.play.special=o.kind;
+    // no routes on a kneel or a spike (they used to be drawn and could be audibled); the QB takes the snap under center
+    for(const e of G.recv||[]){e.route=null;e.block=true;}G.recv=[];if(G.qb){G.qb.y=G.qb.hy=G.linesW.los-1.1;}}
   else setupScrimmage(o,d);
   G.play.defCall=d;
   toPresnap();

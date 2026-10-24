@@ -34,7 +34,7 @@ function step(dt){
   if(G.phase==='replay'){
     const P=G.replay;if(P.playing){P.i+=dt*30*P.speed;if(P.i>=P.R.frames.length-1){P.i=P.R.frames.length-1;P.playing=false;$('rPlay').textContent='Play again';if(P.demo)P.doneAt=G.time;}}
     if(P.demo&&!P.playing&&G.time-(P.doneAt||G.time)>0.7){gpDemoNext();return;}
-    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;
+    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;gpFcStep(P,dt);drawScene(F);updateHUD();gpRecTick();return;
   }
   if(G.phase==='presnap'){
     meterStep(dt);
@@ -95,7 +95,7 @@ function fit(){
 function newGame(){
   PID=0;G.teams=GP?[gpTeam(0,GP.teams[0]),gpTeam(1,GP.teams[1])]:[mkTeam(0,'Harbor','Gulls','HAR'),mkTeam(1,'Ironwood','Elk','IRN')];G.st={};G.played={};G.splits=null;G.gpDone=false;
   Object.assign(G,{score:[0,0],q:1,clock:QLEN,clockRun:false,restartReady:false,to:[3,3],poss:0,los:25,down:1,toGo:10,next:null,conv:null,ot:null,
-    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false});
+    stats:[{yds:0,to:0,pass:0,rush:0},{yds:0,to:0,pass:0,rush:0}],lastRec:null,rec:null,uSlot:null,cele:null,replay:null,started:false,koPen:null,gs:{},drivePoss:null,simming:false,simAuto:false});try{hide('simBox');}catch(e){}
   if(SEVENS())G.q=s7Q()===1?4:2;
   G.offTeam=0;setupScrimmage({kind:'pass',data:PASSES[1]},DCALLS[3]);G.phase='menu';
   const[wx,wy]=toW(0,G.linesW.los);G.camY=wy+3.5;
@@ -143,7 +143,10 @@ function olWait(txt){let el=document.getElementById('olWait');
   el.textContent=txt;}
 function olKickWait(){if(G.client){const s=OL.s;return s&&s.kw!=null?s.kw:null;}return G.rmeter?G.rmeter.team:G.meter?G.me:null;}
 function olFair(){if(G.client)olCmd('fair');G.fair=true;setCtl();}
-function olKneel(){if(G.client){olCmd('kneel');return;}if(G.carrier)G.carrier.kneel=true;}
+function olKneel(){if(G.client){olCmd('kneel');return;}gpKneelNow(G.carrier);}
+// a kick returner who takes a knee in the end zone gets a touchback; once he is out of it he is down where he kneels (it used to be a touchback from anywhere)
+function gpKneelNow(c){if(!c||c!==G.carrier||G.phase!=='live'||G.ballState!=='carrier'||!(G.kneelOK>0)||!G.play||G.play.kind!=='kickoff'||c.side!=='o')return;
+  if(c.y<10){c.kneel=true;return;}c.down=true;c.downAnim='tackled';c.vx=c.vy=0;flash('He takes a knee');endPlay({type:'tackle',spot:c.y});}
 function olScrambling(){const s=OL.s;return!!(s&&s.scr&&G.offTeam===G.me&&G.phase==='live');}
 function olGameOver(){olWait(null);}
 
@@ -200,7 +203,7 @@ function olRemote(m){
         P.kres=kickResult(kk,clamp(num(m.p,0.8),0,1),clamp(num(m.a,0),-1,1));G.rmeter=null;doSnap();return;}
       case 'throw':{if(!passingUser())return;const dx=num(m.dx,0),dy=num(m.dy,1),l=Math.hypot(dx,dy)||1;
         G.aim={run:false,dx:dx/l,dy:dy/l,D:clamp(num(m.D,10),4,gpMaxD())};const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;userThrow();G.aim=null;G.bullet=b0;G.lob=l0;return;}
-      case 'throwr':{if(!passingUser())return;const T=gpThrowTargets(),i=T.findIndex(e=>e.nk===m.n&&e.team===R);if(i<0)return;const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;gpKeyThrow(i);G.bullet=b0;G.lob=l0;return;}
+      case 'throwr':{if(!passingUser())return;const T=gpThrowTargets(),i=T.findIndex(e=>e.nk===m.n&&e.team===R);if(i<0)return;const b0=G.bullet,l0=G.lob;G.bullet=!!m.b;G.lob=!!m.l;gpKeyThrow(i,!!m.ld);G.bullet=b0;G.lob=l0;return;}
       case 'scr':if(passingUser())scramble();return;
       case 'repass':if(gpScrambling()&&G.offTeam===R){G.carrier=null;G.ballState='qb';G.qb.scrT=G.t;setCtl();}return;
       case 'mv':{if(!userCarrier())return;const f={juke:()=>tryJuke(Math.sign(num(m.d,1))||1),spin:trySpin,stiff:tryStiff,truck:tryTruck,hurdle:tryHurdle,dive:tryDive,slow:trySlow}[m.mv];
@@ -219,7 +222,7 @@ function olRemote(m){
       case 'aud':{if(G.phase!=='presnap'||G.offTeam!==R||typeof m.name!=='string'||!ROUTES[m.name])return;const e=(G.recv||[]).find(x=>x.nk===m.n&&x.team===R);if(e)gpAudible(e,m.name);return;}
       case 'celeb':{const c=G.celebPick,t=TD_CELEBS.find(x=>x[0]===m.c);if(c&&t&&c.team===R&&!c.celeb)startCeleb(c,t[0]);return;}
       case 'fair':{const P=G.play;if(G.phase==='live'&&P&&P.kind==='punt'&&G.offTeam===R&&['kick','punter','snap'].includes(G.ballState))G.fair=true;return;}
-      case 'kneel':if(G.phase==='live'&&G.carrier&&G.carrier.team===R&&G.kneelOK>0)G.carrier.kneel=true;return;
+      case 'kneel':if(G.carrier&&G.carrier.team===R)gpKneelNow(G.carrier);return;
       case 'sub':{const T=G.teams[R];if(!T||!m.l||typeof m.l!=='object')return;
         for(const s in m.l){if(!(s in T.lineup))continue;const p=T.get(+m.l[s]);if(p&&!p.inj)T.lineup[s]=p.id;}
         T.auto=!!m.a;T.lock={};if(m.k&&typeof m.k==='object')for(const s in m.k)if(s in T.lineup)T.lock[s]=1;return;}
@@ -393,7 +396,7 @@ function olClientStep(dt){
   G.time+=dt;
   if(G.phase==='replay'&&G.replay){
     const P=G.replay;if(P.playing){P.i+=dt*30*P.speed;if(P.i>=P.R.frames.length-1){P.i=P.R.frames.length-1;P.playing=false;$('rPlay').textContent='Play again';}}
-    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;drawScene(F);updateHUD();gpRecTick();return;}
+    const F=recGet(P.R,Math.floor(P.i));G.camY=F.camY;G.anch=F.anch;gpFcStep(P,dt);drawScene(F);updateHUD();gpRecTick();return;}
   let F=olInterp();
   if(!F){F={ents:[],ball:null,flags:[],camY:G.camY,anch:G.anch,lines:null};drawScene(F);updateHUD();return;}
   OL.lastF=F;olSync(F);

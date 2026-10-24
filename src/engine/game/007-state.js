@@ -38,7 +38,9 @@ function gpPcFlip(){const me=G.ents.find(e=>pcMe(e));if(G.phase!=='presnap'||!me
 function pcCallBall(){if(!pcOn()||G.offTeam!==G.me||pcMe(G.qb)||G.pcWant)return;G.pcWant=true;G.pcAsks=(G.pcAsks||0)+1;flash('Calling for the ball!');setCtl();if(G.phase==='presnap')setTray('presnap');}
 function coachOn(){return!!(G.coachMode&&!ON&&!(GP&&GP.practice))&&!pcOn();}
 function userDecides(t){return!G.test&&!pcOn()&&(!isAI(t)||(coachOn()&&t===G.me));}
-function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;if(pcOn()){const sk=!pcDrive();if(sk)pcBenchOut();return sk;}const m=G.playMode||'all';return m==='off'?G.poss!==G.me:m==='def'?G.poss===G.me:false;}
+function gpAutoSimDrive(){if(ON||G.test||(GP&&GP.practice))return false;if(pcOn()){const sk=!pcDrive();if(sk)pcBenchOut();return sk;}return gpAutoSimTeam(G.poss);}
+// offense-only ('off') games never put you on defense and defense-only ('def') games never on offense: that side's snaps are simulated
+function gpAutoSimTeam(t){if(ON||G.test||(GP&&GP.practice)||pcOn()||t==null)return false;const m=G.playMode||'all';return m==='off'?t!==G.me:m==='def'?t===G.me:false;}
 function gpSetCoach(on){
   if(ON||(GP&&GP.practice))return;G.coachMode=!!on;
   if(!G.simming)G.ai[G.me]=!!on;else if(G.simPrevAI)G.simPrevAI[G.me]=!!on;

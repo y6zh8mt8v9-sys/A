@@ -5,12 +5,30 @@ function gpThrowTargets(){
   // v2.16 online guest: the receivers are the host's players at their live spots (the guest's own copy of the field doesn't move)
   if(G.client){const F=OL.lastF;if(!F||!OL.recvN)return[];return OL.recvN.filter(r=>F.ents.some(S=>S.nk===r.n)).map(r=>{const e=olProxyOf(r.n,G.me,F);e.route={name:r.r,col:r.c};return e;});}
   return(G.recv||[]).filter(r=>r.route&&!r.block&&!r.down);}
-function gpKeyThrow(i){
-  if(!passingUser())return false;const r=gpThrowTargets()[i];if(!r)return false;
-  if(G.client){olCmd('throwr',{n:r.nk,b:G.bullet?1:0,l:G.lob?1:0});return true;}
-  const q=G.qb,D0=dist(q,r),lb=!!G.lob&&D0>=8,bul=G.bullet||D0<12&&!lb,f=flight(D0,bul,lb);
-  throwTo(r.x+r.vx*f.T,r.y+r.vy*f.T+(D0>16?0.6:0.2),bul,0.8,userThrowMeter,lb);return true;
+// v2.17 button and key throws lead the receiver like a touch throw: the ball goes where he will be when it comes down (the windup and the
+// longer flight to that spot count too; it used to be aimed at where he was, so deep balls landed behind him and turned into 50/50 balls).
+// A lead pass (hold RT / R2, or Shift with the number) puts it a few yards farther out in front of him, into open grass away from his man.
+function gpLeadPt(q,r,bul,lb,lead){
+  let tx=r.x,ty=r.y;
+  for(let k=0;k<4;k++){const D=Math.max(1,Math.hypot(tx-q.x,ty-q.y)),M=gpMotion(q,bul,D,lb),t=M.dur*M.rel+flight(D,bul,lb).T;tx=r.x+r.vx*t;ty=r.y+r.vy*t;}
+  const sp=Math.hypot(r.vx,r.vy);
+  if(lead){let ux,uy,ex;
+    if(sp>1.5){ux=r.vx/sp;uy=r.vy/sp;ex=clamp((lb?3.2:2.2)+sp*0.15,1.5,5);}
+    else{let d=null,bd=6;for(const o of G.ents)if(o.side!==r.side&&!o.down){const k=dist(o,r);if(k<bd){bd=k;d=o;}}ux=d?(r.x>=d.x?1:-1):(r.x<CX?-1:1);uy=0;ex=1.6;} // a receiver sitting down: away from his man
+    tx+=ux*ex;ty+=uy*ex;}
+  else ty+=0.2;
+  return[clamp(tx,1,FW-1),Math.min(ty,119)];
 }
+function gpKeyThrow(i,lead){
+  if(!passingUser())return false;const r=gpThrowTargets()[i];if(!r)return false;
+  if(G.client){olCmd('throwr',{n:r.nk,b:G.bullet?1:0,l:G.lob?1:0,ld:lead?1:0});return true;}
+  const q=G.qb,D0=dist(q,r),lb=!!G.lob&&D0>=8,bul=G.bullet||D0<12&&!lb,[tx,ty]=gpLeadPt(q,r,bul,lb,!!lead);
+  G.leadThrow=lead?{r,tx,ty}:null;
+  throwTo(tx,ty,bul,0.8,userThrowMeter,lb);if(lead)try{flash(lb?'Lead lob':'Lead bullet');}catch(e){}return true;
+}
+// Shift + 1-5 on the keyboard: a lead pass (Shift changes the key itself, so the key's position is read)
+addEventListener('keydown',ev=>{if(!ev.shiftKey||KB.wait||G.paused||G.phase!=='live')return;const m=/^Digit([1-5])$/.exec(ev.code||'');if(!m||!passingUser())return;
+  if(gpKeyThrow(+m[1]-1,true)){ev.preventDefault();ev.stopImmediatePropagation();}},true);
 function drawKeyBadges(){
   gpThrowTargets().forEach((r,i)=>{if(i>4)return;const[wx,wy]=toW(r.x,r.y),p=proj(wx,wy,0),z=p.k*0.0212,y=p.sy-132*z;
     ctx.save();ctx.translate(p.sx,y);ctx.beginPath();ctx.arc(0,0,5.4,0,Math.PI*2);ctx.fillStyle=(r.route&&r.route.col)||'#fff';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='#0d2a43';ctx.stroke();
@@ -25,6 +43,7 @@ function gpControlsHtml(){
     <div>${K('T')} timeout<\/div><div>${K('P')} or ${K('Esc')} pause<\/div>
     <div class="ctlh">Passing<\/div>
     <div>${K('1')}–${K('5')} throw to that receiver (numbers float over them)<\/div><div>Mouse / finger: pull back like a slingshot, let go to throw<\/div>
+    <div>${K('Shift')} + ${K('1')}–${K('5')}: lead pass, a few yards out in front of him (bullet or lob)<\/div>
     <div>${K('Space')} or a quick tap: switch bullet / lob (every play starts with a bullet)<\/div><div>${B('scramble')} or the QB run button: tuck it and run<\/div>
     <div class="ctlh">Ball carrier<\/div>
     <div>${K('↑')}${K('↓')}${K('←')}${K('→')} steer your runner (full speed every way)<\/div><div>${B('jukeU')}/${B('jukeD')} juke · ${B('dive')} dive · ${B('slow')} slow down<\/div>
@@ -41,7 +60,8 @@ function gpControlsHtml(){
     <div>${K('Space')} or click: stop the kick meters<\/div><div>${K('Space')} or click: catch meter (hit the green)<\/div>
     <div>${B('fair')} fair catch on punts<\/div><div>${K('1')}–${K('9')} pick a touchdown celebration<\/div>
     <div class="ctlh">Controller<\/div>
-    <div>Left stick: move · ${K('A')} snap / tackle / meters<\/div><div>${K('A')}${K('B')}${K('X')}${K('Y')}${K('RB')}: throw to receivers 1–5<\/div>
+    <div>Left stick: move · ${K('A')} snap / tackle / meters<\/div><div>${K('A')}${K('B')}${K('X')}${K('Y')}${K('RB')}: throw to receivers 1–5 (the ball leads him)<\/div>
+    <div>Hold ${K('RT')} + a receiver's button: lead pass, out in front of him<\/div><div>Tap ${K('RT')} or ${K('LB')}: switch bullet / lob<\/div>
     <div>Ball carrier: ${K('X')} spin · ${K('B')} stiff arm · ${K('Y')} hurdle · ${K('RB')} truck · ${K('RT')} dive · ${K('LB')} juke<\/div><div>${K('LT')} tuck and run / switch player · ${K('Start')} pause · d-pad and ${K('A')} in menus<\/div>
     <div>Defense: ${K('A')} tackle · ${K('B')} form tackle · ${K('Y')} hit stick · ${K('X')} ankle bite · hold ${K('RT')} sprint<\/div><div>Touch: the tackle wheel (bottom right) plus a Sprint button to hold<\/div>
   <\/div>`;
@@ -116,6 +136,8 @@ function padGameStep(){
   const g=padGet();if(!g||DEMO)return;const b=padBtns(g),P=PADN.prev,pr=i=>b[i]&&!P[i];
   if(b.some((x,i)=>x&&!P[i]))try{sndPadKick();}catch(e){}
   if(pr(9)&&!G.client&&G.phase!=='over'&&!G.recVid){gpPause(!G.paused);PADN.prev=b;return;}
+  if(G.phase==='replay'&&G.replay){const x=g.axes[2]||0,y=g.axes[3]||0,zi=(g.buttons[7]&&g.buttons[7].value)||0,zo=(g.buttons[6]&&g.buttons[6].value)||0; // replay free cam: right stick, triggers, R3 resets
+    G.fcPad={x:Math.abs(x)>0.2?x:0,y:Math.abs(y)>0.2?y:0,z:zi-zo};if(pr(11))gpFcReset();}else G.fcPad=null;
   const ov=padOverlay();
   if(ov){G.pad=null;padNavStep(g,b,ov,()=>{if(G.paused)gpPause(false);});PADN.prev=b;return;}
   if(PADN.f)padSetFocus(null);
@@ -129,7 +151,11 @@ function padGameStep(){
     }else if(ph==='live'){
       if(G.ballState==='air'&&pr(0)&&(G.cm||G.im)){if(G.cm&&G.cm.target&&G.cm.target.team===G.me)catchMeterTap();else intMeterTap();}
       else if(pcAIQB()&&G.ballState==='qb'){if(pr(3))pcCallBall();}
-      else if(passingUser()){[0,1,2,3,5].forEach((k,i)=>{if(pr(k))gpKeyThrow(i);});if(pr(6))scramble();if(pr(7))gpCyclePT();}
+      else if(passingUser()){
+        // hold RT / R2 and press a receiver's button for a lead pass; a tap of RT on its own (or LB) still switches bullet / lob
+        const ld=!!b[7];if(pr(7)){PADN.rtUsed=false;try{setCtl();}catch(e){}}
+        [0,1,2,3,5].forEach((k,i)=>{if(pr(k)&&gpKeyThrow(i,ld)&&ld)PADN.rtUsed=true;});if(pr(6))scramble();if(pr(4))gpCyclePT();
+        if(!b[7]&&P[7]&&!PADN.rtUsed&&passingUser())gpCyclePT();}
       else if(userCarrier()){{const mi=[[2,1],[1,2],[3,4],[5,3],[7,5],[4,0]].find(([b])=>pr(b));if(mi&&G.mwMark)G.mwMark(mi[1]);}if(pr(2))trySpin();if(pr(1))tryStiff();if(pr(3))tryHurdle();if(pr(5))tryTruck();if(pr(7))tryDive();if(pr(4))gpAutoJuke();if(pr(6))trySlow();if(pr(0)&&G.kneelOK>0)olKneel();
         const ry=g.axes[3]||0,fl=ry<-0.75?-1:ry>0.75?1:0;if(fl&&fl!==PADN.flick)tryJuke(fl*(G.flip?-1:1));PADN.flick=fl;}
       else if(G.uctl&&G.uctl.team===G.me&&gpDefending(G.me)){{const mi=[[0,0],[1,1],[3,2],[2,3],[6,4]].find(([b])=>pr(b));if(mi&&G.mwMark)G.mwMark(mi[1]);}

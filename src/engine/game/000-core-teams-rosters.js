@@ -33,9 +33,10 @@ const GDS=(()=>{let o={};try{o=JSON.parse(localStorage.getItem('gpgm_gd')||'{}')
 try{camSet(GDS.cam);}catch(e){}
 function gdsSave(){try{localStorage.setItem('gpgm_gd',JSON.stringify(GDS));}catch(e){}}
 // which way the offense attacks on screen: always right (default), always left, or real (teams switch ends every quarter)
+// right: does team 0 attack to the right? Team 1 always goes the other way, so a punt or kick flies the way its team was driving
 function gpFlipFor(off){
   let right=true;
-  if(!ON&&!DEMO){if(GDS.dir==='left')right=false;else if(GDS.dir==='real'){const q=typeof G!=='undefined'&&G.q?G.q:1;right=(q>4||q===1||q===3)?off===0:off!==0;}}
+  if(!ON&&!DEMO){if(GDS.dir==='left')right=false;else if(GDS.dir==='real'){const q=typeof G!=='undefined'&&G.q?G.q:1;right=q>4||q===1||q===3;}}
   return(off===1)===right;
 }
 let SC=1,DPR=1;
@@ -110,7 +111,7 @@ function gpTeam(id,c){
   if(c.kit)KITS[id]=kitOf(c.kit);
   if(c.pack)PACK_TEAMS[id]=c.pack;
   const roster=c.players.map(q=>{const ht=q.ht||74,wt=q.wt||210,bmi=wt*703/(ht*ht);
-    const p={id:PID++,mid:q.mid,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
+    const p={id:PID++,mid:q.mid,fs:q.fs,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
       ...Object.fromEntries('dac,tup,car,elu,btk,cit,rte,jmp,pbk,rbk,pmv,fmv,bsh,hpw,mcv,zcv,prs,end'.split(',').filter(k=>q[k]!=null).map(k=>[k,q[k]])),
       stamina:100,inj:null,body:{hs:1+(ht-74)*0.012,ws:clamp(1+(bmi-26)*0.04,0.88,1.5),belly:clamp((bmi-31)*0.09,0,0.65)},
       look:{pk:q.pk,skin:tone(q.skin||'#c68a5e'),sleeve:q.pos==='OL'||q.pos==='DL'?null:(q.sl===1?tone('#111820'):q.sl===2?tone('#ffffff'):null),visor:!!q.visor,longSock:!!q.ls,band:!!q.band,eq:q.eq||null,hair:q.hair||null,hst:q.hst||null},ovr:q.ovr,stars:q.stars>=2?Math.min(5,q.stars|0):0};
@@ -125,8 +126,9 @@ function gpTeam(id,c){
   return T;
 }
 function gpTrack(S,r){
-  if(!GP)return;const P=G.play;if(!P)return;const st=G.st||(G.st={});
-  const add=(pl,k,v)=>{if(!pl||pl.mid==null||!v)return;const o=st[pl.mid]||(st[pl.mid]={});o[k]=(o[k]||0)+v;};
+  const P=G.play;if(!P)return;const st=G.st||(G.st={}),gs=G.gs||(G.gs={});
+  // G.st (by career id) goes back to the season; G.gs (by Game Day id) is this game's line for every player, for the touchdown card
+  const add=(pl,k,v)=>{if(!pl||!v)return;const q=gs[pl.id]||(gs[pl.id]={});q[k]=(q[k]||0)+v;if(!GP||pl.mid==null)return;const o=st[pl.mid]||(st[pl.mid]={});o[k]=(o[k]||0)+v;};
   for(const e of G.ents)if(e.pl&&e.pl.mid!=null)G.played[e.pl.mid]=1;
   if(P.kind==='scrimmage'&&!G.conv&&!P.special&&r&&r.type!=='presnap'){
     const c=G.carrier,qb=G.qb&&G.qb.pl,off=G.offTeam,gain=Math.round(S.td===off?(100-G.los):(S.gain||0));

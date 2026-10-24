@@ -95,17 +95,20 @@ const MW_KEY={Juke:[4,'jukeU'],Spin:[2,'spin'],'Stiff arm':[1,'stiff'],Truck:[5,
 // W / IC / KM / lbl: the slices, icons and key map (the defense passes its own tackle wheel)
 function gpMoveWheel(box,W,IC,KM,lbl){W=W||MOVE_W;IC=IC||MW_IC;KM=KM||MW_KEY;lbl=lbl||'Moves';
   const N=W.length,C=100,R=97,r=50,gap=0.03,K=padKind(),P=K?PADG[K]:null;
+  // v2.17 the skill-move wheel mirrors with the way the ball carrier is running on screen, so Dive and Truck point where he is going
+  const c0=G.carrier,fl=W===MOVE_W&&!!(c0&&attackDir(c0)*(G.flip?-1:1)<0),keys=[];
   const pt=(rad,a)=>(C+rad*Math.cos(a)).toFixed(1)+','+(C+rad*Math.sin(a)).toFixed(1);
-  const segs=W.map(([l],i)=>{const a0=-Math.PI/2+(i-0.5)*2*Math.PI/N+gap,a1=-Math.PI/2+(i+0.5)*2*Math.PI/N-gap,am=-Math.PI/2+i*2*Math.PI/N,mr=(R+r)/2;
+  let segs=W.map(([l],i)=>{const a0=-Math.PI/2+(i-0.5)*2*Math.PI/N+gap,a1=-Math.PI/2+(i+0.5)*2*Math.PI/N-gap,am=-Math.PI/2+i*2*Math.PI/N,mr=(R+r)/2;
     const[ix,iy]=pt(mr-3,am).split(','),[kx,ky]=pt(R-9,am).split(','),mk=KM[l];
     const key=P&&mk?P.l[mk[0]]:(GPC&&mk?(mk[1]==='jukeU'?kb('jukeU')+'/'+kb('jukeD'):kb(mk[1])).toUpperCase():'');
     return`<path class="mw-s" data-i="${i}" d="M${pt(R,a0)}A${R},${R} 0 0 1 ${pt(R,a1)}L${pt(r,a1)}A${r},${r} 0 0 0 ${pt(r,a0)}Z"/>`+
       `<path class="mw-ic" data-c="${i}" transform="translate(${(+ix-13.2).toFixed(1)},${(+iy-15).toFixed(1)}) scale(1.1)" d="${IC[l]||''}"/>`+
-      (key?`<text class="mw-k" x="${kx}" y="${(+ky+(Math.sin(am)>0.5?-2:2)).toFixed(1)}" ${P&&mk?`style="fill:${P.c[mk[0]]}"`:''}>${key}<\/text>`:'');}).join('');
-  const w=document.createElement('div');w.className='mwheel';
+      (key?(keys.push(`<text class="mw-k" x="${fl?(200-kx).toFixed(1):kx}" y="${(+ky+(Math.sin(am)>0.5?-2:2)).toFixed(1)}" ${P&&mk?`style="fill:${P.c[mk[0]]}"`:''}>${key}<\/text>`),''):'');}).join('');
+  segs=(fl?`<g transform="matrix(-1 0 0 1 200 0)">${segs}<\/g>`:segs)+keys.join('');
+  const w=document.createElement('div');w.className='mwheel'+(fl?' flip':'');
   w.innerHTML=`<svg viewBox="0 0 200 200" aria-label="${lbl}">${segs}<circle class="mw-c" cx="${C}" cy="${C}" r="${r-6}"/><\/svg><div class="mw-lbl">${lbl}<\/div>`;
   box.appendChild(w);const lb=w.querySelector('.mw-lbl');let sel=-1,down=false;
-  const pickAt=ev=>{const b=w.getBoundingClientRect(),sc=b.width/200,dx=ev.clientX-(b.left+b.width/2),dy=ev.clientY-(b.top+b.height/2),d=Math.hypot(dx,dy)/sc;if(d<r*0.55||d>R+30)return-1;
+  const pickAt=ev=>{const b=w.getBoundingClientRect(),sc=b.width/200,dx=(ev.clientX-(b.left+b.width/2))*(fl?-1:1),dy=ev.clientY-(b.top+b.height/2),d=Math.hypot(dx,dy)/sc;if(d<r*0.55||d>R+30)return-1;
     let a=Math.atan2(dy,dx)+Math.PI/2;if(a<0)a+=Math.PI*2;return Math.round(a/(Math.PI*2/N))%N;};
   const mark=i=>{sel=i;w.querySelectorAll('.mw-s').forEach(p=>p.classList.toggle('on',+p.dataset.i===i));
     const lt=document.documentElement.classList.contains('g27l');w.querySelectorAll('.mw-ic').forEach(p=>{p.style.stroke=+p.dataset.c===i?'var(--tOn,#fff)':'';});lb.textContent=i>=0?W[i][0]:lbl;};

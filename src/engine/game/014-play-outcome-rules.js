@@ -128,6 +128,20 @@ function penaltyS(f){
     S.sub=`${yd} yard${yd===1?'':'s'}, replay the two-point try from the ${100-S.los}`;}
   return S;
 }
+// v2.17 personal fouls (facemask, late hit, roughing): 15 yards on top of the run and an automatic first down.
+// A foul during the play is marked off from the end of the run when he got past the line (from the line otherwise),
+// a late hit after the whistle from where the ball was dead. On a return the yards go to the team that has the ball.
+function gpPF(f){return!!(f&&(f.endSpot||/^(Facemask|Roughing the passer|Unnecessary roughness|Personal foul)/.test(f.kind||'')));}
+function gpEndSpotPen(f,S){
+  if(!gpPF(f)||!S||S.td!=null||G.conv||S.msg==='SAFETY')return null;
+  const off=G.offTeam,half=b=>Math.min(15,gpYd((100-b)/2)),T={...S,score:[...S.score],next:'scrimmage',conv:null,down:1,first:true,stop:'snap',to:false,kickTeam:null};
+  const put=(b,who,where)=>{const y=half(b);if(!(y>0))return null;T.los=gpYd(Math.min(99.9,b+y));T.toGo=gpYd(Math.min(10,100-T.los));T.msg=`${f.kind}, ${who}`;
+    T.sub=`${y>=15?'15 yards':'Half the distance'} ${where}, automatic first down`;return T;};
+  if(f.team!==off){if(S.gain==null)return null;const end=gpYd(G.los+S.gain),past=S.gain>0,b=f.late||past?end:G.los;if(b<=0)return null;
+    T.poss=off;return put(b,'defense',f.late?'from the end of the play':past?'on top of the run':'from the line of scrimmage');}
+  if(S.gain==null&&S.to&&S.poss!==off){T.poss=S.poss;return put(S.los,G.teams[off].abbr||'offense','on top of the return');}
+  return null;
+}
 function evalS(S,team){
   const d=(S.score[team]-S.score[1-team])-(G.score[team]-G.score[1-team]);
   // on a try: a replay is worth about a 45% shot at two points (less from farther back) to the team trying
@@ -154,14 +168,17 @@ function endPlay(r){
   const fouls=P.kind==='scrimmage'?G.fouls:[];
   G.result={r,S};
   // v2.16 dirty play: a late hit after the whistle is a 15-yard personal foul on top of the play (rivalry games run hotter)
-  if(P.kind==='scrimmage'&&S&&r.type==='tackle'&&!S.to&&!S.td&&!G.conv&&!fouls.length&&!G.demo&&!G.test){
+  // (a kneel-down or a spike has nobody to hit; out of bounds is where late hits happen most)
+  if(P.kind==='scrimmage'&&!P.special&&S&&(r.type==='tackle'||r.type==='oob')&&!S.to&&S.td==null&&S.msg!=='SAFETY'&&!G.conv&&!fouls.length&&!G.demo&&!G.test){
     const hot=G.ents.some(e=>e.side!==(G.carrier&&G.carrier.side)&&e.pl&&gpTr(e.pl,'hothead')&&G.carrier&&dist(e,G.carrier)<3);
-    if(!SEVENS()&&Math.random()<(GP&&GP.rival?0.035:0.01)*(hot?2:1)){fouls.push({team:1-G.offTeam,kind:'Personal foul (late hit)',yds:15,endSpot:true});try{throwFlag(G.refs[0]);SFX.hit(true);sndCrowdFor(G.offTeam,false);}catch(e){}}
+    if(!SEVENS()&&Math.random()<(GP&&GP.rival?0.035:0.01)*(hot?2:1)*(r.type==='oob'?1.6:1)){fouls.push({team:1-G.offTeam,kind:'Personal foul (late hit)',yds:15,afd:true,endSpot:true,late:true});try{throwFlag(G.refs[0]);SFX.hit(true);sndCrowdFor(G.offTeam,false);}catch(e){}}
   }
   if(r.type==='presnap'||fouls.length){
     const f=fouls[0];
     if(fouls.length>1&&fouls.some(x=>x.team!==f.team)){const R=baseS();R.msg='Offsetting penalties';R.sub='Replay the down';R.stop='snap';return commit(R,r);}
-    const pen=f.endSpot&&S&&!S.to&&!S.td&&f.team!==G.offTeam?(()=>{const T={...S,score:[...S.score]};T.los=Math.min(99,S.los+Math.min(15,Math.floor((100-S.los)/2)));T.down=1;T.toGo=Math.min(10,100-T.los);T.msg=(f.kind||'Facemask')+', defense';T.sub='15 yards, automatic first down';T.stop='snap';return T;})():penaltyS(f);
+    // a personal foul on a touchdown play: the score stands and the 15 yards are marked off on the kickoff
+    if(gpPF(f)&&S&&S.td!=null&&f.team!==S.td&&!G.conv){G.koPen=S.td;S.sub=`${S.sub?S.sub+'. ':''}${f.kind} on ${G.teams[f.team].abbr||G.teams[f.team].name}: 15 yards on the kickoff`;return commit(S,r);}
+    const pen=gpEndSpotPen(f,S)||penaltyS(f);
     if(f.pre||!S)return commit(pen,r);
     const victim=1-f.team;
     if(userDecides(victim)&&!G.simming){
@@ -181,7 +198,7 @@ function commit(S,r){
   if(G.simming)logPlay(S,r);
   G.phase='dead';
   const P=G.play;
-  if(P.kind==='scrimmage'&&S.gain!=null&&!G.conv){const o=G.offTeam,gn=Math.round(S.gain);G.stats[o].yds+=gn;if(P.off.kind==='pass')G.stats[o].pass+=gn;else G.stats[o].rush+=gn;}
+  if(P.kind==='scrimmage'&&S.gain!=null&&!G.conv){const o=G.offTeam,gn=Math.round(S.gain);G.stats[o].yds+=gn;if(P.off.kind==='pass'&&!P.special)G.stats[o].pass+=gn;else G.stats[o].rush+=gn;} // a kneel is a run
   if(S.to&&!S.td)G.stats[1-G.offTeam].to+=0,G.stats[G.offTeam].to+=(G.turnover||G.picker)?1:0;
   G.score=S.score;G.poss=S.poss;G.los=S.los;G.down=S.down;G.toGo=S.toGo;G.next=S.next;
   if(G.demo){if(S.td!=null)G.demoTD=true;G.next='scrimmage';G.conv=null;G.poss=Math.random()<0.5?0:1;G.los=Math.round(rnd(52,86));G.down=1;G.toGo=10;G.clock=QLEN;G.q=1;G.score=[0,0];}
@@ -191,7 +208,7 @@ function commit(S,r){
   else if(S.stop==='ready'){G.clockRun=false;G.restartReady=true;}
   try{gpMercy(S);}catch(e){}
   if(G.q>4)G.clockRun=false;
-  if(S.td!=null){G.cele=S.td;G.cheer=S.td===gpHomeTeam()?3:0.5;}
+  if(S.td!=null){G.cele=S.td;G.cheer=S.td===gpHomeTeam()?3:0.5;try{gpTdCard(S);}catch(e){}}
   else if(S.msg==='Interception'||S.msg==='Turnover')G.cele=1-G.offTeam;
   try{gpResultSound(S,r);}catch(e){}
   toast(S.msg,S.sub);if(G.measure){const m=G.measure;G.measure=null;setTimeout(()=>{try{flash(m);}catch(e){}},700);}
@@ -214,7 +231,7 @@ function commit(S,r){
 // the crowd and the stadium react to the result of every snap
 // v2.16 scuffles after the whistle: two players shove, the refs break it up, sometimes someone is thrown out
 function gpMaybeFight(S,r){
-  if(SEVENS()||G.demo||G.test||G.noDraw||G.simming||S.td!=null||!r||!['tackle','oob'].includes(r.type))return;
+  if(SEVENS()||G.demo||G.test||G.noDraw||G.simming||S.td!=null||!r||!['tackle','oob'].includes(r.type)||(G.play&&G.play.special))return;
   const c=G.carrier;if(!c||!c.pl)return;let b=null,bd=3;for(const e of G.ents)if(e.team!==c.team&&e.pl&&!e.hurt){const d=dist(e,c);if(d<bd){bd=d;b=e;}}if(!b)return;
   const hot=gpTr(c.pl,'hothead')||gpTr(b.pl,'hothead'),p=(GP&&GP.rival?0.05:0.012)*(hot?2.2:1)*(GP&&GP.big?1.3:1);
   if(Math.random()>=p)return;
@@ -263,7 +280,7 @@ function periodEnd(){
   const q=G.q;try{SFX.whistle();}catch(e){}
   if(q===1||q===3){G.q++;G.clock=QLEN;G.clockRun=false;flash(`End of the ${q===1?'1st':'3rd'} quarter`);nextSnap();return;}
   if(q===2){G.q=SEVENS()?4:3;G.clock=QLEN;G.clockRun=false;G.to=[3,3];G.next='kickoff';G.kickTeam=G.openRecv;G.kickSpot=35;G.conv=null;
-    const _htx=`${scoreLine()}. ${G.teams[G.openRecv].name} received the opening kickoff, so they kick off to start the second half.`+(!ON&&G.openRecv===G.me?' You start this half on defense.':!ON?' You get the ball first this half.':'');
+    const _htx=`${scoreLine()}. ${G.teams[G.openRecv].name} received the opening kickoff, so they kick off to start the second half.`+(!ON&&gpAutoSimTeam(1-G.openRecv)?` ${1-G.openRecv===G.me?'Your':'Their'} first drive is simulated.`:!ON&&G.openRecv===G.me?' You start this half on defense.':!ON?' You get the ball first this half.':'');
     olInfo('Halftime',_htx);
     showModal('Halftime',_htx,[['Start 2nd half','go',nextSnap]]);if(ON)olAutoGo(12);return;}
   if(G.score[0]===G.score[1]){startOT();return;}
@@ -296,6 +313,7 @@ function nextSnap(){
   if(G.next==='kickoff'&&SEVENS()){const R=1-G.kickTeam;G.poss=R;G.offTeam=R;G.los=40;G.down=1;G.toGo=10;G.next='scrimmage';G.conv=null;G.onsideNext=false;G.clockRun=false;
     G.phase='dead';setTray('none');$('ctl').innerHTML='';toast('New possession',`${G.teams[R].abbr} ball at its own 40`);updateHUD();G.after={t:1.1,fn:proceed};return;}
   if(G.next==='kickoff'){
+    if(G.koPen!=null){if(G.koPen===G.kickTeam&&!G.ot)G.kickSpot=Math.min(50,(G.kickSpot||35)+15);G.koPen=null;}
     if(G.ot){otAdjust({next:'kickoff',poss:G.poss});if(G.next==='over'){gameOver();return;}return nextSnap();}
     const kt=G.kickTeam,trail=G.score[1-kt]-G.score[kt];
     const go=onside=>{G.onsideNext=onside===true&&!userDecides(kt)?pick(['std','left','right','popup']):onside;if(!onside&&GDS.kr===false&&!ON&&!G.test&&!G.demo&&!(GP&&GP.practice)&&!G.simming&&!G.simQtr&&!G.gpFast){gpQuickKick(G.kickTeam);return;}setupKickoff(G.kickTeam,G.kickSpot);toPresnap();};
@@ -305,12 +323,17 @@ function nextSnap(){
   }
   if(G.next==='conv'){
     const t=G.conv.team;G.offTeam=G.poss=t;
+    // offense-only / defense-only games: the other side's try is simulated too (a pick six used to put you on defense for the two-point try)
+    if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&!pcOn()&&gpAutoSimTeam(t)){G.drivePoss=t;startSim(true,nextSnap);return;}
     const sp=G.conv.los||97,go=two=>{if(two){G.los=sp;G.down=1;G.toGo=100-sp;G.conv.two=true;openCall();}else{G.conv.two=false;G.los=sp;setupFG('xp');toPresnap();}};
     if(G.conv.force2||G.conv.rep||SEVENS()){go(true);return;}
     if(userDecides(t)&&!G.simming){olAsk(t,'Conversion','Kick the extra point from the 3, or go for two?',[['Extra point','go'],['Go for two','alt']],i=>go(i===1));return;}
     const d=G.score[t]-G.score[1-t];go(G.q>=4&&[-2,-5,-10,1,-1].includes(d)&&Math.random()<0.8);return;
   }
-  if(G.simming&&(G.poss!==G.simTeam||G.q!==G.simQ&&G.q===3)){endSim();return;}
+  if(G.simming&&(G.poss!==G.simTeam||G.q!==G.simQ&&G.q===3&&!(G.simAuto&&gpAutoSimTeam(G.poss)))){endSim();return;}
+  // offense-only / defense-only: checked every snap, not only when the ball changes hands. A drive simulated into halftime used to hand
+  // you the other side's second-half drive (same team with the ball, so no new drive was seen) with no way to simulate it
+  if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&!pcOn()&&gpAutoSimTeam(G.poss)){G.drivePoss=G.poss;startSim(true);return;}
   // Player Career: checked every snap, not only when the ball changes hands, so a series without your unit is always simulated
   if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&!ON&&pcOn()){if(G.poss!==G.drivePoss){G.drivePoss=G.poss;pcDrive();}if(!G.pcIn){pcBenchOut();startSim(true);if(G.pcRot)$('simTitle').textContent='Rotation: the coach gives your backup this series';return;}}
   else if(!G.simming&&!G.test&&!G.simQtr&&!G.gpFast&&G.poss!==G.drivePoss){G.drivePoss=G.poss;if(!ON){if(gpAutoSimDrive()){startSim(true);return;}drivePrompt();return;}}

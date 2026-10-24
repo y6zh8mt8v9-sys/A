@@ -40,7 +40,7 @@ function setTray(mode){
       if(uOff&&!pcAIQB()){btn(box,'Snap','go',doSnap,'enter');if(!G.conv)btn(box,'Audible','alt',gpPlayAudOpen);}else if(uOff&&me&&me.role!=='OL')btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');if(uOff&&me&&me.route&&['WR','TE','SL','SR','X','Z','Y'].some(r=>me.role===r||me.slot===r||(me.pl&&me.pl.pos===r)))btn(box,'Flip side','alt',gpPcFlip);
       G.hint=me?`Coach's call: ${(G.pbp&&G.pbp.call)||'–'}. You are #${me.pl.num}, the ringed player${uOff&&!pcAIQB()?'. Snap when ready.':'. The ball is snapped for you.'}`:'Coach has you on the sideline for this play.';
     }else if(P.kind==='scrimmage'){
-      if(uOff){btn(box,'Snap','go',doSnap,'enter');if(!ON&&!G.conv)btn(box,'Audible','alt',gpPlayAudOpen);G.hint='Routes and names show before the snap. Tap Snap when ready, or Audible to change the play.';}
+      if(uOff){btn(box,'Snap','go',doSnap,'enter');if(!ON&&!G.conv&&!P.special)btn(box,'Audible','alt',gpPlayAudOpen);G.hint='Routes and names show before the snap. Tap Snap when ready, or Audible to change the play.';}
       else{btn(box,'Switch player','alt',switchUser);
         if(gpDAdjOK()){const A=G.dAdj||{};btn(box,DADJ_COV[A.cov||0],A.cov?'go':'alt',()=>gpDAdj('cov'),'v');btn(box,A.spy?'QB spy: on':'QB spy: off',A.spy?'go':'alt',()=>gpDAdj('spy'),'y');btn(box,A.con?'Contain: on':'Contain: off',A.con?'go':'alt',()=>gpDAdj('con'),'n');}
         G.hint=ON?'Tap a linebacker or defensive back to control him. Your opponent snaps the ball.':'Tap a linebacker or defensive back to control him. The offense will snap soon.';}
@@ -83,7 +83,8 @@ function setCtl(){
   }else if(G.phase==='live'&&G.ballState==='qb'&&!isAI(G.offTeam)&&G.offTeam===G.me&&P.kind==='scrimmage'&&P.off.kind==='pass'){
     G.hint='Pull back to aim, release to throw. Tap the screen (or Space) to switch between a bullet and a lob; every play starts with a bullet. Drag from the QB to step around the pocket.';
     btn(box,'Pass: '+PT_N[G.lob?'lob':'bullet'],G.lob?'alt':'go',gpCyclePT,'Space');btn(box,'QB run','alt',scramble,kb('scramble'));
-    {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[6,'Scramble'],[7,'Pass type']]));}
+    {const n=gpThrowTargets().length;padLegend(box,[[0,'Receiver 1'],[1,'Receiver 2'],[2,'Receiver 3'],[3,'Receiver 4'],[5,'Receiver 5']].slice(0,n).concat([[7,'Hold + receiver: lead pass'],[4,'Pass type'],[6,'Scramble']]));}
+    if(GPC)G.hint+=' Keys 1-5 throw to a receiver, Shift + the number throws a lead pass out in front of him.';
   }
   if(G.phase==='presnap'&&P&&pcOn()&&!G.meter){if(pcAIQB()&&G.offTeam===G.me)padLegend(box,[[3,'Call for ball']]);}
   else if(G.phase==='presnap'&&P&&!isAI(G.me)&&!G.meter){if(G.offTeam===G.me&&P.kind==='scrimmage')padLegend(box,[[0,'Snap'],[9,'Pause']].filter(x=>x[0]<8));else if(gpDefending(G.me))padLegend(box,[[6,'Switch player']]);}
