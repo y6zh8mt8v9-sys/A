@@ -341,7 +341,7 @@ function pcOfferSpread(p,pops){
   const pickIn=(lo,hi,f)=>{const A=colRange(lo,hi).filter(c=>ok(c)&&(!f||f(c)));return A.length?A[Math.floor(Math.random()*A.length)]:null;};
   const Lc=Math.max(2,L),nUp=O.filter(o=>colPr(o)>Lc+9).length,nDn=O.filter(o=>colPr(o)<Lc-12).length,nOut=O.filter(o=>{const c=COL_BY[o.school+'|'+o.lvl];return c&&c.st!==st;}).length;
   // reach: rare, and the bigger the jump the rarer (a 2-star sees an FBS offer or two at most)
-  if(nUp<2&&Math.random()<0.045*jr){const c=pickIn(Lc+8,Lc+18);if(c)addOffer(p,c,pops,'reach offer');}
+  if(nUp<2&&Math.random()<0.03*jr){const c=pickIn(Lc+8,Lc+16);if(c)addOffer(p,c,pops,'reach offer');}
   // a level or two down: steady interest from schools where he would start early (blue-chip recruits rarely hear from them)
   if(nDn<4&&Math.random()<(sg>=4?0.02:sg>=3?0.08:0.14)*jr){const c=pickIn(Math.max(0,Lc-32),Lc-13);if(c)addOffer(p,c,pops,'');}
   // out of state: staffs from other states recruit him at his level
