@@ -1730,34 +1730,31 @@ function interestBadges(ints){
 }
 
 // ═══════════ DREAM SCHOOL ═══════════
-// Each player gets a dream school based on dev potential and position.
-// If that school ever offers them, they instantly commit.
-const _DREAM_FBS_ELITE=['Llano Grande','Coralina','Magnolia','Cascadia','Coralina State','Llano Grande State','Cumberland','Crestfield','Magnolia State','Llano Grande A&M','Wakota','Summit','Acadia','Cascadia State','Tierra Alta','Cumberland State'];
-const _DREAM_FBS_MID=['Crestfield Tech','Tierra Alta State','Central Tierra Alta','Beckett University','Cascadia Tech','Summit State','Winslow University','Wickham University','Ranger Christian','Summit Mines','Acadia Tech','Crestfield State','Magnolia A&M','Northam University','South Acadia','Ormsby University','Western Llano Grande','Eastern Magnolia','Southern Cascadia','Cumberland Tech','Borger State','Harrington University','Sonora State','Ravenwood','Elgin'];
-const _DREAM_FCS_SCHOOLS=['Silsbee State','Kaimana','Seguin','Dumas','Sandberg State','Kountze','Sweetwater Christian','Dalhart State','Cotulla State','Lampasas State','Southern Acadia State','Abilene','Northern Summit','Crestwood State','Westby State'];
-colKeepArr(_DREAM_FBS_ELITE,'FBS');colKeepArr(_DREAM_FBS_MID,'FBS');colKeepArr(_DREAM_FCS_SCHOOLS,'FCS');
-if(!_DREAM_FBS_MID.length)_DREAM_FBS_MID.push(...D1FBS.slice(-10));if(!_DREAM_FCS_SCHOOLS.length)_DREAM_FCS_SCHOOLS.push(...D1FCS.slice(0,8));
-
+// Each player gets a dream school based on dev potential and position, taken from this world's colleges (so renamed
+// and custom colleges show up). If that school ever offers them, they instantly commit.
+function _dreamPools(){const F=D1FBS,C=D1FCS.length?D1FCS:F,n=Math.min(16,F.length);
+  return{el:F.slice(0,n),mid:F.length>n?F.slice(n,Math.min(60,F.length)):F,fcs:C.slice(0,Math.min(30,C.length)),d2:D2.length?D2:C,d3:D3.length?D3:C};}
+function dreamOk(d){return!!(d&&typeof COL_BY!=='undefined'&&COL_BY[d.school+'|'+d.lvl]);}
 function genDreamSchool(dev, pot, pos){
-  const r=Math.random();
+  const r=Math.random(),P=_dreamPools(),fcsL=D1FCS.length?'FCS':'FBS',d2L=D2.length?'D2':fcsL,d3L=D3.length?'D3':fcsL;
   // Elite dev or high pot, dream big
   if(dev==='Elite Dev'||pot>=88){
-    return r<0.65?{lvl:'FBS',school:pick(_DREAM_FBS_ELITE)}:{lvl:'FBS',school:pick(_DREAM_FBS_MID)};
+    return r<0.65?{lvl:'FBS',school:pick(P.el)}:{lvl:'FBS',school:pick(P.mid)};
   }
   if(dev==='Star'||pot>=76){
-    if(r<0.35)return{lvl:'FBS',school:pick(_DREAM_FBS_ELITE)};
-    if(r<0.70)return{lvl:'FBS',school:pick(_DREAM_FBS_MID)};
-    return{lvl:'FCS',school:pick(_DREAM_FCS_SCHOOLS)};
+    if(r<0.35)return{lvl:'FBS',school:pick(P.el)};
+    if(r<0.70)return{lvl:'FBS',school:pick(P.mid)};
+    return{lvl:fcsL,school:pick(P.fcs)};
   }
   if(dev==='Impact'||pot>=64){
-    if(r<0.15)return{lvl:'FBS',school:pick(_DREAM_FBS_MID)};
-    if(r<0.55)return{lvl:'FCS',school:pick(_DREAM_FCS_SCHOOLS)};
-    return{lvl:'D2',school:pick(D2)};
+    if(r<0.15)return{lvl:'FBS',school:pick(P.mid)};
+    if(r<0.55)return{lvl:fcsL,school:pick(P.fcs)};
+    return{lvl:d2L,school:pick(P.d2)};
   }
   // Normal dev, modest dreams
-  if(r<0.25)return{lvl:'FCS',school:pick(_DREAM_FCS_SCHOOLS)};
-  if(r<0.60)return{lvl:'D2',school:pick(D2)};
-  return{lvl:'D3',school:pick(D3)};
+  if(r<0.25)return{lvl:fcsL,school:pick(P.fcs)};
+  if(r<0.60)return{lvl:d2L,school:pick(P.d2)};
+  return{lvl:d3L,school:pick(P.d3)};
 }
 
 const GAME_DATES=[];
@@ -3428,11 +3425,13 @@ function _mimgTint(c1,c2,bw,ow){const id='mt'+c1.slice(1)+c2.slice(1)+Math.round
       +`<feMorphology in="SourceAlpha" operator="dilate" radius="${bw}" result="a1"/><feFlood flood-color="${c2}"/><feComposite in2="a1" operator="in" result="b1"/>`
       +`<feMorphology in="SourceAlpha" operator="dilate" radius="${bw+ow}" result="a2"/><feFlood flood-color="${_LGINK}"/><feComposite in2="a2" operator="in" result="b2"/>`
       +`<feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="t"/></feMerge></filter>`);_LGF[id]=1;}return id;}
+// the drawn art's bounds depend only on which drawing it is, so they are measured once per drawing
+const _LGBB=new Map();
 // a mascot (library image or drawn art) fitted into a box (x,y,w,h) with a band in c2 and an ink line around it
 function _vgMascot(L,x,y,w,h,bw,ow){
   if(L.img){const fl=L.flip?` transform="translate(${2*x+w} 0) scale(-1 1)"`:'';
     return`<use href="#${_mimgSym(L.img)}" x="${x}" y="${y}" width="${w}" height="${h}" filter="url(#${_mimgTint(L.c1,L.c2,bw,ow)})"${fl}/>`;}
-  const art=L.art,bb=_lgm(art);if(!bb)return'';
+  const art=L.art,bb=_LGBB.get(L.bk)||_lgm(art);if(!bb)return'';_LGBB.set(L.bk,bb);
   const sc=Math.min(w/bb.width,h/bb.height),tx=x+(w-bb.width*sc)/2-bb.x*sc,ty=y+(h-bb.height*sc)/2-bb.y*sc,k=1/sc;
   return`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${sc.toFixed(4)})">`+(ow?_vgSil(art,_LGINK,(bw+ow)*k):'')+(bw?_vgSil(art,L.c2,bw*k):'')+art+'</g>';}
 const _VG_STAR='M0 -10 L2.35 -3.24 L9.51 -3.09 L3.8 1.24 L5.88 8.09 L0 4 L-5.88 8.09 L-3.8 1.24 L-9.51 -3.09 L-2.35 -3.24Z';
@@ -3487,7 +3486,7 @@ function _sLogoBody(s,sz,ck){
   const P={var:(h>>>11)%2,F:c1,K:_lm(c1)>.45?_mx(c1,'#000000',.7):'#f4f6f8',L:_mx(c1,'#ffffff',.42),D:_mx(c1,'#000000',.4),A:Math.abs(_lm(c1)-_lm('#f0b72f'))<.22?c2:'#f0b72f',O:_LGINK,ch:ini};
   if(!L.img&&L.k){let PP=P;const v=L.v;
     if(v==='polar')PP=Object.assign({},P,{F:'#eef2f6',L:'#ffffff',D:'#aebbc8',K:'#1b2430'});else if(v==='zebra')PP=Object.assign({},P,{F:'#f2f2f2',L:'#ffffff',D:'#17191c',K:'#111111'});else if(v==='raven')PP=Object.assign({},P,{F:'#23262d',L:'#5a6170',D:'#0d0e11',K:'#f4f6f8'});
-    try{L.art=_LGO[L.k](PP,v);if(L.flip)L.art=`<g transform="${_MR}">${L.art}</g>`;}catch(e){L.art='';}}
+    try{L.art=_LGO[L.k](PP,v);if(L.flip)L.art=`<g transform="${_MR}">${L.art}</g>`;}catch(e){L.art='';}L.bk=L.k+'|'+v+'|'+L.flip+'|'+P.var+'|'+(L.k==='paw'||L.k==='claw'?ini:'');}
   const M=(x,y,w,hh)=>_vgMascot(L,x,y,w,hh,bw,ow);
   const letter=(r,tf,sc)=>(kb?_vgInk(r.o,tf,sc,c1,kb,bw+2.4,ow,sh):'')+_vgInk(r.o,tf,sc,c1,band,kb?2:bw,kb?0:ow,kb?0:sh);
   let body='';
@@ -9453,13 +9452,11 @@ function _claimDraftSlot(gradYr,round,preferredPick,rngFn){
 }
 
 // Prestige tiers for FBS schools, affects stat volume and award chances
-const _FBS_ELITE=['Llano Grande','Coralina','Magnolia','Cascadia','Coralina State','Llano Grande A&M','Llano Grande State','Cumberland','Wakota','Crestfield','Magnolia State','Summit','Acadia'];
-const _FBS_GOOD=['Cascadia State','Tierra Alta','Cumberland State','Summit Mines','Crestfield Tech','Tierra Alta State','Crestfield State','Magnolia A&M','Ormsby University','Cumberland Tech','Borger State'];
-colKeepArr(_FBS_ELITE,'FBS');colKeepArr(_FBS_GOOD,'FBS');
-
+// FBS colleges are listed best first, so the tier follows the college's place in this world's list (renamed ones keep theirs)
 function _fbsPrestigeTier(school){
-  if(_FBS_ELITE.includes(school))return'elite';
-  if(_FBS_GOOD.includes(school))return'good';
+  const i=D1FBS.indexOf(school);
+  if(i>=0&&i<13)return'elite';
+  if(i>=13&&i<24)return'good';
   return'mid';
 }
 
@@ -15132,6 +15129,8 @@ function applySaveText(txt){
         try{colMigrate();}catch(e){console.error('colleges',e);}
         try{proMigrate();}catch(e){console.error('pro names',e);}
         try{colMigrate3();}catch(e){console.error('colleges v3',e);}
+        // a dream school that is not one of this world's colleges (renamed or replaced) is picked again
+        try{for(const p of G.players)if(p.dreamSchool&&!dreamOk(p.dreamSchool))p.dreamSchool=genDreamSchool(p.dev||'Normal',p.pot||50,p.pos||'QB');}catch(e){}
         if(G.players.some(p=>p.sg===undefined)){G._thr=null;for(const p of G.players)if(p.sg===undefined){p.sg=p.stars||0;p.stars=p.grad?(p.stars||0):natTarget(p);}}
         for(const p of (G.hofArchive||[]))_migrateArchivedPlayer(p);
         for(const p of (G.wlArchive||[]))_migrateArchivedPlayer(p);

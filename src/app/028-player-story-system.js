@@ -175,13 +175,11 @@ function _claimDraftSlot(gradYr,round,preferredPick,rngFn){
 }
 
 // Prestige tiers for FBS schools, affects stat volume and award chances
-const _FBS_ELITE=['Llano Grande','Coralina','Magnolia','Cascadia','Coralina State','Llano Grande A&M','Llano Grande State','Cumberland','Wakota','Crestfield','Magnolia State','Summit','Acadia'];
-const _FBS_GOOD=['Cascadia State','Tierra Alta','Cumberland State','Summit Mines','Crestfield Tech','Tierra Alta State','Crestfield State','Magnolia A&M','Ormsby University','Cumberland Tech','Borger State'];
-colKeepArr(_FBS_ELITE,'FBS');colKeepArr(_FBS_GOOD,'FBS');
-
+// FBS colleges are listed best first, so the tier follows the college's place in this world's list (renamed ones keep theirs)
 function _fbsPrestigeTier(school){
-  if(_FBS_ELITE.includes(school))return'elite';
-  if(_FBS_GOOD.includes(school))return'good';
+  const i=D1FBS.indexOf(school);
+  if(i>=0&&i<13)return'elite';
+  if(i>=13&&i<24)return'good';
   return'mid';
 }
 
