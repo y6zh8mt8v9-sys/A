@@ -136,6 +136,7 @@ const SUPPORT_EMAIL='';
 function supportHtml(){return SUPPORT_EMAIL?`<a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>`:'the support contact on the game\'s store page';}
 function legalTop(){try{const t=document.getElementById('title');document.getElementById('mo').classList.toggle('ontop',!!t&&!t.classList.contains('hid'));}catch(e){}}
 function termsOpen(){try{closeSettings();}catch(e){}legalTop();openMo(`<div style="font-weight:900;font-size:20px;margin-bottom:8px">Terms of use</div><div style="font-size:13px;line-height:1.55;max-height:60vh;overflow-y:auto">
+  <p><b>Copyright.</b> ${G27_COPY.line} The game, its code, art and data may not be copied, re-hosted, changed for redistribution or sold without permission.</p>
   <p>Playing offline needs no account. The account rules below apply to Online Play.</p>
   <p><b>No objectionable content or abusive players.</b> There is zero tolerance for offensive, hateful, sexual, threatening or harassing usernames, profiles, messages or shared saves, and for cheating that ruins other players' games.</p>
   <p><b>Reporting and blocking.</b> You can block or report any player from their profile or your friends list. Reports are reviewed within 24 hours; content that breaks these terms is removed and the account responsible can be suspended or deleted.</p>

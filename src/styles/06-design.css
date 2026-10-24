@@ -174,3 +174,6 @@ html body .soc-av{font-family:var(--hd)!important}
 html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 
 @media (prefers-reduced-motion:reduce){html body *{animation:none!important;transition:none!important}}
+
+/* copyright line on the title screen */
+#title .tt-copy{margin-top:6px;text-align:center;font:500 11px var(--font);color:var(--mute);opacity:.8}
