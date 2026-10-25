@@ -53,11 +53,11 @@ function endzoneText(s,y,yards,col,rev){
   ctx.setTransform(m);
 }
 const EZG=new Map();function ezGlyph(d){let p=EZG.get(d);if(!p){p=new Path2D(d);EZG.set(d,p);}return p;}
-function endzoneLogo(y,x,size,rev){if(GP)return;
-  // laid flat on the turf the same way as the midfield logo
-  const im=logoImg.gull;if(!(im.complete&&im.naturalWidth))return;
-  const p=proj(x,y),sz=size*p.k,sq=HC*p.k/SS*1.1,m=ctx.getTransform();
-  ctx.translate(p.sx,p.sy);ctx.scale(rev?-1:1,sq);ctx.drawImage(im,-sz/2,-sz/2,sz,sz);ctx.setTransform(m);
+// an image painted on the turf, size in yards, centered on (x across, y along): it is projected the same way as the
+// yard lines (squashed into the distance and slanted away from the camera), so it stays put while the camera moves
+function turfImage(im,x,y,size,rev){
+  const p=proj(x,y),dk=p.k*p.k/SS*1.1,m=ctx.getTransform();
+  ctx.translate(p.sx,p.sy);ctx.transform(p.k*(rev?-1:1),0,(y-G.camY)*dk,HC*dk,0,0);ctx.drawImage(im,-size/2,-size/2,size,size);ctx.setTransform(m);
 }
 function groundText(s,x,y,yards,col){
   const p=proj(x,y),fs=yards*p.k,sq=HC*p.k/SS*1.1;
@@ -100,8 +100,7 @@ function drawField(lines){
   }
   const im=logoImg.gull,HT=GP?GP.teams[GP.home||0]:null;
   if(ST.logo==='logo'&&im.complete&&im.naturalWidth&&left<66&&right>54){
-    const p=proj(CX,60),sz=(ST.tier>=16?9:ST.tier>=10?8:7)*p.k,sq=HC*p.k/SS*1.1;
-    ctx.save();ctx.translate(p.sx,p.sy);ctx.scale(1,sq);ctx.globalAlpha=0.9;ctx.drawImage(im,-sz/2,-sz/2,sz,sz);ctx.restore();
+    turfImage(im,CX,60,ST.tier>=16?9:ST.tier>=10?8:7,false);
   }else if(ST.logo==='initial'&&left<66&&right>54){const ch=HT?(HT.abbr||HT.name||'H')[0]:'G';groundText(ch,CX,60,7,shade(ST.c2||'#f2b632',0.95));}
   {const a=proj(FW+1.2,G.camY).sy,x0=Math.max(0,proj(FW+1.2,-8).sx),x1=Math.min(W,proj(FW+1.2,128).sx);if(x1>x0){ctx.fillStyle=TRK(0);ctx.fillRect(x0,Math.round(a),x1-x0,H);if(ST.track&&!ST.indoor){ctx.fillStyle=TRK(1);ctx.fillRect(x0,Math.round(a)+5,x1-x0,1);ctx.fillRect(x0,Math.round(a)+10,x1-x0,1);}}}
   // both end zones belong to the home team

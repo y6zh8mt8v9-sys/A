@@ -334,6 +334,22 @@ html.g27 #gpPrevGo,html.g27 #gpRePass,html.g27 #tutGo,html.g27 #tutSkip,html.g27
 html.g27 .mbar{border-radius:3px}
 /* score bug numbers and the clock read like the stadium board */
 html.g27 #bug .sc,html.g27 #bug #clock{font-family:var(--hd)!important;font-weight:900!important}
+/* every scorebug style in the red and black look: black body, red underline, team colors on the team halves, no gloss */
+html.g27 #bug{border-radius:0!important;background:#0a0a0b!important;box-shadow:0 6px 18px rgba(0,0,0,.5)!important;border-bottom:3px solid var(--post)!important}
+html.g27 #bug .tm::after{display:none!important}
+html.g27 #bug .tm{border-bottom:0!important}
+html.g27 #bug .sc{background:#0a0a0b!important;color:#fff!important;text-shadow:none!important}
+html.g27 #bug .mid{background:#141416!important}
+html.g27 #bug .clk,html.g27 #bug #clock{color:#fff!important}
+html.g27 #bug .clk span:first-child{color:var(--post)!important}
+html.g27 #bug .dd{color:#d4d4d8!important}
+html.g27 #bug .dd b{background:var(--post)!important;color:#fff!important;border-radius:0!important}
+html.g27 #bug .nm b,html.g27 #bug .home .nm b{color:#fff!important}
+html.g27 #bug .wxl{color:#a1a1aa!important}
+html.g27 body.bug-slab #bug{border-bottom:0!important;border-top:3px solid var(--post)!important}
+html.g27 body.bug-slab #bug .sc{background:#f4f4f5!important;color:#0a0a0b!important}
+html.g27 body.bug-tower #bug .tm .sc{background:rgba(0,0,0,.45)!important}
+html.g27 #noiseM{background:rgba(10,10,11,.9);border-radius:0}
 html.g27 #flash{font-family:var(--hd)!important;font-weight:900!important}
 html.g27 #t2{background:var(--cs);color:var(--ink);border:0;border-left:3px solid var(--post);border-radius:4px;font-family:var(--bf)}
 /* catch, sack and penalty call-outs, the big touchdown line and the drive / quarter sim summary */

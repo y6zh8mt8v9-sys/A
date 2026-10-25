@@ -44,6 +44,8 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 - **Team edits show everywhere:** loading screens (including "Saving before kickoff" and the Player Career waits) always show a team's current name and logo, and renamed teams keep their rank badges.
 - **Game Day call-outs:** catch, sack and penalty call-outs, the touchdown line and the drive / quarter sim summary use the new plates and fonts; the field dims behind the sim summary. Drive log lines read properly again ("Gain of 3. Inches short of the first down") and show downs like the play call screen.
 - **Clean-up:** 28 functions nothing used any more were removed.
+- **Scorebugs:** all five styles (TV, Slab, Tower, Mini, Classic) are black with red accents and your team colors, no gloss.
+- **Midfield logo:** solid instead of see-through, and painted onto the turf in perspective, so it stays put on the field like the yard lines while the camera moves.
 
 ### Previous update
 - **Kanra Digital:** the game now opens with a Kanra Digital loading screen (logo, progress bar; tap or press a key to skip), and every copyright line reads "© 2026 Kanra Digital. All rights reserved."
