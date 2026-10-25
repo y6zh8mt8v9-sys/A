@@ -1,6 +1,6 @@
 // ═══════════ SCHOOL / PLAYER MODALS ═══════════
 function viewSchool(id){
-  const s=getS(id);if(!s)return;
+  const s=getS(id);if(!s)return;_moNext=()=>viewSchool(id);
   const pl=sPlayers(id).sort((a,b)=>b.rat-a.rat);const div=divOf(id);const w=s.wins,l=s.losses;
   openMo(`<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     ${sLogo(s,60)}<div>
@@ -96,7 +96,7 @@ function showPlayer(id){
   let p=getP(id);
   if(!p)p=(G.wlArchive||[]).find(x=>x.id===id);
   if(!p)p=(G.hofArchive||[]).find(x=>x.id===id);
-  if(!p)return;
+  if(!p)return;_moNext=()=>showPlayer(id);
   const isGraduated=!G.players.find(x=>x.id===id);
   const sch=getS(p.sId)||{name:'Alumni',id:p.sId,c1:'#333',c2:'#fff',mascot:'Alumni',abbr:'AL'};
   const isMe=p.sId===G.myId,ctl=isMe&&!pcAuto(),own=p.id===G.myPlayerId; // ctl: coach controls (none in Player Career)

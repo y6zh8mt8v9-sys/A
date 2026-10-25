@@ -492,7 +492,12 @@ function ccProNext(){const C=G.cc;if(C.stage==='done'){openMo(`<div style="text-
   setTimeout(()=>{try{ccHsYear();}catch(e){console.error(e);}try{const g=aiG(),a=g.alumni[C.pid],src=(G.hofArchive||[]).find(x=>x.id===C.pid)||C.p;if(a&&!a.done&&a.last<G.yr)aiAdvance(a,src,G.yr,true);const e=a&&a.entries[a.entries.length-1];if(a&&a.done)C.stage='done';
       if(e)openMo(`<div style="padding:6px"><h2>${e.y}</h2><div style="font-weight:800;margin-bottom:6px">${e.hl||''}</div>${(e.tx||[]).map(t=>`<div style="font-size:13px;margin-bottom:4px">${t}</div>`).join('')}<div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo()">Continue</button></div></div>`);}catch(e){console.error(e);}
     try{if(ld)ld.classList.remove('active');}catch(e){}ccSave();nav('dash');},60);}
-window.ccBackToHs=function(){if(!G.cc)return;G.cc.on=false;G.cc.stage=G.cc.stage==='college'?'left':G.cc.stage;nav('dash');};
+window.ccBackToHs=function(){if(!G.cc)return;G.cc.on=false;G.cc.hsView=true;nav('dash');};
+// back from the high school view to your own college or pro career
+window.ccResume=function(){if(!G.cc)return;G.cc.on=true;G.cc.hsView=false;if(G.cc.stage==='left')G.cc.stage='college';_navHist=[];nav('dash');};
+// (a college career you never started stays behind its own opt-in)
+function ccResumeBar(){const C=G.cc;if(!C||C.on||!C.p||!(C.hsView||['pro','done','left'].includes(C.stage)))return'';const lbl=C.stage==='pro'?'pro career':C.stage==='done'?'career story':'college career';
+  return`<div class="pnl" style="margin-bottom:10px"><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${face(C.p.fs,40)}<div style="flex:1;min-width:180px"><b>${C.p.fn} ${C.p.ln}</b><div style="font-size:12px;color:var(--mu)">You are looking at the high school. Your ${lbl} is waiting.</div></div><button class="btn bgn" onclick="ccResume()">Back to my ${lbl} ›</button></div></div>`;}
 
 // ── college screens: the dashboard, the College page (schedule, standings, rankings, roster, postseason, stats) and My Player
 function ccTeamLn(k,extra){const I=colInfo(k),rk=ccRankOf(k);return`<span style="display:inline-flex;align-items:center;gap:6px;min-width:0">${colLogo(k,22)}<span class="dt-ln${k===G.cc.k?' me':''}">${rk?'<b>#'+rk+'</b> ':''}${I.name}</span>${extra||''}</span>`;}

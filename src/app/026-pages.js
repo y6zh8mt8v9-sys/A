@@ -1,6 +1,9 @@
 // ═══════════ PAGES ═══════════
 function pgDash(){
   if(ccOn())return ccDash();
+  let _res='';try{_res=ccResumeBar();}catch(e){}if(_res)return _res+pgDashHs();
+  return pgDashHs();}
+function pgDashHs(){
   const ms=myS(),pl=myP();
   const nextUnplayed=G.sched.find(g=>!g.result);
   const curYear=2026+(G.yr-1);

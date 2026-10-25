@@ -1002,6 +1002,28 @@ html body #coachc{background:var(--mow),var(--bg)!important}
 #coachc .cc-seg.on{background:var(--post)!important;border-color:var(--post);color:#fff;box-shadow:none}
 #coachc .cc-sw.on{outline-color:var(--post)}
 #coachc input[type=range],#coachc input[type=checkbox]{accent-color:var(--post)}
+/* main menu: scrolls when the buttons do not fit (short phones, landscape, small laptop windows) */
+#title .tt-main{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--post) transparent}
+#title .tt-main>*{flex-shrink:0}
+/* tabs and pages animate when you switch: the page slides in, the red bar grows under the tab you picked */
+html body .tab,html body .pfb,html body .news-filt,.cnav-sub button,.nb,[id^="np-"]{transition:color .18s ease,background-color .18s ease,border-color .18s ease,transform .12s ease}
+html body .tab:active,html body .pfb:active,.cnav-sub button:active{transform:translateY(1px)}
+html body .tab{background-image:linear-gradient(var(--ac),var(--ac))!important;background-repeat:no-repeat!important;background-position:50% 100%!important;background-size:0 3px!important}
+html body .tab.on{background-size:100% 3px!important;border-bottom-color:transparent!important}
+#ct.pg-in .tab.on{animation:tabBar .32s cubic-bezier(.2,.8,.2,1) both}
+@keyframes tabBar{from{background-size:0 3px}to{background-size:100% 3px}}
+#ct.pg-in>*{animation:pgIn .3s cubic-bezier(.2,.8,.2,1) both}
+#ct.pg-in>*:nth-child(2){animation-delay:.04s}#ct.pg-in>*:nth-child(3){animation-delay:.08s}#ct.pg-in>*:nth-child(4){animation-delay:.12s}#ct.pg-in>*:nth-child(n+5){animation-delay:.16s}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.tt-btns .tt-btn{animation:ttBtnIn .42s cubic-bezier(.2,.8,.2,1) both}
+.tt-btns .tt-btn:nth-child(2){animation-delay:.05s}.tt-btns .tt-btn:nth-child(3){animation-delay:.1s}.tt-btns .tt-btn:nth-child(4){animation-delay:.15s}.tt-btns .tt-btn:nth-child(5){animation-delay:.2s}.tt-btns .tt-btn:nth-child(6){animation-delay:.25s}.tt-btns .tt-btn:nth-child(n+7){animation-delay:.3s}
+@keyframes ttBtnIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+/* Back: the bar above a page and the button in a card's corner */
+.pg-backbar{display:flex;margin:0 0 8px}
+.pg-back{display:inline-flex;align-items:baseline;gap:8px;background:none;border:0;color:var(--chalk,var(--tx));font:700 14px/1 var(--font);padding:8px 10px 8px 2px;cursor:pointer;min-height:36px}
+.pg-back small{font-weight:500;color:var(--mute,var(--mu));font-size:12px}
+.pg-back:hover{color:var(--post)}
+#mc2>.mo-back{margin:0 0 10px;display:inline-flex}
 /* ════════ Career story scenes: a cutscene card inside the modal (tokens from 06-design.css) ════════ */
 .st-scene{display:flex;flex-direction:column;gap:12px;max-width:620px;margin:0 auto}
 .st-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px;padding-right:36px;background:var(--yardline);background-position:bottom;padding-top:0}
@@ -1111,6 +1133,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 <div id="setup">
   <!-- SETUP SCREEN: two-column layout with map on left, controls on right -->
   <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:1200px;gap:10px;padding:16px;">
+    <div style="align-self:flex-start"><button class="bgh bsm" onclick="ttSetupBack()">‹ Main menu</button></div>
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;">
       <h1 style="font-family:var(--hd);font-size:42px;font-weight:900;letter-spacing:2px;margin:0"><span class="r">Gridiron</span>&nbsp;<span class="b">27</span></h1>
       <p style="color:var(--mu);font-size:13px;margin:0">Pick your states, take a job offer from the map and build your program.</p>
@@ -1440,7 +1463,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'ca1644d61c'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'cba8ab6ac4'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -6556,7 +6579,7 @@ function pgColleges(){_colStReady();
     <div style="overflow-x:auto"><table><thead><tr><th>College</th><th>Level</th><th>State</th><th>Prestige</th><th>Class</th><th>Jr</th><th>In-state</th><th>Top</th></tr></thead><tbody>${rows||'<tr><td colspan="8" style="color:var(--mu)">No colleges match.</td></tr>'}</tbody></table></div></div></div>`;
 }
 window.colShow=function(k){_colStReady();
-  const c=COL_BY[k];if(!c)return;const m=colCommitMap(),ps=(m[k]||[]).slice().sort((a,b)=>b.yr-a.yr||(b.stars||0)-(a.stars||0)||b.rat-a.rat),o=colCls(c,G.yr),yr0=2026+(G.yr-1);
+  const c=COL_BY[k];if(!c)return;_moNext=()=>colShow(k);const m=colCommitMap(),ps=(m[k]||[]).slice().sort((a,b)=>b.yr-a.yr||(b.stars||0)-(a.stars||0)||b.rat-a.rat),o=colCls(c,G.yr),yr0=2026+(G.yr-1);
   const need=Object.keys(o.need).map(pos=>{const cm=o.com[pos]||0,n=o.need[pos];return`<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 7px;border-radius:8px;background:${cm>=n?'rgba(40,180,90,.18)':'var(--s2)'};border:1px solid var(--bd);font-size:11px"><b>${pos}</b> ${cm}/${n}</span>`;}).join('');
   const row=p=>{const s=getS(p.sId);return`<tr class="cl" onclick="clo();showPlayer(${p.id})"><td>${p.fn} ${p.ln}${p.sId===G.myId?' <span style="color:var(--gd);font-size:10px">Yours</span>':''}</td><td><span class="pb2">${p.pos}</span></td><td>${stars(p.stars)}</td><td>${p.rat}</td><td>${s?s.name:''}</td><td>${s?stName(stOf(s)):''}${s&&stOf(s)===c.st?' <span style="color:var(--gn);font-size:10px">In-state</span>':''}</td></tr>`;};
   const sr=ps.filter(p=>p.yr===12),jr=ps.filter(p=>p.yr<12);
@@ -8411,7 +8434,10 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
   if(ccOn()&&G.cc.stage==='college'&&CC_TAB[page]){arg=CC_TAB[page];page='college';} // college: high school league links open the college tab
   if(pcHidePg(page)){page='dash';arg=undefined;} // Player Career: coach pages (old saves, deep links) go to the dashboard
   try{pcAutoTick();}catch(e){console.error('player career auto',e);}
-  const _prevPg=G._page;
+  const _prevPg=G._page,_prevArg=G._arg;
+  if(_navG!==G){_navG=G;_navHist=[];}
+  if(!_navBacking&&_prevPg&&(_prevPg!==page||_prevArg!==arg)){_navHist.push([_prevPg,_prevArg]);if(_navHist.length>40)_navHist.shift();try{history.pushState({g27:1},'');}catch(e){}}
+  _navBacking=false;
   G._page=page;G._arg=arg;
   if(['dash','depth','roster','jv'].includes(page)){try{autoJVCallup(true);}catch(e){console.error('autoJVCallup',e);}}
   try{intlEnsure();}catch(e){console.error('intl',e);}
@@ -8431,6 +8457,8 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
       document.getElementById('ct').innerHTML=`<div class="pnl"><div class="ph">Render Error</div><div class="pb" style="color:var(--rd)">Failed to load this page: <strong>${err.message}</strong><br><span style="color:var(--mu);font-size:11px">Check the browser console for details. Try loading the page again or re-loading your save.</span></div></div>`;
     }
   }
+  if(page!=='dash'&&_navHist.length){const c=document.getElementById('ct'),pv=_navHist[_navHist.length-1];if(c)c.insertAdjacentHTML('afterbegin',`<div class="pg-backbar"><button class="pg-back" onclick="navBack()">‹ Back<small>${navLbl(pv[0],pv[1])}</small></button></div>`);}
+  pgAnim(page!==_prevPg||arg!==_prevArg);
   updateTb();
   updateSbCard();
   try{aiBadge();}catch(e){}
@@ -8439,6 +8467,37 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
   // Clear news badge when visiting news
   if(page==='news'){const b=document.getElementById('news-badge');if(b)b.style.display='none';}
 }
+// page history: every page you open can step back to the one before (the Back bar, Escape, and the phone or browser back button)
+let _navHist=[],_navBacking=false,_navG=null;
+function navLbl(pg,arg){if(pg==='roster'&&arg!=null&&arg!==G.myId){const s=getS(arg);if(s)return s.name;}if(pg==='college')return'College';try{return cnavLbl(pg);}catch(e){return pg;}}
+window.navBack=function(){const e=_navHist.pop();if(!e){nav('dash');return;}_navBacking=true;nav(e[0],e[1]);};
+// what Back closes first: the top window, then the open screen, then the page; on the dashboard it asks about the main menu
+function g27Back(){const vis=id=>{const e=document.getElementById(id);return e&&getComputedStyle(e).display!=='none'&&!e.classList.contains('hid');};
+  if(document.getElementById('gd-ov'))return; // Game Day has its own pause menu
+  const pu=document.getElementById('pu');if(pu&&pu.classList.contains('open'))return;
+  if(vis('settings-modal')){try{closeSettings();}catch(e){}return;}
+  if(vis('tut-overlay')){try{closeTutorial();}catch(e){}return;}
+  const mo=document.getElementById('mo');if(mo&&mo.classList.contains('open')){moBack();return;}
+  if(vis('confirm-menu')){document.getElementById('confirm-menu').style.display='none';return;}
+  if(vis('team-builder')){try{closeTeamBuilder();}catch(e){}return;}
+  if(vis('div-editor')){try{closeDivEditor();}catch(e){}return;}
+  if(document.getElementById('fp')&&vis('fp')){try{fpClose();}catch(e){}return;}
+  if(document.getElementById('ol')&&vis('ol')){try{olClose();}catch(e){}return;}
+  if(vis('coachc')){const b=[...document.querySelectorAll('#coachc button')].find(x=>/back/i.test(x.textContent));if(b)b.click();return;}
+  if(vis('title')){if(!document.getElementById('tt-load').classList.contains('hid'))try{ttBack();}catch(e){}return;}
+  if(vis('setup')){ttSetupBack();return;}
+  if(!G||!G.myId)return;
+  if(_navHist.length){navBack();return;}
+  if(G._page&&G._page!=='dash'){_navBacking=true;nav('dash');return;}
+  try{confirmMainMenu();}catch(e){}}
+// one spare history entry keeps the phone's back gesture inside the game instead of leaving the site
+(function(){try{history.pushState({g27:1},'');}catch(e){}
+  window.addEventListener('popstate',()=>{try{g27Back();}finally{try{history.pushState({g27:1},'');}catch(e){}}});
+  window.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented)return;const t=e.target;if(t&&/INPUT|TEXTAREA|SELECT/.test(t.tagName))return;g27Back();});})();
+// a new page, or a different tab or filter on the same page, slides in; re-renders of the same view stay still
+let _pgTabSig='';
+function pgAnim(changed){const c=document.getElementById('ct');if(!c)return;const sig=[...c.querySelectorAll('.tab.on,.pfb.on,.news-filt.on')].map(t=>t.textContent).join('|');
+  c.classList.remove('pg-in');if(changed||sig!==_pgTabSig){void c.offsetWidth;c.classList.add('pg-in');}_pgTabSig=sig;}
 function updateSbCard(){
   if(!G||!G.myId)return;
   {const b=document.getElementById('nb-mine');if(b)b.style.display=G.myPlayerId!=null?'':'none';}
@@ -8460,6 +8519,9 @@ function updateSbCard(){
 // ═══════════ PAGES ═══════════
 function pgDash(){
   if(ccOn())return ccDash();
+  let _res='';try{_res=ccResumeBar();}catch(e){}if(_res)return _res+pgDashHs();
+  return pgDashHs();}
+function pgDashHs(){
   const ms=myS(),pl=myP();
   const nextUnplayed=G.sched.find(g=>!g.result);
   const curYear=2026+(G.yr-1);
@@ -11039,6 +11101,7 @@ function ttIntro(){if(window._ttIntroDone)return;if(window.__ks&&!window.__ks.do
 function hideTitle(){const t=_ttEl('title');if(t)t.classList.add('hid');if(window._sbT){clearInterval(window._sbT);window._sbT=null;}}
 function ttClock(){if(window._sbT)return;let s=120;window._sbT=setInterval(()=>{const el=document.getElementById('sb-clock'),t=_ttEl('title');if(!el||!t||t.classList.contains('hid')){clearInterval(window._sbT);window._sbT=null;return;}s=s<=0?120:s-1;el.textContent='4TH '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s===114){const h=document.getElementById('sb-h');if(h)h.textContent=h.textContent==='21'?'27':'21';}},1000);}
 function ttNew(){hideTitle();_ttEl('app').classList.add('hid');_ttEl('setup').classList.remove('hid');setupEnsure();}
+window.ttSetupBack=function(){_ttEl('setup').classList.add('hid');showTitle(false);};
 function ttPlayer(){ttNew();const on=document.getElementById('pc-on'),lk=document.getElementById('pc-lock'),f=document.getElementById('pc-fields');
   if(on)on.checked=true;if(lk)lk.checked=true;if(f){f.style.display='';setTimeout(()=>{try{f.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}},200);}
   try{notify('Player Career: pick the high school he plays for on the map, then build your player in the player creator.');}catch(e){}}
@@ -14243,7 +14306,7 @@ function swRTab2(btn,id){
 
 // ═══════════ SCHOOL / PLAYER MODALS ═══════════
 function viewSchool(id){
-  const s=getS(id);if(!s)return;
+  const s=getS(id);if(!s)return;_moNext=()=>viewSchool(id);
   const pl=sPlayers(id).sort((a,b)=>b.rat-a.rat);const div=divOf(id);const w=s.wins,l=s.losses;
   openMo(`<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     ${sLogo(s,60)}<div>
@@ -14339,7 +14402,7 @@ function showPlayer(id){
   let p=getP(id);
   if(!p)p=(G.wlArchive||[]).find(x=>x.id===id);
   if(!p)p=(G.hofArchive||[]).find(x=>x.id===id);
-  if(!p)return;
+  if(!p)return;_moNext=()=>showPlayer(id);
   const isGraduated=!G.players.find(x=>x.id===id);
   const sch=getS(p.sId)||{name:'Alumni',id:p.sId,c1:'#333',c2:'#fff',mascot:'Alumni',abbr:'AL'};
   const isMe=p.sId===G.myId,ctl=isMe&&!pcAuto(),own=p.id===G.myPlayerId; // ctl: coach controls (none in Player Career)
@@ -15250,8 +15313,15 @@ function startPlayoffs(){
 }
 
 // ═══════════ MODAL ═══════════
-function openMo(html){document.getElementById('mc2').innerHTML=html;document.getElementById('mo').classList.add('open');}
-function clo(){const m=document.getElementById('mo');m.classList.remove('open');m.classList.remove('ontop');}
+// viewer cards (player, school, college) remember how to reopen themselves, so Back steps through the chain you clicked;
+// a viewer opened right after closing another (a link that closes first) still counts as the next step. Any other window starts fresh.
+let _moStack=[],_moCur=null,_moNext=null,_moShut=false;
+function openMo(html,again){again=again||_moNext;_moNext=null;const m=document.getElementById('mo'),chained=m.classList.contains('open')||_moShut;
+  if(again&&chained&&_moCur){_moStack.push(_moCur);if(_moStack.length>15)_moStack.shift();}else if(!again||!chained)_moStack=[];
+  _moCur=again||null;
+  document.getElementById('mc2').innerHTML=(_moStack.length?'<button class="mo-back bgh bsm" onclick="moBack()">‹ Back</button>':'')+html;m.classList.add('open');}
+function clo(){const m=document.getElementById('mo');m.classList.remove('open');m.classList.remove('ontop');if(!_moShut){_moShut=true;setTimeout(()=>{_moShut=false;},0);}}
+window.moBack=function(){const f=_moStack.pop();if(!f){clo();return;}_moCur=null;try{f();}catch(e){console.error('back',e);clo();}};
 function clov(e){if(e.target===document.getElementById('mo'))clo();}
 
 // ═══════════ TOPBAR ═══════════
@@ -18062,7 +18132,12 @@ function ccProNext(){const C=G.cc;if(C.stage==='done'){openMo(`<div style="text-
   setTimeout(()=>{try{ccHsYear();}catch(e){console.error(e);}try{const g=aiG(),a=g.alumni[C.pid],src=(G.hofArchive||[]).find(x=>x.id===C.pid)||C.p;if(a&&!a.done&&a.last<G.yr)aiAdvance(a,src,G.yr,true);const e=a&&a.entries[a.entries.length-1];if(a&&a.done)C.stage='done';
       if(e)openMo(`<div style="padding:6px"><h2>${e.y}</h2><div style="font-weight:800;margin-bottom:6px">${e.hl||''}</div>${(e.tx||[]).map(t=>`<div style="font-size:13px;margin-bottom:4px">${t}</div>`).join('')}<div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo()">Continue</button></div></div>`);}catch(e){console.error(e);}
     try{if(ld)ld.classList.remove('active');}catch(e){}ccSave();nav('dash');},60);}
-window.ccBackToHs=function(){if(!G.cc)return;G.cc.on=false;G.cc.stage=G.cc.stage==='college'?'left':G.cc.stage;nav('dash');};
+window.ccBackToHs=function(){if(!G.cc)return;G.cc.on=false;G.cc.hsView=true;nav('dash');};
+// back from the high school view to your own college or pro career
+window.ccResume=function(){if(!G.cc)return;G.cc.on=true;G.cc.hsView=false;if(G.cc.stage==='left')G.cc.stage='college';_navHist=[];nav('dash');};
+// (a college career you never started stays behind its own opt-in)
+function ccResumeBar(){const C=G.cc;if(!C||C.on||!C.p||!(C.hsView||['pro','done','left'].includes(C.stage)))return'';const lbl=C.stage==='pro'?'pro career':C.stage==='done'?'career story':'college career';
+  return`<div class="pnl" style="margin-bottom:10px"><div class="pb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${face(C.p.fs,40)}<div style="flex:1;min-width:180px"><b>${C.p.fn} ${C.p.ln}</b><div style="font-size:12px;color:var(--mu)">You are looking at the high school. Your ${lbl} is waiting.</div></div><button class="btn bgn" onclick="ccResume()">Back to my ${lbl} ›</button></div></div>`;}
 
 // ── college screens: the dashboard, the College page (schedule, standings, rankings, roster, postseason, stats) and My Player
 function ccTeamLn(k,extra){const I=colInfo(k),rk=ccRankOf(k);return`<span style="display:inline-flex;align-items:center;gap:6px;min-width:0">${colLogo(k,22)}<span class="dt-ln${k===G.cc.k?' me':''}">${rk?'<b>#'+rk+'</b> ':''}${I.name}</span>${extra||''}</span>`;}

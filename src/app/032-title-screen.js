@@ -18,6 +18,7 @@ function ttIntro(){if(window._ttIntroDone)return;if(window.__ks&&!window.__ks.do
 function hideTitle(){const t=_ttEl('title');if(t)t.classList.add('hid');if(window._sbT){clearInterval(window._sbT);window._sbT=null;}}
 function ttClock(){if(window._sbT)return;let s=120;window._sbT=setInterval(()=>{const el=document.getElementById('sb-clock'),t=_ttEl('title');if(!el||!t||t.classList.contains('hid')){clearInterval(window._sbT);window._sbT=null;return;}s=s<=0?120:s-1;el.textContent='4TH '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s===114){const h=document.getElementById('sb-h');if(h)h.textContent=h.textContent==='21'?'27':'21';}},1000);}
 function ttNew(){hideTitle();_ttEl('app').classList.add('hid');_ttEl('setup').classList.remove('hid');setupEnsure();}
+window.ttSetupBack=function(){_ttEl('setup').classList.add('hid');showTitle(false);};
 function ttPlayer(){ttNew();const on=document.getElementById('pc-on'),lk=document.getElementById('pc-lock'),f=document.getElementById('pc-fields');
   if(on)on.checked=true;if(lk)lk.checked=true;if(f){f.style.display='';setTimeout(()=>{try{f.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}},200);}
   try{notify('Player Career: pick the high school he plays for on the map, then build your player in the player creator.');}catch(e){}}

@@ -268,3 +268,25 @@ html body #coachc{background:var(--mow),var(--bg)!important}
 #coachc .cc-seg.on{background:var(--post)!important;border-color:var(--post);color:#fff;box-shadow:none}
 #coachc .cc-sw.on{outline-color:var(--post)}
 #coachc input[type=range],#coachc input[type=checkbox]{accent-color:var(--post)}
+/* main menu: scrolls when the buttons do not fit (short phones, landscape, small laptop windows) */
+#title .tt-main{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--post) transparent}
+#title .tt-main>*{flex-shrink:0}
+/* tabs and pages animate when you switch: the page slides in, the red bar grows under the tab you picked */
+html body .tab,html body .pfb,html body .news-filt,.cnav-sub button,.nb,[id^="np-"]{transition:color .18s ease,background-color .18s ease,border-color .18s ease,transform .12s ease}
+html body .tab:active,html body .pfb:active,.cnav-sub button:active{transform:translateY(1px)}
+html body .tab{background-image:linear-gradient(var(--ac),var(--ac))!important;background-repeat:no-repeat!important;background-position:50% 100%!important;background-size:0 3px!important}
+html body .tab.on{background-size:100% 3px!important;border-bottom-color:transparent!important}
+#ct.pg-in .tab.on{animation:tabBar .32s cubic-bezier(.2,.8,.2,1) both}
+@keyframes tabBar{from{background-size:0 3px}to{background-size:100% 3px}}
+#ct.pg-in>*{animation:pgIn .3s cubic-bezier(.2,.8,.2,1) both}
+#ct.pg-in>*:nth-child(2){animation-delay:.04s}#ct.pg-in>*:nth-child(3){animation-delay:.08s}#ct.pg-in>*:nth-child(4){animation-delay:.12s}#ct.pg-in>*:nth-child(n+5){animation-delay:.16s}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.tt-btns .tt-btn{animation:ttBtnIn .42s cubic-bezier(.2,.8,.2,1) both}
+.tt-btns .tt-btn:nth-child(2){animation-delay:.05s}.tt-btns .tt-btn:nth-child(3){animation-delay:.1s}.tt-btns .tt-btn:nth-child(4){animation-delay:.15s}.tt-btns .tt-btn:nth-child(5){animation-delay:.2s}.tt-btns .tt-btn:nth-child(6){animation-delay:.25s}.tt-btns .tt-btn:nth-child(n+7){animation-delay:.3s}
+@keyframes ttBtnIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+/* Back: the bar above a page and the button in a card's corner */
+.pg-backbar{display:flex;margin:0 0 8px}
+.pg-back{display:inline-flex;align-items:baseline;gap:8px;background:none;border:0;color:var(--chalk,var(--tx));font:700 14px/1 var(--font);padding:8px 10px 8px 2px;cursor:pointer;min-height:36px}
+.pg-back small{font-weight:500;color:var(--mute,var(--mu));font-size:12px}
+.pg-back:hover{color:var(--post)}
+#mc2>.mo-back{margin:0 0 10px;display:inline-flex}

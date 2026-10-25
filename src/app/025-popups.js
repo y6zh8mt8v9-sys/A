@@ -169,7 +169,10 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
   if(ccOn()&&G.cc.stage==='college'&&CC_TAB[page]){arg=CC_TAB[page];page='college';} // college: high school league links open the college tab
   if(pcHidePg(page)){page='dash';arg=undefined;} // Player Career: coach pages (old saves, deep links) go to the dashboard
   try{pcAutoTick();}catch(e){console.error('player career auto',e);}
-  const _prevPg=G._page;
+  const _prevPg=G._page,_prevArg=G._arg;
+  if(_navG!==G){_navG=G;_navHist=[];}
+  if(!_navBacking&&_prevPg&&(_prevPg!==page||_prevArg!==arg)){_navHist.push([_prevPg,_prevArg]);if(_navHist.length>40)_navHist.shift();try{history.pushState({g27:1},'');}catch(e){}}
+  _navBacking=false;
   G._page=page;G._arg=arg;
   if(['dash','depth','roster','jv'].includes(page)){try{autoJVCallup(true);}catch(e){console.error('autoJVCallup',e);}}
   try{intlEnsure();}catch(e){console.error('intl',e);}
@@ -189,6 +192,8 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
       document.getElementById('ct').innerHTML=`<div class="pnl"><div class="ph">Render Error</div><div class="pb" style="color:var(--rd)">Failed to load this page: <strong>${err.message}</strong><br><span style="color:var(--mu);font-size:11px">Check the browser console for details. Try loading the page again or re-loading your save.</span></div></div>`;
     }
   }
+  if(page!=='dash'&&_navHist.length){const c=document.getElementById('ct'),pv=_navHist[_navHist.length-1];if(c)c.insertAdjacentHTML('afterbegin',`<div class="pg-backbar"><button class="pg-back" onclick="navBack()">‹ Back<small>${navLbl(pv[0],pv[1])}</small></button></div>`);}
+  pgAnim(page!==_prevPg||arg!==_prevArg);
   updateTb();
   updateSbCard();
   try{aiBadge();}catch(e){}
@@ -197,6 +202,37 @@ function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e
   // Clear news badge when visiting news
   if(page==='news'){const b=document.getElementById('news-badge');if(b)b.style.display='none';}
 }
+// page history: every page you open can step back to the one before (the Back bar, Escape, and the phone or browser back button)
+let _navHist=[],_navBacking=false,_navG=null;
+function navLbl(pg,arg){if(pg==='roster'&&arg!=null&&arg!==G.myId){const s=getS(arg);if(s)return s.name;}if(pg==='college')return'College';try{return cnavLbl(pg);}catch(e){return pg;}}
+window.navBack=function(){const e=_navHist.pop();if(!e){nav('dash');return;}_navBacking=true;nav(e[0],e[1]);};
+// what Back closes first: the top window, then the open screen, then the page; on the dashboard it asks about the main menu
+function g27Back(){const vis=id=>{const e=document.getElementById(id);return e&&getComputedStyle(e).display!=='none'&&!e.classList.contains('hid');};
+  if(document.getElementById('gd-ov'))return; // Game Day has its own pause menu
+  const pu=document.getElementById('pu');if(pu&&pu.classList.contains('open'))return;
+  if(vis('settings-modal')){try{closeSettings();}catch(e){}return;}
+  if(vis('tut-overlay')){try{closeTutorial();}catch(e){}return;}
+  const mo=document.getElementById('mo');if(mo&&mo.classList.contains('open')){moBack();return;}
+  if(vis('confirm-menu')){document.getElementById('confirm-menu').style.display='none';return;}
+  if(vis('team-builder')){try{closeTeamBuilder();}catch(e){}return;}
+  if(vis('div-editor')){try{closeDivEditor();}catch(e){}return;}
+  if(document.getElementById('fp')&&vis('fp')){try{fpClose();}catch(e){}return;}
+  if(document.getElementById('ol')&&vis('ol')){try{olClose();}catch(e){}return;}
+  if(vis('coachc')){const b=[...document.querySelectorAll('#coachc button')].find(x=>/back/i.test(x.textContent));if(b)b.click();return;}
+  if(vis('title')){if(!document.getElementById('tt-load').classList.contains('hid'))try{ttBack();}catch(e){}return;}
+  if(vis('setup')){ttSetupBack();return;}
+  if(!G||!G.myId)return;
+  if(_navHist.length){navBack();return;}
+  if(G._page&&G._page!=='dash'){_navBacking=true;nav('dash');return;}
+  try{confirmMainMenu();}catch(e){}}
+// one spare history entry keeps the phone's back gesture inside the game instead of leaving the site
+(function(){try{history.pushState({g27:1},'');}catch(e){}
+  window.addEventListener('popstate',()=>{try{g27Back();}finally{try{history.pushState({g27:1},'');}catch(e){}}});
+  window.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented)return;const t=e.target;if(t&&/INPUT|TEXTAREA|SELECT/.test(t.tagName))return;g27Back();});})();
+// a new page, or a different tab or filter on the same page, slides in; re-renders of the same view stay still
+let _pgTabSig='';
+function pgAnim(changed){const c=document.getElementById('ct');if(!c)return;const sig=[...c.querySelectorAll('.tab.on,.pfb.on,.news-filt.on')].map(t=>t.textContent).join('|');
+  c.classList.remove('pg-in');if(changed||sig!==_pgTabSig){void c.offsetWidth;c.classList.add('pg-in');}_pgTabSig=sig;}
 function updateSbCard(){
   if(!G||!G.myId)return;
   {const b=document.getElementById('nb-mine');if(b)b.style.display=G.myPlayerId!=null?'':'none';}

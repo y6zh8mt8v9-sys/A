@@ -1,6 +1,13 @@
 // ═══════════ MODAL ═══════════
-function openMo(html){document.getElementById('mc2').innerHTML=html;document.getElementById('mo').classList.add('open');}
-function clo(){const m=document.getElementById('mo');m.classList.remove('open');m.classList.remove('ontop');}
+// viewer cards (player, school, college) remember how to reopen themselves, so Back steps through the chain you clicked;
+// a viewer opened right after closing another (a link that closes first) still counts as the next step. Any other window starts fresh.
+let _moStack=[],_moCur=null,_moNext=null,_moShut=false;
+function openMo(html,again){again=again||_moNext;_moNext=null;const m=document.getElementById('mo'),chained=m.classList.contains('open')||_moShut;
+  if(again&&chained&&_moCur){_moStack.push(_moCur);if(_moStack.length>15)_moStack.shift();}else if(!again||!chained)_moStack=[];
+  _moCur=again||null;
+  document.getElementById('mc2').innerHTML=(_moStack.length?'<button class="mo-back bgh bsm" onclick="moBack()">‹ Back</button>':'')+html;m.classList.add('open');}
+function clo(){const m=document.getElementById('mo');m.classList.remove('open');m.classList.remove('ontop');if(!_moShut){_moShut=true;setTimeout(()=>{_moShut=false;},0);}}
+window.moBack=function(){const f=_moStack.pop();if(!f){clo();return;}_moCur=null;try{f();}catch(e){console.error('back',e);clo();}};
 function clov(e){if(e.target===document.getElementById('mo'))clo();}
 
 // ═══════════ TOPBAR ═══════════

@@ -169,7 +169,7 @@ function pgColleges(){_colStReady();
     <div style="overflow-x:auto"><table><thead><tr><th>College</th><th>Level</th><th>State</th><th>Prestige</th><th>Class</th><th>Jr</th><th>In-state</th><th>Top</th></tr></thead><tbody>${rows||'<tr><td colspan="8" style="color:var(--mu)">No colleges match.</td></tr>'}</tbody></table></div></div></div>`;
 }
 window.colShow=function(k){_colStReady();
-  const c=COL_BY[k];if(!c)return;const m=colCommitMap(),ps=(m[k]||[]).slice().sort((a,b)=>b.yr-a.yr||(b.stars||0)-(a.stars||0)||b.rat-a.rat),o=colCls(c,G.yr),yr0=2026+(G.yr-1);
+  const c=COL_BY[k];if(!c)return;_moNext=()=>colShow(k);const m=colCommitMap(),ps=(m[k]||[]).slice().sort((a,b)=>b.yr-a.yr||(b.stars||0)-(a.stars||0)||b.rat-a.rat),o=colCls(c,G.yr),yr0=2026+(G.yr-1);
   const need=Object.keys(o.need).map(pos=>{const cm=o.com[pos]||0,n=o.need[pos];return`<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 7px;border-radius:8px;background:${cm>=n?'rgba(40,180,90,.18)':'var(--s2)'};border:1px solid var(--bd);font-size:11px"><b>${pos}</b> ${cm}/${n}</span>`;}).join('');
   const row=p=>{const s=getS(p.sId);return`<tr class="cl" onclick="clo();showPlayer(${p.id})"><td>${p.fn} ${p.ln}${p.sId===G.myId?' <span style="color:var(--gd);font-size:10px">Yours</span>':''}</td><td><span class="pb2">${p.pos}</span></td><td>${stars(p.stars)}</td><td>${p.rat}</td><td>${s?s.name:''}</td><td>${s?stName(stOf(s)):''}${s&&stOf(s)===c.st?' <span style="color:var(--gn);font-size:10px">In-state</span>':''}</td></tr>`;};
   const sr=ps.filter(p=>p.yr===12),jr=ps.filter(p=>p.yr<12);
