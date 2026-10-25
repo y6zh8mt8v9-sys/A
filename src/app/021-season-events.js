@@ -68,7 +68,9 @@ function buildPlayoffBracket(){
   // SOS weight tripled (was *2, now *8), two teams with same record are
   // meaningfully separated by schedule difficulty. A team that schedules
   // higher-OVR opponents gets a real seeding edge over a cupcake schedule.
-  const all=allSchools().map(s=>{
+  // your playoff division only: the other division of your classification plays its own bracket (G.playoff.others)
+  const myPd=pdOf(myS());
+  const all=allSchools().filter(s=>pdOf(s)===myPd).map(s=>{
     const wr=s.wins/(s.wins+s.losses+.001);
     const sos=calcSOS(s.id);
     const seed=wr*1000+sos*8+(s.prestige||1)*5;
@@ -76,7 +78,7 @@ function buildPlayoffBracket(){
   }).sort((a,b)=>b._seed-a._seed);
 
   const N=Math.min(poSeasonN(),1<<Math.floor(Math.log2(Math.max(2,all.length)))),PR=poRules(),pick=[];
-  if(PR.q==='div')for(const d of G.divisions){const b=all.find(s=>d.teams.some(t=>t.id===s.id));if(b&&pick.length<N)pick.push(b);} // division winners first
+  if(PR.q==='div')for(const d of G.divisions){const b=all.find(s=>d.teams.some(t=>t.id===s.id));if(b&&pick.length<N)pick.push(b);} // league winners first (the best team of your playoff division in each league)
   for(const s of all){if(pick.length>=N)break;if(!pick.includes(s))pick.push(s);}
   pick.sort((a,b)=>b._seed-a._seed);
   const field=pick;
@@ -87,7 +89,7 @@ function buildPlayoffBracket(){
     G.trophies=G.trophies||[];
     G.trophies.push({type:'Division',yr:G.yr,rec:`${G.wins}-${G.losses}`});
     G.prestige=clamp(G.prestige+.2,1,5);
-    addLog(`<span style="color:var(--gd)">Division Champion! ${G.wins}-${G.losses}</span>`);
+    addLog(`<span style="color:var(--gd)">League Champion! ${G.wins}-${G.losses}</span>`);
   }
 
   G.playoff={
@@ -97,7 +99,9 @@ function buildPlayoffBracket(){
     myElim:!iMyTeam,
     champ:false,
     stateChamp:false,
-    rounds:[]
+    rounds:[],
+    pd:myPd,
+    others:pdOthersBuild(N,myPd)
   };
 
   const playoffSlots=G.sched.filter(g=>g.type==='bye'||g.type==='playoff');
@@ -118,7 +122,7 @@ function buildPlayoffBracket(){
       const noQPop=bEvPop('State Champion Crowned',`Your team did not qualify for the playoffs.<br><br><strong style="color:var(--gd)">${noQChamp.name} ${noQChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(noQChamp,64),'var(--gd)');
       _popQ=[noQPop];_popI=0;_popCb=()=>nav('dash');showPop();
     }
-    G.phase='postseason';
+    (pdOthersFinishSafe(),G.phase='postseason');
     addLog(`<span style="color:var(--mu)">Did not qualify for state playoffs.</span>`);
     return false;
   }
@@ -146,7 +150,7 @@ function setNextPlayoffGame(){
     }
     const remainingSlots=G.sched.filter(g=>(g.type==='playoff'||g.type==='bye')&&!g.result);
     for(const s of remainingSlots){s.type='bye';s.result='bye';s.label='Bye Week';}
-    G.phase='postseason';
+    (pdOthersFinishSafe(),G.phase='postseason');
     return;
   }
 
@@ -155,7 +159,7 @@ function setNextPlayoffGame(){
 
   // Find next unused schedule slot
   const slot=G.sched.find(g=>(g.type==='bye'||g.type==='playoff')&&!g.result&&g.result!=='bye');
-  if(!slot){G.phase='postseason';return;}
+  if(!slot){(pdOthersFinishSafe(),G.phase='postseason');return;}
 
   const myIdx=bracket.findIndex(s=>s.id===G.myId);
 
@@ -215,6 +219,7 @@ function simPlayoffRound(round,slot,myResult){
 
   G.playoff.rounds.push({round,results:roundResults});
   G.playoff.bracket=survivors;
+  try{pdOthersRound();}catch(e){console.error('other playoff divisions',e);}
 }
 
 function advPlayoffWeek(){
@@ -297,7 +302,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
       addLog(`<span style="color:var(--gd)">State champion: ${stateChamp.name} ${stateChamp.mascot} (${champRec})</span>`);
       pops.push(bEvPop('State Champion Crowned',`<strong style="color:var(--gd)">${stateChamp.name} ${stateChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(stateChamp,64),'var(--gd)'));
     }
-    G.phase='postseason';
+    (pdOthersFinishSafe(),G.phase='postseason');
   } else if(G.playoff.bracket.length<=1){
     // Call setNextPlayoffGame(), it correctly sets champ flag, pushes State trophy, awards prestige/budget
     setNextPlayoffGame();

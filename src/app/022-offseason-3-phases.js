@@ -420,15 +420,15 @@ function finalizeOffseason(){
   const divWon=_snapDivWinners.some(dw=>dw.id===G.myId&&dw.clear!==false);
   const divBonus=divWon?35000:0;
   if(divWon){
-    pops.push(bEvPop('Division Champions!',`Your team won the division title! <strong style="color:var(--gd)">+$35,000 bonus!</strong>`,null,'var(--gd)'));
-    addLog(`<span style="color:var(--gd)">Division champions! +$35,000</span>`);
+    pops.push(bEvPop('League Champions!',`Your team won the league title! <strong style="color:var(--gd)">+$35,000 bonus!</strong>`,null,'var(--gd)'));
+    addLog(`<span style="color:var(--gd)">League champions! +$35,000</span>`);
   }
   G.budget+=baseBudget+divBonus;
   // ── Snapshot record BEFORE resetting wins/losses for the new year ──
   const _endWins=G.wins, _endLosses=G.losses;
   try{const q=myPlayer();if(q&&!q.grad&&G.players.includes(q))q._snap={rat:q.rat,at:Object.assign({},q.at||{}),spd:q.spd,str:q.str,awr:q.awr};}catch(e){}
   try{jobOffersGen(_endWins,_endLosses,!!(G.playoff&&(G.playoff.stateChamp||G.playoff.stateChampId===G.myId)),divWon);}catch(e){console.error('jobs',e);}
-  G.yr++;G.wins=0;G.losses=0;(()=>{try{progOffseason();}catch(e){}})(),G.phase='offseason';G.osPhase=0;G.playoff=null;G.seasonRivalId=null;
+  G.yr++;G.wins=0;G.losses=0;pdNewSeason();(()=>{try{progOffseason();}catch(e){}})(),G.phase='offseason';G.osPhase=0;G.playoff=null;G.seasonRivalId=null;
 
   // ── End-of-season for other leagues: determine champ, reset, regenerate ──
   if(G.allLeagues){

@@ -51,7 +51,7 @@ function wsGrab(){
   if(WS.tab==='states'){D.states=D.states||{};for(const k of ST_ORDER){const x=v('ws-st-'+k);if(x!=null){const n=wsClean(x);if(n&&n!==O.states[k])D.states[k]=n;else delete D.states[k];}}
     D.counties=D.counties||{};for(const c of MAPC){if(c.st!==WS.st)continue;const x=v('ws-cn-'+c.id);if(x==null)continue;const n=wsClean(x);const kk=c.key||c.id;if(n&&n!==O.counties[kk])D.counties[kk]=n;else delete D.counties[kk];}}
   if(WS.tab==='divs'){D.size=D.size||{};D.divs=D.divs||{};D.xdivs=D.xdivs||{};
-    const cls=clsOfSt(WS.st);for(const c of cls){const t=+v('ws-t-'+c),d=+v('ws-d-'+c);if(t&&d)D.size[c]={t,d};}
+    const cls=clsOfSt(WS.st);D.pdN=D.pdN||{};for(const c of cls){const t=+v('ws-t-'+c),d=+v('ws-d-'+c);if(t&&d)D.size[c]={t,d};const p=+v('ws-pd-'+c);if(p===1||p===2)D.pdN[c]=p;else delete D.pdN[c];}
     const x=v('ws-dn');if(x!=null){const names=wsList(x,200);if(WS.st==='CF'){let i=0;for(const c of CLS_ORDER){const n=(D.size[c]||O.size[c]).d;D.divs[c]=names.slice(i,i+n);i+=n;}}else D.xdivs[WS.st]=names;}}
   if(WS.tab==='map')meGrab();
   if(WS.tab==='share'){const n=v('ws-mn'),d=v('ws-md');if(n!=null||d!=null)D.meta={name:wsClean(n||''),desc:String(d||'').replace(/[<>&"'`\\]/g,'').slice(0,200)};}
@@ -60,7 +60,7 @@ function wsGrab(){
   if(WS.tab==='stars'){D.stars=D.stars||{};for(const s of[5,4,3,2]){const x=v('ws-s'+s);if(x!=null)D.stars[s]=clamp(Math.round(+x)||0,0,5000);}const f=v('ws-fr'),c=v('ws-cm');if(f!=null)D.frMult=+f;if(c!=null)D.colMult=+c;}
 }
 function wsRender(){
-  const{O,D}=wsCur(),tabs=[['states','States & counties'],['map','Map editor'],['divs','Divisions & sizes'],['colleges','Colleges'],['pro','Pro teams'],['stars','Stars & classes'],['share','File & sharing']];
+  const{O,D}=wsCur(),tabs=[['states','States & counties'],['map','Map editor'],['divs','Leagues & playoffs'],['colleges','Colleges'],['pro','Pro teams'],['stars','Stars & classes'],['share','File & sharing']];
   const stSel=(fn)=>`<select onchange="wsGrab();WS.st=this.value;wsRender()" style="padding:6px 8px;border-radius:8px">${ST_ORDER.map(k=>`<option value="${k}"${WS.st===k?' selected':''}>${(D.states&&D.states[k])||O.states[k]}</option>`).join('')}</select>`;
   let body='';
   if(WS.tab==='states'){
@@ -70,11 +70,11 @@ function wsRender(){
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:34vh;overflow-y:auto">${MAPC.filter(c=>c.st===WS.st).map(c=>`<input id="ws-cn-${c.id}" value="${(D.counties&&D.counties[c.key||c.id])||O.counties[c.key||c.id]}" maxlength="40" title="${O.counties[c.key||c.id]}">`).join('')}</div>`;
   }else if(WS.tab==='divs'){
     const cls=clsOfSt(WS.st),sz=c=>(D.size&&D.size[c])||O.size[c];
-    const names=WS.st==='CF'?CLS_ORDER.flatMap(c=>{const a=(D.divs&&D.divs[c])||O.divs[c]||[];const n=sz(c).d;return Array.from({length:n},(_,i)=>a[i]||`${c} Division ${i+1}`);}):(()=>{const a=(D.xdivs&&D.xdivs[WS.st])||O.xdivs[WS.st]||[];const n=cls.reduce((s,c)=>s+sz(c).d,0);return Array.from({length:n},(_,i)=>a[i]||`District ${i+1}`);})();
+    const names=WS.st==='CF'?CLS_ORDER.flatMap(c=>{const a=(D.divs&&D.divs[c])||O.divs[c]||[];const n=sz(c).d;return Array.from({length:n},(_,i)=>a[i]||`${c} League ${i+1}`);}):(()=>{const a=(D.xdivs&&D.xdivs[WS.st])||O.xdivs[WS.st]||[];const n=cls.reduce((s,c)=>s+sz(c).d,0);return Array.from({length:n},(_,i)=>a[i]||`District ${i+1}`);})();
     body=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:13px">State</b>${stSel()}</div>
-      <div style="font-size:12px;color:var(--mu);margin-bottom:6px">Teams and divisions in each classification (more teams make a bigger league; at least 4 teams per division).</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:150px;font-size:12px;font-weight:800">${clsName(c)}</span><label style="font-size:12px">Teams <input id="ws-t-${c}" type="number" min="8" max="160" value="${sz(c).t}" style="width:76px"></label><label style="font-size:12px">Divisions <input id="ws-d-${c}" type="number" min="1" max="16" value="${sz(c).d}" style="width:64px"></label></div>`).join('')}</div>
-      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">Division names, one per line, in order (smallest classification first). Add lines for new divisions.</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:6px">Teams, leagues and playoff divisions in each classification. Leagues decide league games and standings (at least 4 teams each). Playoff divisions split the classification by school size into separate brackets, each with its own state champion; leagues can mix both.</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:150px;font-size:12px;font-weight:800">${clsName(c)}</span><label style="font-size:12px">Teams <input id="ws-t-${c}" type="number" min="8" max="160" value="${sz(c).t}" style="width:76px"></label><label style="font-size:12px">Leagues <input id="ws-d-${c}" type="number" min="1" max="16" value="${sz(c).d}" style="width:64px"></label><label style="font-size:12px">Playoff divisions <select id="ws-pd-${c}" style="padding:4px 6px">${[['0','Auto (two with 16+ teams)'],['1','One bracket'],['2','Two by school size']].map(([v,l])=>`<option value="${v}"${String((D.pdN&&D.pdN[c])||0)===v?' selected':''}>${l}</option>`).join('')}</select></label></div>`).join('')}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">League names, one per line, in order (smallest classification first). Add lines for new leagues.</div>
       <textarea id="ws-dn" rows="10" style="width:100%;font:13px/1.4 Archivo,system-ui,sans-serif">${names.join('\n')}</textarea>`;
   }else if(WS.tab==='map'){body=meBody();
   }else if(WS.tab==='share'){body=shareBody();

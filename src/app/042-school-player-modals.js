@@ -5,7 +5,7 @@ function viewSchool(id){
   openMo(`<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     ${sLogo(s,60)}<div>
       <h2 style="margin-bottom:3px">${s.name} ${s.mascot}</h2>
-      <div style="color:var(--mu);font-size:13px">${s.city} • ${clsName(s.cls||G.cls)} • ${div?.name||'?'}</div>
+      <div style="color:var(--mu);font-size:13px">${s.city} • ${clsName(s.cls||G.cls)}${pdName(s.cls||G.cls,pdOf(s))?' '+pdName(s.cls||G.cls,pdOf(s)):''} • League: ${div?.name||'?'}</div>
       <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
         <span style="font-family:var(--hd);font-size:18px;font-weight:800;white-space:nowrap;color:${w>=l?'var(--gn)':'var(--te)'}">${w}-${l}</span>
         ${rb(teamOvr(id))}<span class="sbh">${s.offS}/${s.defS}</span>

@@ -584,10 +584,10 @@ function pgHist(){
       <td>${2026+(h.yr-1)}</td><td>${recStr(h.wins,h.losses)}</td>
       <td><span style="font-family:var(--hd);font-weight:700;color:var(--te)">${clsL(h.cls||G.cls)}</span></td>
       <td>${'★'.repeat(Math.round(h.prestige))}</td>
-      <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?'State Champion':h.champ?'Division Champ':'–'}</td>
+      <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?'State Champion':h.champ?'League Champ':'–'}</td>
     </tr>`).join('')}</tbody></table>`}
     ${G.trophies&&G.trophies.length?`<div style="margin-bottom:16px"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">Trophy Cabinet</div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'National champs':t.type==='State'?'State champs':'Division champs'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
+    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'National champs':t.type==='State'?'State champs':'League champs'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
     </div>
     <div id="hist-lg" class="hid">${leagueHistHtml}</div>
     <div id="hist-aw" class="hid">${(()=>{

@@ -40,6 +40,9 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 ## What's new
 
 ### Latest update
+- **Leagues and playoff divisions are separate:** the regional groups are now called leagues. They decide league games, standings and league titles. Playoff divisions are new: a classification with 16 or more schools splits by school size into Division I (larger) and Division II (smaller), each with its own bracket and state champion. A league can hold schools from both, and the other division's bracket plays alongside yours on the Playoffs page. In states whose classifications are already called "Division", the brackets are called Large school and Small school.
+- **Editing:** League Setup's "Leagues & playoffs" tab sets the number of leagues and playoff divisions for each classification, and League names. In Team Builder and a school's Edit page you can move a school to another league and pick its playoff division (or leave it by school size). The Playoffs page switches your classification between one bracket and two before the playoffs start.
+
 - **Dashboard tiles do what they say:** Next game opens your next game (the play window with Full game, Coach mode, Offense only and Defense only), or the schedule builder, or the playoffs, whatever comes next. It never starts the offseason. Scouting the opponent is the Scout button inside the tile. Schedule opens the schedule builder while the schedule still has open slots.
 - **No windows under your finger:** story scenes and post-game interviews wait until you have not touched the screen for a moment, and interviews only open on the dashboard, so a tap never lands on a window that just appeared.
 

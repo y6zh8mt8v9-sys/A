@@ -1035,6 +1035,7 @@ html body .tab.on{background-size:100% 3px!important;border-bottom-color:transpa
 .aw-mv{font:700 11px/1 var(--font);color:var(--mute,var(--mu));text-align:center}
 .aw-mv.up{color:#4ade80}.aw-mv.dn{color:var(--post)}.aw-mv.new{color:#fbbf24;text-transform:uppercase;font-size:9px;letter-spacing:.06em}
 .dt-scout{margin-top:10px;min-height:36px}
+.pd-tag{display:inline-block;margin-left:6px;padding:1px 5px;font:700 10px/1.3 var(--font);border:1px solid var(--line,var(--bd));color:var(--mute,var(--mu));letter-spacing:.03em}.pd-tag.pd1{color:var(--chalk,var(--tx));border-color:var(--post)}
 /* ════════ Career story scenes: a cutscene card inside the modal (tokens from 06-design.css) ════════ */
 .st-scene{display:flex;flex-direction:column;gap:12px;max-width:620px;margin:0 auto}
 .st-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px;padding-right:36px;background:var(--yardline);background-position:bottom;padding-top:0}
@@ -1389,8 +1390,8 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 <div id="div-editor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:600;align-items:center;justify-content:center;">
   <div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:22px 26px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;position:relative;">
     <button onclick="closeDivEditor()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;">&#10005;</button>
-    <h2 style="font-family:var(--hd);font-size:19px;font-weight:900;color:var(--te);margin-bottom:4px;">Rename Divisions</h2>
-    <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">Edit the name of any division. Changes apply when you close this panel.</p>
+    <h2 style="font-family:var(--hd);font-size:19px;font-weight:900;color:var(--te);margin-bottom:4px;">Rename leagues</h2>
+    <p style="font-size:12px;color:var(--mu);margin-bottom:14px;">Edit the name of any league. Changes apply when you close this panel.</p>
     <div id="div-editor-list" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button class="btn bgn" style="flex:1;" onclick="closeDivEditor()">&#10003; Done</button>
@@ -1405,7 +1406,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
     <div style="padding:16px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div>
         <h2 style="font-family:var(--hd);font-size:21px;font-weight:900;color:var(--te);margin:0;">Team Builder</h2>
-        <div style="font-size:11px;color:var(--mu);margin-top:2px;">Add, edit and manage teams in every state and division. Your changes are saved as you go, so you can stop and continue later.</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:2px;">Add, edit and manage teams in every state and league. Your changes are saved as you go, so you can stop and continue later.</div>
       </div>
       <button onclick="closeTeamBuilder()" style="background:none;border:none;color:var(--mu);font-size:22px;cursor:pointer;padding:4px 8px;">✕</button>
     </div>
@@ -1474,7 +1475,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'e6951fe41e'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'dcb525d162'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -1661,7 +1662,7 @@ function renderLeagueRules(){const el=document.getElementById('set-league');if(!
   const later=G.poN&&G.poN!==R.n;
   el.innerHTML=`<div style="font-size:12px;font-weight:800;color:var(--mu);margin:4px 0 8px;letter-spacing:.06em">League rules (this career)</div>`
     +row('Playoff teams',later?`This season keeps ${G.poN} teams; ${R.n} from next season.`:'Teams in your classification\'s state playoffs.',seg('poN',R.n,[[4,'4'],[8,'8'],[16,'16'],[32,'32']]))
-    +row('Who qualifies','Division winners first: every division champion is in, then the best records.',seg('poQ',R.q,[['record','Best records'],['div','Division winners first']]))
+    +row('Who qualifies','League winners first: every league champion is in, then the best records.',seg('poQ',R.q,[['record','Best records'],['div','League winners first']]))
     +row('Mercy rule','A 35-point lead in the second half starts a running clock, on Game Day and in simulated games.',seg('mercy',cur.mercy!==false,[[true,'On'],[false,'Off']]))
     +row('Earned progression','On: ratings can\'t be typed in. Players earn them in practice, games, position battles and with SP.',seg('earned',!!cur.earned,[[false,'Off'],[true,'On']]));}
 window.ruleSet=function(k,v){if(typeof G==='undefined'||!G)return;G.rules=G.rules||{};G.rules[k]=v;
@@ -3882,7 +3883,7 @@ function makeDivisions(cls){
       else{({nm,city,cnty}=USA.on?usaSchoolName('CF',CLS_ORDER.indexOf(cls)/4,_usedSchoolNames):_genSchoolName());msc=mascPick(Math.random,MCTS);const ci=(_sId-1)%LCOLS.length;[c1,c2]=LCOLS[ci];abbr=abbr3(nm,_abbrUsed);}
       teams.push({id:_sId++,name:nm,city,cnty,mascot:msc,cls,dIdx:d,abbr,c1,c2,prestige:rng(1,5),wins:0,losses:0,isP:false,offS:pick(OFF_SCH),defS:pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1});
     }
-    divs.push({name:divNames[d]||`Division ${d+1}`,teams});
+    divs.push({name:divNames[d]||`League ${d+1}`,teams});
   }
   // Assign tiers: ~30% good (top-band), ~35% bad (bottom-band), ~35% average (middle)
   // This creates real OVR spread, every classification has both elite and weak programs.
@@ -4792,7 +4793,7 @@ function renderRivalryPicker(){
 
   openMo(`<h2>${yr} Season, Pick Your Rivalry Game</h2>
   <div style="font-size:12px;color:var(--mu);margin-bottom:14px">
-    Every season you choose <strong style="color:var(--gd)">one division opponent</strong> as your <strong style="color:var(--gd)">Rivalry Game</strong> (always Week 5). Rivalry games carry extra prestige, affect recruiting, and can shift the season narrative. Choose wisely: your rival resets each year.
+    Every season you choose <strong style="color:var(--gd)">one league opponent</strong> as your <strong style="color:var(--gd)">Rivalry Game</strong> (always Week 5). Rivalry games carry extra prestige, affect recruiting, and can shift the season narrative. Choose wisely: your rival resets each year.
   </div>
   ${rivalInfo}
   <div style="overflow-y:auto;max-height:45vh;margin-bottom:14px">
@@ -4988,7 +4989,7 @@ function renderScheduleBuilder(){
   openMo(`<h2>Build Your ${yr2} Schedule</h2>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:stretch">
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
-      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">Division Games (Locked)</div>
+      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">League Games (Locked)</div>
       <div style="font-family:var(--hd);font-size:20px;font-weight:900;color:var(--te)">5 Games</div>
       <div style="font-size:11px;color:var(--mu)">Weeks 1–5 · Rival in Wk 5</div>
     </div>
@@ -5601,7 +5602,7 @@ function trophySvg(col,big){const w=big?64:46;return`<svg viewBox="0 0 64 72" wi
   <rect x="28" y="40" width="8" height="12" fill="${col}"/><rect x="18" y="52" width="28" height="6" rx="1" fill="${col}"/><rect x="14" y="58" width="36" height="10" rx="2" fill="#4a3324"/></svg>`;}
 function pgTrophy(){
   const T=G.trophies||[],H=G.hist||[],me=myS();
-  const kinds=[['National','National Champions','#d9a520',true],['State','State Champions','#e3b341',true],['Division','Division Champions','#a9b4c2',false]];
+  const kinds=[['National','National Champions','#d9a520',true],['State','State Champions','#e3b341',true],['Division','League Champions','#a9b4c2',false]];
   const shelf=kinds.map(([k,l,c,big])=>{const L=T.filter(t=>t.type===k).sort((a,b)=>a.yr-b.yr);if(!L.length)return'';
     return`<div class="pnl" style="margin-bottom:14px"><div class="ph">${l} <span style="font-size:12px;color:var(--mu)">${L.length}</span></div><div class="pb" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;background:linear-gradient(180deg,transparent 78%,rgba(120,80,40,.18) 78%)">
       ${L.map(t=>`<div style="text-align:center;min-width:70px">${trophySvg(c,big)}<div style="font-weight:800;font-size:13px">${(G.baseYear||2026)+t.yr-1}</div><div style="font-size:11px;color:var(--mu)">${t.rec||''}${t.cls?' · '+clsL(t.cls):''}</div></div>`).join('')}</div></div>`;}).join('');
@@ -5611,8 +5612,8 @@ function pgTrophy(){
   const empty=!shelf&&!ind.length;
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph"><span style="display:inline-flex;align-items:center;gap:8px">${sLogo(me,30)}${me.name} Trophy Case</span></div><div class="pb">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-        ${[['Seasons',H.length],['All-time record',`${tw}-${tl}`],['Best season',best?`${best.wins}-${best.losses} (${(G.baseYear||2026)+best.yr-1})`:'–'],['Titles',T.filter(t=>t.type!=='Division').length],['Division titles',T.filter(t=>t.type==='Division').length],['Player awards',ind.length]].map(([l,v])=>`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px"><div style="font-size:11px;color:var(--mu);letter-spacing:.06em">${l}</div><div style="font-weight:900;font-size:20px">${v}</div></div>`).join('')}
-      </div>${empty?`<p style="color:var(--mu);margin:12px 0 0">The case is empty for now. Division titles, state and national championships and your players' awards will be displayed here.</p>`:''}</div></div>
+        ${[['Seasons',H.length],['All-time record',`${tw}-${tl}`],['Best season',best?`${best.wins}-${best.losses} (${(G.baseYear||2026)+best.yr-1})`:'–'],['Titles',T.filter(t=>t.type!=='Division').length],['League titles',T.filter(t=>t.type==='Division').length],['Player awards',ind.length]].map(([l,v])=>`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px"><div style="font-size:11px;color:var(--mu);letter-spacing:.06em">${l}</div><div style="font-weight:900;font-size:20px">${v}</div></div>`).join('')}
+      </div>${empty?`<p style="color:var(--mu);margin:12px 0 0">The case is empty for now. League titles, state and national championships and your players' awards will be displayed here.</p>`:''}</div></div>
     ${shelf}
     ${ind.length?`<div class="pnl"><div class="ph">Player awards</div><div class="pb" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       ${ind.map(x=>`<div class="cl" style="display:flex;gap:10px;align-items:center;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:8px" onclick="showPlayer(${x.a.pid})">${trophySvg(x.l==='Mr. Football'?'#d9a520':'#7fa6d8',false)}<div><div style="font-weight:800">${x.l}</div><div>${x.a.name}</div><div style="font-size:11px;color:var(--mu)">${(G.baseYear||2026)+x.yr-1}${x.a.pos?' · '+x.a.pos:''}</div></div></div>`).join('')}</div></div>`:''}`;}
@@ -6756,7 +6757,9 @@ function buildPlayoffBracket(){
   // SOS weight tripled (was *2, now *8), two teams with same record are
   // meaningfully separated by schedule difficulty. A team that schedules
   // higher-OVR opponents gets a real seeding edge over a cupcake schedule.
-  const all=allSchools().map(s=>{
+  // your playoff division only: the other division of your classification plays its own bracket (G.playoff.others)
+  const myPd=pdOf(myS());
+  const all=allSchools().filter(s=>pdOf(s)===myPd).map(s=>{
     const wr=s.wins/(s.wins+s.losses+.001);
     const sos=calcSOS(s.id);
     const seed=wr*1000+sos*8+(s.prestige||1)*5;
@@ -6764,7 +6767,7 @@ function buildPlayoffBracket(){
   }).sort((a,b)=>b._seed-a._seed);
 
   const N=Math.min(poSeasonN(),1<<Math.floor(Math.log2(Math.max(2,all.length)))),PR=poRules(),pick=[];
-  if(PR.q==='div')for(const d of G.divisions){const b=all.find(s=>d.teams.some(t=>t.id===s.id));if(b&&pick.length<N)pick.push(b);} // division winners first
+  if(PR.q==='div')for(const d of G.divisions){const b=all.find(s=>d.teams.some(t=>t.id===s.id));if(b&&pick.length<N)pick.push(b);} // league winners first (the best team of your playoff division in each league)
   for(const s of all){if(pick.length>=N)break;if(!pick.includes(s))pick.push(s);}
   pick.sort((a,b)=>b._seed-a._seed);
   const field=pick;
@@ -6775,7 +6778,7 @@ function buildPlayoffBracket(){
     G.trophies=G.trophies||[];
     G.trophies.push({type:'Division',yr:G.yr,rec:`${G.wins}-${G.losses}`});
     G.prestige=clamp(G.prestige+.2,1,5);
-    addLog(`<span style="color:var(--gd)">Division Champion! ${G.wins}-${G.losses}</span>`);
+    addLog(`<span style="color:var(--gd)">League Champion! ${G.wins}-${G.losses}</span>`);
   }
 
   G.playoff={
@@ -6785,7 +6788,9 @@ function buildPlayoffBracket(){
     myElim:!iMyTeam,
     champ:false,
     stateChamp:false,
-    rounds:[]
+    rounds:[],
+    pd:myPd,
+    others:pdOthersBuild(N,myPd)
   };
 
   const playoffSlots=G.sched.filter(g=>g.type==='bye'||g.type==='playoff');
@@ -6806,7 +6811,7 @@ function buildPlayoffBracket(){
       const noQPop=bEvPop('State Champion Crowned',`Your team did not qualify for the playoffs.<br><br><strong style="color:var(--gd)">${noQChamp.name} ${noQChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(noQChamp,64),'var(--gd)');
       _popQ=[noQPop];_popI=0;_popCb=()=>nav('dash');showPop();
     }
-    G.phase='postseason';
+    (pdOthersFinishSafe(),G.phase='postseason');
     addLog(`<span style="color:var(--mu)">Did not qualify for state playoffs.</span>`);
     return false;
   }
@@ -6834,7 +6839,7 @@ function setNextPlayoffGame(){
     }
     const remainingSlots=G.sched.filter(g=>(g.type==='playoff'||g.type==='bye')&&!g.result);
     for(const s of remainingSlots){s.type='bye';s.result='bye';s.label='Bye Week';}
-    G.phase='postseason';
+    (pdOthersFinishSafe(),G.phase='postseason');
     return;
   }
 
@@ -6843,7 +6848,7 @@ function setNextPlayoffGame(){
 
   // Find next unused schedule slot
   const slot=G.sched.find(g=>(g.type==='bye'||g.type==='playoff')&&!g.result&&g.result!=='bye');
-  if(!slot){G.phase='postseason';return;}
+  if(!slot){(pdOthersFinishSafe(),G.phase='postseason');return;}
 
   const myIdx=bracket.findIndex(s=>s.id===G.myId);
 
@@ -6903,6 +6908,7 @@ function simPlayoffRound(round,slot,myResult){
 
   G.playoff.rounds.push({round,results:roundResults});
   G.playoff.bracket=survivors;
+  try{pdOthersRound();}catch(e){console.error('other playoff divisions',e);}
 }
 
 function advPlayoffWeek(){
@@ -6985,7 +6991,7 @@ function _doAdvPlayoffWeek(slot,opp,forced=null){
       addLog(`<span style="color:var(--gd)">State champion: ${stateChamp.name} ${stateChamp.mascot} (${champRec})</span>`);
       pops.push(bEvPop('State Champion Crowned',`<strong style="color:var(--gd)">${stateChamp.name} ${stateChamp.mascot}</strong> are this year's <strong>${2026+(G.yr-1)} State Champions</strong>!<br><br>They finished <strong>${champRec}</strong> on the season.`,sLogo(stateChamp,64),'var(--gd)'));
     }
-    G.phase='postseason';
+    (pdOthersFinishSafe(),G.phase='postseason');
   } else if(G.playoff.bracket.length<=1){
     // Call setNextPlayoffGame(), it correctly sets champ flag, pushes State trophy, awards prestige/budget
     setNextPlayoffGame();
@@ -7454,15 +7460,15 @@ function finalizeOffseason(){
   const divWon=_snapDivWinners.some(dw=>dw.id===G.myId&&dw.clear!==false);
   const divBonus=divWon?35000:0;
   if(divWon){
-    pops.push(bEvPop('Division Champions!',`Your team won the division title! <strong style="color:var(--gd)">+$35,000 bonus!</strong>`,null,'var(--gd)'));
-    addLog(`<span style="color:var(--gd)">Division champions! +$35,000</span>`);
+    pops.push(bEvPop('League Champions!',`Your team won the league title! <strong style="color:var(--gd)">+$35,000 bonus!</strong>`,null,'var(--gd)'));
+    addLog(`<span style="color:var(--gd)">League champions! +$35,000</span>`);
   }
   G.budget+=baseBudget+divBonus;
   // ── Snapshot record BEFORE resetting wins/losses for the new year ──
   const _endWins=G.wins, _endLosses=G.losses;
   try{const q=myPlayer();if(q&&!q.grad&&G.players.includes(q))q._snap={rat:q.rat,at:Object.assign({},q.at||{}),spd:q.spd,str:q.str,awr:q.awr};}catch(e){}
   try{jobOffersGen(_endWins,_endLosses,!!(G.playoff&&(G.playoff.stateChamp||G.playoff.stateChampId===G.myId)),divWon);}catch(e){console.error('jobs',e);}
-  G.yr++;G.wins=0;G.losses=0;(()=>{try{progOffseason();}catch(e){}})(),G.phase='offseason';G.osPhase=0;G.playoff=null;G.seasonRivalId=null;
+  G.yr++;G.wins=0;G.losses=0;pdNewSeason();(()=>{try{progOffseason();}catch(e){}})(),G.phase='offseason';G.osPhase=0;G.playoff=null;G.seasonRivalId=null;
 
   // ── End-of-season for other leagues: determine champ, reset, regenerate ──
   if(G.allLeagues){
@@ -8435,7 +8441,7 @@ function dashTiles(o){
     :dtTile('Training'+dot('training'),`nav('training')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">${pracAvailable()?`Weekly practice is ready`:'This week\'s practice is done'}</div>${pracAvailable()?`<button class="btn bsm" style="margin-top:8px" onclick="event.stopPropagation();pracOpen()">Practice</button>`:''}`,'dt-tall');
   const tScout=dtTile('Scouting',pa?(opp?`viewSchool(${opp.id})`:`nav('teams')`):`nav('scout')`,`<div class="dt-sub">Scout your next opponents and the prospects in your area.</div>${opp?`<div class="dt-sub" style="margin-top:6px">Next: <b>${opp.name}</b></div>`:''}`);
   // standings and top players
-  const dv=(G.divisions||[]).find(d=>d.teams.some(t=>t.id===G.myId));let stB='<div class="dt-mu">No division.</div>';
+  const dv=(G.divisions||[]).find(d=>d.teams.some(t=>t.id===G.myId));let stB='<div class="dt-mu">No league.</div>';
   if(dv){const rows=dv.teams.slice().sort((a,b)=>(b.wins-a.wins)||(a.losses-b.losses)).slice(0,6);
     stB=`<div class="dt-sub">${dv.name||''}</div><div class="dt-list">${rows.map((t,i)=>`<div class="${t.id===G.myId?'me':''}"><b>${i+1}</b>${sLogo(t,22)}<span class="dt-ln">${t.name}</span><span class="dt-mu">${t.wins||0}-${t.losses||0}</span></div>`).join('')}</div>`;}
   const tStand=dtTile('Standings',`nav('stand')`,stB,'dt-tall');
@@ -9324,6 +9330,10 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;window._schUniT={id:s.i
       </div>
     </div>
   </div>
+  ${(()=>{const cls=s.cls||G.cls,L=divisionsForCls(cls),cur=L.findIndex(d=>d.teams.some(t=>t.id===s.id)),two=pdN(cls)>1;
+    return`<div class="g2" style="gap:10px;margin-top:10px"><div class="fg"><label>League</label><select class="ei" id="es-lg">${L.map((d,i)=>`<option value="${i}"${i===cur?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</select></div>
+      <div class="fg"><label>Playoff division</label><select class="ei" id="es-pd"${two?'':' disabled title="This classification plays one bracket. Switch to two on the Playoffs page."'}><option value="0"${!s.pdFix?' selected':''}>By school size (${two?pdName(cls,pdOf(s)):'one bracket'})</option>${two?[1,2].map(k=>`<option value="${k}"${s.pdFix===k?' selected':''}>${pdName(cls,k)}</option>`).join(''):''}</select></div></div>
+      <div style="font-size:11px;color:var(--mu);margin-top:4px">Leagues decide league games and standings; the playoff division decides which state bracket the school plays in. A league move counts for the standings right away; league games follow next season.</div>`;})()}
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
     <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:8px">Uniforms</div>
     <div id="sch-uni">${uniHostHtml(window._schUniT,schUniCol,sid===G.myId)}</div>
@@ -9333,7 +9343,10 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;window._schUniT={id:s.i
     <button class="bgh" onclick="clo()">Cancel</button>
   </div>`);}
 window.schLogoPrev=function(sid){const s=getS(sid),el=document.getElementById('elk-prev');if(!s||!el)return;const t=Object.assign({},s,{logoKey:document.getElementById('elk').value||null,mash:document.getElementById('emash').value||null,c1:document.getElementById('ec1').value,c2:document.getElementById('ec2').value,customLogo:null});el.innerHTML=sLogo(t,64);};
-window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}{const T=window._schUniT;if(T&&T.id===s.id){const u=uniClean(T.uni);if(u)s.uni=u;else delete s.uni;if(T.c3)s.c3=T.c3;}window._schUniT=null;window._uniT=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
+window.saveSch=function(sid){const s=getS(sid);if(!s)return;
+  {const cls=s.cls||G.cls,L=divisionsForCls(cls),lg=document.getElementById('es-lg'),pdE=document.getElementById('es-pd');
+    if(lg){const to=L[+lg.value],from=L.find(d=>d.teams.some(t=>t.id===s.id));if(to&&from&&to!==from&&from.teams.length<=2)notify(`${from.name} would be left with too few teams, so ${s.name} stays there`,'w');else if(to&&from&&to!==from){const t=from.teams.find(t=>t.id===s.id);from.teams=from.teams.filter(x=>x.id!==s.id);to.teams.push(t);}}
+    if(pdE&&!pdE.disabled){const v=+pdE.value;if(v===1||v===2)s.pdFix=v;else delete s.pdFix;for(const x of pdSchools(cls))delete x.pd;}}{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}{const T=window._schUniT;if(T&&T.id===s.id){const u=uniClean(T.uni);if(u)s.uni=u;else delete s.uni;if(T.c3)s.c3=T.c3;}window._schUniT=null;window._uniT=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
 window.handleSchLogoUpload=function(inp,sid){
   const file=inp.files[0];if(!file)return;
   logoShrink(file,function(d){
@@ -9440,12 +9453,12 @@ function pgStand(){
     for(const div of divs){
       const isMyDiv=div.teams.some(t=>t.id===G.myId);
       const sorted=[...div.teams].sort((a,b)=>{const aw=a.wins/(a.wins+a.losses+.001),bw=b.wins/(b.wins+b.losses+.001);return bw-aw||b.wins-a.wins;});
-      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--te)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--te);font-size:11px">Your division</span>':''}</div>
+      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--te)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--te);font-size:11px">Your league</span>':''}</div>
         <table><thead><tr><th>#</th><th>School</th><th>W</th><th>L</th><th>Win%</th><th>Ovr</th><th>Scheme</th></tr></thead>
         <tbody>${sorted.map((s,i)=>{const isMe=s.id===G.myId;const w=s.wins,l=s.losses;const wp=w+l>0?(w/(w+l)*100).toFixed(0)+'%':'–';
           return`<tr class="cl" onclick="viewSchool(${s.id})" ${isMe?'style="background:rgba(204,34,34,.07)"':''}>
             <td style="color:var(--mu)">${i+1}</td>
-            <td><div style="display:flex;align-items:center;gap:6px">${sLogo(s,32)}<span>${isMe?'<strong>':''}${s.name} ${s.mascot}${isMe?'</strong>':''}</span>${isMe?'<span style="color:var(--te);font-size:10px">You</span>':''}</div></td>
+            <td><div style="display:flex;align-items:center;gap:6px">${sLogo(s,32)}<span>${isMe?'<strong>':''}${s.name} ${s.mascot}${isMe?'</strong>':''}</span>${pdTag(s)}${isMe?'<span style="color:var(--te);font-size:10px">You</span>':''}</div></td>
             <td style="color:var(--gn)">${w}</td><td style="color:var(--te)">${l}</td>
             <td>${wp}</td><td>${rb(teamOvr(s.id))}</td>
             <td style="font-size:11px;color:var(--mu)">${s.offS}/${s.defS}</td>
@@ -9458,13 +9471,19 @@ function pgStand(){
 
 function pgPlayoff(){
   const pl=G.playoff;const curYear=2026+(G.yr-1);
-  if(!pl)return`<div class="pnl"><div class="ph">State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. The top ${poSeasonN()} teams in ${clsL(G.cls)} qualify${poRules().q==='div'?', division winners first':''}. Complete your schedule first.</div></div></div>`;
+  if(!pl){const n=pdN(G.cls),mp=pdOf(myS()),sw=k=>`<button class="bgh bsm${n===k?' on':''}" style="${n===k?'border-color:var(--post);color:var(--chalk)':''}" onclick="pdSetN('${G.cls}',${k})">${k===1?'One bracket':'Two by school size'}</button>`;
+    return`<div class="pnl"><div class="ph">State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. The top ${(()=>{const c=allSchools().filter(x=>pdOf(x)===mp).length;return Math.min(poSeasonN(),1<<Math.floor(Math.log2(Math.max(2,c))));})()} teams in ${pdFull(G.cls,mp)} qualify${poRules().q==='div'?', league winners first':''}. Complete your schedule first.</div>
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font-size:13px">Playoff divisions in ${clsL(G.cls)}</b>${sw(1)}${sw(2)}</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:6px">${n>1?`Your school plays in ${pdName(G.cls,mp)}. Leagues mix both divisions; each division has its own bracket and state champion. Change a school's division from its Edit page.`:`Every school in ${clsL(G.cls)} plays in one bracket. Leagues decide league games and standings, not playoff spots.`}</div></div></div>`;}
   const field=pl.field||[],inF=field.includes(G.myId),sd=field.indexOf(G.myId)+1;
   const st=pl.stateChamp?'<span style="color:var(--gd)">State champions!</span>':!inF?'Your team did not qualify.':pl.myElim?'Your team was eliminated.':pl.stateChampId?'':`You are the #${sd} seed and still alive.`;
-  return`<div class="pnl"><div class="ph">State Playoffs, ${curYear} <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${clsName(G.cls)} · ${field.length} teams</span></div><div class="pb">
+  if(['postseason','offseason'].includes(G.phase))pdOthersFinishSafe();
+  const myPd=pl.pd||pdOf(myS()),oth=(pl.others||[]).map(B=>{const ch=B.stateChampId!=null?getS(B.stateChampId):null;
+    return`<div class="pnl"><div class="ph">${pdFull(G.cls,B.pd)} playoffs <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${B.field.length} teams${ch?' · champion: '+ch.name:''}</span></div><div class="pb">${poBracketHtml(B)}</div></div>`;}).join('');
+  return`<div class="pnl"><div class="ph">State Playoffs, ${curYear} <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${clsName(G.cls)}${pdName(G.cls,myPd)?' '+pdName(G.cls,myPd):''} · ${field.length} teams</span></div><div class="pb">
     <div style="font-size:13px;margin-bottom:10px">${st}</div>${poBracketHtml(pl)}
-    <div style="font-size:11px;color:var(--mu);margin-top:8px">Seeds by record, strength of schedule and prestige. The top seeds meet as late as possible. Tap a team to see the school.</div>
-  </div></div>`;
+    <div style="font-size:11px;color:var(--mu);margin-top:8px">Seeds by record, strength of schedule and prestige. The top seeds meet as late as possible. Tap a team to see the school.${pdN(G.cls)>1?` ${clsL(G.cls)} has two playoff divisions by school size; leagues mix both, but each division crowns its own state champion.`:''}</div>
+  </div></div>${oth}`;
 }
 
 let _teamsCls=null;
@@ -14252,10 +14271,10 @@ function pgHist(){
       <td>${2026+(h.yr-1)}</td><td>${recStr(h.wins,h.losses)}</td>
       <td><span style="font-family:var(--hd);font-weight:700;color:var(--te)">${clsL(h.cls||G.cls)}</span></td>
       <td>${'★'.repeat(Math.round(h.prestige))}</td>
-      <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?'State Champion':h.champ?'Division Champ':'–'}</td>
+      <td>${h.natl&&h.natl.done&&h.natl.w===G.myId?'National Champion · ':h.natl&&h.natl.done&&h.natl.l===G.myId?'National runner-up · ':''}${h.stateChamp?'State Champion':h.champ?'League Champ':'–'}</td>
     </tr>`).join('')}</tbody></table>`}
     ${G.trophies&&G.trophies.length?`<div style="margin-bottom:16px"><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--te);margin-bottom:8px;">Trophy Cabinet</div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'National champs':t.type==='State'?'State champs':'Division champs'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
+    <div style="display:flex;flex-wrap:wrap;gap:10px">${G.trophies.map(t=>`<div class="tc"><div style="font-size:30px">${t.type==='State'?'':''}</div><div style="font-family:var(--hd);font-size:13px;font-weight:800;color:var(--gd);margin-top:5px">${t.type==='National'?'National champs':t.type==='State'?'State champs':'League champs'}</div><div style="font-size:11px;color:var(--mu);margin-top:3px">${2026+(t.yr-1)} | ${t.rec}</div></div>`).join('')}</div></div>`:''}
     </div>
     <div id="hist-lg" class="hid">${leagueHistHtml}</div>
     <div id="hist-aw" class="hid">${(()=>{
@@ -14350,7 +14369,7 @@ function viewSchool(id){
   openMo(`<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     ${sLogo(s,60)}<div>
       <h2 style="margin-bottom:3px">${s.name} ${s.mascot}</h2>
-      <div style="color:var(--mu);font-size:13px">${s.city} • ${clsName(s.cls||G.cls)} • ${div?.name||'?'}</div>
+      <div style="color:var(--mu);font-size:13px">${s.city} • ${clsName(s.cls||G.cls)}${pdName(s.cls||G.cls,pdOf(s))?' '+pdName(s.cls||G.cls,pdOf(s)):''} • League: ${div?.name||'?'}</div>
       <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
         <span style="font-family:var(--hd);font-size:18px;font-weight:800;white-space:nowrap;color:${w>=l?'var(--gn)':'var(--te)'}">${w}-${l}</span>
         ${rb(teamOvr(id))}<span class="sbh">${s.offS}/${s.defS}</span>
@@ -15315,12 +15334,12 @@ function _doOffseason(){
           for(const s of rem){s.type='bye';s.result='bye';s.label='Bye Week (Eliminated)';}
           let _se=0;while(G.playoff.bracket&&G.playoff.bracket.length>1&&_se<8){_se++;G.playoff.round++;simPlayoffRound(G.playoff.round,{playoffRound:G.playoff.round},null);}
           if(G.playoff.bracket&&G.playoff.bracket.length===1)G.playoff.stateChampId=G.playoff.bracket[0].id;
-          G.phase='postseason';break;
-        } else if(G.playoff.bracket&&G.playoff.bracket.length<=1){G.phase='postseason';break;}
+          (pdOthersFinishSafe(),G.phase='postseason');break;
+        } else if(G.playoff.bracket&&G.playoff.bracket.length<=1){(pdOthersFinishSafe(),G.phase='postseason');break;}
         else setNextPlayoffGame();
         safetyCount++;
       }
-      if(G.phase!=='postseason')G.phase='postseason';
+      if(G.phase!=='postseason')(pdOthersFinishSafe(),G.phase='postseason');
     }
   }
   // Show state champion popup if player didn't win the championship
@@ -15334,7 +15353,7 @@ function _doOffseason(){
     }
   }
   // v2.00: the National Championship (top two of the final national poll) is played before the offseason starts
-  try{G.phase='postseason';if(natEnsure()){const np=natSim();if(np)_osPops.push(np);}}catch(e){console.error('natl',e);}
+  try{(pdOthersFinishSafe(),G.phase='postseason');if(natEnsure()){const np=natSim();if(np)_osPops.push(np);}}catch(e){console.error('natl',e);}
   if(_osPops.length){_popQ=_osPops;_popI=0;_popCb=()=>{G.phase='offseason';G.osPhase=0;runOffseason();};showPop();return;}
   G.phase='offseason';G.osPhase=0;runOffseason();
   }); // end showLoading callback
@@ -15545,7 +15564,7 @@ function closeDivEditor(){
 function resetDivNames(){
   const cls=document.getElementById('s-cls').value;
   const names=DIV_NAMES[cls]||[];
-  _setupDivs.forEach((d,i)=>{d.name=names[i]||`Division ${i+1}`;});
+  _setupDivs.forEach((d,i)=>{d.name=names[i]||`League ${i+1}`;});
   renderDivEditorList();
 }
 function renderDivEditorList(){
@@ -15553,13 +15572,13 @@ function renderDivEditorList(){
   list.innerHTML=_setupDivs.map((d,i)=>`
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:11px;color:var(--mu);font-family:var(--hd);font-weight:700;min-width:22px;text-align:right;">${i+1}.</span>
-      <input class="ei div-name-input" value="${d.name}" placeholder="Division ${i+1} name" style="flex:1;" oninput="liveDivName(this,${i})">
+      <input class="ei div-name-input" value="${d.name}" placeholder="League ${i+1} name" style="flex:1;" oninput="liveDivName(this,${i})">
       <span style="font-size:10px;color:var(--mu);white-space:nowrap;">${d.teams.length} teams</span>
     </div>
   `).join('');
 }
 function liveDivName(inp,i){
-  if(_setupDivs[i])_setupDivs[i].name=inp.value||`Division ${i+1}`;
+  if(_setupDivs[i])_setupDivs[i].name=inp.value||`League ${i+1}`;
 }
 
 // ═══════════ TEAM BUILDER ═══════════
@@ -15626,7 +15645,7 @@ function tbDraft(){let d=null;try{d=JSON.parse(localStorage.getItem(TBD_KEY)||'n
 function tbDraftPut(d){try{if(USA.on){const pt={},P=c=>{if(c&&!pt[c]){const p=clsPort(c);if(p)pt[c]=p;}};for(const k in d.ed){P(k.split('|')[0]);P(String(d.ed[k].to||'').split('|')[0]);}for(const k of d.del)P(k.split('|')[0]);for(const a of d.add)P(String(a.to||'').split('|')[0]);d.pt=pt;}
   localStorage.setItem(TBD_KEY,JSON.stringify(d));return true;}catch(e){tbStatus('Could not save your changes on this device (storage full: try smaller logo images).','var(--rd)');return false;}}
 function tbOk(t){return t._ok||(t._ok=(t.cls||'')+'|'+t.name);}
-function tbFields(t){const f={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};for(const k of['c3','logoKey','mash','offS','defS'])if(t[k])f[k]=t[k];{const u=uniClean(t.uni);if(u)f.uni=u;}return f;}
+function tbFields(t){const f={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};for(const k of['c3','logoKey','mash','offS','defS','pdFix'])if(t[k])f[k]=t[k];{const u=uniClean(t.uni);if(u)f.uni=u;}return f;}
 function tbRecord(t,op){const d=tbDraft();
   if(op==='add'){t._ok='add|'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);d.add.push(Object.assign({ok:t._ok},tbFields(t)));}
   else if(op==='del'){const ok=tbOk(t);const i=d.add.findIndex(a=>a.ok===ok);if(i>=0)d.add.splice(i,1);else{delete d.ed[ok];if(!d.del.includes(ok))d.del.push(ok);}}
@@ -15637,7 +15656,7 @@ function tbRecord(t,op){const d=tbDraft();
 function tbPackOut(){const d=tbDraft(),n=Object.keys(d.ed).length+d.del.length+d.add.length;return n?{ed:d.ed,del:d.del,add:d.add}:null;}
 function tbPackClean(t){if(!t||typeof t!=='object')return undefined;
   const col=c=>/^#[0-9a-f]{6}$/i.test(c||'')?c:'#444444',lg=v=>typeof v==='string'&&v.length<120000&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(v)?v:null;
-  const lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;const F=f=>f&&typeof f==='object'?{name:wsClean(f.name),mascot:wsClean(f.mascot),city:wsClean(f.city),abbr:String(f.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:col(f.c1),c2:col(f.c2),prestige:clamp(Math.round(+f.prestige)||3,1,5),customLogo:lg(f.customLogo),to:String(f.to||'').slice(0,40),c3:/^#[0-9a-f]{6}$/i.test(f.c3||'')?f.c3:undefined,logoKey:lk(f.logoKey),mash:lk(f.mash),offS:OFF_SCH.includes(f.offS)?f.offS:undefined,defS:DEF_SCH.includes(f.defS)?f.defS:undefined,uni:uniClean(f.uni)}:null;
+  const lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;const F=f=>f&&typeof f==='object'?{name:wsClean(f.name),mascot:wsClean(f.mascot),city:wsClean(f.city),abbr:String(f.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:col(f.c1),c2:col(f.c2),prestige:clamp(Math.round(+f.prestige)||3,1,5),customLogo:lg(f.customLogo),to:String(f.to||'').slice(0,40),pdFix:f.pdFix===1||f.pdFix===2?f.pdFix:undefined,c3:/^#[0-9a-f]{6}$/i.test(f.c3||'')?f.c3:undefined,logoKey:lk(f.logoKey),mash:lk(f.mash),offS:OFF_SCH.includes(f.offS)?f.offS:undefined,defS:DEF_SCH.includes(f.defS)?f.defS:undefined,uni:uniClean(f.uni)}:null;
   const ed={};if(t.ed&&typeof t.ed==='object'&&!Array.isArray(t.ed))for(const k of Object.keys(t.ed).slice(0,4000)){const v=F(t.ed[k]);if(v&&v.name)ed[String(k).slice(0,120)]=v;}
   const del=Array.isArray(t.del)?t.del.slice(0,4000).map(x=>String(x).slice(0,120)):[];
   const add=Array.isArray(t.add)?t.add.slice(0,400).map(a=>{const v=F(a);return v&&v.name?Object.assign(v,{ok:String((a&&a.ok)||('add|'+Math.random().toString(36).slice(2,8))).slice(0,60)}):null;}).filter(Boolean):[];
@@ -15651,9 +15670,9 @@ function tbApplyDraft(){
   const moveTo=(t,to)=>{if(!to)return;const[c,di]=to.split('|'),D=_allClsDivs[c],k=+di;if(!D||!D[k]||(t.cls===c&&t.dIdx===k))return;
     for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}t.cls=c;t.dIdx=k;D[k].teams.push(t);};
   for(const ok of d.del){const t=byOk[ok];if(!t)continue;for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}}
-  for(const ok in d.ed){const t=byOk[ok];if(!t)continue;const f=d.ed[ok];t._ok=ok;Object.assign(t,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,customLogo:f.customLogo||null});for(const k of['c3','logoKey','mash','offS','defS'])if(f[k])t[k]=f[k];{const u=uniClean(f.uni);if(u)t.uni=u;else delete t.uni;}moveTo(t,f.to);}
+  for(const ok in d.ed){const t=byOk[ok];if(!t)continue;const f=d.ed[ok];t._ok=ok;Object.assign(t,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,customLogo:f.customLogo||null});for(const k of['c3','logoKey','mash','offS','defS'])if(f[k])t[k]=f[k];if(f.pdFix)t.pdFix=f.pdFix;else delete t.pdFix;{const u=uniClean(f.uni);if(u)t.uni=u;else delete t.uni;}moveTo(t,f.to);}
   for(const a of d.add){const[c,di]=String(a.to||'').split('|'),D=_allClsDivs[c];if(!D)continue;const k=clamp(+di||0,0,D.length-1);
-    D[k].teams.push({id:_sId++,_ok:a.ok,name:a.name,mascot:a.mascot,city:a.city,cls:c,dIdx:k,abbr:a.abbr,c1:a.c1,c2:a.c2,c3:a.c3,logoKey:a.logoKey,mash:a.mash,prestige:a.prestige||3,wins:0,losses:0,isP:false,offS:a.offS||pick(OFF_SCH),defS:a.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:a.customLogo||null,uni:uniClean(a.uni)});}
+    D[k].teams.push({id:_sId++,_ok:a.ok,pdFix:a.pdFix,name:a.name,mascot:a.mascot,city:a.city,cls:c,dIdx:k,abbr:a.abbr,c1:a.c1,c2:a.c2,c3:a.c3,logoKey:a.logoKey,mash:a.mash,prestige:a.prestige||3,wins:0,losses:0,isP:false,offS:a.offS||pick(OFF_SCH),defS:a.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:a.customLogo||null,uni:uniClean(a.uni)});}
   return n;}
 window.tbDraftClear=function(){if(!confirm('Undo every Team Builder change and go back to the original schools?'))return;try{localStorage.removeItem(TBD_KEY);}catch(e){}
   _allClsDivs=null;try{_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);}catch(e){}initCountyMap();tbTab('browse');tbStatus('Team Builder changes cleared.','var(--gd)');};
@@ -15805,7 +15824,7 @@ function tbRenderAdd(dIdx){
       <div class="fg"><label>School Name</label><input class="ei" id="tb-add-name" placeholder="e.g. Jefferson High" oninput="tbPreviewLogo('add')"></div>
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-add-mascot" placeholder="e.g. Eagles" oninput="tbPreviewLogo('add')"></div>
       <div class="fg"><label>City</label><input class="ei" id="tb-add-city" placeholder="e.g. Springfield"></div>
-      <div class="fg"><label>Division</label>
+      <div class="fg"><label>League</label>
         <select class="ei" id="tb-add-div">
           ${divs.map((d,i)=>`<option value="${i}"${i===selDiv?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}
         </select>
@@ -15942,10 +15961,13 @@ function tbEditTeam(dIdx,tIdx){
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-edit-mascot" value="${t.mascot}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>City</label><input class="ei" id="tb-edit-city" value="${t.city}"></div>
       <div class="fg"><label>Abbreviation (3 letters)</label><input class="ei" id="tb-edit-abbr" value="${t.abbr||''}" maxlength="3" style=""></div>
-      <div class="fg"><label>Move to Division (any classification)</label>
+      <div class="fg"><label>Move to league (any classification)</label>
         <select class="ei" id="tb-edit-div">
           ${allClsOptions}
         </select>
+      </div>
+      <div class="fg"><label>Playoff division</label>
+        <select class="ei" id="tb-edit-pd">${[[0,'By school size'],[1,'Division I (larger schools)'],[2,'Division II (smaller schools)']].map(([v,l])=>`<option value="${v}"${(t.pdFix||0)===v?' selected':''}>${l}</option>`).join('')}</select>
       </div>
     </div>
     <div class="g2" style="gap:10px;margin-bottom:10px;">
@@ -16003,7 +16025,7 @@ function tbSaveEdit(){
   const newC1=document.getElementById('tb-edit-c1')?.value||t.c1;
   const newC2=document.getElementById('tb-edit-c2')?.value||t.c2;
   const newPrestige=parseInt(document.getElementById('tb-edit-prestige')?.value||'3');
-  t.name=newName;t.mascot=newMascot;t.city=newCity;t.c1=newC1;t.c2=newC2;
+  t.name=newName;t.mascot=newMascot;t.city=newCity;t.c1=newC1;t.c2=newC2;{const v=+(document.getElementById('tb-edit-pd')?.value||0);if(v===1||v===2)t.pdFix=v;else delete t.pdFix;}
   t.prestige=newPrestige;
   {const ab=String(document.getElementById('tb-edit-abbr')?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3);const u=tbAbbrUsed(editCls);u.delete(t.abbr);t.abbr=ab.length===3&&!u.has(ab)?ab:(newName!==t._ok.split('|').slice(1).join('|')||ab.length!==3?abbr3(newName,u):t.abbr);}
   t.customLogo=_tbEditLogoData||null;
@@ -16173,7 +16195,7 @@ function tbApplyImport(pack){
       const clsData=pack.allClassifications[cls];
       if(!clsData||!clsData.divisions)continue;
       _allClsDivs[cls]=clsData.divisions.map((div,dIdx)=>({
-        name:div.name||`Division ${dIdx+1}`,
+        name:div.name||`League ${dIdx+1}`,
         teams:div.teams.map(t=>{
           const abbr=t.abbr||(t.name.replace(/High|School|Academy|Prep/g,'').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'HS');
           return{id:_sId++,name:t.name,mascot:t.mascot,city:t.city,cls,dIdx,abbr,c1:t.c1||'#333',c2:t.c2||'#fff',prestige:t.prestige||1,tier:t.tier||'avg',wins:0,losses:0,isP:false,offS:t.offS||pick(OFF_SCH),defS:t.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],trainLevel:1,customLogo:t.customLogo||null};
@@ -16201,7 +16223,7 @@ function tbApplyImport(pack){
   if(!_allClsDivs)initAllClsDivs();
   _sId=1;
   const importedDivs=pack.divisions.map((div,dIdx)=>({
-    name:div.name||`Division ${dIdx+1}`,
+    name:div.name||`League ${dIdx+1}`,
     teams:div.teams.map(t=>{
       const abbr=t.abbr||(t.name.replace(/High|School|Academy|Prep/g,'').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'HS');
       return{id:_sId++,name:t.name,mascot:t.mascot,city:t.city,cls:importCls,dIdx,abbr,c1:t.c1||'#333',c2:t.c2||'#fff',prestige:t.prestige||1,tier:t.tier||'avg',wins:0,losses:0,isP:false,offS:t.offS||pick(OFF_SCH),defS:t.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],trainLevel:1,customLogo:t.customLogo||null};
@@ -16829,6 +16851,7 @@ function worldSanitize(W){
   if(W.colMeta&&typeof W.colMeta==='object'){const hx=v=>/^#[0-9a-f]{6}$/i.test(v||'')?v:undefined,lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;o.colMeta=map(W.colMeta,m=>{if(!m||typeof m!=='object')return null;const r={mascot:m.mascot?str(m.mascot).slice(0,24):undefined,abbr:m.abbr?String(m.abbr).toUpperCase().replace(/[^A-Z&]/g,'').slice(0,5):undefined,c1:hx(m.c1),c2:hx(m.c2),logoKey:lk(m.logoKey),mash:lk(m.mash),st:m.st?String(m.st).slice(0,3):undefined,pr:m.pr?clamp(Math.round(+m.pr)||50,1,99):undefined,customLogo:typeof m.customLogo==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,/.test(m.customLogo)&&m.customLogo.length<160000?m.customLogo:undefined};for(const x in r)if(r[x]===undefined)delete r[x];return Object.keys(r).length?r:null;});}
   if(W.pro&&typeof W.pro==='object'){o.pro={};for(const k of['NGL','SFL','MGL']){const v=L(W.pro[k],64);if(v&&v.length)o.pro[k]=v;}}
   o.divs=map(W.divs,a=>L(a,64));o.xdivs=map(W.xdivs,a=>L(a,200));
+  o.pdN=map(W.pdN,v=>v===1||v===2?v:null);
   o.size=map(W.size,z=>z&&typeof z==='object'?{t:clamp(Math.round(+z.t)||8,8,160),d:clamp(Math.round(+z.d)||1,1,16)}:null);
   if(W.stars&&typeof W.stars==='object'){o.stars={};for(const k of[5,4,3,2])if(W.stars[k]!=null)o.stars[k]=clamp(Math.round(+W.stars[k])||0,0,5000);}
   for(const k of['frMult','colMult'])if(W[k]!=null)o[k]=clamp(+W[k]||1,0.5,2);
@@ -17401,7 +17424,7 @@ function wsGrab(){
   if(WS.tab==='states'){D.states=D.states||{};for(const k of ST_ORDER){const x=v('ws-st-'+k);if(x!=null){const n=wsClean(x);if(n&&n!==O.states[k])D.states[k]=n;else delete D.states[k];}}
     D.counties=D.counties||{};for(const c of MAPC){if(c.st!==WS.st)continue;const x=v('ws-cn-'+c.id);if(x==null)continue;const n=wsClean(x);const kk=c.key||c.id;if(n&&n!==O.counties[kk])D.counties[kk]=n;else delete D.counties[kk];}}
   if(WS.tab==='divs'){D.size=D.size||{};D.divs=D.divs||{};D.xdivs=D.xdivs||{};
-    const cls=clsOfSt(WS.st);for(const c of cls){const t=+v('ws-t-'+c),d=+v('ws-d-'+c);if(t&&d)D.size[c]={t,d};}
+    const cls=clsOfSt(WS.st);D.pdN=D.pdN||{};for(const c of cls){const t=+v('ws-t-'+c),d=+v('ws-d-'+c);if(t&&d)D.size[c]={t,d};const p=+v('ws-pd-'+c);if(p===1||p===2)D.pdN[c]=p;else delete D.pdN[c];}
     const x=v('ws-dn');if(x!=null){const names=wsList(x,200);if(WS.st==='CF'){let i=0;for(const c of CLS_ORDER){const n=(D.size[c]||O.size[c]).d;D.divs[c]=names.slice(i,i+n);i+=n;}}else D.xdivs[WS.st]=names;}}
   if(WS.tab==='map')meGrab();
   if(WS.tab==='share'){const n=v('ws-mn'),d=v('ws-md');if(n!=null||d!=null)D.meta={name:wsClean(n||''),desc:String(d||'').replace(/[<>&"'`\\]/g,'').slice(0,200)};}
@@ -17410,7 +17433,7 @@ function wsGrab(){
   if(WS.tab==='stars'){D.stars=D.stars||{};for(const s of[5,4,3,2]){const x=v('ws-s'+s);if(x!=null)D.stars[s]=clamp(Math.round(+x)||0,0,5000);}const f=v('ws-fr'),c=v('ws-cm');if(f!=null)D.frMult=+f;if(c!=null)D.colMult=+c;}
 }
 function wsRender(){
-  const{O,D}=wsCur(),tabs=[['states','States & counties'],['map','Map editor'],['divs','Divisions & sizes'],['colleges','Colleges'],['pro','Pro teams'],['stars','Stars & classes'],['share','File & sharing']];
+  const{O,D}=wsCur(),tabs=[['states','States & counties'],['map','Map editor'],['divs','Leagues & playoffs'],['colleges','Colleges'],['pro','Pro teams'],['stars','Stars & classes'],['share','File & sharing']];
   const stSel=(fn)=>`<select onchange="wsGrab();WS.st=this.value;wsRender()" style="padding:6px 8px;border-radius:8px">${ST_ORDER.map(k=>`<option value="${k}"${WS.st===k?' selected':''}>${(D.states&&D.states[k])||O.states[k]}</option>`).join('')}</select>`;
   let body='';
   if(WS.tab==='states'){
@@ -17420,11 +17443,11 @@ function wsRender(){
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:34vh;overflow-y:auto">${MAPC.filter(c=>c.st===WS.st).map(c=>`<input id="ws-cn-${c.id}" value="${(D.counties&&D.counties[c.key||c.id])||O.counties[c.key||c.id]}" maxlength="40" title="${O.counties[c.key||c.id]}">`).join('')}</div>`;
   }else if(WS.tab==='divs'){
     const cls=clsOfSt(WS.st),sz=c=>(D.size&&D.size[c])||O.size[c];
-    const names=WS.st==='CF'?CLS_ORDER.flatMap(c=>{const a=(D.divs&&D.divs[c])||O.divs[c]||[];const n=sz(c).d;return Array.from({length:n},(_,i)=>a[i]||`${c} Division ${i+1}`);}):(()=>{const a=(D.xdivs&&D.xdivs[WS.st])||O.xdivs[WS.st]||[];const n=cls.reduce((s,c)=>s+sz(c).d,0);return Array.from({length:n},(_,i)=>a[i]||`District ${i+1}`);})();
+    const names=WS.st==='CF'?CLS_ORDER.flatMap(c=>{const a=(D.divs&&D.divs[c])||O.divs[c]||[];const n=sz(c).d;return Array.from({length:n},(_,i)=>a[i]||`${c} League ${i+1}`);}):(()=>{const a=(D.xdivs&&D.xdivs[WS.st])||O.xdivs[WS.st]||[];const n=cls.reduce((s,c)=>s+sz(c).d,0);return Array.from({length:n},(_,i)=>a[i]||`District ${i+1}`);})();
     body=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:13px">State</b>${stSel()}</div>
-      <div style="font-size:12px;color:var(--mu);margin-bottom:6px">Teams and divisions in each classification (more teams make a bigger league; at least 4 teams per division).</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:150px;font-size:12px;font-weight:800">${clsName(c)}</span><label style="font-size:12px">Teams <input id="ws-t-${c}" type="number" min="8" max="160" value="${sz(c).t}" style="width:76px"></label><label style="font-size:12px">Divisions <input id="ws-d-${c}" type="number" min="1" max="16" value="${sz(c).d}" style="width:64px"></label></div>`).join('')}</div>
-      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">Division names, one per line, in order (smallest classification first). Add lines for new divisions.</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:6px">Teams, leagues and playoff divisions in each classification. Leagues decide league games and standings (at least 4 teams each). Playoff divisions split the classification by school size into separate brackets, each with its own state champion; leagues can mix both.</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:150px;font-size:12px;font-weight:800">${clsName(c)}</span><label style="font-size:12px">Teams <input id="ws-t-${c}" type="number" min="8" max="160" value="${sz(c).t}" style="width:76px"></label><label style="font-size:12px">Leagues <input id="ws-d-${c}" type="number" min="1" max="16" value="${sz(c).d}" style="width:64px"></label><label style="font-size:12px">Playoff divisions <select id="ws-pd-${c}" style="padding:4px 6px">${[['0','Auto (two with 16+ teams)'],['1','One bracket'],['2','Two by school size']].map(([v,l])=>`<option value="${v}"${String((D.pdN&&D.pdN[c])||0)===v?' selected':''}>${l}</option>`).join('')}</select></label></div>`).join('')}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">League names, one per line, in order (smallest classification first). Add lines for new leagues.</div>
       <textarea id="ws-dn" rows="10" style="width:100%;font:13px/1.4 Archivo,system-ui,sans-serif">${names.join('\n')}</textarea>`;
   }else if(WS.tab==='map'){body=meBody();
   }else if(WS.tab==='share'){body=shareBody();
@@ -18585,6 +18608,7 @@ const TUT_PAGES=[
   `},
   {tab:'New this update',icon:'',title:'A new look, faster menus and lots of new football',body:`
     <ul>
+      <li><strong>Leagues and playoff divisions</strong>: leagues decide league games and standings; bigger classifications split into Division I and II for the playoffs, each with its own state champion.</li>
       <li><strong>Award watch</strong>: Player of the Year and Freshman of the Year watch lists in high school, and trophy races plus a conference Player of the Week in college, all re-ranked every week.</li>
       <li><strong>Back</strong>: every page and card can go back, and the phone back button works. From the high school view you can return to your college or pro career.</li>
       <li><strong>Potential</strong>: a quiet season never lowers a player's potential any more. In Player Career it only goes up, and it comes with you to college.</li>
@@ -19080,6 +19104,47 @@ function storyCombine(run){const C=G.cc,p=C&&C.p;if(!p){run();return;}const cmb=
   for(const s of sc.steps)Object.defineProperty(s,'extra',{get:res,configurable:true});sc.end=res;
   stRun(sc,{done:()=>{window._ccCmb=cmb;run();},skip:()=>{run();}});}
 (function(){const f=window.ccDraftRun;if(typeof f!=='function'||f._st)return;const w=function(){if(gdsMain().scenes===false)return f.apply(this,arguments);storyCombine(()=>f());};w._st=true;window.ccDraftRun=w;})();
+// ═══════════ LEAGUES AND PLAYOFF DIVISIONS ═══════════
+// Leagues (the regional groups in G.divisions / G.allLeagues[cls].divisions) decide league games and standings.
+// Playoff divisions are separate: a classification with enough schools is split by school size into Division I (larger)
+// and Division II (smaller), each with its own bracket and state champion. A league can hold schools from both.
+const PD_AUTO_MIN=16; // a classification needs this many schools before it splits into two playoff divisions
+function pdSchools(cls){try{return divisionsForCls(cls).flatMap(d=>d.teams);}catch(e){return[];}}
+function pdSettings(){if(!G.pdN){let w={};try{w=(worldLoad()||{}).pdN||{};}catch(e){}G.pdN=Object.assign({},w);}return G.pdN;}
+// how many playoff divisions a classification has: the save's choice, else the world's, else by size
+function pdN(cls){const v=pdSettings()[cls];if(v===1||v===2)return v;return pdSchools(cls).length>=PD_AUTO_MIN?2:1;}
+// enrollment decides the split; schools without one get a steady number from their id
+function schEnr(s){if(!s.enr){let h=((s.id||1)*2654435761)>>>0;s.enr=250+(h%1650);}return s.enr;}
+// the larger half of a classification is Division I; a school's own setting (s.pdFix) wins
+function pdAssign(cls){const L=pdSchools(cls).filter(s=>!(s.pdFix===1||s.pdFix===2)).sort((a,b)=>schEnr(b)-schEnr(a)),fixed=pdSchools(cls).filter(s=>s.pdFix===1||s.pdFix===2);
+  const n1=Math.max(0,Math.ceil(pdSchools(cls).length/2)-fixed.filter(s=>s.pdFix===1).length);L.forEach((s,i)=>{s.pd=i<n1?1:2;});fixed.forEach(s=>{s.pd=s.pdFix;});}
+function pdOf(s){if(!s)return 1;const cls=s.cls||G.cls;if(pdN(cls)<2)return 1;if(s.pdFix===1||s.pdFix===2)return s.pdFix;if(s.pd!==1&&s.pd!==2)pdAssign(cls);return s.pd===2?2:1;}
+// the name of a playoff division; states whose classifications are already called "Division" get large/small school brackets
+function pdName(cls,pd){if(pdN(cls)<2)return'';const lbl=String(clsL(cls)||'');return/division/i.test(lbl)?(pd===1?'Large school bracket':'Small school bracket'):(pd===1?'Division I':'Division II');}
+function pdShort(cls,pd){if(pdN(cls)<2)return'';return/division/i.test(String(clsL(cls)||''))?(pd===1?'Large':'Small'):(pd===1?'D-I':'D-II');}
+// "3A Division I" or just "3A" when the classification has one bracket
+function pdFull(cls,pd){const n=pdName(cls,pd);return clsL(cls)+(n?' '+n:'');}
+// the other playoff division(s) of your classification play their own bracket alongside yours, round by round
+function pdSeedList(pd){return allSchools().filter(s=>pdOf(s)===pd).map(s=>{const wr=s.wins/(s.wins+s.losses+.001);return{id:s.id,seed:wr*1000+calcSOS(s.id)*8+(s.prestige||1)*5};}).sort((a,b)=>b.seed-a.seed);}
+function pdOthersBuild(N,myPd){const out=[];if(pdN(G.cls)<2)return out;
+  for(const pd of[1,2]){if(pd===myPd)continue;const L=pdSeedList(pd),n=Math.min(N,1<<Math.floor(Math.log2(Math.max(2,L.length))));if(L.length<2)continue;
+    const field=L.slice(0,n).map(x=>x.id);out.push({pd,field,bracket:poOrder(field.length).map(i=>field[i-1]).filter(x=>x!=null),round:0,rounds:[],stateChampId:null});}
+  return out;}
+function pdSimRound(B){if(!B||B.stateChampId||B.bracket.length<2)return;const res=[],sv=[];
+  for(let i=0;i<B.bracket.length;i+=2){const a=B.bracket[i],b=B.bracket[i+1];if(b==null){sv.push(a);res.push({a,b:null,winner:a,score:'Bye'});continue;}
+    const oa=teamOvr(a),ob=teamOvr(b),gap=oa-ob,ag=Math.abs(gap),fav=ag>=25?0.97:ag>=20?0.95:ag>=15?0.92:ag>=10?0.87:ag>=5?0.78:0.5+ag*0.056,aw=Math.random()<(gap>=0?fav:1-fav);
+    const w=aw?a:b,l=aw?b:a,sc=lgScore(teamOvr(w),teamOvr(l),true);res.push({a,b,winner:w,loser:l,wScore:sc[0],lScore:sc[1]});sv.push(w);}
+  B.round++;B.rounds.push({round:B.round,results:res});B.bracket=sv;
+  if(sv.length===1){B.stateChampId=sv[0];const s=getS(sv[0]);if(s)try{addNews('general',`${s.name} ${s.mascot} win the ${pdFull(G.cls,B.pd)} state title`,`${2026+(G.yr-1)} · ${recStr(s.wins,s.losses)}`);}catch(e){}}}
+function pdOthersRound(){for(const B of(G.playoff&&G.playoff.others)||[])pdSimRound(B);}
+function pdOthersFinishSafe(){try{pdOthersFinish();}catch(e){console.error('other playoff divisions',e);}}
+function pdOthersFinish(){for(const B of(G.playoff&&G.playoff.others)||[]){let k=0;while(!B.stateChampId&&B.bracket.length>1&&k++<8)pdSimRound(B);}}
+// the playoff division tag next to a school in standings and lists
+function pdTag(s){const cls=s.cls||G.cls;if(pdN(cls)<2)return'';const pd=pdOf(s);return`<span class="pd-tag pd${pd}" title="${pdName(cls,pd)} playoffs">${pdShort(cls,pd)}</span>`;}
+// one or two playoff brackets for a classification (before its playoffs start)
+window.pdSetN=function(cls,n){if(G.playoff&&cls===G.cls){notify('The playoffs already started: change it next season.','w');return;}pdSettings()[cls]=n;for(const s of pdSchools(cls))delete s.pd;nav(G._page||'playoff');};
+// a new season: sizes can change with reclassification, so everyone is placed again (a school's own choice stays)
+function pdNewSeason(){try{for(const s of allSchoolsAll())delete s.pd;}catch(e){}}
 </script>
 <script type="text/x-gameday" id="gd-src"><!DOCTYPE html>
 <html lang="en">

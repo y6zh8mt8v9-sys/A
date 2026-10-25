@@ -166,12 +166,12 @@ function _doOffseason(){
           for(const s of rem){s.type='bye';s.result='bye';s.label='Bye Week (Eliminated)';}
           let _se=0;while(G.playoff.bracket&&G.playoff.bracket.length>1&&_se<8){_se++;G.playoff.round++;simPlayoffRound(G.playoff.round,{playoffRound:G.playoff.round},null);}
           if(G.playoff.bracket&&G.playoff.bracket.length===1)G.playoff.stateChampId=G.playoff.bracket[0].id;
-          G.phase='postseason';break;
-        } else if(G.playoff.bracket&&G.playoff.bracket.length<=1){G.phase='postseason';break;}
+          (pdOthersFinishSafe(),G.phase='postseason');break;
+        } else if(G.playoff.bracket&&G.playoff.bracket.length<=1){(pdOthersFinishSafe(),G.phase='postseason');break;}
         else setNextPlayoffGame();
         safetyCount++;
       }
-      if(G.phase!=='postseason')G.phase='postseason';
+      if(G.phase!=='postseason')(pdOthersFinishSafe(),G.phase='postseason');
     }
   }
   // Show state champion popup if player didn't win the championship
@@ -185,7 +185,7 @@ function _doOffseason(){
     }
   }
   // v2.00: the National Championship (top two of the final national poll) is played before the offseason starts
-  try{G.phase='postseason';if(natEnsure()){const np=natSim();if(np)_osPops.push(np);}}catch(e){console.error('natl',e);}
+  try{(pdOthersFinishSafe(),G.phase='postseason');if(natEnsure()){const np=natSim();if(np)_osPops.push(np);}}catch(e){console.error('natl',e);}
   if(_osPops.length){_popQ=_osPops;_popI=0;_popCb=()=>{G.phase='offseason';G.osPhase=0;runOffseason();};showPop();return;}
   G.phase='offseason';G.osPhase=0;runOffseason();
   }); // end showLoading callback

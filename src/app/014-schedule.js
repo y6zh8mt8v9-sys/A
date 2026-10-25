@@ -148,7 +148,7 @@ function renderRivalryPicker(){
 
   openMo(`<h2>${yr} Season, Pick Your Rivalry Game</h2>
   <div style="font-size:12px;color:var(--mu);margin-bottom:14px">
-    Every season you choose <strong style="color:var(--gd)">one division opponent</strong> as your <strong style="color:var(--gd)">Rivalry Game</strong> (always Week 5). Rivalry games carry extra prestige, affect recruiting, and can shift the season narrative. Choose wisely: your rival resets each year.
+    Every season you choose <strong style="color:var(--gd)">one league opponent</strong> as your <strong style="color:var(--gd)">Rivalry Game</strong> (always Week 5). Rivalry games carry extra prestige, affect recruiting, and can shift the season narrative. Choose wisely: your rival resets each year.
   </div>
   ${rivalInfo}
   <div style="overflow-y:auto;max-height:45vh;margin-bottom:14px">
@@ -344,7 +344,7 @@ function renderScheduleBuilder(){
   openMo(`<h2>Build Your ${yr2} Schedule</h2>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:stretch">
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 14px;flex:1;min-width:140px">
-      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">Division Games (Locked)</div>
+      <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:4px">League Games (Locked)</div>
       <div style="font-family:var(--hd);font-size:20px;font-weight:900;color:var(--te)">5 Games</div>
       <div style="font-size:11px;color:var(--mu)">Weeks 1–5 · Rival in Wk 5</div>
     </div>

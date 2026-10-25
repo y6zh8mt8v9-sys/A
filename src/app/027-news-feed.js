@@ -589,6 +589,10 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;window._schUniT={id:s.i
       </div>
     </div>
   </div>
+  ${(()=>{const cls=s.cls||G.cls,L=divisionsForCls(cls),cur=L.findIndex(d=>d.teams.some(t=>t.id===s.id)),two=pdN(cls)>1;
+    return`<div class="g2" style="gap:10px;margin-top:10px"><div class="fg"><label>League</label><select class="ei" id="es-lg">${L.map((d,i)=>`<option value="${i}"${i===cur?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}</select></div>
+      <div class="fg"><label>Playoff division</label><select class="ei" id="es-pd"${two?'':' disabled title="This classification plays one bracket. Switch to two on the Playoffs page."'}><option value="0"${!s.pdFix?' selected':''}>By school size (${two?pdName(cls,pdOf(s)):'one bracket'})</option>${two?[1,2].map(k=>`<option value="${k}"${s.pdFix===k?' selected':''}>${pdName(cls,k)}</option>`).join(''):''}</select></div></div>
+      <div style="font-size:11px;color:var(--mu);margin-top:4px">Leagues decide league games and standings; the playoff division decides which state bracket the school plays in. A league move counts for the standings right away; league games follow next season.</div>`;})()}
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
     <div style="font-size:10px;color:var(--mu);letter-spacing:1px;font-weight:700;margin-bottom:8px">Uniforms</div>
     <div id="sch-uni">${uniHostHtml(window._schUniT,schUniCol,sid===G.myId)}</div>
@@ -598,7 +602,10 @@ function openEditSch(sid){const s=getS(sid);if(!s)return;window._schUniT={id:s.i
     <button class="bgh" onclick="clo()">Cancel</button>
   </div>`);}
 window.schLogoPrev=function(sid){const s=getS(sid),el=document.getElementById('elk-prev');if(!s||!el)return;const t=Object.assign({},s,{logoKey:document.getElementById('elk').value||null,mash:document.getElementById('emash').value||null,c1:document.getElementById('ec1').value,c2:document.getElementById('ec2').value,customLogo:null});el.innerHTML=sLogo(t,64);};
-window.saveSch=function(sid){const s=getS(sid);if(!s)return;{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}{const T=window._schUniT;if(T&&T.id===s.id){const u=uniClean(T.uni);if(u)s.uni=u;else delete s.uni;if(T.c3)s.c3=T.c3;}window._schUniT=null;window._uniT=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
+window.saveSch=function(sid){const s=getS(sid);if(!s)return;
+  {const cls=s.cls||G.cls,L=divisionsForCls(cls),lg=document.getElementById('es-lg'),pdE=document.getElementById('es-pd');
+    if(lg){const to=L[+lg.value],from=L.find(d=>d.teams.some(t=>t.id===s.id));if(to&&from&&to!==from&&from.teams.length<=2)notify(`${from.name} would be left with too few teams, so ${s.name} stays there`,'w');else if(to&&from&&to!==from){const t=from.teams.find(t=>t.id===s.id);from.teams=from.teams.filter(x=>x.id!==s.id);to.teams.push(t);}}
+    if(pdE&&!pdE.disabled){const v=+pdE.value;if(v===1||v===2)s.pdFix=v;else delete s.pdFix;for(const x of pdSchools(cls))delete x.pd;}}{const lk=document.getElementById('elk'),mh=document.getElementById('emash');if(lk)s.logoKey=lk.value||null;if(mh)s.mash=mh.value||null;}s.name=document.getElementById('en').value||s.name;s.mascot=document.getElementById('em').value||s.mascot;s.city=document.getElementById('ec').value||s.city;s.abbr=((document.getElementById('ea').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3)||s.abbr);s.c1=document.getElementById('ec1').value;s.c2=document.getElementById('ec2').value;s.offS=document.getElementById('eos').value;s.defS=document.getElementById('eds').value;if(s._pendingLogo){s.customLogo=s._pendingLogo;s._pendingLogo=null;}{const T=window._schUniT;if(T&&T.id===s.id){const u=uniClean(T.uni);if(u)s.uni=u;else delete s.uni;if(T.c3)s.c3=T.c3;}window._schUniT=null;window._uniT=null;}s.userEdited=true;clo();notify('School updated!');updateTb();if(G._page)nav(G._page,G._arg);};
 window.handleSchLogoUpload=function(inp,sid){
   const file=inp.files[0];if(!file)return;
   logoShrink(file,function(d){
@@ -705,12 +712,12 @@ function pgStand(){
     for(const div of divs){
       const isMyDiv=div.teams.some(t=>t.id===G.myId);
       const sorted=[...div.teams].sort((a,b)=>{const aw=a.wins/(a.wins+a.losses+.001),bw=b.wins/(b.wins+b.losses+.001);return bw-aw||b.wins-a.wins;});
-      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--te)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--te);font-size:11px">Your division</span>':''}</div>
+      html+=`<div class="pnl" style="margin-bottom:14px"><div class="ph">${div.name} <span style="font-size:10px;font-weight:600;color:var(--te)">[${XCLS[cls]?clsName(cls):cls}]</span> ${isMyDiv?'<span style="color:var(--te);font-size:11px">Your league</span>':''}</div>
         <table><thead><tr><th>#</th><th>School</th><th>W</th><th>L</th><th>Win%</th><th>Ovr</th><th>Scheme</th></tr></thead>
         <tbody>${sorted.map((s,i)=>{const isMe=s.id===G.myId;const w=s.wins,l=s.losses;const wp=w+l>0?(w/(w+l)*100).toFixed(0)+'%':'–';
           return`<tr class="cl" onclick="viewSchool(${s.id})" ${isMe?'style="background:rgba(204,34,34,.07)"':''}>
             <td style="color:var(--mu)">${i+1}</td>
-            <td><div style="display:flex;align-items:center;gap:6px">${sLogo(s,32)}<span>${isMe?'<strong>':''}${s.name} ${s.mascot}${isMe?'</strong>':''}</span>${isMe?'<span style="color:var(--te);font-size:10px">You</span>':''}</div></td>
+            <td><div style="display:flex;align-items:center;gap:6px">${sLogo(s,32)}<span>${isMe?'<strong>':''}${s.name} ${s.mascot}${isMe?'</strong>':''}</span>${pdTag(s)}${isMe?'<span style="color:var(--te);font-size:10px">You</span>':''}</div></td>
             <td style="color:var(--gn)">${w}</td><td style="color:var(--te)">${l}</td>
             <td>${wp}</td><td>${rb(teamOvr(s.id))}</td>
             <td style="font-size:11px;color:var(--mu)">${s.offS}/${s.defS}</td>
@@ -723,13 +730,19 @@ function pgStand(){
 
 function pgPlayoff(){
   const pl=G.playoff;const curYear=2026+(G.yr-1);
-  if(!pl)return`<div class="pnl"><div class="ph">State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. The top ${poSeasonN()} teams in ${clsL(G.cls)} qualify${poRules().q==='div'?', division winners first':''}. Complete your schedule first.</div></div></div>`;
+  if(!pl){const n=pdN(G.cls),mp=pdOf(myS()),sw=k=>`<button class="bgh bsm${n===k?' on':''}" style="${n===k?'border-color:var(--post);color:var(--chalk)':''}" onclick="pdSetN('${G.cls}',${k})">${k===1?'One bracket':'Two by school size'}</button>`;
+    return`<div class="pnl"><div class="ph">State Playoffs, ${curYear}</div><div class="pb"><div style="color:var(--mu)">Playoffs start after the regular season. The top ${(()=>{const c=allSchools().filter(x=>pdOf(x)===mp).length;return Math.min(poSeasonN(),1<<Math.floor(Math.log2(Math.max(2,c))));})()} teams in ${pdFull(G.cls,mp)} qualify${poRules().q==='div'?', league winners first':''}. Complete your schedule first.</div>
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font-size:13px">Playoff divisions in ${clsL(G.cls)}</b>${sw(1)}${sw(2)}</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:6px">${n>1?`Your school plays in ${pdName(G.cls,mp)}. Leagues mix both divisions; each division has its own bracket and state champion. Change a school's division from its Edit page.`:`Every school in ${clsL(G.cls)} plays in one bracket. Leagues decide league games and standings, not playoff spots.`}</div></div></div>`;}
   const field=pl.field||[],inF=field.includes(G.myId),sd=field.indexOf(G.myId)+1;
   const st=pl.stateChamp?'<span style="color:var(--gd)">State champions!</span>':!inF?'Your team did not qualify.':pl.myElim?'Your team was eliminated.':pl.stateChampId?'':`You are the #${sd} seed and still alive.`;
-  return`<div class="pnl"><div class="ph">State Playoffs, ${curYear} <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${clsName(G.cls)} · ${field.length} teams</span></div><div class="pb">
+  if(['postseason','offseason'].includes(G.phase))pdOthersFinishSafe();
+  const myPd=pl.pd||pdOf(myS()),oth=(pl.others||[]).map(B=>{const ch=B.stateChampId!=null?getS(B.stateChampId):null;
+    return`<div class="pnl"><div class="ph">${pdFull(G.cls,B.pd)} playoffs <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${B.field.length} teams${ch?' · champion: '+ch.name:''}</span></div><div class="pb">${poBracketHtml(B)}</div></div>`;}).join('');
+  return`<div class="pnl"><div class="ph">State Playoffs, ${curYear} <span style="font-size:11px;font-weight:400;color:var(--mu);text-transform:none">${clsName(G.cls)}${pdName(G.cls,myPd)?' '+pdName(G.cls,myPd):''} · ${field.length} teams</span></div><div class="pb">
     <div style="font-size:13px;margin-bottom:10px">${st}</div>${poBracketHtml(pl)}
-    <div style="font-size:11px;color:var(--mu);margin-top:8px">Seeds by record, strength of schedule and prestige. The top seeds meet as late as possible. Tap a team to see the school.</div>
-  </div></div>`;
+    <div style="font-size:11px;color:var(--mu);margin-top:8px">Seeds by record, strength of schedule and prestige. The top seeds meet as late as possible. Tap a team to see the school.${pdN(G.cls)>1?` ${clsL(G.cls)} has two playoff divisions by school size; leagues mix both, but each division crowns its own state champion.`:''}</div>
+  </div></div>${oth}`;
 }
 
 let _teamsCls=null;

@@ -313,7 +313,7 @@ function trophySvg(col,big){const w=big?64:46;return`<svg viewBox="0 0 64 72" wi
   <rect x="28" y="40" width="8" height="12" fill="${col}"/><rect x="18" y="52" width="28" height="6" rx="1" fill="${col}"/><rect x="14" y="58" width="36" height="10" rx="2" fill="#4a3324"/></svg>`;}
 function pgTrophy(){
   const T=G.trophies||[],H=G.hist||[],me=myS();
-  const kinds=[['National','National Champions','#d9a520',true],['State','State Champions','#e3b341',true],['Division','Division Champions','#a9b4c2',false]];
+  const kinds=[['National','National Champions','#d9a520',true],['State','State Champions','#e3b341',true],['Division','League Champions','#a9b4c2',false]];
   const shelf=kinds.map(([k,l,c,big])=>{const L=T.filter(t=>t.type===k).sort((a,b)=>a.yr-b.yr);if(!L.length)return'';
     return`<div class="pnl" style="margin-bottom:14px"><div class="ph">${l} <span style="font-size:12px;color:var(--mu)">${L.length}</span></div><div class="pb" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;background:linear-gradient(180deg,transparent 78%,rgba(120,80,40,.18) 78%)">
       ${L.map(t=>`<div style="text-align:center;min-width:70px">${trophySvg(c,big)}<div style="font-weight:800;font-size:13px">${(G.baseYear||2026)+t.yr-1}</div><div style="font-size:11px;color:var(--mu)">${t.rec||''}${t.cls?' · '+clsL(t.cls):''}</div></div>`).join('')}</div></div>`;}).join('');
@@ -323,8 +323,8 @@ function pgTrophy(){
   const empty=!shelf&&!ind.length;
   return`<div class="pnl" style="margin-bottom:14px"><div class="ph"><span style="display:inline-flex;align-items:center;gap:8px">${sLogo(me,30)}${me.name} Trophy Case</span></div><div class="pb">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-        ${[['Seasons',H.length],['All-time record',`${tw}-${tl}`],['Best season',best?`${best.wins}-${best.losses} (${(G.baseYear||2026)+best.yr-1})`:'–'],['Titles',T.filter(t=>t.type!=='Division').length],['Division titles',T.filter(t=>t.type==='Division').length],['Player awards',ind.length]].map(([l,v])=>`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px"><div style="font-size:11px;color:var(--mu);letter-spacing:.06em">${l}</div><div style="font-weight:900;font-size:20px">${v}</div></div>`).join('')}
-      </div>${empty?`<p style="color:var(--mu);margin:12px 0 0">The case is empty for now. Division titles, state and national championships and your players' awards will be displayed here.</p>`:''}</div></div>
+        ${[['Seasons',H.length],['All-time record',`${tw}-${tl}`],['Best season',best?`${best.wins}-${best.losses} (${(G.baseYear||2026)+best.yr-1})`:'–'],['Titles',T.filter(t=>t.type!=='Division').length],['League titles',T.filter(t=>t.type==='Division').length],['Player awards',ind.length]].map(([l,v])=>`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px"><div style="font-size:11px;color:var(--mu);letter-spacing:.06em">${l}</div><div style="font-weight:900;font-size:20px">${v}</div></div>`).join('')}
+      </div>${empty?`<p style="color:var(--mu);margin:12px 0 0">The case is empty for now. League titles, state and national championships and your players' awards will be displayed here.</p>`:''}</div></div>
     ${shelf}
     ${ind.length?`<div class="pnl"><div class="ph">Player awards</div><div class="pb" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       ${ind.map(x=>`<div class="cl" style="display:flex;gap:10px;align-items:center;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:8px" onclick="showPlayer(${x.a.pid})">${trophySvg(x.l==='Mr. Football'?'#d9a520':'#7fa6d8',false)}<div><div style="font-weight:800">${x.l}</div><div>${x.a.name}</div><div style="font-size:11px;color:var(--mu)">${(G.baseYear||2026)+x.yr-1}${x.a.pos?' · '+x.a.pos:''}</div></div></div>`).join('')}</div></div>`:''}`;}

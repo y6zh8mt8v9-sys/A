@@ -75,6 +75,7 @@ app/056-huddle-the-career-s-social.js
 app/057-tutorial.js
 app/058-audio-mix.js
 app/059-story-scenes.js
+app/060-leagues-playoff-divisions.js
 shell/20-app-end-engine-start.html
 engine/shell/00-page.html
 engine/sprites/00-sprite-library.js

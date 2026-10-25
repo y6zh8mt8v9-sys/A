@@ -113,6 +113,7 @@ const TUT_PAGES=[
   `},
   {tab:'New this update',icon:'',title:'A new look, faster menus and lots of new football',body:`
     <ul>
+      <li><strong>Leagues and playoff divisions</strong>: leagues decide league games and standings; bigger classifications split into Division I and II for the playoffs, each with its own state champion.</li>
       <li><strong>Award watch</strong>: Player of the Year and Freshman of the Year watch lists in high school, and trophy races plus a conference Player of the Week in college, all re-ranked every week.</li>
       <li><strong>Back</strong>: every page and card can go back, and the phone back button works. From the high school view you can return to your college or pro career.</li>
       <li><strong>Potential</strong>: a quiet season never lowers a player's potential any more. In Player Career it only goes up, and it comes with you to college.</li>

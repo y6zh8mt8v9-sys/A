@@ -52,6 +52,7 @@ function worldSanitize(W){
   if(W.colMeta&&typeof W.colMeta==='object'){const hx=v=>/^#[0-9a-f]{6}$/i.test(v||'')?v:undefined,lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;o.colMeta=map(W.colMeta,m=>{if(!m||typeof m!=='object')return null;const r={mascot:m.mascot?str(m.mascot).slice(0,24):undefined,abbr:m.abbr?String(m.abbr).toUpperCase().replace(/[^A-Z&]/g,'').slice(0,5):undefined,c1:hx(m.c1),c2:hx(m.c2),logoKey:lk(m.logoKey),mash:lk(m.mash),st:m.st?String(m.st).slice(0,3):undefined,pr:m.pr?clamp(Math.round(+m.pr)||50,1,99):undefined,customLogo:typeof m.customLogo==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,/.test(m.customLogo)&&m.customLogo.length<160000?m.customLogo:undefined};for(const x in r)if(r[x]===undefined)delete r[x];return Object.keys(r).length?r:null;});}
   if(W.pro&&typeof W.pro==='object'){o.pro={};for(const k of['NGL','SFL','MGL']){const v=L(W.pro[k],64);if(v&&v.length)o.pro[k]=v;}}
   o.divs=map(W.divs,a=>L(a,64));o.xdivs=map(W.xdivs,a=>L(a,200));
+  o.pdN=map(W.pdN,v=>v===1||v===2?v:null);
   o.size=map(W.size,z=>z&&typeof z==='object'?{t:clamp(Math.round(+z.t)||8,8,160),d:clamp(Math.round(+z.d)||1,1,16)}:null);
   if(W.stars&&typeof W.stars==='object'){o.stars={};for(const k of[5,4,3,2])if(W.stars[k]!=null)o.stars[k]=clamp(Math.round(+W.stars[k])||0,0,5000);}
   for(const k of['frMult','colMult'])if(W[k]!=null)o[k]=clamp(+W[k]||1,0.5,2);

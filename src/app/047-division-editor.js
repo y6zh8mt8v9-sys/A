@@ -16,7 +16,7 @@ function closeDivEditor(){
 function resetDivNames(){
   const cls=document.getElementById('s-cls').value;
   const names=DIV_NAMES[cls]||[];
-  _setupDivs.forEach((d,i)=>{d.name=names[i]||`Division ${i+1}`;});
+  _setupDivs.forEach((d,i)=>{d.name=names[i]||`League ${i+1}`;});
   renderDivEditorList();
 }
 function renderDivEditorList(){
@@ -24,13 +24,13 @@ function renderDivEditorList(){
   list.innerHTML=_setupDivs.map((d,i)=>`
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:11px;color:var(--mu);font-family:var(--hd);font-weight:700;min-width:22px;text-align:right;">${i+1}.</span>
-      <input class="ei div-name-input" value="${d.name}" placeholder="Division ${i+1} name" style="flex:1;" oninput="liveDivName(this,${i})">
+      <input class="ei div-name-input" value="${d.name}" placeholder="League ${i+1} name" style="flex:1;" oninput="liveDivName(this,${i})">
       <span style="font-size:10px;color:var(--mu);white-space:nowrap;">${d.teams.length} teams</span>
     </div>
   `).join('');
 }
 function liveDivName(inp,i){
-  if(_setupDivs[i])_setupDivs[i].name=inp.value||`Division ${i+1}`;
+  if(_setupDivs[i])_setupDivs[i].name=inp.value||`League ${i+1}`;
 }
 
 // ═══════════ TEAM BUILDER ═══════════
@@ -97,7 +97,7 @@ function tbDraft(){let d=null;try{d=JSON.parse(localStorage.getItem(TBD_KEY)||'n
 function tbDraftPut(d){try{if(USA.on){const pt={},P=c=>{if(c&&!pt[c]){const p=clsPort(c);if(p)pt[c]=p;}};for(const k in d.ed){P(k.split('|')[0]);P(String(d.ed[k].to||'').split('|')[0]);}for(const k of d.del)P(k.split('|')[0]);for(const a of d.add)P(String(a.to||'').split('|')[0]);d.pt=pt;}
   localStorage.setItem(TBD_KEY,JSON.stringify(d));return true;}catch(e){tbStatus('Could not save your changes on this device (storage full: try smaller logo images).','var(--rd)');return false;}}
 function tbOk(t){return t._ok||(t._ok=(t.cls||'')+'|'+t.name);}
-function tbFields(t){const f={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};for(const k of['c3','logoKey','mash','offS','defS'])if(t[k])f[k]=t[k];{const u=uniClean(t.uni);if(u)f.uni=u;}return f;}
+function tbFields(t){const f={name:t.name,mascot:t.mascot,city:t.city,abbr:t.abbr,c1:t.c1,c2:t.c2,prestige:t.prestige,customLogo:t.customLogo||null,to:t.cls+'|'+t.dIdx};for(const k of['c3','logoKey','mash','offS','defS','pdFix'])if(t[k])f[k]=t[k];{const u=uniClean(t.uni);if(u)f.uni=u;}return f;}
 function tbRecord(t,op){const d=tbDraft();
   if(op==='add'){t._ok='add|'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);d.add.push(Object.assign({ok:t._ok},tbFields(t)));}
   else if(op==='del'){const ok=tbOk(t);const i=d.add.findIndex(a=>a.ok===ok);if(i>=0)d.add.splice(i,1);else{delete d.ed[ok];if(!d.del.includes(ok))d.del.push(ok);}}
@@ -108,7 +108,7 @@ function tbRecord(t,op){const d=tbDraft();
 function tbPackOut(){const d=tbDraft(),n=Object.keys(d.ed).length+d.del.length+d.add.length;return n?{ed:d.ed,del:d.del,add:d.add}:null;}
 function tbPackClean(t){if(!t||typeof t!=='object')return undefined;
   const col=c=>/^#[0-9a-f]{6}$/i.test(c||'')?c:'#444444',lg=v=>typeof v==='string'&&v.length<120000&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(v)?v:null;
-  const lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;const F=f=>f&&typeof f==='object'?{name:wsClean(f.name),mascot:wsClean(f.mascot),city:wsClean(f.city),abbr:String(f.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:col(f.c1),c2:col(f.c2),prestige:clamp(Math.round(+f.prestige)||3,1,5),customLogo:lg(f.customLogo),to:String(f.to||'').slice(0,40),c3:/^#[0-9a-f]{6}$/i.test(f.c3||'')?f.c3:undefined,logoKey:lk(f.logoKey),mash:lk(f.mash),offS:OFF_SCH.includes(f.offS)?f.offS:undefined,defS:DEF_SCH.includes(f.defS)?f.defS:undefined,uni:uniClean(f.uni)}:null;
+  const lk=v=>v&&typeof _LGO!=='undefined'&&_LGO[v]?v:undefined;const F=f=>f&&typeof f==='object'?{name:wsClean(f.name),mascot:wsClean(f.mascot),city:wsClean(f.city),abbr:String(f.abbr||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),c1:col(f.c1),c2:col(f.c2),prestige:clamp(Math.round(+f.prestige)||3,1,5),customLogo:lg(f.customLogo),to:String(f.to||'').slice(0,40),pdFix:f.pdFix===1||f.pdFix===2?f.pdFix:undefined,c3:/^#[0-9a-f]{6}$/i.test(f.c3||'')?f.c3:undefined,logoKey:lk(f.logoKey),mash:lk(f.mash),offS:OFF_SCH.includes(f.offS)?f.offS:undefined,defS:DEF_SCH.includes(f.defS)?f.defS:undefined,uni:uniClean(f.uni)}:null;
   const ed={};if(t.ed&&typeof t.ed==='object'&&!Array.isArray(t.ed))for(const k of Object.keys(t.ed).slice(0,4000)){const v=F(t.ed[k]);if(v&&v.name)ed[String(k).slice(0,120)]=v;}
   const del=Array.isArray(t.del)?t.del.slice(0,4000).map(x=>String(x).slice(0,120)):[];
   const add=Array.isArray(t.add)?t.add.slice(0,400).map(a=>{const v=F(a);return v&&v.name?Object.assign(v,{ok:String((a&&a.ok)||('add|'+Math.random().toString(36).slice(2,8))).slice(0,60)}):null;}).filter(Boolean):[];
@@ -122,9 +122,9 @@ function tbApplyDraft(){
   const moveTo=(t,to)=>{if(!to)return;const[c,di]=to.split('|'),D=_allClsDivs[c],k=+di;if(!D||!D[k]||(t.cls===c&&t.dIdx===k))return;
     for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}t.cls=c;t.dIdx=k;D[k].teams.push(t);};
   for(const ok of d.del){const t=byOk[ok];if(!t)continue;for(const dv of Object.values(_allClsDivs))for(const dd of dv){const i=dd.teams.indexOf(t);if(i>=0)dd.teams.splice(i,1);}}
-  for(const ok in d.ed){const t=byOk[ok];if(!t)continue;const f=d.ed[ok];t._ok=ok;Object.assign(t,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,customLogo:f.customLogo||null});for(const k of['c3','logoKey','mash','offS','defS'])if(f[k])t[k]=f[k];{const u=uniClean(f.uni);if(u)t.uni=u;else delete t.uni;}moveTo(t,f.to);}
+  for(const ok in d.ed){const t=byOk[ok];if(!t)continue;const f=d.ed[ok];t._ok=ok;Object.assign(t,{name:f.name,mascot:f.mascot,city:f.city,abbr:f.abbr,c1:f.c1,c2:f.c2,prestige:f.prestige,customLogo:f.customLogo||null});for(const k of['c3','logoKey','mash','offS','defS'])if(f[k])t[k]=f[k];if(f.pdFix)t.pdFix=f.pdFix;else delete t.pdFix;{const u=uniClean(f.uni);if(u)t.uni=u;else delete t.uni;}moveTo(t,f.to);}
   for(const a of d.add){const[c,di]=String(a.to||'').split('|'),D=_allClsDivs[c];if(!D)continue;const k=clamp(+di||0,0,D.length-1);
-    D[k].teams.push({id:_sId++,_ok:a.ok,name:a.name,mascot:a.mascot,city:a.city,cls:c,dIdx:k,abbr:a.abbr,c1:a.c1,c2:a.c2,c3:a.c3,logoKey:a.logoKey,mash:a.mash,prestige:a.prestige||3,wins:0,losses:0,isP:false,offS:a.offS||pick(OFF_SCH),defS:a.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:a.customLogo||null,uni:uniClean(a.uni)});}
+    D[k].teams.push({id:_sId++,_ok:a.ok,pdFix:a.pdFix,name:a.name,mascot:a.mascot,city:a.city,cls:c,dIdx:k,abbr:a.abbr,c1:a.c1,c2:a.c2,c3:a.c3,logoKey:a.logoKey,mash:a.mash,prestige:a.prestige||3,wins:0,losses:0,isP:false,offS:a.offS||pick(OFF_SCH),defS:a.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],tier:'avg',trainLevel:1,customLogo:a.customLogo||null,uni:uniClean(a.uni)});}
   return n;}
 window.tbDraftClear=function(){if(!confirm('Undo every Team Builder change and go back to the original schools?'))return;try{localStorage.removeItem(TBD_KEY);}catch(e){}
   _allClsDivs=null;try{_usedSchoolNames.clear();Object.keys(_citySchoolCount).forEach(k=>delete _citySchoolCount[k]);}catch(e){}initCountyMap();tbTab('browse');tbStatus('Team Builder changes cleared.','var(--gd)');};
@@ -276,7 +276,7 @@ function tbRenderAdd(dIdx){
       <div class="fg"><label>School Name</label><input class="ei" id="tb-add-name" placeholder="e.g. Jefferson High" oninput="tbPreviewLogo('add')"></div>
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-add-mascot" placeholder="e.g. Eagles" oninput="tbPreviewLogo('add')"></div>
       <div class="fg"><label>City</label><input class="ei" id="tb-add-city" placeholder="e.g. Springfield"></div>
-      <div class="fg"><label>Division</label>
+      <div class="fg"><label>League</label>
         <select class="ei" id="tb-add-div">
           ${divs.map((d,i)=>`<option value="${i}"${i===selDiv?' selected':''}>${d.name} (${d.teams.length} teams)</option>`).join('')}
         </select>
@@ -413,10 +413,13 @@ function tbEditTeam(dIdx,tIdx){
       <div class="fg"><label>Mascot</label><input class="ei" id="tb-edit-mascot" value="${t.mascot}" oninput="tbPreviewLogo('edit')"></div>
       <div class="fg"><label>City</label><input class="ei" id="tb-edit-city" value="${t.city}"></div>
       <div class="fg"><label>Abbreviation (3 letters)</label><input class="ei" id="tb-edit-abbr" value="${t.abbr||''}" maxlength="3" style=""></div>
-      <div class="fg"><label>Move to Division (any classification)</label>
+      <div class="fg"><label>Move to league (any classification)</label>
         <select class="ei" id="tb-edit-div">
           ${allClsOptions}
         </select>
+      </div>
+      <div class="fg"><label>Playoff division</label>
+        <select class="ei" id="tb-edit-pd">${[[0,'By school size'],[1,'Division I (larger schools)'],[2,'Division II (smaller schools)']].map(([v,l])=>`<option value="${v}"${(t.pdFix||0)===v?' selected':''}>${l}</option>`).join('')}</select>
       </div>
     </div>
     <div class="g2" style="gap:10px;margin-bottom:10px;">
@@ -474,7 +477,7 @@ function tbSaveEdit(){
   const newC1=document.getElementById('tb-edit-c1')?.value||t.c1;
   const newC2=document.getElementById('tb-edit-c2')?.value||t.c2;
   const newPrestige=parseInt(document.getElementById('tb-edit-prestige')?.value||'3');
-  t.name=newName;t.mascot=newMascot;t.city=newCity;t.c1=newC1;t.c2=newC2;
+  t.name=newName;t.mascot=newMascot;t.city=newCity;t.c1=newC1;t.c2=newC2;{const v=+(document.getElementById('tb-edit-pd')?.value||0);if(v===1||v===2)t.pdFix=v;else delete t.pdFix;}
   t.prestige=newPrestige;
   {const ab=String(document.getElementById('tb-edit-abbr')?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3);const u=tbAbbrUsed(editCls);u.delete(t.abbr);t.abbr=ab.length===3&&!u.has(ab)?ab:(newName!==t._ok.split('|').slice(1).join('|')||ab.length!==3?abbr3(newName,u):t.abbr);}
   t.customLogo=_tbEditLogoData||null;
@@ -644,7 +647,7 @@ function tbApplyImport(pack){
       const clsData=pack.allClassifications[cls];
       if(!clsData||!clsData.divisions)continue;
       _allClsDivs[cls]=clsData.divisions.map((div,dIdx)=>({
-        name:div.name||`Division ${dIdx+1}`,
+        name:div.name||`League ${dIdx+1}`,
         teams:div.teams.map(t=>{
           const abbr=t.abbr||(t.name.replace(/High|School|Academy|Prep/g,'').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'HS');
           return{id:_sId++,name:t.name,mascot:t.mascot,city:t.city,cls,dIdx,abbr,c1:t.c1||'#333',c2:t.c2||'#fff',prestige:t.prestige||1,tier:t.tier||'avg',wins:0,losses:0,isP:false,offS:t.offS||pick(OFF_SCH),defS:t.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],trainLevel:1,customLogo:t.customLogo||null};
@@ -672,7 +675,7 @@ function tbApplyImport(pack){
   if(!_allClsDivs)initAllClsDivs();
   _sId=1;
   const importedDivs=pack.divisions.map((div,dIdx)=>({
-    name:div.name||`Division ${dIdx+1}`,
+    name:div.name||`League ${dIdx+1}`,
     teams:div.teams.map(t=>{
       const abbr=t.abbr||(t.name.replace(/High|School|Academy|Prep/g,'').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'HS');
       return{id:_sId++,name:t.name,mascot:t.mascot,city:t.city,cls:importCls,dIdx,abbr,c1:t.c1||'#333',c2:t.c2||'#fff',prestige:t.prestige||1,tier:t.tier||'avg',wins:0,losses:0,isP:false,offS:t.offS||pick(OFF_SCH),defS:t.defS||pick(DEF_SCH),fac:{weight:1,film:1,train:1,med:1},staff:genStaff(false),trophies:[],trainLevel:1,customLogo:t.customLogo||null};

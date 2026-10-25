@@ -136,7 +136,7 @@ function dashTiles(o){
     :dtTile('Training'+dot('training'),`nav('training')`,`<div class="dt-sub"><b>Training level ${tl}/20</b></div><div class="dt-stars">${stars(Math.max(1,Math.round(tl/4)))}</div><div class="dt-sub" style="margin-top:8px">${pracAvailable()?`Weekly practice is ready`:'This week\'s practice is done'}</div>${pracAvailable()?`<button class="btn bsm" style="margin-top:8px" onclick="event.stopPropagation();pracOpen()">Practice</button>`:''}`,'dt-tall');
   const tScout=dtTile('Scouting',pa?(opp?`viewSchool(${opp.id})`:`nav('teams')`):`nav('scout')`,`<div class="dt-sub">Scout your next opponents and the prospects in your area.</div>${opp?`<div class="dt-sub" style="margin-top:6px">Next: <b>${opp.name}</b></div>`:''}`);
   // standings and top players
-  const dv=(G.divisions||[]).find(d=>d.teams.some(t=>t.id===G.myId));let stB='<div class="dt-mu">No division.</div>';
+  const dv=(G.divisions||[]).find(d=>d.teams.some(t=>t.id===G.myId));let stB='<div class="dt-mu">No league.</div>';
   if(dv){const rows=dv.teams.slice().sort((a,b)=>(b.wins-a.wins)||(a.losses-b.losses)).slice(0,6);
     stB=`<div class="dt-sub">${dv.name||''}</div><div class="dt-list">${rows.map((t,i)=>`<div class="${t.id===G.myId?'me':''}"><b>${i+1}</b>${sLogo(t,22)}<span class="dt-ln">${t.name}</span><span class="dt-mu">${t.wins||0}-${t.losses||0}</span></div>`).join('')}</div>`;}
   const tStand=dtTile('Standings',`nav('stand')`,stB,'dt-tall');
