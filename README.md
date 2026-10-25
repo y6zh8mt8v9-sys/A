@@ -46,6 +46,7 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 - **Clean-up:** 28 functions nothing used any more were removed.
 - **Scorebugs:** all five styles (TV, Slab, Tower, Mini, Classic) are black with red accents and your team colors, no gloss.
 - **Midfield logo:** solid instead of see-through, and painted onto the turf in perspective, so it stays put on the field like the yard lines while the camera moves.
+- **New Kanra Digital logo** on the start screen and next to the copyright line.
 
 ### Previous update
 - **Kanra Digital:** the game now opens with a Kanra Digital loading screen (logo, progress bar; tap or press a key to skip), and every copyright line reads "© 2026 Kanra Digital. All rights reserved."
