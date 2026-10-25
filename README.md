@@ -40,6 +40,8 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 ## What's new
 
 ### Latest update
+- **Next game tile in college:** on a bye week or in the postseason without a game of your own, the tile used to quietly sim a week, which looked like the tap did nothing. It now opens your schedule or the bracket; the Continue button moves the season on.
+
 - **Award watch lists, every week:** in high school, the state and national Player of the Year races and the state Freshman of the Year race are re-ranked after every regular season week, with arrows for who moved up or down and a tag for new names. They are on the Media page and a dashboard tile. They use the same scoring as the end-of-season awards. A new No. 1 makes the news, and in Player Career you get a post when your player climbs a list.
 - **College awards:** the top trophy for your level (Gridiron Crown Trophy, Prairie Cup and so on), the position award (FBS) and the First Light Award for freshmen get weekly watch lists too, on a new Award watch tab and a dashboard tile. Every week a conference Player of the Week is named (your player can win it for XP). The season's winners come from the same ballot and are announced even when it isn't you.
 - **Back everywhere:** every page has a Back bar to the page before. Escape and the phone or browser back button work too: they close the top window first and ask about the main menu on the dashboard. Player, school and college cards opened from each other get a Back button that steps through the chain. The New Game and Player Career setup screens have a Main menu button.
