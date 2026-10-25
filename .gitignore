@@ -1,0 +1,7 @@
+app/gd_test.html
+app/gd_base.html
+.claude/worktrees/
+tools/mascots/raw/
+tools/node_modules/
+dist/
+__pycache__/

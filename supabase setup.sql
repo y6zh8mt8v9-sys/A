@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
--- Gridiron Prep GM · Online Play database (Supabase) · v2.13: profiles and saves on your account
+-- Gridiron 27 (beta) · Online Play database (Supabase): everything online needs in one script (accounts, matches, friends, cloud saves, saves with friends, blocks, reports, community teams and worlds)
 -- Run once: Supabase dashboard → SQL Editor → New query → paste this whole file → Run.
 -- It is safe to run again later (it updates the rules without touching saved data).
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -171,3 +171,227 @@ create policy "Own save files: replace" on storage.objects
 drop policy if exists "Own save files: delete" on storage.objects;
 create policy "Own save files: delete" on storage.objects
   for delete to authenticated using (bucket_id = 'saves' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- 6) v2.14: DELETE YOUR ACCOUNT, BLOCK AND REPORT PLAYERS, SEND SAVES TO FRIENDS ──────────────────────
+-- (required by the App Store: players who can create an account must be able to delete it in the game)
+
+-- blocks: a blocked player can't send you friend requests or saves, and disappears from your searches
+create table if not exists public.blocks (
+  blocker     uuid not null references public.profiles (id) on delete cascade,
+  blocked     uuid not null references public.profiles (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (blocker, blocked),
+  check (blocker <> blocked)
+);
+alter table public.blocks enable row level security;
+drop policy if exists "Your own blocks" on public.blocks;
+create policy "Your own blocks" on public.blocks
+  for all to authenticated using ((select auth.uid()) = blocker) with check ((select auth.uid()) = blocker);
+revoke all on public.blocks from anon, authenticated;
+grant select, insert, delete on public.blocks to authenticated;
+
+create or replace function public.is_blocked(a uuid, b uuid) returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.blocks k where (k.blocker = a and k.blocked = b) or (k.blocker = b and k.blocked = a));
+$$;
+revoke all on function public.is_blocked(uuid, uuid) from public, anon;
+grant execute on function public.is_blocked(uuid, uuid) to authenticated;
+
+-- friend requests can't be sent between players where either one blocked the other
+drop policy if exists "Send friend requests" on public.friendships;
+create policy "Send friend requests" on public.friendships
+  for insert to authenticated with check ((select auth.uid()) = requester and status = 'pending' and not public.is_blocked(requester, addressee));
+
+-- reports: players can file them, only the project owner reads them (Supabase dashboard → Table Editor → reports)
+create table if not exists public.reports (
+  id          bigint generated always as identity primary key,
+  reporter    uuid not null references public.profiles (id) on delete cascade,
+  reported    uuid not null references public.profiles (id) on delete cascade,
+  reason      text not null check (char_length(reason) between 1 and 300),
+  created_at  timestamptz not null default now()
+);
+alter table public.reports enable row level security;
+drop policy if exists "File a report" on public.reports;
+create policy "File a report" on public.reports
+  for insert to authenticated with check ((select auth.uid()) = reporter);
+revoke all on public.reports from anon, authenticated;
+grant insert on public.reports to authenticated;
+
+-- saves sent to friends: a copy goes into the friend's inbox (bucket "shared", folder <recipient>/<sender>/)
+create table if not exists public.shared_saves (
+  id          bigint generated always as identity primary key,
+  sender      uuid not null references public.profiles (id) on delete cascade,
+  recipient   uuid not null references public.profiles (id) on delete cascade,
+  meta        jsonb not null default '{}'::jsonb check (pg_column_size(meta) <= 2000),
+  path        text not null,
+  enc         text not null default 'gzip' check (enc in ('gzip', 'raw')),
+  size        bigint not null default 0,
+  created_at  timestamptz not null default now()
+);
+alter table public.shared_saves enable row level security;
+drop policy if exists "Sent and received saves" on public.shared_saves;
+create policy "Sent and received saves" on public.shared_saves
+  for select to authenticated using ((select auth.uid()) in (sender, recipient));
+drop policy if exists "Send a save to a friend" on public.shared_saves;
+create policy "Send a save to a friend" on public.shared_saves
+  for insert to authenticated with check ((select auth.uid()) = sender and public.is_friend(sender, recipient) and not public.is_blocked(sender, recipient)
+    and path like recipient::text || '/' || sender::text || '/%');
+drop policy if exists "Remove sent or received saves" on public.shared_saves;
+create policy "Remove sent or received saves" on public.shared_saves
+  for delete to authenticated using ((select auth.uid()) in (sender, recipient));
+revoke all on public.shared_saves from anon, authenticated;
+grant select, insert, delete on public.shared_saves to authenticated;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('shared', 'shared', false, 52428800)
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit;
+
+drop policy if exists "Shared saves: send" on storage.objects;
+create policy "Shared saves: send" on storage.objects
+  for insert to authenticated with check (bucket_id = 'shared' and (storage.foldername(name))[2] = (select auth.uid())::text
+    and public.is_friend((select auth.uid()), ((storage.foldername(name))[1])::uuid) and not public.is_blocked((select auth.uid()), ((storage.foldername(name))[1])::uuid));
+drop policy if exists "Shared saves: read" on storage.objects;
+create policy "Shared saves: read" on storage.objects
+  for select to authenticated using (bucket_id = 'shared' and (select auth.uid())::text in ((storage.foldername(name))[1], (storage.foldername(name))[2]));
+drop policy if exists "Shared saves: delete" on storage.objects;
+create policy "Shared saves: delete" on storage.objects
+  for delete to authenticated using (bucket_id = 'shared' and (select auth.uid())::text in ((storage.foldername(name))[1], (storage.foldername(name))[2]));
+
+-- delete your own account: the game removes your files first, then this deletes the account and (by cascade)
+-- your profile, friendships, blocks, reports, cloud save list, shared saves and the games you hosted
+create or replace function public.delete_my_account() returns void
+language plpgsql security definer set search_path = '' as $$
+begin
+  if auth.uid() is null then raise exception 'Not signed in'; end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
+
+-- 7) v2.15: COMMUNITY TEAMS: Free Practice teams players publish for everyone to download ─────────────
+create table if not exists public.community_teams (
+  id uuid primary key default gen_random_uuid(),
+  owner uuid not null references auth.users(id) on delete cascade,
+  username text not null default '',
+  name text not null check (char_length(name) between 1 and 80),
+  ovr int not null default 60,
+  data jsonb not null check (pg_column_size(data) < 200000),
+  downloads int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists community_teams_created on public.community_teams (created_at desc);
+create index if not exists community_teams_owner on public.community_teams (owner);
+alter table public.community_teams enable row level security;
+drop policy if exists "Read community teams" on public.community_teams;
+create policy "Read community teams" on public.community_teams
+  for select to authenticated using (true);
+drop policy if exists "Publish your own teams" on public.community_teams;
+create policy "Publish your own teams" on public.community_teams
+  for insert to authenticated with check ((select auth.uid()) = owner
+    and (select count(*) from public.community_teams c where c.owner = (select auth.uid())) < 20);
+drop policy if exists "Remove your own teams" on public.community_teams;
+create policy "Remove your own teams" on public.community_teams
+  for delete to authenticated using ((select auth.uid()) = owner);
+revoke all on public.community_teams from anon, authenticated;
+grant select, insert, delete on public.community_teams to authenticated;
+
+-- counts a download without letting anyone edit other players' teams
+create or replace function public.community_download(tid uuid) returns void
+language sql security definer set search_path = '' as $$
+  update public.community_teams set downloads = downloads + 1 where id = tid;
+$$;
+revoke all on function public.community_download(uuid) from public, anon;
+grant execute on function public.community_download(uuid) to authenticated;
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 8. Community Creations: worlds (League Setup with real or custom states) that players share
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.community_worlds (
+  id uuid primary key default gen_random_uuid(),
+  owner uuid not null references auth.users(id) on delete cascade,
+  username text not null default '',
+  name text not null check (char_length(name) between 1 and 80),
+  info text not null default '' check (char_length(info) <= 200),
+  data jsonb not null check (pg_column_size(data) < 400000),
+  downloads int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists community_worlds_created on public.community_worlds (created_at desc);
+create index if not exists community_worlds_owner on public.community_worlds (owner);
+alter table public.community_worlds enable row level security;
+drop policy if exists "Read community worlds" on public.community_worlds;
+create policy "Read community worlds" on public.community_worlds
+  for select to authenticated using (true);
+drop policy if exists "Publish your own worlds" on public.community_worlds;
+create policy "Publish your own worlds" on public.community_worlds
+  for insert to authenticated with check ((select auth.uid()) = owner
+    and (select count(*) from public.community_worlds w where w.owner = (select auth.uid())) < 10);
+drop policy if exists "Remove your own worlds" on public.community_worlds;
+create policy "Remove your own worlds" on public.community_worlds
+  for delete to authenticated using ((select auth.uid()) = owner);
+revoke all on public.community_worlds from anon, authenticated;
+grant select, insert, delete on public.community_worlds to authenticated;
+
+-- counts a download without letting anyone edit other players' worlds
+create or replace function public.community_world_download(wid uuid) returns void
+language sql security definer set search_path = '' as $$
+  update public.community_worlds set downloads = downloads + 1 where id = wid;
+$$;
+revoke all on function public.community_world_download(uuid) from public, anon;
+grant execute on function public.community_world_download(uuid) to authenticated;
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 9. Community Creations: leagues (whole career saves) that players share
+--    The save file sits in the private bucket "community" in the owner's folder; every signed-in player can read it.
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.community_leagues (
+  id uuid primary key default gen_random_uuid(),
+  owner uuid not null references auth.users(id) on delete cascade,
+  username text not null default '',
+  name text not null check (char_length(name) between 1 and 80),
+  info text not null default '' check (char_length(info) <= 200),
+  path text not null,
+  enc text not null default 'gzip' check (enc in ('gzip', 'raw')),
+  size bigint not null default 0,
+  downloads int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists community_leagues_created on public.community_leagues (created_at desc);
+create index if not exists community_leagues_owner on public.community_leagues (owner);
+alter table public.community_leagues enable row level security;
+drop policy if exists "Read community leagues" on public.community_leagues;
+create policy "Read community leagues" on public.community_leagues
+  for select to authenticated using (true);
+drop policy if exists "Publish your own leagues" on public.community_leagues;
+create policy "Publish your own leagues" on public.community_leagues
+  for insert to authenticated with check ((select auth.uid()) = owner
+    and path like owner::text || '/%'
+    and (select count(*) from public.community_leagues l where l.owner = (select auth.uid())) < 5);
+drop policy if exists "Remove your own leagues" on public.community_leagues;
+create policy "Remove your own leagues" on public.community_leagues
+  for delete to authenticated using ((select auth.uid()) = owner);
+revoke all on public.community_leagues from anon, authenticated;
+grant select, insert, delete on public.community_leagues to authenticated;
+
+-- counts a download without letting anyone edit other players' leagues
+create or replace function public.community_league_download(lid uuid) returns void
+language sql security definer set search_path = '' as $$
+  update public.community_leagues set downloads = downloads + 1 where id = lid;
+$$;
+revoke all on function public.community_league_download(uuid) from public, anon;
+grant execute on function public.community_league_download(uuid) to authenticated;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('community', 'community', false, 52428800)
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit;
+
+drop policy if exists "Community leagues: publish" on storage.objects;
+create policy "Community leagues: publish" on storage.objects
+  for insert to authenticated with check (bucket_id = 'community' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "Community leagues: read" on storage.objects;
+create policy "Community leagues: read" on storage.objects
+  for select to authenticated using (bucket_id = 'community');
+drop policy if exists "Community leagues: delete" on storage.objects;
+create policy "Community leagues: delete" on storage.objects
+  for delete to authenticated using (bucket_id = 'community' and (storage.foldername(name))[1] = (select auth.uid())::text);

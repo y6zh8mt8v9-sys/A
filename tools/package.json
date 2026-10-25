@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "Build tools for Gridiron 27 (release minification)",
+  "devDependencies": {
+    "terser": "5.31.0"
+  }
+}

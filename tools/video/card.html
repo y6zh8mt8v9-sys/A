@@ -1,0 +1,53 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@700;800;900&family=Archivo:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--pitch:#0b1f16;--sod:#12301f;--chalk:#f1f5ef;--mute:#a7bcae;--post:#f2c230}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:transparent;font-family:Archivo,sans-serif;color:var(--chalk)}
+body.solid{background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 135px,transparent 135px 270px),radial-gradient(120% 70% at 50% 40%,#16402a 0%,var(--pitch) 75%)}
+.lines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 238px,rgba(241,245,239,.07) 238px 242px)}
+.shade{position:absolute;left:0;right:0;height:560px}
+.shade.t{top:0;background:linear-gradient(rgba(6,18,12,.92),rgba(6,18,12,0))}.shade.b{bottom:0;background:linear-gradient(rgba(6,18,12,0),rgba(6,18,12,.94))}
+.tag{position:absolute;top:96px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:12px 30px 12px 24px;background:var(--post);color:#0b1f16;font:800 34px/1 Archivo;letter-spacing:.06em;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%);white-space:nowrap}
+.head{position:absolute;top:186px;left:60px;right:60px;text-align:center;font:900 150px/.9 'Alumni Sans';text-transform:uppercase;letter-spacing:.01em;text-shadow:0 6px 0 rgba(0,0,0,.35)}
+.head span{display:inline-block}.head .hl{color:var(--post)}
+.sub{position:absolute;bottom:150px;left:80px;right:80px;text-align:center;font:600 50px/1.25 Archivo;text-shadow:0 3px 12px rgba(0,0,0,.6)}
+.phone{position:absolute;left:50%;top:560px;width:690px;height:1227px;margin-left:-345px;border-radius:54px;padding:16px;background:#071209;box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 0 3px rgba(241,245,239,.14)}
+.phone img{width:100%;height:100%;border-radius:40px;object-fit:cover;object-position:top}
+.yard{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);width:0;height:6px;background:var(--post)}
+.logo{position:absolute;left:50%;top:640px;width:760px;margin-left:-380px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.5))}
+.big{position:absolute;left:0;right:0;text-align:center;font:900 230px/.85 'Alumni Sans';text-transform:uppercase}
+.big b{color:var(--post)}
+.url{position:absolute;left:50%;transform:translateX(-50%);padding:18px 34px;border:4px solid var(--post);font:800 54px/1 Archivo;white-space:nowrap}
+.copy{position:absolute;bottom:60px;left:0;right:0;text-align:center;font:500 28px Archivo;color:var(--mute)}
+.bar{position:absolute;left:50%;top:1130px;width:420px;margin-left:-210px;height:6px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}.bar i{display:block;height:100%;width:0;background:#f6a62a}
+</style></head><body>
+<div id="root"></div>
+<script src="gsap.js"></script>
+<script>
+// one card per segment; window.build(cfg) makes a paused timeline the capture script seeks frame by frame
+window.build=function(c){
+  const R=document.getElementById('root');document.body.className=c.solid?'solid':'';
+  const words=h=>h.split(' ').map(w=>w.startsWith('*')?`<span class="hl">${w.slice(1)}</span>`:`<span>${w}</span>`).join(' ');
+  const tl=gsap.timeline({paused:true,defaults:{ease:'power3.out',duration:.5}});
+  if(c.kind==='intro'){
+    R.innerHTML=`<div class="lines"></div><img class="logo" src="kanra.webp"><div class="bar"><i></i></div>
+      <div class="big" style="top:520px" id="g27">Gridiron <b>27</b></div><div class="tag" style="top:900px" id="nu">New update</div><div class="sub" id="s">${c.sub}</div>`;
+    tl.from('.logo',{opacity:0,scale:.92,duration:.6}).to('.bar i',{width:'100%',duration:1.1,ease:'power1.inOut'},'<.1')
+      .to(['.logo','.bar'],{opacity:0,y:-30,duration:.35},'+=.15')
+      .from('#g27',{y:80,opacity:0,duration:.55},'-=.05').from('#nu',{scale:.6,opacity:0,duration:.4,ease:'back.out(2)'},'-=.2')
+      .from('#s',{y:30,opacity:0,duration:.45},'-=.1');
+  }else if(c.kind==='outro'){
+    R.innerHTML=`<div class="lines"></div><img class="logo" src="kanra.webp" style="top:360px;width:600px;margin-left:-300px">
+      <div class="big" style="top:820px" id="pf">Play <b>free</b></div><div class="url" style="top:1070px" id="u">gridiron27.neocities.org</div><div class="sub" id="s">${c.sub}</div><div class="copy">© 2026 Kanra Digital. All rights reserved.</div>`;
+    tl.from('.logo',{opacity:0,y:-40}).from('#pf',{y:80,opacity:0},'-=.25').from('#u',{scale:.7,opacity:0,ease:'back.out(1.8)'},'-=.2').from('#s',{y:30,opacity:0},'-=.2');
+  }else{
+    R.innerHTML=(c.img?`<div class="lines"></div><div class="phone"><img src="${c.img}"></div>`:'')+
+      `<div class="shade t"></div><div class="shade b"></div><div class="tag">Gridiron 27 · New</div><div class="head">${words(c.head)}</div><div class="sub">${c.sub}</div><div class="yard"></div>`;
+    tl.from('.tag',{y:-40,opacity:0,duration:.4}).from('.head span',{y:70,opacity:0,stagger:.08},'-=.15');
+    if(c.img)tl.from('.phone',{y:260,opacity:0,duration:.7},'<').to('.phone img',{objectPosition:'50% 30%',duration:c.dur,ease:'none'},'<');
+    tl.from('.sub',{y:30,opacity:0,duration:.45},'-=.3').to('.yard',{width:900,duration:c.dur-1,ease:'none'},.4);
+  }
+  tl.set({},{},c.dur);window._tl=tl;return document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.decode().catch(()=>{}))));
+};
+</script></body></html>
