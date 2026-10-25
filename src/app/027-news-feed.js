@@ -340,7 +340,8 @@ window.upgradeTrainLevel=function(){
 function pgStaff(){
   const bud=G.budget,fac=G.fac,st=G.staff;
   const sC=l=>l*20000,fC=c=>(c+1)*15000;
-  return ticketHtml()+moneyHtml()+pcoachHtml()+`<div class="g2" style="margin-bottom:14px">
+  // what the tab is named for comes first (staff, facilities, playbook); money and the stadium follow
+  return`<div class="g2" style="margin-bottom:14px">
     <div class="pnl"><div class="ph">Coaching Staff</div><div class="pb">
       <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Budget: <strong style="color:var(--gn)">$${bud.toLocaleString()}</strong></div>
       ${[{k:'hc',l:'Asst. Head Coach',d:'Overall SP bonus'},{k:'oc',l:'Off. Coordinator',d:'Offensive SP bonus'},{k:'dc',l:'Def. Coordinator',d:'Defensive SP bonus'},{k:'rc',l:'Recruiting Coord',d:'Better freshmen quality'}].map(s=>{const cur=st[s.k];const uC=sC(cur.lvl+1);const canU=cur.lvl<5&&hasFunds(uC);
@@ -363,7 +364,6 @@ function pgStaff(){
         </div>`;}).join('')}
     </div></div>
   </div>
-  ${stadPanel()}
   <div class="pnl"><div class="ph">Playbook</div><div class="pb"><div class="g2">
     <div><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--mu)">Offensive scheme</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${OFF_SCH.map(s=>`<button class="bgh ${G.offS===s?'btn bbl':''}" onclick="G.offS=this.textContent;myS().offS=G.offS;nav('staff')" style="font-size:11px">${s}</button>`).join('')}</div>
@@ -372,7 +372,7 @@ function pgStaff(){
       <div style="display:flex;flex-wrap:wrap;gap:6px">${DEF_SCH.map(s=>`<button class="bgh ${G.defS===s?'btn bbl':''}" onclick="G.defS=this.textContent;myS().defS=G.defS;nav('staff')" style="font-size:11px">${s}</button>`).join('')}</div>
     </div>
   </div></div></div>
-  <div class="pnl"><div class="ph">Play-call splits${G.pSplits&&G.pSplits.yr===G.yr?` · ${G.pSplits.g} game${G.pSplits.g===1?'':'s'} played`:''}</div><div class="pb">${G.pSplits&&G.pSplits.yr===G.yr?splitsHtml(G.pSplits,'This season (games you played on Game Day)'):'<div style="color:var(--mu);font-size:13px">Play a game on Game Day and every call you run shows up here: how often you ran it, its average gain, touchdowns and first downs, plus what each of your coverages gave up.</div>'}</div></div>`;
+  <div class="pnl"><div class="ph">Play-call splits${G.pSplits&&G.pSplits.yr===G.yr?` · ${G.pSplits.g} game${G.pSplits.g===1?'':'s'} played`:''}</div><div class="pb">${G.pSplits&&G.pSplits.yr===G.yr?splitsHtml(G.pSplits,'This season (games you played on Game Day)'):'<div style="color:var(--mu);font-size:13px">Play a game on Game Day and every call you run shows up here: how often you ran it, its average gain, touchdowns and first downs, plus what each of your coverages gave up.</div>'}</div></div>${pcoachHtml()}${stadPanel()}${ticketHtml()}${moneyHtml()}`;
 }
 function upgSt(k,c){if(!hasFunds(c)){notify('Not enough budget!','e');return;}if(!G.unlimitedMoney)G.budget-=c;G.staff[k].lvl++;notify(`${G.staff[k].name} upgraded to Level ${G.staff[k].lvl}!`);nav('staff');}
 function upgFac(k,c){if(!hasFunds(c)){notify('Not enough budget!','e');return;}if(!G.unlimitedMoney)G.budget-=c;G.fac[k]++;notify('Facility upgraded!');nav('staff');}

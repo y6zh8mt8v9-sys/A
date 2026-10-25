@@ -122,7 +122,7 @@ function dashTiles(o){
   // recruiting (offers coming in) and seniors (leaving)
   const offers=pl.reduce((a,p)=>a+((p.offers||[]).length),0),commits=pl.filter(p=>p.committed).length,srs=pl.filter(p=>p.yr===12).length;
   const xin=xferInList().length,xout=xferOutList().length;
-  const tRec=dtTile('Transfers',pa?`nav('roster')`:`nav('scout')`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
+  const tRec=dtTile('Transfers',pa?`nav('roster')`:`xferInOpen()`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
   const tSr=dtTile('Transfers'+(xout&&!pa?'<i class="dt-dot"></i>':''),pa?`nav('roster')`:`xferLeaveOpen()`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${xout+srs}${xout?` · ${xout} transfer${xout>1?'s':''}`:''}</span></div>`,'dt-half');
   const n0=(newsItems||[])[0];
   const tNews=dtTile('News'+dot('news'),`nav('news')`,n0?`<div class="dt-news">${n0.headline}</div><div class="dt-mu">${n0.sub||''}</div>`:`<div class="dt-mu">No news yet.</div>`);

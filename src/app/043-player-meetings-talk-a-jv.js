@@ -149,6 +149,12 @@ function xferProcess(){
     addLog(`<span style="color:var(--rd)">Transfer: ${p.fn} ${p.ln} (${p.pos}, OVR ${p.rat}) leaves for ${d.name} ${d.mascot}.</span>`);
     try{addNews('bad',`${p.fn} ${p.ln} transfers out`,`The ${p.pos} leaves for ${d.name} ${d.mascot}, looking for ${PRIO_TXT[plPriority(p)]||'a fresh start'}.`);}catch(e){}}
   try{checkAndFillRosters();}catch(e){}}
+// the transfers tile on the dashboard: who joins next season, with the way to find more
+window.xferInOpen=function(){const L=xferInList();
+  openMo(`<h2>Transfers coming in</h2>
+   <div style="font-size:13px;color:var(--mu);margin-bottom:8px">Players who said yes to a meeting join you next season. Scout other schools' players and meet with them to bring more in.</div>
+   ${L.map(o=>`<div class="dr"><span class="a"><b style="cursor:pointer" onclick="clo();showPlayer(${o.p.id})">${o.p.fn} ${o.p.ln}</b> <span class="pb2">${o.p.pos}</span> ${rb(o.p.rat)}</span><span style="font-size:12px;color:var(--mu)">${yrL(o.p.yr)} · from ${o.from?o.from.name:'?'}</span></div>`).join('')||'<div style="color:var(--mu);font-size:13px">No transfers are coming in yet.</div>'}
+   <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button class="btn" onclick="clo();nav('scout')">Find players on Scouting</button><button class="bgh" onclick="clo()">Close</button></div>`);};
 window.xferLeaveOpen=function(){const L=xferOutList(),srs=myP().filter(p=>p.yr===12&&!p.xferOut);
   const row=p=>{const d=getS(p.xferOut.to);return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:170px"><b style="cursor:pointer" onclick="clo();showPlayer(${p.id})">${p.fn} ${p.ln}</b> <span class="pb2">${p.pos}</span> ${rb(p.rat)}<div style="font-size:11px;color:var(--mu)">${yrL(p.yr)} · wants ${PRIO_TXT[p.xferOut.why]||'a change'}${d?' · likely '+d.name:''}</div></span>${p.talkKey===talkKey()?'<span style="font-size:11px;color:var(--mu)">Talked this week</span>':`<button class="btn bxs" onclick="keepOpen(${p.id})">Talk</button>`}</div>`;};
   openMo(`<h2>Players leaving</h2>

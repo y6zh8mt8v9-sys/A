@@ -1425,7 +1425,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'5f7c90f5e5'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'51a5c13ece'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -8355,7 +8355,7 @@ function dashTiles(o){
   // recruiting (offers coming in) and seniors (leaving)
   const offers=pl.reduce((a,p)=>a+((p.offers||[]).length),0),commits=pl.filter(p=>p.committed).length,srs=pl.filter(p=>p.yr===12).length;
   const xin=xferInList().length,xout=xferOutList().length;
-  const tRec=dtTile('Transfers',pa?`nav('roster')`:`nav('scout')`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
+  const tRec=dtTile('Transfers',pa?`nav('roster')`:`xferInOpen()`,`<div class="dt-row"><b>Coming in</b><svg class="dt-in" viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg><span>${xin}</span></div>`,'dt-half');
   const tSr=dtTile('Transfers'+(xout&&!pa?'<i class="dt-dot"></i>':''),pa?`nav('roster')`:`xferLeaveOpen()`,`<div class="dt-row"><b>Leaving</b><svg class="dt-out" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg><span>${xout+srs}${xout?` · ${xout} transfer${xout>1?'s':''}`:''}</span></div>`,'dt-half');
   const n0=(newsItems||[])[0];
   const tNews=dtTile('News'+dot('news'),`nav('news')`,n0?`<div class="dt-news">${n0.headline}</div><div class="dt-mu">${n0.sub||''}</div>`:`<div class="dt-mu">No news yet.</div>`);
@@ -8964,7 +8964,8 @@ window.upgradeTrainLevel=function(){
 function pgStaff(){
   const bud=G.budget,fac=G.fac,st=G.staff;
   const sC=l=>l*20000,fC=c=>(c+1)*15000;
-  return ticketHtml()+moneyHtml()+pcoachHtml()+`<div class="g2" style="margin-bottom:14px">
+  // what the tab is named for comes first (staff, facilities, playbook); money and the stadium follow
+  return`<div class="g2" style="margin-bottom:14px">
     <div class="pnl"><div class="ph">Coaching Staff</div><div class="pb">
       <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Budget: <strong style="color:var(--gn)">$${bud.toLocaleString()}</strong></div>
       ${[{k:'hc',l:'Asst. Head Coach',d:'Overall SP bonus'},{k:'oc',l:'Off. Coordinator',d:'Offensive SP bonus'},{k:'dc',l:'Def. Coordinator',d:'Defensive SP bonus'},{k:'rc',l:'Recruiting Coord',d:'Better freshmen quality'}].map(s=>{const cur=st[s.k];const uC=sC(cur.lvl+1);const canU=cur.lvl<5&&hasFunds(uC);
@@ -8987,7 +8988,6 @@ function pgStaff(){
         </div>`;}).join('')}
     </div></div>
   </div>
-  ${stadPanel()}
   <div class="pnl"><div class="ph">Playbook</div><div class="pb"><div class="g2">
     <div><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--mu)">Offensive scheme</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${OFF_SCH.map(s=>`<button class="bgh ${G.offS===s?'btn bbl':''}" onclick="G.offS=this.textContent;myS().offS=G.offS;nav('staff')" style="font-size:11px">${s}</button>`).join('')}</div>
@@ -8996,7 +8996,7 @@ function pgStaff(){
       <div style="display:flex;flex-wrap:wrap;gap:6px">${DEF_SCH.map(s=>`<button class="bgh ${G.defS===s?'btn bbl':''}" onclick="G.defS=this.textContent;myS().defS=G.defS;nav('staff')" style="font-size:11px">${s}</button>`).join('')}</div>
     </div>
   </div></div></div>
-  <div class="pnl"><div class="ph">Play-call splits${G.pSplits&&G.pSplits.yr===G.yr?` · ${G.pSplits.g} game${G.pSplits.g===1?'':'s'} played`:''}</div><div class="pb">${G.pSplits&&G.pSplits.yr===G.yr?splitsHtml(G.pSplits,'This season (games you played on Game Day)'):'<div style="color:var(--mu);font-size:13px">Play a game on Game Day and every call you run shows up here: how often you ran it, its average gain, touchdowns and first downs, plus what each of your coverages gave up.</div>'}</div></div>`;
+  <div class="pnl"><div class="ph">Play-call splits${G.pSplits&&G.pSplits.yr===G.yr?` · ${G.pSplits.g} game${G.pSplits.g===1?'':'s'} played`:''}</div><div class="pb">${G.pSplits&&G.pSplits.yr===G.yr?splitsHtml(G.pSplits,'This season (games you played on Game Day)'):'<div style="color:var(--mu);font-size:13px">Play a game on Game Day and every call you run shows up here: how often you ran it, its average gain, touchdowns and first downs, plus what each of your coverages gave up.</div>'}</div></div>${pcoachHtml()}${stadPanel()}${ticketHtml()}${moneyHtml()}`;
 }
 function upgSt(k,c){if(!hasFunds(c)){notify('Not enough budget!','e');return;}if(!G.unlimitedMoney)G.budget-=c;G.staff[k].lvl++;notify(`${G.staff[k].name} upgraded to Level ${G.staff[k].lvl}!`);nav('staff');}
 function upgFac(k,c){if(!hasFunds(c)){notify('Not enough budget!','e');return;}if(!G.unlimitedMoney)G.budget-=c;G.fac[k]++;notify('Facility upgraded!');nav('staff');}
@@ -14636,6 +14636,12 @@ function xferProcess(){
     addLog(`<span style="color:var(--rd)">Transfer: ${p.fn} ${p.ln} (${p.pos}, OVR ${p.rat}) leaves for ${d.name} ${d.mascot}.</span>`);
     try{addNews('bad',`${p.fn} ${p.ln} transfers out`,`The ${p.pos} leaves for ${d.name} ${d.mascot}, looking for ${PRIO_TXT[plPriority(p)]||'a fresh start'}.`);}catch(e){}}
   try{checkAndFillRosters();}catch(e){}}
+// the transfers tile on the dashboard: who joins next season, with the way to find more
+window.xferInOpen=function(){const L=xferInList();
+  openMo(`<h2>Transfers coming in</h2>
+   <div style="font-size:13px;color:var(--mu);margin-bottom:8px">Players who said yes to a meeting join you next season. Scout other schools' players and meet with them to bring more in.</div>
+   ${L.map(o=>`<div class="dr"><span class="a"><b style="cursor:pointer" onclick="clo();showPlayer(${o.p.id})">${o.p.fn} ${o.p.ln}</b> <span class="pb2">${o.p.pos}</span> ${rb(o.p.rat)}</span><span style="font-size:12px;color:var(--mu)">${yrL(o.p.yr)} · from ${o.from?o.from.name:'?'}</span></div>`).join('')||'<div style="color:var(--mu);font-size:13px">No transfers are coming in yet.</div>'}
+   <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button class="btn" onclick="clo();nav('scout')">Find players on Scouting</button><button class="bgh" onclick="clo()">Close</button></div>`);};
 window.xferLeaveOpen=function(){const L=xferOutList(),srs=myP().filter(p=>p.yr===12&&!p.xferOut);
   const row=p=>{const d=getS(p.xferOut.to);return`<div class="dr" style="gap:8px;flex-wrap:wrap"><span class="a" style="flex:1;min-width:170px"><b style="cursor:pointer" onclick="clo();showPlayer(${p.id})">${p.fn} ${p.ln}</b> <span class="pb2">${p.pos}</span> ${rb(p.rat)}<div style="font-size:11px;color:var(--mu)">${yrL(p.yr)} · wants ${PRIO_TXT[p.xferOut.why]||'a change'}${d?' · likely '+d.name:''}</div></span>${p.talkKey===talkKey()?'<span style="font-size:11px;color:var(--mu)">Talked this week</span>':`<button class="btn bxs" onclick="keepOpen(${p.id})">Talk</button>`}</div>`;};
   openMo(`<h2>Players leaving</h2>
