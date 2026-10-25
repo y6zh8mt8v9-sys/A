@@ -63,13 +63,19 @@ window.pcSpend=function(k){const p=myPlayer();if(!p||!(G.players.includes(p)||(c
   const v=atv(p,k),c=pcCost(v);if(v>=99||(p.pcSP||0)<c)return;
   if(ATOP.has(k))p[k]=v+1;else p.at[k]=v+1;p.pcSP-=c;p.rat=ovrCalc(p);p._rc=p.rat;if(p.pot<p.rat)p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.rat)p.potHi=p.rat;
   try{updateRats();}catch(e){}nav('mine');};
+// skill points can also raise his ceiling: one point on both ends of the potential range
+function pcPotCost(p){const h=p.potHi||p.pot||60;return h<80?4:h<90?6:8;}
+window.pcPotUp=function(){const p=myPlayer();if(!p||!(G.players.includes(p)||(ccOn()&&p===G.cc.p)))return;syncPot(p);
+  const c=pcPotCost(p),hi=p.potHi||p.pot;if(hi>=99||(p.pcSP||0)<c)return;
+  p.potHi=Math.min(99,hi+1);p.potLo=Math.min(p.potHi,(p.potLo||p.pot)+1);p.pcSP-=c;syncPot(p);nav(G._page||'mine');};
 function pcSkillPanel(p){const lv=p.pcLv||1,xp=p.pcXP||0,need=pcNeed(lv),sp=p.pcSP||0,W=OVR_W[p.pos]||OVR_W.WR;
   const ks=Object.keys(W).sort((a,b)=>W[b]-W[a]);for(const k of['spd','str','sta'])if(!ks.includes(k))ks.push(k);
   return`<div class="pnl"><div class="ph">Level ${lv} · Skill points</div><div class="pb">
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--mu)"><span>${xp} / ${need} XP to level ${lv+1}</span><span><b style="color:${sp?'var(--gd)':'var(--tx)'}">${sp}</b> skill point${sp===1?'':'s'} to spend</span></div>
     <div style="height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden;margin:4px 0 10px"><div style="height:100%;width:${Math.round(xp/need*100)}%;background:var(--ac)"></div></div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;padding:6px 8px;background:var(--s2)"><span style="flex:1"><b>Potential</b> ${p.potLo||p.pot}–${p.potHi||p.pot} <span style="color:var(--mu);font-size:11px">raise the ceiling he can grow to</span></span><button class="bgh bxs" style="min-width:52px" onclick="pcPotUp()" ${sp<pcPotCost(p)||(p.potHi||p.pot)>=99?'disabled':''}>+1 · ${pcPotCost(p)}</button></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 14px">${ks.map(k=>{const v=atv(p,k),c=pcCost(v);return`<div style="display:flex;align-items:center;gap:6px;font-size:13px"><span style="flex:1">${AN[k]||k}${W[k]?' <span style="color:var(--te);font-size:10px">●</span>':''}</span><b style="width:26px;text-align:center;color:${attrColor(v)}">${v}</b><button class="bgh bxs" style="min-width:52px" onclick="pcSpend('${k}')" ${sp<c||v>=99?'disabled':''}>+1 · ${c}</button></div>`;}).join('')}</div>
-    <div style="font-size:11px;color:var(--mu);margin-top:8px">Every game earns XP: more for big games, wins and the playoffs. Each level gives ${PC_SP_LV} skill points. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 points above 90.</div></div></div>`;}
+    <div style="font-size:11px;color:var(--mu);margin-top:8px">Every game earns XP: more for big games, wins and the playoffs. Each level gives ${PC_SP_LV} skill points. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 points above 90. Raising the potential costs 4 to 8 points. Good seasons raise it too.</div></div></div>`;}
 function pcPanel(){
   const p=pcActive();if(!p)return'';const r=pcRole(p),rel=p.rel==null?50:p.rel,first=!G.sched.some(g=>g.type==='regular'&&g.result);
   const bar=`<div style="height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden;margin:4px 0 2px"><div style="height:100%;width:${rel}%;background:${rel>=70?'var(--gn)':rel>=40?'var(--gd)':'var(--rd,#d33)'}"></div></div>`;
@@ -109,7 +115,7 @@ function pgMine(){
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px"><span class="pb2">${p.pos}</span>${rb(p.rat)} ${stars(p.stars||0)} ${devB(p.dev)} ${p.arch?`<span style="font-size:11px;color:var(--mu)">${p.arch}</span>`:''}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:6px">${sch?sch.name+' '+sch.mascot:''} · potential ${p.potLo||p.pot}–${p.potHi||p.pot} · Level ${p.pcLv||1}</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px"><button class="btn" onclick="showPlayer(${p.id})">Player card</button></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><button class="btn" onclick="showPlayer(${p.id})">Player card</button>${active?'<button class="bgh" onclick="myGearOpen()">Look and equipment</button>':''}</div>
   </div></div>`;
   const season=active?`<div class="pnl"><div class="ph">This season</div><div class="pb"><div style="font-size:13px;margin-bottom:8px">${s.gp?statLine(p,s):'<span style="color:var(--mu)">No games yet this season.</span>'}</div>${gameLogHtml(p)}</div></div>`:'';
   const recruit=active?`<div class="pnl"><div class="ph">Recruiting</div><div class="pb">${p.committed?`<div style="font-weight:800;color:var(--gn)">Committed to ${p.committed.school} (${p.committed.lvl})</div>`:''}${G.pcLock&&!p.committed&&pcOffers(p).length?`<div style="font-size:12px;color:var(--mu);margin-bottom:6px">Your choice: nobody commits for you. Pick a school when you are ready (by signing day at the latest).</div>${pcOfferRows(p)}`:(p.offers||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${p.offers.map(o=>ofB(o)).join('')}</div>`:`<div style="color:var(--mu);font-size:13px">No offers yet. Big games, camps and stars bring the colleges.</div>`}${p.dreamSchool?`<div style="font-size:12px;margin-top:8px">Dream school: <b>${p.dreamSchool.school}</b> (${p.dreamSchool.lvl})</div>`:''}</div></div>`:'';

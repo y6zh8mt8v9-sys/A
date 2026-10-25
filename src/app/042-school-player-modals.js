@@ -248,6 +248,7 @@ function showPlayer(id){
     </div>
     <button class="bgh bsm" onclick="autoSP(${p.id})">Auto-upgrade all SP</button>
   </div>`:''}
+  ${own&&pcAuto()?`<div style="margin-top:14px"><button class="bgh bsm" onclick="clo();myGearOpen()">Look and equipment</button></div>`:''}
   ${ctl?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="bgh bsm" onclick="clo();editPlayer(${p.id})">Edit Player &amp; Equipment</button><button class="bgh bsm" onclick="capToggle(${p.id});clo();showPlayer(${p.id})">${captains().includes(p.id)?'Remove captain':'Name captain'}</button>${colFlipTarget(p)?`<button class="bgh bsm" onclick="pushFlip(${p.id})">Push him to flip to ${colFlipTarget(p).school}</button>`:''}${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
   </div>`:''}

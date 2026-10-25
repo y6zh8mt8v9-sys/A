@@ -91,7 +91,8 @@ function eqRead(){const g=id=>document.getElementById(id);if(!g('eq-tw'))return 
     sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||'',mouth2:g('eq-mo2')?eqColRead('eq-mo2'):'',ski:g('eq-sk')?eqColRead('eq-sk'):'',gcap:g('eq-gc')?eqColRead('eq-gc'):'',spats:g('eq-sp')?eqColRead('eq-sp'):''};}
 function eqSetForm(e){const g=id=>document.getElementById(id),sc=(id,v)=>{const s=g(id);if(!s)return;if([...s.options].some(o=>o.value===v))s.value=v;else{s.value='custom';g(id+'-x').value=v;}};
   g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');sc('eq-mo2',e.mouth2||'');sc('eq-sk',e.ski||'');sc('eq-gc',e.gcap||'');sc('eq-sp',e.spats||'');eqPrev();}
-function eqRandom(pid){const p=window._eqPid==='pcd'&&_pcd?pccP():getP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
+function _eqP(pid){return window._eqPid==='mine'?myPlayer():window._eqPid==='pcd'&&_pcd?pccP():getP(pid);}
+function eqRandom(pid){const p=_eqP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
 function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:'',spats:''});}
 // the same pixel sprites as Game Day, loaded once from the embedded game for the preview
 let _eqLibP=null;
@@ -109,7 +110,7 @@ function gdPackOf(s,kind){const u=uniOf(s,kind||'home'),kit=Object.assign({glove
   return{helmet:kit.helmet,helmetStripe:kit.hstripe,helmetLogo:kit.hstripe,facemask:kit.mask,jersey:kit.jersey,jerseyTrim:kit.trim,pants:kit.pants,pantsStripe:kit.pstripe,belt:'#1d1d22',socks:kit.sock,sockStripe:kit.trim,cleats:kit.cleat,cleatAccent:kit.trim,gloves:kit.glove,number:kit.num,numberTrim:_gdLum(kit.jersey)>.6?null:'#f4f4f4',armSleeve:'skin'};}
 function eqPrev(){
   if(window._eqPid==='pcd'){pccPrev();return;}
-  const cv=document.getElementById('eq-cv');if(!cv)return;const p=getP(window._eqPid);if(!p)return;const e=eqRead()||eqOf(p),s=getS(p.sId)||myS();
+  const cv=document.getElementById('eq-cv');if(!cv)return;const p=_eqP(window._eqPid);if(!p)return;const e=eqRead()||eqOf(p),s=getS(p.sId)||myS();
   eqLib().then(lib=>{if(!document.body.contains(cv))return;const x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);x.imageSmoothingEnabled=false;
     const build=(p.pos==='OL'||(p.pos==='DL'&&(p.wt||0)>=275))?'line':(['TE','LB','DL'].includes(p.pos)?'big':'skill'),sh='player_'+build;
     const sk=Math.round(Math.max(0,FACE_SKIN.indexOf(faceSkinHex(p.fs!=null?p.fs:p.id)))*5/7),sp=lib.lite(sh,gdPackOf(s,'home'),sk),eq=eqResolve(e,s);{const u=uniOf(s,'home');eq.helm={shell:u.hShell||'gloss',stripe:u.hStripe||'team',mask:''};}if(p.pos==='QB'){eq.noGlove=true;eq.glove=null;}
@@ -117,6 +118,14 @@ function eqPrev(){
     shows.forEach(([an,f,fl],i)=>{if(!sp.has(an))return;sp.draw(x,an,f,46+i*80,200,3,3,fl,p.num,eq);});
   }).catch(()=>{const x=cv.getContext('2d');x.fillStyle='#fff';x.font='12px sans-serif';x.fillText('Preview unavailable',90,95);});
 }
+// Player Career: your own player's look and equipment, any time in his career (high school, college or the pros);
+// ratings stay out of it, they are earned
+function myGearOpen(){const p=myPlayer();if(!p)return;window._eqPid='mine';
+  openMo(`<h2>Look and equipment</h2><div style="font-size:13px;color:var(--mu);margin-bottom:8px">${p.fn} ${p.ln} · ${p.pos}</div>
+  ${lookEditorHtml(p)}${eqEditorHtml(p)}
+  <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" onclick="myGearSave()">Save</button><button class="bgh" onclick="clo()">Cancel</button></div>`);setTimeout(eqPrev,0);}
+function myGearSave(){const p=myPlayer();if(!p)return;const eq=eqRead();if(eq)p.eq=eq;lookRead(p);try{gdFixNums(p);}catch(e){}
+  clo();nav(G._page||'mine',G._arg);notify('Look and equipment saved');}
 function editPlayer(pid){
   const p=getP(pid);if(!p)return;window._eqPid=pid;setTimeout(earnedLock,0);
   openMo(`<h2>Edit: ${p.fn} ${p.ln}</h2>

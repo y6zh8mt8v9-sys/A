@@ -35,7 +35,10 @@ function pcActive(){const p=myPlayer();return!!(G&&G.pcLock&&p&&G.players.includ
 // ── Player Career mode runs the team for you: the head coach handles schedule, depth chart, training, staff and recruiting ──
 function pcAuto(){return!!(typeof G!=='undefined'&&G&&G.pcLock);}
 // coach pages are hidden; in college the high school team's pages go too
-function pcHidePg(pg){return pcAuto()&&(['depth','jv','recr','scout','training','staff','cust','advisor'].includes(pg)||(ccOn()&&['roster','sched','recls'].includes(pg)));}
+// in college the high school league's pages go too: his college page has its own schedule, standings, rankings and roster
+const CC_HS_PG=['roster','sched','recls','stand','rank','playoff','teams','leads','media','watch','hof','trophy','hist'];
+const CC_TAB={sched:'sched',stand:'stand',rank:'rank',playoff:'post',roster:'roster',teams:'cols',leads:'stats'};
+function pcHidePg(pg){return pcAuto()&&(['depth','jv','recr','scout','training','staff','cust','advisor'].includes(pg)||(ccOn()&&CC_HS_PG.includes(pg)));}
 // run a coach action without its toasts and page changes
 function pcQuiet(fn){const n=nav,nt=notify;nav=function(){};notify=function(){};try{return fn();}finally{nav=n;notify=nt;}}
 // the schedule: the rival in week 5 (an ongoing rival from the division, or the usual one), the open dates filled with fair
@@ -552,13 +555,13 @@ function pgCollege(tab){const C=G.cc;if(!C||!C.S){return`<div class="pnl"><div c
   else if(tab==='cols'){body=lvSel+`<div class="pnl"><div class="ph">${CC_LVN[lvl]} colleges</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;padding:10px">${C.S[lvl].T.slice().sort((a,b)=>(COL_BY[b]||{}).pr-(COL_BY[a]||{}).pr).map(k=>`<button class="bgh" style="display:flex;gap:8px;align-items:center;text-align:left;padding:6px 8px" onclick="colShow('${k.replace(/'/g,"\\'")}')">${colLogo(k,30)}<span style="font-size:12px;line-height:1.2"><b>${ccName(k)}</b><br><small style="color:var(--mu)">${colInfo(k).mascot} · ${ccRecStr(k,lvl)}</small></span></button>`).join('')}</div></div>`;}
   return`<div class="pnl" style="margin-bottom:10px"><div class="pb" style="display:flex;align-items:center;gap:12px">${colLogo(C.k,48)}<div style="flex:1"><div style="font:900 22px/1.1 var(--hd)">${colInfo(C.k).name} ${colInfo(C.k).mascot}</div><div style="font-size:12px;color:var(--mu)">${CC_LVN[C.lvl]} · ${ccConfName(C.k)} · ${ccRecStr(C.k)}</div></div><button class="btn bgn" onclick="ccNext()">${ccLabel()} ›</button></div></div>${bar}${body}`;}
 // My Player in college (and after)
-function ccMine(){const C=G.cc,p=C.p,I=colInfo(C.k);let skill='';try{if(C.stage==='college')skill=pcSkillPanel(p);}catch(e){}
+function ccMine(){const C=G.cc,p=C.p,I=colInfo(C.k);let skill='';try{if(C.stage==='college'||C.stage==='pro')skill=pcSkillPanel(p);}catch(e){}
   const head=`<div class="pnl"><div class="pb" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div>${face(p.fs,84)}</div>
     <div style="flex:1;min-width:220px"><div style="font-size:12px;color:var(--mu);font-weight:800;letter-spacing:.06em;">My Player · ${C.stage==='college'?ccClassLbl():C.stage==='pro'?'Pro':'Career over'}</div>
       <div style="font-family:var(--hd);font-size:30px;font-weight:900;line-height:1.05">#${p.num} ${p.fn} ${p.ln}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px"><span class="pb2">${p.pos}</span>${rb(p.rat)} ${stars(p.stars||0)} ${devB(p.dev)} ${p.arch?`<span style="font-size:11px;color:var(--mu)">${p.arch}</span>`:''}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:6px">${I.name} ${I.mascot} · potential ${p.pot} · Level ${p.pcLv||1} · high school: ${C.hs} (${C.hsRat} OVR)</div></div>
-    <div>${colLogo(C.k,64)}</div></div></div>`;
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">${colLogo(C.k,64)}${C.stage!=='done'?'<button class="bgh bsm" onclick="myGearOpen()">Look and equipment</button>':''}</div></div></div>`;
   let pro='';if(C.stage!=='college'){try{const a=aiG().alumni[C.pid];if(a)pro=`<div class="pnl"><div class="ph">Pro career</div><div class="pb">${aiCareerCard(a,p)}</div></div>`;else if(C.stage==='done')pro=`<div class="pnl"><div class="ph">After college</div><div class="pb">No pro team signed ${p.fn} after the draft. His football career is over.</div></div>`;}catch(e){}}
   return head+skill+pro+pgCollege('stats').replace(/^[\s\S]*?<div class="tabs"[\s\S]*?<\/div>/,'');}
 function ccProDash(){const C=G.cc,p=C.p,D=C.draft||{},a=(()=>{try{return aiG().alumni[C.pid];}catch(e){return null;}})();

@@ -95,7 +95,8 @@ function effPot(p){
   }
   // a player who grew past his ceiling keeps his rating: the ceiling rises to meet him, it never pulls him down
   const r=Math.min(99,p.rat||0);if(r>p.potHi)p.potHi=r;
-  const tf=trainFactor();
+  // your own Player Career player reaches the top of his range: his ceiling is his to earn, not the team's facilities
+  const tf=typeof pcOwnPick==='function'&&pcOwnPick(p)?1:trainFactor();
   return Math.max(r,clamp(Math.round(p.potLo+(p.potHi-p.potLo)*tf),p.potLo,p.potHi));
 }
 // Sync p.pot to effective value (called after training upgrades or season updates)

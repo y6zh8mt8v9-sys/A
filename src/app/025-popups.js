@@ -166,6 +166,7 @@ function cnavHub(force){if(!force&&gdsMain().cnav===false)return'';const T=cnavT
     return`<div class="cnav-card"><div class="cnav-h"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg>${l}${n?`<small>${n} to do</small>`:''}</div><div class="cnav-sub">${ps.map(pg=>`<button class="${T[pg]?'todo':''}" onclick="nav('${pg}')">${cnavLbl(pg)}${T[pg]?`<span>${T[pg]}</span>`:''}</button>`).join('')}</div></div>`;}).join('');
   return`<div class="cnav-hub">${cards}</div>`;}
 function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e){}
+  if(ccOn()&&G.cc.stage==='college'&&CC_TAB[page]){arg=CC_TAB[page];page='college';} // college: high school league links open the college tab
   if(pcHidePg(page)){page='dash';arg=undefined;} // Player Career: coach pages (old saves, deep links) go to the dashboard
   try{pcAutoTick();}catch(e){console.error('player career auto',e);}
   const _prevPg=G._page;

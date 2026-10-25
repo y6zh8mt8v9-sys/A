@@ -373,7 +373,10 @@ function seasonDevCheck(p){
   const prevPotHi=p.potHi||p.pot;
   const isFrSo=(p.yr===9||p.yr===10);
   const potShiftRoll=Math.random();
-  const potShiftChanceVal=0.02+perfFactor*0.06; // 2-8% chance per season
+  // 2-8% chance per season
+  const ownPc=typeof pcOwnPick==='function'&&pcOwnPick(p),potShiftChanceVal=ownPc?0:0.02+perfFactor*0.06;
+  // your own Player Career player: a solid season (a starter's numbers) raises his ceiling, a big one raises it more; it never drops
+  if(ownPc&&perfScore>=25){const up=clamp(Math.round((perfScore-25)/12)+1,1,4);p.potHi=Math.min(99,(p.potHi||p.pot)+up);p.potLo=Math.min(p.potHi,(p.potLo||p.pot)+Math.max(1,up-1));}
   if(potShiftRoll<potShiftChanceVal){
     const extremity=Math.abs(perfFactor-0.5)*2;
     const mag=Math.max(1,Math.round(extremity*5));
