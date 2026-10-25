@@ -290,3 +290,13 @@ html body .tab.on{background-size:100% 3px!important;border-bottom-color:transpa
 .pg-back small{font-weight:500;color:var(--mute,var(--mu));font-size:12px}
 .pg-back:hover{color:var(--post)}
 #mc2>.mo-back{margin:0 0 10px;display:inline-flex}
+/* award watch lists */
+.aw-list{display:flex;flex-direction:column;gap:2px}
+.aw-row{display:grid;grid-template-columns:22px 34px auto minmax(0,1fr);align-items:center;gap:6px;padding:5px 4px;border-bottom:1px solid var(--line,var(--bd));cursor:default}
+.aw-row[onclick]{cursor:pointer}.aw-row[onclick]:hover{background:var(--sod2,var(--s2))}
+.aw-row>b{font:800 14px/1 var(--hd);color:var(--mute,var(--mu));text-align:right}
+.aw-row.me{background:rgba(239,45,56,.12)}.aw-row.me .aw-n{color:var(--chalk,var(--tx));font-weight:800}
+.aw-n{font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aw-n small{display:block;font-size:11px;font-weight:500;color:var(--mute,var(--mu));overflow:hidden;text-overflow:ellipsis}
+.aw-mv{font:700 11px/1 var(--font);color:var(--mute,var(--mu));text-align:center}
+.aw-mv.up{color:#4ade80}.aw-mv.dn{color:var(--post)}.aw-mv.new{color:#fbbf24;text-transform:uppercase;font-size:9px;letter-spacing:.06em}

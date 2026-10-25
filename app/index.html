@@ -1024,6 +1024,16 @@ html body .tab.on{background-size:100% 3px!important;border-bottom-color:transpa
 .pg-back small{font-weight:500;color:var(--mute,var(--mu));font-size:12px}
 .pg-back:hover{color:var(--post)}
 #mc2>.mo-back{margin:0 0 10px;display:inline-flex}
+/* award watch lists */
+.aw-list{display:flex;flex-direction:column;gap:2px}
+.aw-row{display:grid;grid-template-columns:22px 34px auto minmax(0,1fr);align-items:center;gap:6px;padding:5px 4px;border-bottom:1px solid var(--line,var(--bd));cursor:default}
+.aw-row[onclick]{cursor:pointer}.aw-row[onclick]:hover{background:var(--sod2,var(--s2))}
+.aw-row>b{font:800 14px/1 var(--hd);color:var(--mute,var(--mu));text-align:right}
+.aw-row.me{background:rgba(239,45,56,.12)}.aw-row.me .aw-n{color:var(--chalk,var(--tx));font-weight:800}
+.aw-n{font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aw-n small{display:block;font-size:11px;font-weight:500;color:var(--mute,var(--mu));overflow:hidden;text-overflow:ellipsis}
+.aw-mv{font:700 11px/1 var(--font);color:var(--mute,var(--mu));text-align:center}
+.aw-mv.up{color:#4ade80}.aw-mv.dn{color:var(--post)}.aw-mv.new{color:#fbbf24;text-transform:uppercase;font-size:9px;letter-spacing:.06em}
 /* ════════ Career story scenes: a cutscene card inside the modal (tokens from 06-design.css) ════════ */
 .st-scene{display:flex;flex-direction:column;gap:12px;max-width:620px;margin:0 auto}
 .st-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px;padding-right:36px;background:var(--yardline);background-position:bottom;padding-top:0}
@@ -1463,7 +1473,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'cba8ab6ac4'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'2a33791f69'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -5189,6 +5199,7 @@ function simGame(idx,silent=false,forced=null){
 
   lgSimWeek(game.wk,opp.id,silent,oppScore,myScore,!iWin);
   try{weeklyAwards(game.wk,silent?null:weekPops);}catch(e){console.error('weekly awards',e);}
+  try{hsPollWeek(game.wk);}catch(e){console.error('award watch',e);}
   try{gameInviteResolve(game.wk,silent?null:weekPops);}catch(e){console.error('game invites',e);}
   try{colNeedsWeek(silent?null:weekPops);}catch(e){console.error('college needs',e);}
 
@@ -5785,6 +5796,38 @@ const AW_POSW={QB:1.1,RB:1.05,WR:1,TE:0.95,DL:1,LB:1,CB:1,S:0.95,OL:0.75,K:0.6};
 function awName(p){const s=getS(p.sId);return{pid:p.id,n:p.fn+' '+p.ln,pos:p.pos,yr:p.yr,sch:s?s.name:'',st:s?stOf(s):'',mine:p.sId===G.myId};}
 function awLine(st,pos){if(!st)return'';const b=[];if(st.passYds)b.push(`${st.passYds} pass yds, ${st.passTD||0} TD`);if(st.rushYds)b.push(`${st.rushYds} rush yds${st.rushTD?', '+st.rushTD+' TD':''}`);if(st.recYds)b.push(`${st.rec||0} rec, ${st.recYds} yds${st.recTD?', '+st.recTD+' TD':''}`);
   if(st.tackles)b.push(`${st.tackles} tkl`);if(st.sacks)b.push(`${st.sacks} sacks`);if(st.ints)b.push(`${st.ints} INT`);if(st.pbu)b.push(`${st.pbu} PBU`);if(pos==='OL'&&st.pancakes)b.push(`${st.pancakes} pancakes`);if(st.fgm)b.push(`${st.fgm}/${st.fga||st.fgm} FG`);return b.slice(0,3).join(' · ');}
+// one award score for the weekly watch lists and the season's awards: a season measured against a great game at its position,
+// then how far it stands out from the real contributors at that position (their top 30%, not the backups), so no position is favored
+function awRawScore(p,ss){const gp=Math.max(1,ss.gp||1),bench=p.pos==='OL'?5:p.pos==='K'?7:(STREAK_BENCH[p.pos]||10);
+  const pg=p.pos==='K'?((ss.fgm||0)*3+(ss.xpm||0))/gp:scorePerfEntry(ss,p.pos)/gp;
+  return clamp(pg/bench,0,3)/3*0.72+(p.rat/99)*0.2+(({'Elite Dev':100,'Star':75,'Impact':50,'Normal':25}[p.dev]||25)/100)*0.08;}
+function awScoreMap(all,ssOf){const raw=new Map(),pos={},sc=new Map();
+  for(const p of all){const r=awRawScore(p,ssOf(p)||{});raw.set(p.id,r);(pos[p.pos]=pos[p.pos]||[]).push(r);}
+  for(const k in pos){const A=pos[k].sort((a,b)=>b-a).slice(0,Math.max(5,Math.ceil(pos[k].length*0.3))),m=A.reduce((a,b)=>a+b,0)/A.length,sd=Math.sqrt(Math.max(1e-6,A.reduce((a,b)=>a+(b-m)*(b-m),0)/A.length));pos[k]={m,sd};}
+  for(const p of all){const q=pos[p.pos];sc.set(p.id,((raw.get(p.id)-q.m)/q.sd)*(AW_POSW[p.pos]||1)+(p.rat-60)/60);}
+  return sc;}
+// award watch: the Player of the Year races (state, national) and the state Freshman of the Year race, re-ranked after every regular season week
+function hsPollWeek(wk){const st=clsSt(G.cls),ids=fltSchoolIds(st==='CF'?'ALL':'ST:'+st);
+  const all=G.players.filter(p=>!p.grad&&p.sId!=null&&p.seasStats&&(p.seasStats.gp||0)>=1&&getS(p.sId)&&!getS(p.sId).intl);if(all.length<20)return;
+  const sc=awScoreMap(all,p=>p.seasStats),top=(L,n)=>L.sort((a,b)=>sc.get(b.id)-sc.get(a.id)).slice(0,n);
+  const old=G.hsPoll&&G.hsPoll.yr===G.yr?G.hsPoll.lists:null;
+  const mk=(key,L)=>{const pv=old&&old[key]?Object.fromEntries(old[key].map((x,i)=>[x.pid,i+1])):null;return L.map((p,i)=>Object.assign(awName(p),{mv:pv?(pv[p.id]?pv[p.id]-(i+1):'new'):null,line:awLine(p.seasStats,p.pos)}));};
+  const inSt=all.filter(p=>ids.has(p.sId)),lists={st:mk('st',top(inSt.slice(),10)),nat:mk('nat',top(all.slice(),10)),fr:mk('fr',top(inSt.filter(p=>p.yr===9),5))};
+  const lead=lists.st[0],was=old&&old.st&&old.st[0];
+  if(lead&&was&&was.pid!==lead.pid)try{addNews(lead.mine?'award':'general',`${stName(st)} Player of the Year watch: ${lead.n} takes over No. 1`,`${lead.pos}, ${lead.sch}: ${lead.line} · via ${MEDIA.fni}`);}catch(e){}
+  const me=typeof pcActive==='function'&&pcActive();
+  if(me)for(const[k,lbl]of[['st',stName(st)+' Player of the Year'],['nat','National Player of the Year'],['fr',stName(st)+' Freshman of the Year']]){
+    const i=lists[k].findIndex(x=>x.pid===me.id),j=old&&old[k]?old[k].findIndex(x=>x.pid===me.id):-1;
+    if(i>=0&&(j<0||i<j))try{socNote('award',`${me.fn} ${me.ln} is No. ${i+1} on the ${lbl} watch list.`,1.5);}catch(e){}}
+  G.hsPoll={yr:G.yr,wk,lists};}
+function awMv(mv){return mv==='new'?'<span class="aw-mv new">new</span>':mv>0?`<span class="aw-mv up">▲${mv}</span>`:mv<0?`<span class="aw-mv dn">▼${-mv}</span>`:'<span class="aw-mv">–</span>';}
+function awRows(L,mineId,open){return L.map((x,i)=>`<div class="aw-row${x.mine||x.pid===mineId?' me':''}"${open?` onclick="event.stopPropagation();${open(x)}"`:''}><b>${i+1}</b>${awMv(x.mv)}${(()=>{const q=getP(x.pid),sc=q&&getS(q.sId);return sc?sLogo(sc,18):'<span></span>';})()}<span class="aw-n">${x.n}<small>${x.pos} · ${x.sch||''}${x.line?' · '+x.line:''}</small></span></div>`).join('');}
+function hsPollHtml(compact){const P=G.hsPoll&&G.hsPoll.yr===G.yr?G.hsPoll:null,st=stName(clsSt(G.cls));
+  if(!P)return compact?'<div class="dt-mu">The first watch lists come out after week 1.</div>':`<div class="pnl"><div class="ph">Award watch</div><div class="pb" style="color:var(--mu);font-size:13px">The ${st} and national Player of the Year watch lists come out after week 1 and change every week.</div></div>`;
+  const op=x=>`showPlayer(${x.pid})`;
+  if(compact)return`<div class="dt-sub">${st} Player of the Year · week ${P.wk}</div><div class="aw-list">${awRows(P.lists.st.slice(0,4),G.myPlayerId,op)}</div>`;
+  const col=(t,L)=>`<div class="pnl"><div class="ph">${t} <small style="color:var(--mu);font-weight:600">after week ${P.wk}</small></div><div class="pb aw-list">${L.length?awRows(L,G.myPlayerId,op):'<span style="color:var(--mu)">No candidates yet.</span>'}</div></div>`;
+  return`<div class="g2" style="align-items:start">${col(st+' Player of the Year watch',P.lists.st)}${col('National Player of the Year watch',P.lists.nat)}</div>${col(st+' Freshman of the Year watch',P.lists.fr)}`;}
 // state Player / Freshman of the Year for every state with full rosters, plus the national awards
 function seasonAwardsAll(all,sc,myK,pops,snap){
   const by={};for(const p of all){const s=getS(p.sId);if(!s||s.intl)continue;const k=stOf(s);(by[k]=by[k]||[]).push(p);}
@@ -5846,7 +5889,7 @@ function pgMedia(){const st=clsSt(G.cls),mine=p=>p.sId===G.myId?'style="backgrou
   const row=(p,i)=>{const s=getS(p.sId);return`<tr class="cl" ${mine(p)} onclick="showPlayer(${p.id})"><td>${i+1}</td><td style="white-space:nowrap">${p.fn} ${p.ln}</td><td><span class="pb2">${p.pos}</span></td><td>${yrL(p.yr)}</td><td>${stars(p.stars||0)}</td><td style="white-space:nowrap">${s?sLogo(s,18)+' '+s.name:''}</td><td style="white-space:nowrap">${p.committed?`<span style="color:var(--gn);display:inline-flex;align-items:center;gap:4px">${colLogo(p.committed,18)}${p.committed.school}</span>`:'Open'}</td></tr>`;};
   const W=(G.wkAwards||[]).filter(x=>x.yr===G.yr).slice(-6).reverse(),H=(G.awardHist||[]).slice(-1)[0];
   const tbl=L=>`<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Player</th><th>Pos</th><th>Yr</th><th>Stars</th><th>School</th><th>Commit</th></tr></thead><tbody>${L.map(row).join('')||'<tr><td colspan="7" style="color:var(--mu)">No rankings yet.</td></tr>'}</tbody></table></div>`;
-  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">${MEDIA.fni} <span style="font-size:12px;color:var(--mu);font-weight:600">Player and Play of the Week</span></div><div class="pb">${W.length?W.map(x=>`<div class="dr" style="flex-wrap:wrap;gap:6px"><span class="a"><b>Week ${x.wk}</b> · Player of the Week: <b ${x.potw.mine?'style="color:var(--gd)"':''}>${x.potw.n}</b> (${x.potw.pos}, ${x.potw.sch})<div style="font-size:11px;color:var(--mu)">${x.potw.line}</div></span>${x.play?`<span style="font-size:12px;color:var(--mu)">Play of the Week: <b style="color:var(--tx)">${x.play.n}</b>, ${x.play.what}</span>`:''}</div>`).join(''):'<div style="color:var(--mu);font-size:13px">The weekly honors start after week 1.</div>'}
+  return`${hsPollHtml(false)}<div class="pnl" style="margin-bottom:14px"><div class="ph">${MEDIA.fni} <span style="font-size:12px;color:var(--mu);font-weight:600">Player and Play of the Week</span></div><div class="pb">${W.length?W.map(x=>`<div class="dr" style="flex-wrap:wrap;gap:6px"><span class="a"><b>Week ${x.wk}</b> · Player of the Week: <b ${x.potw.mine?'style="color:var(--gd)"':''}>${x.potw.n}</b> (${x.potw.pos}, ${x.potw.sch})<div style="font-size:11px;color:var(--mu)">${x.potw.line}</div></span>${x.play?`<span style="font-size:12px;color:var(--mu)">Play of the Week: <b style="color:var(--tx)">${x.play.n}</b>, ${x.play.what}</span>`:''}</div>`).join(''):'<div style="color:var(--mu);font-size:13px">The weekly honors start after week 1.</div>'}
      ${H?`<div style="margin-top:10px;font-size:13px"><b>${2026+(H.yr-1)} season awards</b>: National Player of the Year <b>${H.nat.poy?H.nat.poy.n+' ('+H.nat.poy.pos+', '+H.nat.poy.sch+')':'–'}</b> · National Freshman of the Year <b>${H.nat.fr?H.nat.fr.n+' ('+H.nat.fr.pos+')':'–'}</b>${H.st[st]?` · ${stName(st)}: Player <b>${H.st[st].poy?H.st[st].poy.n+' ('+H.st[st].poy.pos+')':'–'}</b>, Freshman <b>${H.st[st].fr?H.st[st].fr.n+' ('+H.st[st].fr.pos+')':'–'}</b>`:''}</div>`:''}</div></div>
     <div class="g2" style="align-items:start"><div class="pnl"><div class="ph">${MEDIA.rank} · National Top 25 (seniors)</div>${tbl(nat)}</div>
     <div class="pnl"><div class="ph">${MEDIA.rival} · ${stName(st)} Top 15</div>${tbl(stl)}</div></div>`;}
@@ -7310,19 +7353,9 @@ function finalizeOffseason(){
     const ss=clamp(statRaw,0,120)/120;
     return ss*0.70 + ratScore*0.20 + devScore*0.10;
   }
-  // every position can win: a season is measured against what a great game looks like at that position
-  const _AW_BENCH=Object.assign({OL:5,K:7},STREAK_BENCH);
-  const _awScore=p=>{const ss2=_awardSeasStats(p),gp=Math.max(1,ss2.gp||1);if((ss2.gp||0)<3)return 0;
-    const pg=p.pos==='K'?((ss2.fgm||0)*3+(ss2.xpm||0))/gp:scorePerfEntry(ss2,p.pos)/gp;
-    return clamp(pg/(_AW_BENCH[p.pos]||10),0,3)/3*0.72+(p.rat/99)*0.2+(({'Elite Dev':100,'Star':75,'Impact':50,'Normal':25}[p.dev]||25)/100)*0.08;};
   // state awards go to players from your own state; national awards to the whole country
   const _myStK=clsSt(G.cls),_cfIds=fltSchoolIds(_myStK==='CF'?'ALL':'ST:'+_myStK);
-  // how far a season stands out from the average starter at the same position (z-score), so no position is favored
-  const _awAll=G.players.filter(p=>!p.grad&&p.sId!=null&&(_awardSeasStats(p).gp||0)>=3),_awSc=new Map(),_awRaw=new Map(),_awPos={};
-  for(const p of _awAll){const r=_awScore(p);_awRaw.set(p.id,r);(_awPos[p.pos]=_awPos[p.pos]||[]).push(r);}
-  // measured against the real contributors at each position (its top 30%), not the backups who barely play
-  for(const k in _awPos){const A=_awPos[k].sort((a,b)=>b-a).slice(0,Math.max(5,Math.ceil(_awPos[k].length*0.3))),m=A.reduce((a,b)=>a+b,0)/A.length,sd=Math.sqrt(Math.max(1e-6,A.reduce((a,b)=>a+(b-m)*(b-m),0)/A.length));_awPos[k]={m,sd};}
-  for(const p of _awAll){const q=_awPos[p.pos];_awSc.set(p.id,((_awRaw.get(p.id)-q.m)/q.sd)*(AW_POSW[p.pos]||1)+(p.rat-60)/60);}
+  const _awAll=G.players.filter(p=>!p.grad&&p.sId!=null&&(_awardSeasStats(p).gp||0)>=3),_awSc=awScoreMap(_awAll,_awardSeasStats);
   const _calcAwardScoreSnap2=p=>_awSc.get(p.id)||0;
   const _awardPool=_awAll.filter(p=>_cfIds.has(p.sId));
   try{seasonAwardsAll(_awAll,_awSc,_myStK,pops,_aiSeasStatsSnap);}catch(e){console.error('awards',e);}
@@ -8405,13 +8438,14 @@ function dashTiles(o){
   const tTop=dtTile('Top players',`nav('roster')`,`<div class="dt-list">${top.map(p=>`<div><b>${p.pos}</b><span class="dt-ln">${p.fn} ${p.ln}</span><span class="dt-mu">${yrL(p.yr)}</span>${rb(p.rat)}</div>`).join('')}</div>`);
   // program
   const tProg=dtTile('Program'+dot('advisor'),pa?`nav('trophy')`:`nav('advisor')`,`<div class="dt-sub">${pa?'Watchlist':'Assistant GM, watchlist'}, trophies and history.</div><div class="dt-list" style="margin-top:8px">${[['advisor','Assistant GM'],['trophy','Trophy Case'],['hof','Hall of Fame'],['hist','History & Records']].filter(([k])=>!pcHidePg(k)).map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`,'dt-tall');
+  let tAw='';try{tAw=dtTile('Award watch',`nav('media')`,hsPollHtml(true));}catch(e){}
   const tLeague=dtTile('League',`nav('rank')`,`<div class="dt-list">${[['rank','Rankings'],['playoff','Playoffs'],['teams','Teams'],['leads','Leaders']].map(([k,l])=>`<div onclick="event.stopPropagation();nav('${k}')"><span class="dt-ln">${l}</span>${T[k]?`<span class="dt-mu" style="color:var(--gd)">${T[k]}</span>`:''}</div>`).join('')}</div>`);
   let alerts='';try{alerts=jobPanel()+pcPanel()+s7Panel();}catch(e){}
   const pills=`<span class="dt-pill" title="Record">${G.wins}-${G.losses}</span><span class="dt-pill" title="Prestige">★ ${Math.round(G.prestige||1)}</span><span class="dt-pill" style="color:var(--gn)" title="Budget">$${(G.budget/1000).toFixed(0)}k</span>`;
   return`<div class="dt-club"><button class="dt-menu" onclick="dtMenu()" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="dt-crest">${sLogo(ms,58)}</div><div class="dt-name">${ms.name}<small>${ms.mascot} · ${clsL(G.cls)}${G.role==='OC'?' · Offensive Coordinator':G.role==='DC'?' · Defensive Coordinator':''}</small></div><div class="dt-tools"><button onclick="saveGame()" title="Save"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"/></svg>Save</button><button onclick="openSettings()" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h.1a2 2 0 1 1 0 4z"/></svg>Settings</button><button onclick="showTutorial()" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>Help</button><button onclick="confirmMainMenu()" title="Main menu"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Menu</button></div><div class="dt-go">${actionBtn||''}</div></div>
    <div class="dt-strip">${G.coach&&G.coach.name?`<span class="dt-pill" title="Head coach">${G.coach.name}</span>`:''}<b>Year ${G.yr} (${curYear}) - ${phaseLabel}</b><span class="dt-pills">${pills}</span></div>
    ${alerts?`<div class="dt-alerts">${alerts}</div>`:''}
-   <div class="dt-grid">${tNext}${tSched}${tTeam}<div class="dt-stack"><div class="dt-pair">${tRec}${tSr}</div>${tNews}</div>${tTrain}${tScout}${tStand}${tTop}${tProg}${tLeague}</div>`;}
+   <div class="dt-grid">${tNext}${tSched}${tTeam}<div class="dt-stack"><div class="dt-pair">${tRec}${tSr}</div>${tNews}</div>${tTrain}${tScout}${tStand}${tTop}${tAw}${tProg}${tLeague}</div>`;}
 // what needs you right now: a dot on the page in the hub and in the tab bar
 function cnavTodo(){const t={},vis=id=>{const e=document.getElementById(id);return!!(e&&e.style.display!=='none');};
   try{if(vis('news-badge'))t.news='New';}catch(e){}
@@ -17959,7 +17993,9 @@ function ccLabel(){const C=G.cc;if(!C)return'Continue';if(C.stage==='pro')return
   if(C.phase==='reg'){const g=ccMyGameAt(C.wk);return g&&!g.s?`Play week ${C.wk+1}`:`Sim week ${C.wk+1}`;}
   if(C.phase==='post'){const m=ccMyPost();return m?'Play '+(m[1].n||'postseason'):(ccPostDone()?'Season wrap-up':'Sim postseason');}
   return['','Portal & draft','Spring practice',`Start ${ccYear()+1} season`][C.os]||'Continue';}
-function ccWeekDone(){const C=G.cc;ccSimWeekRest(C.wk);C.wk++;if(C.wk>=ccMaxWk()){ccPostStart();C.phase='post';
+// the rest of the week is played, the award races move, and the week turns (true when the regular season just ended)
+function ccWeekStep(){const C=G.cc;ccSimWeekRest(C.wk);try{ccPollWeek(C.wk);}catch(e){console.error('award watch',e);}C.wk++;if(C.wk>=ccMaxWk()){ccPostStart();C.phase='post';return true;}return false;}
+function ccWeekDone(){const C=G.cc;if(ccWeekStep()){
     try{const P=C.P[C.lvl];const inF=P&&P.field&&P.field.includes(C.k);addNews('myteam',`${ccYear()} regular season ends`,`${ccName(C.k)} finish ${ccRecStr(C.k)}${ccRankOf(C.k)?' · ranked #'+ccRankOf(C.k):''}.`);}catch(e){}}
   ccSave();nav('dash');}
 function ccPostStep(){ccPostRest();ccPostAdvance();if(ccPostDone()){ccSeasonEnd();return;}ccSave();nav('dash');}
@@ -18022,7 +18058,7 @@ function ccMyResult(g,plvl,my,op,st,played,how){const C=G.cc,p=C.p,isA=g.a===C.k
     ${played?`<div style="font-size:12px;margin-top:4px;color:${goal?'var(--gn)':'var(--mu)'}">Weekly goal (${GL[2]}): ${goal?'done ✓':'missed'}</div>`:''}
     <div style="font-size:12px;color:var(--mu);margin-top:4px">Coach trust ${C.trust}/100${xp?` · +${xp} XP`:''}</div>
     <div style="margin-top:12px"><button class="btn" onclick="clo();nav('dash')">Continue</button></div></div>`;
-  if(plvl)ccPostRest(),ccPostAdvance();else{ccSimWeekRest(C.wk);C.wk++;if(C.wk>=ccMaxWk()){ccPostStart();C.phase='post';}}
+  if(plvl)ccPostRest(),ccPostAdvance();else ccWeekStep();
   const end=plvl&&ccPostDone();ccSave();nav('dash');setTimeout(()=>openMo(res),how==='gd'?400:30);
   if(end)ccSeasonEnd(true);}
 function ccWelcome(){const C=G.cc,I=colInfo(C.k),r=ccRole();
@@ -18032,13 +18068,66 @@ function ccWelcome(){const C=G.cc,I=colInfo(C.k),r=ccRole();
    <div style="font-size:13px;margin-bottom:6px">Depth chart: <b>${r.start?'starter':'#'+r.rank+' at '+C.p.pos}</b>. Play well and earn the coach's trust to move up.</div>
    <div style="font-size:12px;color:var(--mu);text-align:left;max-width:520px;margin:10px auto 0"><b>How college works</b>: ${CC_G[C.lvl]} regular season games, conference games at the end and a conference title game. FBS: the top 12 make the playoff (the five best conference champions get in, the top four seeds get a bye), six wins makes you bowl eligible. Play 4 games or fewer and you keep your redshirt (once). In January the transfer portal opens; three years after high school you can declare for the pro draft. NIL money comes with your rating, position, stats and school.</div>
    <div style="margin-top:14px"><button class="btn bgn" onclick="clo();nav('dash')">Let's go</button></div></div>`);nav('dash');}
+// ── award watch: the trophy races re-ranked after every regular season week, and the conference Player of the Week.
+// Every starter on the top 40 teams and in your conference gets a weekly game grade (0 to 15, the same scale as yours) from his
+// rating, a seeded roll and his team's result; the season awards rank the same scores, so the last watch list is the ballot.
+function ccPosB(pos){return{QB:9,RB:4,WR:3}[pos]||0;}
+function ccAiPerf(q){const R=G.cc.race,x=R&&R.yr===G.yr&&R.perf[q.id];return x&&x[1]?x[0]/x[1]:clamp((q.rat-58)/2.6,0,15)*0.8;}
+function ccAiScore(x,wp,b){return x.q.rat*0.6+wp*25+(b?ccPosB(x.q.pos):0)+ccAiPerf(x.q)+ccN(ccR(ccH('aw',G.yr,x.q.id)))*2;}
+function ccMyScore(b,wp){const C=G.cc,p=C.p,L=C.S[C.lvl],x=L&&L.rec[C.k],tg=x?x[0]+x[1]:0,gp=C.gp||0;
+  return p.rat*0.6+wp*25+(b?ccPosB(p.pos):0)+ccPerf(p.pos,C.st,gp)-Math.max(0,tg-gp)*1.5+(C.trust-50)/20;}
+function ccRaceTeams(){const C=G.cc,conf=C.conf.list[C.conf.by[C.k]];return[...new Set(ccRank(C.lvl).slice(0,40).concat(conf?conf.t:[]))].filter(k=>k!==C.k);}
+function ccStarters(k){const by={};for(const q of ccRoster(k,true))(by[q.pos]=by[q.pos]||[]).push(q);const o=[];for(const pos in by)o.push(...by[pos].sort((a,b)=>b.rat-a.rat).slice(0,PC_STARTERS[pos]||1));return o;}
+function ccFreshOk(){return ccYrsOut()===1||(G.cc.rsUsed&&ccYrsOut()===2);}
+function ccPollWeek(w){const C=G.cc,lvl=C.lvl,L=C.S[lvl];if(!L||!L.W[w])return;const p=C.p;
+  const R=C.race&&C.race.yr===G.yr?C.race:(C.race={yr:G.yr,perf:{},lists:null,potw:[]});
+  const wp=k=>{const x=L.rec[k];return x&&(x[0]+x[1])?x[0]/(x[0]+x[1]):0.5;},res={};for(const g of L.W[w])if(g.s){res[g.a]=g.s[0]>g.s[1];res[g.b]=g.s[1]>g.s[0];}
+  const conf=C.conf.list[C.conf.by[C.k]],inConf=new Set(conf?conf.t:[]),cand=[],wk=[];
+  for(const k of ccRaceTeams())for(const q of ccStarters(k)){cand.push({q,k});if(res[k]==null)continue;
+    const v=clamp((q.rat-58)/2.6+ccN(ccR(ccH('wk',G.yr,w,q.id)))*3+(res[k]?1.2:-1),0,15),x=R.perf[q.id]||(R.perf[q.id]=[0,0]);x[0]+=v;x[1]++;if(inConf.has(k))wk.push({n:q.fn+' '+q.ln,pos:q.pos,k,v});}
+  // the lists, with the move since last week
+  const old=R.lists,mv=(key,id,i)=>{if(!old||!old[key])return null;const j=old[key].findIndex(x=>x.id===id);return j<0?'new':j-i;};
+  const row=(key,x,s,i)=>({id:x.q.id,n:x.q.fn+' '+x.q.ln,pos:x.q.pos,k:x.k,me:x.q===p,s,mv:mv(key,x.q.id,i)});
+  const me={q:p,k:C.k},list=(key,pool,b,n,mine)=>{const L2=pool.map(x=>({x,s:ccAiScore(x,wp(x.k),b)}));if(mine)L2.push({x:me,s:ccMyScore(b,wp(C.k))});
+    return L2.sort((a,b2)=>b2.s-a.s).slice(0,n).map((o,i)=>row(key,o.x,o.s,i));};
+  const grp=p.pos==='CB'||p.pos==='S'?['CB','S']:[p.pos],gp=C.gp||0;
+  const lists={wk:w+1,mvp:list('mvp',cand,1,10,gp>0),fr:list('fr',cand.filter(x=>x.q.yr===1),1,5,gp>0&&ccFreshOk())};
+  if(lvl==='FBS'&&CC_POSAW[p.pos])lists.pos=list('pos',cand.filter(x=>grp.includes(x.q.pos)),0,5,gp>0);
+  // conference Player of the Week: the best game grade in your conference, yours included
+  const lg=(C.log||[]).slice().reverse().find(l=>l.w===w+1);if(lg&&lg.st)wk.push({n:p.fn+' '+p.ln,pos:p.pos,k:C.k,v:ccPerf(p.pos,lg.st,1)+0.5,me:true,line:ccLine(p.pos,lg.st)});
+  const best=wk.sort((a,b)=>b.v-a.v)[0];
+  if(best&&conf){R.potw=(R.potw||[]).concat({w:w+1,n:best.n,pos:best.pos,k:best.k,me:!!best.me}).slice(-20);
+    if(best.me){try{pcGainXP(p,150,'potw');}catch(e){}try{addNews('myteam',`${conf.name} Player of the Week: ${best.n}`,`${p.pos}, ${ccName(C.k)}: ${best.line}`);socNote('award',`${p.fn} ${p.ln} is the ${conf.name} Player of the Week.`,2);}catch(e){}
+      try{notify(`${p.fn} ${p.ln} is the ${conf.name} Player of the Week!`);}catch(e){}}
+    else try{addNews('general',`${conf.name} Player of the Week: ${best.n}`,`${best.pos}, ${ccName(best.k)}`);}catch(e){}}
+  // your spot on the lists
+  for(const[key,lbl]of[['mvp',CC_MVP[lvl]],['pos',CC_POSAW[p.pos]],['fr','First Light Award']]){const L2=lists[key];if(!L2)continue;const i=L2.findIndex(x=>x.me),j=old&&old[key]?old[key].findIndex(x=>x.me):-1;
+    if(i>=0&&(j<0||i<j))try{socNote('award',`${p.fn} ${p.ln} is No. ${i+1} on the ${lbl} watch list.`,1.5);}catch(e){}}
+  const lead=lists.mvp[0];if(lead&&old&&old.mvp&&old.mvp[0]&&old.mvp[0].id!==lead.id)try{addNews(lead.me?'myteam':'general',`${CC_MVP[lvl]} watch: ${lead.n} moves to No. 1`,`${lead.pos}, ${ccName(lead.k)}`);}catch(e){}
+  R.lists=lists;}
+function ccPollHtml(compact){const C=G.cc,R=C.race&&C.race.yr===G.yr?C.race:null,L=R&&R.lists,lvl=C.lvl;
+  const rows=A=>A.map((x,i)=>`<div class="aw-row${x.me?' me':''}"><b>${i+1}</b>${awMv(x.mv)}${colLogo(x.k,18)}<span class="aw-n">${x.n}<small>${x.pos} · ${ccName(x.k)}</small></span></div>`).join('');
+  const won=C.winners?`<div class="pnl"><div class="ph">${C.winners.y} winners</div><div class="pb">${C.winners.L.map(w=>`<div class="dr"><span class="a">${w.t}</span><span${w.me?' style="color:var(--gd);font-weight:800"':''}>${colLogo(w.k,16)} ${w.n} · ${w.pos}, ${ccName(w.k)}</span></div>`).join('')}</div></div>`:'';
+  if(!L)return compact?'<div class="dt-mu">The first watch list comes out after week 1.</div>':`<div class="pnl"><div class="pb" style="color:var(--mu);font-size:13px">The ${CC_MVP[lvl]} watch list and the other award races come out after week 1 and change every week.</div></div>${won}`;
+  if(compact){const i=L.mvp.findIndex(x=>x.me);return`<div class="dt-sub">${CC_MVP[lvl]} · after week ${L.wk}</div><div class="aw-list">${rows(L.mvp.slice(0,4))}</div>${i>3?`<div class="dt-sub" style="margin-top:4px">You: <b>No. ${i+1}</b></div>`:''}`;}
+  const col=(t,A)=>`<div class="pnl"><div class="ph">${t} <small style="color:var(--mu);font-weight:600">after week ${L.wk}</small></div><div class="pb aw-list">${A&&A.length?rows(A):'<span style="color:var(--mu)">No candidates yet.</span>'}</div></div>`;
+  const pw=(R.potw||[]).slice(-6).reverse();
+  return`<div class="g2" style="align-items:start">${col(CC_MVP[lvl]+' watch',L.mvp)}<div>${L.pos?col(CC_POSAW[C.p.pos]+' watch',L.pos):''}${col('First Light Award watch (freshmen)',L.fr)}</div></div>
+    ${won}
+    <div class="pnl"><div class="ph">${ccConfName(C.k)} Player of the Week</div><div class="pb">${pw.length?pw.map(x=>`<div class="dr"><span class="a">Week ${x.w}</span><span${x.me?' style="color:var(--gd);font-weight:800"':''}>${x.n} · ${x.pos}, ${ccName(x.k)}</span></div>`).join(''):'<span style="color:var(--mu)">After week 1.</span>'}</div></div>`;}
 // ── season end: awards, eligibility, NIL money
-function ccAwards(){const C=G.cc,p=C.p,lvl=C.lvl,L=C.S[lvl];if(!L)return[];const out=[],gp=C.gp||0;if(!gp)return out;
-  const wp=k=>{const x=L.rec[k];return x&&(x[0]+x[1])?x[0]/(x[0]+x[1]):0.5;},posB={QB:9,RB:4,WR:3}[p.pos]||0,top=ccRank(lvl).slice(0,40),conf=G.cc.conf.list[G.cc.conf.by[C.k]];
+function ccAwards(){const C=G.cc,p=C.p,lvl=C.lvl,L=C.S[lvl];if(!L)return[];const out=[],gp=C.gp||0;
+  const wp=k=>{const x=L.rec[k];return x&&(x[0]+x[1])?x[0]/(x[0]+x[1]):0.5;},top=ccRank(lvl).slice(0,40),conf=G.cc.conf.list[G.cc.conf.by[C.k]];
   const cand=ks=>{const o=[];for(const k of ks){if(k===C.k)continue;for(const q of ccRoster(k,true))o.push({q,k,w:wp(k)});}return o;};
-  const sc=(x,b)=>x.q.rat*0.6+x.w*25+(b?({QB:9,RB:4,WR:3}[x.q.pos]||0):0)+ccN(ccR(ccH('aw',G.yr,x.q.id)))*4;
-  const perf=ccPerf(p.pos,C.st,gp),mine=b=>p.rat*0.6+wp(C.k)*25+(b?posB:0)+perf-(gp<8?(8-gp)*1.5:0)+(C.trust-50)/20;
+  const sc=(x,b)=>ccAiScore(x,x.w,b);
+  const mine=b=>ccMyScore(b,wp(C.k));
   const A=cand(top),grp=pos=>pos==='CB'||pos==='S'?['CB','S']:[pos];
+  // who won, you or not: the top of the same ballot as the watch list
+  const win=(t,pool,b,mineOk)=>{let w=null;for(const x of pool){const v=sc(x,b);if(!w||v>w.v)w={v,n:x.q.fn+' '+x.q.ln,pos:x.q.pos,k:x.k};}
+    if(mineOk){const v=mine(b);if(!w||v>w.v)w={v,n:p.fn+' '+p.ln,pos:p.pos,k:C.k,me:true};}return w&&{t,n:w.n,pos:w.pos,k:w.k,me:!!w.me};};
+  C.winners={y:ccYear(),lvl,L:[win(CC_MVP[lvl],A,1,gp>0),win('First Light Award (freshman of the year)',A.filter(x=>x.q.yr===1),1,gp>0&&ccFreshOk())].filter(Boolean)};
+  for(const w of C.winners.L)if(!w.me)try{addNews('general',`${w.n} wins the ${ccYear()} ${w.t}`,`${w.pos}, ${ccName(w.k)}`);}catch(e){}
+  if(!gp)return out;
   {const all=A.map(x=>sc(x,1)).sort((a,b)=>b-a),m=mine(1),rk=all.filter(v=>v>m).length;if(rk===0)out.push({n:CC_MVP[lvl],big:true,t:'Winner'});else if(rk<4)out.push({n:CC_MVP[lvl],big:rk<2,t:'Finalist'});}
   if(lvl==='FBS'&&CC_POSAW[p.pos]){const G2=grp(p.pos),L2=A.filter(x=>G2.includes(x.q.pos)).map(x=>sc(x,0)).sort((a,b)=>b-a),m=mine(0),rk=L2.filter(v=>v>m).length;if(rk===0)out.push({n:CC_POSAW[p.pos],big:true,t:'Winner'});else if(rk<3)out.push({n:CC_POSAW[p.pos],t:'Finalist'});}
   {const n=PC_STARTERS[p.pos]||1,L2=A.filter(x=>x.q.pos===p.pos).map(x=>sc(x,0)).sort((a,b)=>b-a),m=mine(0),rk=L2.filter(v=>v>m).length;if(rk<n)out.push({n:lvl==='FBS'?'All-Nation team':'All-'+CC_LVN[lvl]+' team',big:lvl==='FBS',t:'1st team'});else if(rk<n*2)out.push({n:lvl==='FBS'?'All-Nation team':'All-'+CC_LVN[lvl]+' team',t:'2nd team'});}
@@ -18173,7 +18262,7 @@ function ccDash(){const C=G.cc,p=C.p,I=colInfo(C.k),lvl=C.lvl;if(C.stage==='pro'
   const dep=r.mates.slice(0,6).map((q,i)=>`<div><b>${i+1}</b><span class="dt-ln${q===p?' me':''}">${q.fn} ${q.ln}${q.real&&q.hs?` <small style="color:var(--mu)">${q.hs}</small>`:''}</span><span class="dt-mu">${['','Fr','So','Jr','Sr','5th'][q===p?Math.min(5,ccYrsOut()):q.yr]||''} · ${q.rat}</span></div>`).join('');
   const st=`<div class="dt-sub">${C.gp?ccLine(p.pos,C.st):'No games yet this season.'}</div>${last?`<div class="dt-sub" style="margin-top:6px">Last season: ${last.gp} games · ${ccLine(p.pos,last.st)}</div>`:''}${(C.aw||[]).length?`<div class="dt-sub" style="margin-top:6px">Awards: ${(C.aw||[]).slice(-3).map(a=>a.n+' ('+a.t+')').join(', ')}</div>`:''}`;
   const tiles=[dtTile('Next game',"ccNext()",ng,'dt-tall'),dtTile('My player',"nav('mine')",me,'dt-tall'),dtTile(ccConfName(C.k)||'Conference',"nav('college','stand')",`<div class="dt-list">${cst}</div>`),dtTile(`Top 25 · ${CC_LVN[lvl]}`,"nav('college','rank')",`<div class="dt-list">${t25}</div>`),
-    dtTile('Schedule',"nav('college','sched')",`<div class="dt-list">${sch||'<div class="dt-sub">No games.</div>'}</div>`),dtTile('NIL and draft',"nav('college','stats')",nil),dtTile(`${p.pos} depth chart`,"nav('college','roster')",`<div class="dt-list">${dep}</div>`),dtTile('Season stats',"nav('college','stats')",st)];
+    dtTile('Schedule',"nav('college','sched')",`<div class="dt-list">${sch||'<div class="dt-sub">No games.</div>'}</div>`),dtTile('NIL and draft',"nav('college','stats')",nil),dtTile(`${p.pos} depth chart`,"nav('college','roster')",`<div class="dt-list">${dep}</div>`),dtTile('Season stats',"nav('college','stats')",st),dtTile('Award watch',"nav('college','aw')",ccPollHtml(true))];
   return`${club}${strip}<div class="dt-grid">${tiles.join('')}</div>`;}
 function ccMyPostStatus(){const C=G.cc,P=C.P&&C.P[C.lvl];if(!P)return'';if(P.champ===C.k)return'National champions!';
   const inF=P.br&&Object.prototype.hasOwnProperty.call(P.br.seed,C.k),alive=P.br&&P.br.cur.includes(C.k);
@@ -18182,7 +18271,7 @@ function ccMyPostStatus(){const C=G.cc,P=C.P&&C.P[C.lvl];if(!P)return'';if(P.cha
 window.ccSimPost=function(){let n=0;while(!ccPostDone()&&!ccMyPost()&&n++<12){ccPostRest();ccPostAdvance();}if(ccPostDone()){ccSeasonEnd();return;}ccSave();nav('dash');};
 // ── the College page
 function pgCollege(tab){const C=G.cc;if(!C||!C.S){return`<div class="pnl"><div class="ph">College</div><div class="pb" style="color:var(--mu)">${C?'The college season starts from the dashboard.':'No college career in this save.'}</div></div>`;}
-  tab=tab||G._ccTab||'sched';G._ccTab=tab;const T=[['sched','Schedule'],['stand','Standings'],['rank','Rankings'],['roster','Roster'],['post','Postseason'],['stats','Stats & awards'],['cols','All colleges']];
+  tab=tab||G._ccTab||'sched';G._ccTab=tab;const T=[['sched','Schedule'],['stand','Standings'],['rank','Rankings'],['roster','Roster'],['post','Postseason'],['stats','Stats & awards'],['aw','Award watch'],['cols','All colleges']];
   const bar=`<div class="tabs" style="margin-bottom:10px">${T.map(([k,l])=>`<button class="tab ${tab===k?'on':''}" onclick="nav('college','${k}')">${l}</button>`).join('')}</div>`;
   const lvl=G._ccLvl&&C.S[G._ccLvl]?G._ccLvl:C.lvl,lvSel=`<div class="tabs" style="margin-bottom:8px">${CC_LV.filter(l=>C.S[l]).map(l=>`<button class="tab ${l===lvl?'on':''}" onclick="G._ccLvl='${l}';nav('college','${tab}')">${CC_LVN[l]}</button>`).join('')}</div>`;
   let body='';const row=(k,i,ex)=>`<tr class="cl" onclick="colShow('${k.replace(/'/g,"\\'")}')"${k===C.k?' style="background:rgba(245,192,48,.12)"':''}><td>${i}</td><td style="white-space:nowrap">${ccTeamLn(k)}</td>${ex}</tr>`;
@@ -18200,6 +18289,7 @@ function pgCollege(tab){const C=G.cc;if(!C||!C.S){return`<div class="pnl"><div c
     <div class="pnl"><div class="ph">Awards</div><div class="pb">${(C.aw||[]).length?C.aw.map(a=>`<div class="dr"><span class="a">${a.y}</span><span><b>${a.n}</b> · ${a.t}</span></div>`).join(''):'<span style="color:var(--mu)">No awards yet.</span>'}</div></div>
     <div class="pnl"><div class="ph">NIL</div><div class="pb"><div class="dr"><span class="a">Value this year</span><b>${ccMoney(C.nil.val)}</b></div><div class="dr"><span class="a">Career earnings</span><b>${ccMoney(C.nil.cash)}</b></div>${(C.nil.deals||[]).map(d=>`<div class="dr"><span class="a">${d.y} · ${d.n}</span><span>${ccMoney(d.cash)}</span></div>`).join('')}</div></div>
     <div class="pnl"><div class="ph">This season's games</div><div class="pb">${(C.log||[]).map(l=>`<div class="dr"><span class="a">${l.w==='P'?l.n:'Week '+l.w} · ${l.h===1?'at ':'vs '}${ccName(l.o)}</span><span>${l.s[0]>l.s[1]?'W':'L'} ${l.s[0]}-${l.s[1]} · <span style="font-size:12px">${l.st?ccLine(p.pos,l.st):'did not play'}</span></span></div>`).join('')||'<span style="color:var(--mu)">No games yet.</span>'}</div></div>`;}
+  else if(tab==='aw'){body=ccPollHtml(false);}
   else if(tab==='cols'){body=lvSel+`<div class="pnl"><div class="ph">${CC_LVN[lvl]} colleges</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;padding:10px">${C.S[lvl].T.slice().sort((a,b)=>(COL_BY[b]||{}).pr-(COL_BY[a]||{}).pr).map(k=>`<button class="bgh" style="display:flex;gap:8px;align-items:center;text-align:left;padding:6px 8px" onclick="colShow('${k.replace(/'/g,"\\'")}')">${colLogo(k,30)}<span style="font-size:12px;line-height:1.2"><b>${ccName(k)}</b><br><small style="color:var(--mu)">${colInfo(k).mascot} · ${ccRecStr(k,lvl)}</small></span></button>`).join('')}</div></div>`;}
   return`<div class="pnl" style="margin-bottom:10px"><div class="pb" style="display:flex;align-items:center;gap:12px">${colLogo(C.k,48)}<div style="flex:1"><div style="font:900 22px/1.1 var(--hd)">${colInfo(C.k).name} ${colInfo(C.k).mascot}</div><div style="font-size:12px;color:var(--mu)">${CC_LVN[C.lvl]} · ${ccConfName(C.k)} · ${ccRecStr(C.k)}</div></div><button class="btn bgn" onclick="ccNext()">${ccLabel()} ›</button></div></div>${bar}${body}`;}
 // My Player in college (and after)
@@ -18483,6 +18573,8 @@ const TUT_PAGES=[
   `},
   {tab:'New this update',icon:'',title:'A new look, faster menus and lots of new football',body:`
     <ul>
+      <li><strong>Award watch</strong>: Player of the Year and Freshman of the Year watch lists in high school, and trophy races plus a conference Player of the Week in college, all re-ranked every week.</li>
+      <li><strong>Back</strong>: every page and card can go back, and the phone back button works. From the high school view you can return to your college or pro career.</li>
       <li><strong>Potential</strong>: a quiet season never lowers a player's potential any more. In Player Career it only goes up, and it comes with you to college.</li>
       <li><strong>Two-way players</strong>: set them as starters at their second position on the depth chart; sims and Game Day use it.</li>
       <li><strong>Online</strong>: online play isn't working right now. Everything else works as usual.</li>

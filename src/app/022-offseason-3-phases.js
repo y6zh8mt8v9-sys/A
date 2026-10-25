@@ -320,19 +320,9 @@ function finalizeOffseason(){
     const ss=clamp(statRaw,0,120)/120;
     return ss*0.70 + ratScore*0.20 + devScore*0.10;
   }
-  // every position can win: a season is measured against what a great game looks like at that position
-  const _AW_BENCH=Object.assign({OL:5,K:7},STREAK_BENCH);
-  const _awScore=p=>{const ss2=_awardSeasStats(p),gp=Math.max(1,ss2.gp||1);if((ss2.gp||0)<3)return 0;
-    const pg=p.pos==='K'?((ss2.fgm||0)*3+(ss2.xpm||0))/gp:scorePerfEntry(ss2,p.pos)/gp;
-    return clamp(pg/(_AW_BENCH[p.pos]||10),0,3)/3*0.72+(p.rat/99)*0.2+(({'Elite Dev':100,'Star':75,'Impact':50,'Normal':25}[p.dev]||25)/100)*0.08;};
   // state awards go to players from your own state; national awards to the whole country
   const _myStK=clsSt(G.cls),_cfIds=fltSchoolIds(_myStK==='CF'?'ALL':'ST:'+_myStK);
-  // how far a season stands out from the average starter at the same position (z-score), so no position is favored
-  const _awAll=G.players.filter(p=>!p.grad&&p.sId!=null&&(_awardSeasStats(p).gp||0)>=3),_awSc=new Map(),_awRaw=new Map(),_awPos={};
-  for(const p of _awAll){const r=_awScore(p);_awRaw.set(p.id,r);(_awPos[p.pos]=_awPos[p.pos]||[]).push(r);}
-  // measured against the real contributors at each position (its top 30%), not the backups who barely play
-  for(const k in _awPos){const A=_awPos[k].sort((a,b)=>b-a).slice(0,Math.max(5,Math.ceil(_awPos[k].length*0.3))),m=A.reduce((a,b)=>a+b,0)/A.length,sd=Math.sqrt(Math.max(1e-6,A.reduce((a,b)=>a+(b-m)*(b-m),0)/A.length));_awPos[k]={m,sd};}
-  for(const p of _awAll){const q=_awPos[p.pos];_awSc.set(p.id,((_awRaw.get(p.id)-q.m)/q.sd)*(AW_POSW[p.pos]||1)+(p.rat-60)/60);}
+  const _awAll=G.players.filter(p=>!p.grad&&p.sId!=null&&(_awardSeasStats(p).gp||0)>=3),_awSc=awScoreMap(_awAll,_awardSeasStats);
   const _calcAwardScoreSnap2=p=>_awSc.get(p.id)||0;
   const _awardPool=_awAll.filter(p=>_cfIds.has(p.sId));
   try{seasonAwardsAll(_awAll,_awSc,_myStK,pops,_aiSeasStatsSnap);}catch(e){console.error('awards',e);}

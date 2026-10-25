@@ -105,6 +105,7 @@ function simGame(idx,silent=false,forced=null){
 
   lgSimWeek(game.wk,opp.id,silent,oppScore,myScore,!iWin);
   try{weeklyAwards(game.wk,silent?null:weekPops);}catch(e){console.error('weekly awards',e);}
+  try{hsPollWeek(game.wk);}catch(e){console.error('award watch',e);}
   try{gameInviteResolve(game.wk,silent?null:weekPops);}catch(e){console.error('game invites',e);}
   try{colNeedsWeek(silent?null:weekPops);}catch(e){console.error('college needs',e);}
 

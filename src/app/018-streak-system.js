@@ -20,6 +20,38 @@ const AW_POSW={QB:1.1,RB:1.05,WR:1,TE:0.95,DL:1,LB:1,CB:1,S:0.95,OL:0.75,K:0.6};
 function awName(p){const s=getS(p.sId);return{pid:p.id,n:p.fn+' '+p.ln,pos:p.pos,yr:p.yr,sch:s?s.name:'',st:s?stOf(s):'',mine:p.sId===G.myId};}
 function awLine(st,pos){if(!st)return'';const b=[];if(st.passYds)b.push(`${st.passYds} pass yds, ${st.passTD||0} TD`);if(st.rushYds)b.push(`${st.rushYds} rush yds${st.rushTD?', '+st.rushTD+' TD':''}`);if(st.recYds)b.push(`${st.rec||0} rec, ${st.recYds} yds${st.recTD?', '+st.recTD+' TD':''}`);
   if(st.tackles)b.push(`${st.tackles} tkl`);if(st.sacks)b.push(`${st.sacks} sacks`);if(st.ints)b.push(`${st.ints} INT`);if(st.pbu)b.push(`${st.pbu} PBU`);if(pos==='OL'&&st.pancakes)b.push(`${st.pancakes} pancakes`);if(st.fgm)b.push(`${st.fgm}/${st.fga||st.fgm} FG`);return b.slice(0,3).join(' · ');}
+// one award score for the weekly watch lists and the season's awards: a season measured against a great game at its position,
+// then how far it stands out from the real contributors at that position (their top 30%, not the backups), so no position is favored
+function awRawScore(p,ss){const gp=Math.max(1,ss.gp||1),bench=p.pos==='OL'?5:p.pos==='K'?7:(STREAK_BENCH[p.pos]||10);
+  const pg=p.pos==='K'?((ss.fgm||0)*3+(ss.xpm||0))/gp:scorePerfEntry(ss,p.pos)/gp;
+  return clamp(pg/bench,0,3)/3*0.72+(p.rat/99)*0.2+(({'Elite Dev':100,'Star':75,'Impact':50,'Normal':25}[p.dev]||25)/100)*0.08;}
+function awScoreMap(all,ssOf){const raw=new Map(),pos={},sc=new Map();
+  for(const p of all){const r=awRawScore(p,ssOf(p)||{});raw.set(p.id,r);(pos[p.pos]=pos[p.pos]||[]).push(r);}
+  for(const k in pos){const A=pos[k].sort((a,b)=>b-a).slice(0,Math.max(5,Math.ceil(pos[k].length*0.3))),m=A.reduce((a,b)=>a+b,0)/A.length,sd=Math.sqrt(Math.max(1e-6,A.reduce((a,b)=>a+(b-m)*(b-m),0)/A.length));pos[k]={m,sd};}
+  for(const p of all){const q=pos[p.pos];sc.set(p.id,((raw.get(p.id)-q.m)/q.sd)*(AW_POSW[p.pos]||1)+(p.rat-60)/60);}
+  return sc;}
+// award watch: the Player of the Year races (state, national) and the state Freshman of the Year race, re-ranked after every regular season week
+function hsPollWeek(wk){const st=clsSt(G.cls),ids=fltSchoolIds(st==='CF'?'ALL':'ST:'+st);
+  const all=G.players.filter(p=>!p.grad&&p.sId!=null&&p.seasStats&&(p.seasStats.gp||0)>=1&&getS(p.sId)&&!getS(p.sId).intl);if(all.length<20)return;
+  const sc=awScoreMap(all,p=>p.seasStats),top=(L,n)=>L.sort((a,b)=>sc.get(b.id)-sc.get(a.id)).slice(0,n);
+  const old=G.hsPoll&&G.hsPoll.yr===G.yr?G.hsPoll.lists:null;
+  const mk=(key,L)=>{const pv=old&&old[key]?Object.fromEntries(old[key].map((x,i)=>[x.pid,i+1])):null;return L.map((p,i)=>Object.assign(awName(p),{mv:pv?(pv[p.id]?pv[p.id]-(i+1):'new'):null,line:awLine(p.seasStats,p.pos)}));};
+  const inSt=all.filter(p=>ids.has(p.sId)),lists={st:mk('st',top(inSt.slice(),10)),nat:mk('nat',top(all.slice(),10)),fr:mk('fr',top(inSt.filter(p=>p.yr===9),5))};
+  const lead=lists.st[0],was=old&&old.st&&old.st[0];
+  if(lead&&was&&was.pid!==lead.pid)try{addNews(lead.mine?'award':'general',`${stName(st)} Player of the Year watch: ${lead.n} takes over No. 1`,`${lead.pos}, ${lead.sch}: ${lead.line} · via ${MEDIA.fni}`);}catch(e){}
+  const me=typeof pcActive==='function'&&pcActive();
+  if(me)for(const[k,lbl]of[['st',stName(st)+' Player of the Year'],['nat','National Player of the Year'],['fr',stName(st)+' Freshman of the Year']]){
+    const i=lists[k].findIndex(x=>x.pid===me.id),j=old&&old[k]?old[k].findIndex(x=>x.pid===me.id):-1;
+    if(i>=0&&(j<0||i<j))try{socNote('award',`${me.fn} ${me.ln} is No. ${i+1} on the ${lbl} watch list.`,1.5);}catch(e){}}
+  G.hsPoll={yr:G.yr,wk,lists};}
+function awMv(mv){return mv==='new'?'<span class="aw-mv new">new</span>':mv>0?`<span class="aw-mv up">▲${mv}</span>`:mv<0?`<span class="aw-mv dn">▼${-mv}</span>`:'<span class="aw-mv">–</span>';}
+function awRows(L,mineId,open){return L.map((x,i)=>`<div class="aw-row${x.mine||x.pid===mineId?' me':''}"${open?` onclick="event.stopPropagation();${open(x)}"`:''}><b>${i+1}</b>${awMv(x.mv)}${(()=>{const q=getP(x.pid),sc=q&&getS(q.sId);return sc?sLogo(sc,18):'<span></span>';})()}<span class="aw-n">${x.n}<small>${x.pos} · ${x.sch||''}${x.line?' · '+x.line:''}</small></span></div>`).join('');}
+function hsPollHtml(compact){const P=G.hsPoll&&G.hsPoll.yr===G.yr?G.hsPoll:null,st=stName(clsSt(G.cls));
+  if(!P)return compact?'<div class="dt-mu">The first watch lists come out after week 1.</div>':`<div class="pnl"><div class="ph">Award watch</div><div class="pb" style="color:var(--mu);font-size:13px">The ${st} and national Player of the Year watch lists come out after week 1 and change every week.</div></div>`;
+  const op=x=>`showPlayer(${x.pid})`;
+  if(compact)return`<div class="dt-sub">${st} Player of the Year · week ${P.wk}</div><div class="aw-list">${awRows(P.lists.st.slice(0,4),G.myPlayerId,op)}</div>`;
+  const col=(t,L)=>`<div class="pnl"><div class="ph">${t} <small style="color:var(--mu);font-weight:600">after week ${P.wk}</small></div><div class="pb aw-list">${L.length?awRows(L,G.myPlayerId,op):'<span style="color:var(--mu)">No candidates yet.</span>'}</div></div>`;
+  return`<div class="g2" style="align-items:start">${col(st+' Player of the Year watch',P.lists.st)}${col('National Player of the Year watch',P.lists.nat)}</div>${col(st+' Freshman of the Year watch',P.lists.fr)}`;}
 // state Player / Freshman of the Year for every state with full rosters, plus the national awards
 function seasonAwardsAll(all,sc,myK,pops,snap){
   const by={};for(const p of all){const s=getS(p.sId);if(!s||s.intl)continue;const k=stOf(s);(by[k]=by[k]||[]).push(p);}
@@ -81,7 +113,7 @@ function pgMedia(){const st=clsSt(G.cls),mine=p=>p.sId===G.myId?'style="backgrou
   const row=(p,i)=>{const s=getS(p.sId);return`<tr class="cl" ${mine(p)} onclick="showPlayer(${p.id})"><td>${i+1}</td><td style="white-space:nowrap">${p.fn} ${p.ln}</td><td><span class="pb2">${p.pos}</span></td><td>${yrL(p.yr)}</td><td>${stars(p.stars||0)}</td><td style="white-space:nowrap">${s?sLogo(s,18)+' '+s.name:''}</td><td style="white-space:nowrap">${p.committed?`<span style="color:var(--gn);display:inline-flex;align-items:center;gap:4px">${colLogo(p.committed,18)}${p.committed.school}</span>`:'Open'}</td></tr>`;};
   const W=(G.wkAwards||[]).filter(x=>x.yr===G.yr).slice(-6).reverse(),H=(G.awardHist||[]).slice(-1)[0];
   const tbl=L=>`<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Player</th><th>Pos</th><th>Yr</th><th>Stars</th><th>School</th><th>Commit</th></tr></thead><tbody>${L.map(row).join('')||'<tr><td colspan="7" style="color:var(--mu)">No rankings yet.</td></tr>'}</tbody></table></div>`;
-  return`<div class="pnl" style="margin-bottom:14px"><div class="ph">${MEDIA.fni} <span style="font-size:12px;color:var(--mu);font-weight:600">Player and Play of the Week</span></div><div class="pb">${W.length?W.map(x=>`<div class="dr" style="flex-wrap:wrap;gap:6px"><span class="a"><b>Week ${x.wk}</b> · Player of the Week: <b ${x.potw.mine?'style="color:var(--gd)"':''}>${x.potw.n}</b> (${x.potw.pos}, ${x.potw.sch})<div style="font-size:11px;color:var(--mu)">${x.potw.line}</div></span>${x.play?`<span style="font-size:12px;color:var(--mu)">Play of the Week: <b style="color:var(--tx)">${x.play.n}</b>, ${x.play.what}</span>`:''}</div>`).join(''):'<div style="color:var(--mu);font-size:13px">The weekly honors start after week 1.</div>'}
+  return`${hsPollHtml(false)}<div class="pnl" style="margin-bottom:14px"><div class="ph">${MEDIA.fni} <span style="font-size:12px;color:var(--mu);font-weight:600">Player and Play of the Week</span></div><div class="pb">${W.length?W.map(x=>`<div class="dr" style="flex-wrap:wrap;gap:6px"><span class="a"><b>Week ${x.wk}</b> · Player of the Week: <b ${x.potw.mine?'style="color:var(--gd)"':''}>${x.potw.n}</b> (${x.potw.pos}, ${x.potw.sch})<div style="font-size:11px;color:var(--mu)">${x.potw.line}</div></span>${x.play?`<span style="font-size:12px;color:var(--mu)">Play of the Week: <b style="color:var(--tx)">${x.play.n}</b>, ${x.play.what}</span>`:''}</div>`).join(''):'<div style="color:var(--mu);font-size:13px">The weekly honors start after week 1.</div>'}
      ${H?`<div style="margin-top:10px;font-size:13px"><b>${2026+(H.yr-1)} season awards</b>: National Player of the Year <b>${H.nat.poy?H.nat.poy.n+' ('+H.nat.poy.pos+', '+H.nat.poy.sch+')':'–'}</b> · National Freshman of the Year <b>${H.nat.fr?H.nat.fr.n+' ('+H.nat.fr.pos+')':'–'}</b>${H.st[st]?` · ${stName(st)}: Player <b>${H.st[st].poy?H.st[st].poy.n+' ('+H.st[st].poy.pos+')':'–'}</b>, Freshman <b>${H.st[st].fr?H.st[st].fr.n+' ('+H.st[st].fr.pos+')':'–'}</b>`:''}</div>`:''}</div></div>
     <div class="g2" style="align-items:start"><div class="pnl"><div class="ph">${MEDIA.rank} · National Top 25 (seniors)</div>${tbl(nat)}</div>
     <div class="pnl"><div class="ph">${MEDIA.rival} · ${stName(st)} Top 15</div>${tbl(stl)}</div></div>`;}

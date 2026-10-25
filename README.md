@@ -40,6 +40,14 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 ## What's new
 
 ### Latest update
+- **Award watch lists, every week:** in high school, the state and national Player of the Year races and the state Freshman of the Year race are re-ranked after every regular season week, with arrows for who moved up or down and a tag for new names. They are on the Media page and a dashboard tile. They use the same scoring as the end-of-season awards. A new No. 1 makes the news, and in Player Career you get a post when your player climbs a list.
+- **College awards:** the top trophy for your level (Gridiron Crown Trophy, Prairie Cup and so on), the position award (FBS) and the First Light Award for freshmen get weekly watch lists too, on a new Award watch tab and a dashboard tile. Every week a conference Player of the Week is named (your player can win it for XP). The season's winners come from the same ballot and are announced even when it isn't you.
+- **Back everywhere:** every page has a Back bar to the page before. Escape and the phone or browser back button work too: they close the top window first and ask about the main menu on the dashboard. Player, school and college cards opened from each other get a Back button that steps through the chain. The New Game and Player Career setup screens have a Main menu button.
+- **Back to your career:** going back to the high school from a college or pro career no longer strands you. The high school dashboard shows a Back to my career button.
+- **Main menu scrolls** when its buttons don't fit (short phones, landscape, small windows).
+- **Animated tabs:** pages slide in and the red bar grows under the tab you pick. Reduced motion and low-end mode turn it off.
+
+### Previous update
 - **Potential no longer drops:** a quiet season (a backup who barely played) never lowers a player's ceiling any more; good seasons can still raise it. In Player Career your player's potential only goes up, and going to college keeps the ceiling he earned in high school.
 - **Two-way players:** the depth chart lists them at their second position with a 2-way tag, and you can make them the starter there. Simulated games and Game Day use that order. Edit Player only offers a second position on the other side of the ball, and the list follows a change of main position. Call for the ball follows the position your player has on that snap.
 - **Player and coach creation:** both screens use the red and black look.
@@ -49,7 +57,7 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 - **Look and equipment** for your own player from My Player and his player card, at any point in his career, plus a Potential +1 skill point option.
 - **Every button checked:** an automated pass clicked every button on every page in coach mode and in high school and college Player Career, with no errors.
 
-### Previous update
+### Earlier update
 - **Red and black look:** black surfaces, white text and red for the numbers and buttons that matter, in the menus and in Game Day. Your team's own colors still mark your team. Light mode got the same change.
 - **Team edits show everywhere:** loading screens (including "Saving before kickoff" and the Player Career waits) always show a team's current name and logo, and renamed teams keep their rank badges.
 - **Game Day call-outs:** catch, sack and penalty call-outs, the touchdown line and the drive / quarter sim summary use the new plates and fonts; the field dims behind the sim summary. Drive log lines read properly again ("Gain of 3. Inches short of the first down") and show downs like the play call screen.
