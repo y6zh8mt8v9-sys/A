@@ -89,19 +89,6 @@ function calcSSBase(p,st){
 
 // ═══════════ PLAYER AWARDS ═══════════
 // Award score = 70% normalised season stats + 20% rating + 10% dev trait
-function calcAwardScore(p){
-  const DEV_SCORE={'Elite Dev':100,'Star':75,'Impact':50,'Normal':25};
-  const devScore=(DEV_SCORE[p.dev]||25)/100; // 0-1
-  // Normalise rating 0-1
-  const ratScore=p.rat/99;
-  // Normalised stat score, reuse calcSS but cap at 120 then scale 0-1
-  const ss=clamp(calcSS(p),0,120)/120;
-  // OL and K are purely rating-based and less comparable to skill positions; exclude from award pool
-  if(p.pos==='OL'||p.pos==='K')return 0;
-  // Must have played at least 3 games to be eligible
-  if((p.seasStats?.gp||0)<3)return 0;
-  return ss*0.70 + ratScore*0.20 + devScore*0.10;
-}
 
 // ═══════════ STARS, COLLEGE OFFERS AND CAMPS (v1.88 rework) ═══════════
 // Stars come from overall rating + development trait (+ a projection bonus for underclassmen), with only a small
@@ -280,8 +267,6 @@ function colClsSize(c,r){const q=COL_CLS_RNG[c.lvl]||[18,26],pr=COL_PR_RNG[c.lvl
 // v2.11: only some of each class comes straight from high school. About 15-20% of seniors play college football;
 // the rest of a 30-85 man class is transfers, junior-college players and walk-ons from outside the game.
 const COL_HS_Q={FBS:[14,26],FCS:[2,6],D2:[2,7],D3:[2,7],NAIA:[2,7],JUCO:[5,12]},COL_PR_RNG={FBS:[56,99],FCS:[30,55],D2:[18,38],D3:[5,24],NAIA:[12,29],JUCO:[3,20]};
-function colHsQuota(c,cy){const q=COL_HS_Q[c.lvl]||[3,6],pr=COL_PR_RNG[c.lvl]||[0,100],r=_colRand((c._k||c.school+'|'+c.lvl)+'#hs'+cy)();
-  const pn=clamp((c.pr-pr[0])/Math.max(1,pr[1]-pr[0]),0,1);return Math.round(q[0]+(q[1]-q[0])*(0.55*r+0.45*pn));}
 function colHsLeft(o){let n=0;for(const k in o.com)n+=o.com[k]||0;return Math.max(0,(o.hs||0)-n);}
 function colOffTot(o){let n=0;for(const k in o.off)n+=o.off[k]||0;return n;}
 function colRoom(c,p,forOffer){if(!c||!p)return true;const o=colCls(c,colClassYr(p)),n=o.need[p.pos]||1,cm=o.com[p.pos]||0;if(colHsLeft(o)<=0)return false;return forOffer?(cm<n&&(o.off[p.pos]||0)<Math.min(n*3,o.hs*2)&&colOffTot(o)<o.hs*4):cm<n;}
@@ -456,12 +441,6 @@ function checkCommit(p){
 function campCap(){return Math.max(1,Math.round(G.prestige||1));}
 function campsUsed(p){return p.campYr===G.yr?(p.campN||0):0;}
 const CAMP_KIND=['Elite Camp','Prospect Camp','Showcase','Mega Camp','Skills Camp'];
-function campMake(target){
-  const CC=COLLEGES.filter(c=>c.lvl!=='JUCO');const host=CC.slice().sort((a,b)=>Math.abs(a.pr-target)-Math.abs(b.pr-target))[Math.floor(Math.random()*4)];
-  const near=CC.filter(c=>c!==host&&Math.abs(c.pr-host.pr)<=16).sort(()=>Math.random()-0.5).slice(0,3+Math.floor(Math.random()*4));
-  const kind=host.lvl==='FBS'&&host.pr>=85?(Math.random()<0.5?'Elite Camp':'Mega Camp'):CAMP_KIND[Math.floor(Math.random()*CAMP_KIND.length)];
-  return{host:host.school,lvl:host.lvl,pr:host.pr,name:`${host.school} ${kind}`,schools:[host,...near].map(c=>({school:c.school,lvl:c.lvl,pr:c.pr})).sort((a,b)=>b.pr-a.pr)};
-}
 // ── v1.95 camp circuit: about 50 camps a year across the college ladder, each inviting 10-30 prospects.
 // Invites go to players who produce per touch (yards per carry / catch, completion %, coverage, line play),
 // do it week after week, and have the frame for their position; stars and rating help, but film matters most.

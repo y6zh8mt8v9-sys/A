@@ -30,39 +30,6 @@ function pointInPoly(px, py, poly) {
 }
 
 // Clip a polygon to the state boundary using Sutherland-Hodgman
-function clipPolyToState(subjectPoly, clipPoly) {
-  if (!subjectPoly.length) return [];
-  let output = [...subjectPoly];
-  for (let i = 0; i < clipPoly.length; i++) {
-    if (!output.length) return [];
-    const input = output;
-    output = [];
-    const edgeA = clipPoly[i];
-    const edgeB = clipPoly[(i + 1) % clipPoly.length];
-    const inside = (p) => {
-      return (edgeB[0] - edgeA[0]) * (p[1] - edgeA[1]) - (edgeB[1] - edgeA[1]) * (p[0] - edgeA[0]) >= 0;
-    };
-    const intersect = (a, b) => {
-      const dx1 = b[0] - a[0], dy1 = b[1] - a[1];
-      const dx2 = edgeB[0] - edgeA[0], dy2 = edgeB[1] - edgeA[1];
-      const denom = dx1 * dy2 - dy1 * dx2;
-      if (Math.abs(denom) < 1e-10) return a;
-      const t = ((edgeA[0] - a[0]) * dy2 - (edgeA[1] - a[1]) * dx2) / denom;
-      return [a[0] + t * dx1, a[1] + t * dy1];
-    };
-    for (let j = 0; j < input.length; j++) {
-      const cur = input[j];
-      const prev = input[(j + input.length - 1) % input.length];
-      if (inside(cur)) {
-        if (!inside(prev)) output.push(intersect(prev, cur));
-        output.push(cur);
-      } else if (inside(prev)) {
-        output.push(intersect(prev, cur));
-      }
-    }
-  }
-  return output;
-}
 
 const _STATE_POLY = parseStatePath(STATE_PATH);
 
@@ -93,49 +60,6 @@ function genSeedPoints(n, statePoly) {
 
 // Build Voronoi regions clipped to state using a simple rasterized approach
 // For each seed, compute its clipped polygon region
-function buildVoronoiCounties(seeds, statePoly, viewW, viewH) {
-  // For each seed, we'll define its Voronoi cell by building a bounding polygon
-  // from the perpendicular bisectors with all other seeds, then clip to state.
-  // Simplified: use a large bounding box polygon, intersect half-planes for each neighbor.
-  const BIG = 1200;
-  const regions = seeds.map((seed, i) => {
-    // Start with a big rectangle
-    let poly = [[-BIG, -BIG], [BIG, -BIG], [BIG, BIG], [-BIG, BIG]];
-    // Clip against half-plane for each other seed
-    for (let j = 0; j < seeds.length; j++) {
-      if (i === j || !poly.length) continue;
-      const ox = seeds[j][0], oy = seeds[j][1];
-      const mx = (seed[0] + ox) / 2, my = (seed[1] + oy) / 2;
-      const dx = ox - seed[0], dy = oy - seed[1];
-      // Keep points on seed's side: dot(p - mid, d) <= 0
-      const newPoly = [];
-      for (let k = 0; k < poly.length; k++) {
-        const cur = poly[k];
-        const prev = poly[(k + poly.length - 1) % poly.length];
-        const dCur = (cur[0] - mx) * dx + (cur[1] - my) * dy;
-        const dPrev = (prev[0] - mx) * dx + (prev[1] - my) * dy;
-        if (dCur <= 0) {
-          if (dPrev > 0) {
-            // intersection
-            const t = dPrev / (dPrev - dCur);
-            newPoly.push([prev[0] + t * (cur[0] - prev[0]), prev[1] + t * (cur[1] - prev[1])]);
-          }
-          newPoly.push(cur);
-        } else if (dPrev <= 0) {
-          const t = dPrev / (dPrev - dCur);
-          newPoly.push([prev[0] + t * (cur[0] - prev[0]), prev[1] + t * (cur[1] - prev[1])]);
-        }
-      }
-      poly = newPoly;
-    }
-    // Clip to state boundary
-    poly = clipPolyToState(poly, statePoly);
-    const cx = poly.length ? poly.reduce((s, p) => s + p[0], 0) / poly.length : seed[0];
-    const cy = poly.length ? poly.reduce((s, p) => s + p[1], 0) / poly.length : seed[1];
-    return { pts: poly, cx, cy };
-  });
-  return regions;
-}
 
 
 function _gridSeeds(n,poly){

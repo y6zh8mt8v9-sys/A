@@ -32,7 +32,6 @@ function myClsOrder(){return clsOfSt(clsSt(G.cls));}
 function makeDivsAny(c){return XCLS[c]?makeStateDivisions(c):makeDivisions(c);}
 function clsSz(c){return XCLS[c]?{r:XCLS[c].r,t:XCLS[c].t,d:XCLS[c].d}:CLS_SZ[c]||CLS_SZ['3A'];}
 function isUSSchool(s){const st=stOf(s);return st==='CF'||!!XST[st];}
-function schoolsOfSt(st){return allSchoolsAll().filter(s=>stOf(s)===st);}
 const XDIV_NAMES={
   WK:['Big River Conference','Corn Belt Conference','Tallgrass Conference','North Star Conference','Iron Range Conference','Prairie Lakes Conference',
       'Heartland Conference','Bluestem Conference','Twin Rivers Conference','Lakeshore Conference','Cedar Valley Conference',

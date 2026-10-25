@@ -1,9 +1,4 @@
 // ═══════════ DIVISION EDITOR ═══════════
-function openDivEditor(){
-  const el=document.getElementById('div-editor');
-  el.style.display='flex';
-  renderDivEditorList();
-}
 function closeDivEditor(){
   // Flush any edited names back into _setupDivs
   const inputs=document.querySelectorAll('.div-name-input');
@@ -695,26 +690,4 @@ function tbApplyImport(pack){
 }
 
 // Global import entry point (called from setup screen button)
-function importTeamPack(){
-  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
-  inp.onchange=function(e){
-    const file=e.target.files[0];if(!file)return;
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      try{
-        const pack=JSON.parse(ev.target.result);
-        // If team builder is open use it, otherwise apply directly
-        if(document.getElementById('team-builder').style.display==='flex'){
-          tbApplyImport(pack);
-        }else{
-          tbApplyImport(pack);
-          // Brief confirmation notification to setup screen
-          const total=_setupDivs?_setupDivs.reduce((s,d)=>s+d.teams.length,0):0;
-          const note=document.getElementById('nf');
-          if(note){note.textContent=`Team pack imported! ${total} teams loaded.`;note.className='show';setTimeout(()=>note.classList.remove('show'),3200);}
-        }
-      }catch(err){alert('Invalid team pack file: '+err.message);}
-    };reader.readAsText(file);
-  };inp.click();
-}
 

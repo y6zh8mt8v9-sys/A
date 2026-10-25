@@ -663,15 +663,6 @@ function pgSched(){
 
 // Cross-classification view state
 let _viewCls=null; // null = current game cls; set to '1A'-'5A' to view others
-function allSchoolsCls(cls){
-  if(!cls||cls===G.cls)return allSchools();
-  // Build a flat list of all schools across divisions for a given classification
-  return G.divisions.filter(div=>div.teams.some(t=>t.cls===cls||!t.cls)).flatMap(d=>d.teams);
-}
-function allDivisionsCls(cls){
-  if(!cls||cls===G.cls)return G.divisions;
-  return G.divisions;
-}
 // filter values: a class code, 'ALL' (all of Crestfield), 'ST:WK' / 'ST:TA' (a whole neighbor state), 'NAT' (all three states), 'INTL'
 function fltClasses(v){if(v==='NAT')return[...CLS_ORDER,...XCLS_ORDER];if(!v||v==='ALL')return CLS_ORDER.slice();if(v.startsWith('ST:'))return clsOfSt(v.slice(3));return[v];}
 function fltLabel(v){return v==='NAT'?`National · all ${ST_ORDER.length} states`:v==='ALL'?`All ${CF_NAME} classifications`:v.startsWith('ST:')?`All ${stName(v.slice(3))} classifications`:clsName(v);}

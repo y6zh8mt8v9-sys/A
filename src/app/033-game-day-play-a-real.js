@@ -2,7 +2,6 @@
 // Ratings are mapped around the matchup's average so talent gaps show up clearly on the field
 // (a 10-point OVR gap is about 11 engine points on every attribute, including speed).
 let _gdAnchor=55;
-function _gdE(v){return Math.max(30,Math.min(99,Math.round(66+((+v||50)-_gdAnchor)*1.1)));}
 function _gdTop(s){if(s&&s.lite)return(s.str||55)+4;const ps=(s.fp?s.roster:(G&&s.id===G.myId?myP():sPlayers(s.id))).filter(p=>!(p.inj>0)).sort((a,b)=>b.rat-a.rat).slice(0,22);return ps.length?ps.reduce((a,p)=>a+p.rat,0)/ps.length:50;}
 function _gdLum(c){const h=String(c||'#777').replace('#','');const f=h.length===3?h.split('').map(x=>x+x).join(''):h;const n=parseInt(f,16);return((n>>16&255)*.299+(n>>8&255)*.587+(n&255)*.114)/255;}
 function _gdDark(c,t){const h=String(c||'#333').replace('#','');const f=h.length===3?h.split('').map(x=>x+x).join(''):h;const n=parseInt(f,16);const k=1-(t||.35);return'#'+[n>>16&255,n>>8&255,n&255].map(v=>Math.round(v*k).toString(16).padStart(2,'0')).join('');}
@@ -205,7 +204,6 @@ function gdFail(msg){
   openMo(`<div style="text-align:center;padding:8px"><div style="font-weight:900;font-size:18px;margin-bottom:8px">Game Day could not start</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">${String(msg).replace(/</g,'&lt;')}</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" onclick="clo();if(window._gdRetryCtx&&window.__GP){_gdCtx=window._gdRetryCtx;gdLaunchFrame();}">Try again</button><button class="btn bgn" onclick="clo();window._gdSim&&window._gdSim()">Simulate this game instead</button></div><div style="font-size:11px;color:var(--mu);margin-top:10px">Tip: close other tabs, or set Settings → Graphics to Fast on older laptops and Chromebooks.</div></div>`);
 }
 window.gdSaveFile=function(name,data){_fileSave(name,data);};
-function gdSimRest(){const f=document.getElementById('gd-if');try{f.contentWindow.gpSimRest();}catch(e){notify('Could not simulate: '+e.message,'e');}}
 function gdConv(st){const o={passYds:0,passTD:0,passInt:0,rushYds:0,rushTD:0,recYds:0,recTD:0,tackles:0,sacks:0,ints:0};const m={passAtt:'passAtt',passCmp:'passCmp',passYds:'passYds',passTD:'passTD',passInt:'passInt',rushAtt:'rushAtt',rushYds:'rushYds',rushTD:'rushTD',rec:'rec',recYds:'recYds',recTD:'recTD',tackles:'tackles',sacks:'sacks',ints:'ints',fga:'fga',fgm:'fgm',xpa:'xpa',xpm:'xpm',krRet:'krRet',krYds:'krYds',krTD:'krTD',drops:'drops',pbu:'pbu',tgtA:'tgtA',ydsA:'ydsA',pancakes:'pancakes',sacksA:'sacksA',tfl:'tfl',yac:'yac',safeties:'safeties',prRet:'prRet',prYds:'prYds',prTD:'prTD',cmpA:'cmpA'};for(const k in st)if(m[k])o[m[k]]=st[k];return o;}
 window.gdFinish=function(res){
   try{res=JSON.parse(JSON.stringify(res));}catch(e){}   // a copy that does not keep the game frame alive

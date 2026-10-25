@@ -57,39 +57,6 @@ function lsLoad(key){
   }catch(e){return null;}
 }
 
-function saveGameLegacy(){
-  // Step 1: always try to download the file, no size limit, most reliable
-  let downloadOk=false;
-  try{
-    const json=saveJson();
-    const blob=new Blob([json],{type:'application/json'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`gridiron_${2026+(G.yr-1)}_s${G.yr}.json`;
-    a.style.display='none';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    downloadOk=true;
-    // Step 2: also try browser save (chunked) as a quick-resume backup
-    try{
-      lsSave(LS_KEY,json);
-    }catch(lsErr){
-      // Browser save failed (private browsing or storage full), file download already worked, so just continue
-      console.warn('Browser save skipped:',lsErr);
-    }
-    notify('Game saved! Check your Downloads folder.');
-  }catch(e){
-    // File download failed (rare, e.g. some mobile browsers)
-    // Fall back to browser-only chunked save
-    try{
-      const json=saveJson();
-      lsSave(LS_KEY,json);
-      notify('Saved to browser (no file). Export a backup soon!','w');
-    }catch(e2){
-      notify('Save failed! Try a different browser.','e');
-      console.error('Save error:',e2);
-    }
-  }
-}
 
 /* saves can come from other players (shared saves, leagues, files), and their text ends up in the page. Every string is made
    safe: allowed formatting tags in the log stay, anything else that could become markup or break out of an attribute goes,

@@ -191,7 +191,6 @@ function gameWx(home,dateIdx,awayId){
 }
 const WX_NAMES={clear:'Clear',cloudy:'Overcast',rain:'Rain',storm:'Thunderstorms',snow:'Snow',fog:'Fog'};
 function wxName(w){if(!w)return'';if(w.k==='rain'&&w.i>0.65)return'Heavy rain';if(w.k==='snow'&&w.i>0.65)return'Heavy snow';if(w.k==='clear'&&w.w>=18)return'Windy';if(w.k==='clear'&&w.t>=90)return'Hot and humid';if(w.k==='clear'&&w.t<=32)return'Bitter cold';return WX_NAMES[w.k]||'Clear';}
-function wxDirArrow(d){return['↓','↙','←','↖','↑','↗','→','↘'][Math.round(((d%360)+360)%360/45)%8];}
 function wxLine(w){if(!w)return'';return`${wxName(w)} · ${w.t}°F · wind ${w.w} mph`;}
 // what it changes on the field, in plain words
 function wxEffects(w){if(!w)return'';const o=[];
@@ -214,7 +213,6 @@ function wxIcon(w,sz){sz=sz||18;if(!w)return'';const k=w.k==='clear'&&w.w>=18?'w
     fog:'<g stroke="#b9c3cf" stroke-width="2" stroke-linecap="round"><path d="M4 9h16M3 13h18M5 17h14"/></g>',
     wind:'<g fill="none" stroke="#9cc7e8" stroke-width="2" stroke-linecap="round"><path d="M3 9h11a3 3 0 1 0-3-3M3 14h15a3 3 0 1 1-3 3M3 19h8"/></g>'}[k]||sun;
   return`<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" style="vertical-align:middle;flex-shrink:0" aria-hidden="true">${body}</svg>`;}
-function wxChip(w){if(!w)return'';return`<span class="wx-chip" title="${wxEffects(w)}">${wxIcon(w,16)}<span>${wxName(w)} · ${w.t}°F · ${w.w} mph</span></span>`;}
 // how much the weather pulls a simulated game around: fewer points, fewer passing yards, more upsets
 function wxSimF(w){
   if(!w)return{sc:1,pass:1,upset:1};

@@ -732,30 +732,30 @@ html.and *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important
 html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
 .slg input[type=range]{width:100%;min-width:0;box-sizing:border-box;margin:0;padding-left:0;padding-right:0}
 
-/* ════════ Gridiron 27 design: Painted field ════════
-   The game seen from the sideline: turf, chalk lines and hash marks, goalpost yellow for the numbers that matter,
-   and the team's own colors for everything you press. Sections sit on painted yard lines instead of boxed cards;
-   corners are clipped like a jersey number plate. Every older visual layer is overridden here, so this file is
-   the one place to change the look. Sentence case everywhere. */
+/* ════════ Gridiron 27 design: Red and black ════════
+   Black surfaces, white text, red for the numbers and buttons that matter, and the team's own colors for
+   everything you press. Sections sit on painted yard lines instead of boxed cards; corners are clipped like a
+   jersey number plate. Every older visual layer is overridden here, so this file is the one place to change
+   the look. Sentence case everywhere. */
 :root{
-  --pitch:#0b1f16;--sod:#12301f;--sod2:#183c28;--yard:#24503a;--line:rgba(225,240,228,.10);--line2:rgba(225,240,228,.22);
-  --chalk:#f1f5ef;--mute:#a7bcae;--post:#f2c230;--go:#46d17f;--flag:#ff7a5c;--board:#081710;
-  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#21482f;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
+  --pitch:#0a0a0b;--sod:#141416;--sod2:#1c1c20;--yard:#2a2a30;--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.22);
+  --chalk:#f4f4f5;--mute:#a1a1aa;--post:#ef2d38;--go:#46d17f;--flag:#ff7a5c;--board:#050506;
+  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#26262b;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
   --gn:var(--go);--gd:var(--post);--rd:var(--flag);--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);--te:var(--tT,#9fc0f2);
   --hd:'Alumni Sans','Arial Narrow',sans-serif;--head:var(--hd);
   --font:'Archivo','Segoe UI',system-ui,sans-serif;--rad:4px;--cut:14px;--shadow:none;--glass:none;
-  --pop:0 28px 80px rgba(0,8,4,.6);
+  --pop:0 28px 80px rgba(0,0,0,.6);
   /* mowing stripes, the field under everything */
   --mow:repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 120px,transparent 120px 240px);
   /* a painted yard line with hash marks under it */
   --yardline:linear-gradient(var(--line2),var(--line2)) top/100% 2px no-repeat,repeating-linear-gradient(90deg,var(--line2) 0 2px,transparent 2px 22px) 0 6px/100% 6px no-repeat;
 }
 :root.light{
-  --pitch:#f2f5ef;--sod:#ffffff;--sod2:#eaf0e8;--yard:#cfdccf;--line:rgba(15,36,26,.12);--line2:rgba(15,36,26,.24);
-  --chalk:#0f241a;--mute:#4f6658;--post:#8a6400;--go:#167a45;--flag:#b8341b;--board:#0f241a;
-  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#dde7dc;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:#167a45;--gd:#8a6400;--rd:#b8341b;--te:var(--tT,#1f56b0);--pop:0 24px 60px rgba(15,36,26,.2);--pot:#8a6400;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
-  --mow:repeating-linear-gradient(90deg,rgba(15,36,26,.022) 0 120px,transparent 120px 240px);
+  --pitch:#f4f4f5;--sod:#ffffff;--sod2:#ececef;--yard:#d4d4d8;--line:rgba(17,17,19,.12);--line2:rgba(17,17,19,.24);
+  --chalk:#111113;--mute:#5b5b63;--post:#c8101e;--go:#167a45;--flag:#b8341b;--board:#111113;
+  --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#e4e4e7;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
+  --gn:#167a45;--gd:#c8101e;--rd:#b8341b;--te:var(--tT,#1f56b0);--pop:0 24px 60px rgba(17,17,19,.2);--pot:#c8101e;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
+  --mow:repeating-linear-gradient(90deg,rgba(17,17,19,.022) 0 120px,transparent 120px 240px);
 }
 :root.light .yf{color:#167a45}:root.light .ys{color:#1f63b0}
 /* type: no all caps, no tracking (logos are SVG and keep their own lettering) */
@@ -781,8 +781,8 @@ html body .dr{border-bottom:1px solid var(--bd)}html body .dr .a{color:var(--mu)
 html body .btn{background:var(--ac)!important;background-image:none!important;color:var(--tOn,#fff)!important;border:0!important;border-bottom:3px solid rgba(0,0,0,.28)!important;
   border-radius:var(--rad)!important;box-shadow:none!important;text-shadow:none!important;font:650 14px/1.15 var(--font)!important;padding:10px 16px;cursor:pointer;transition:filter .12s,transform .06s}
 html body .btn:hover{filter:brightness(1.1)}html body .btn:active,html body .bgh:active{transform:translateY(1px)}
-html body .btn.bgn{background:#1f8a4c!important;color:#fff!important}
-html body .btn.bgd{background:var(--post)!important;color:#1a1400!important}:root.light body .btn.bgd{background:#e8b52b!important;color:#1a1400!important}
+html body .btn.bgn{background:#f4f4f5!important;color:#111113!important}
+html body .btn.bgd{background:var(--post)!important;color:#ffffff!important}:root.light body .btn.bgd{background:#c8101e!important;color:#ffffff!important}
 html body .btn.bbl{background:var(--s3)!important;color:var(--tx)!important}
 html body .bgh{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:var(--rad)!important;box-shadow:none!important;font:600 13px/1.15 var(--font)!important;cursor:pointer}
 html body .bgh:hover{background:var(--s2)!important;border-color:var(--mu)!important}
@@ -814,9 +814,9 @@ html body .rb{border-radius:3px!important;font:700 12px/1.3 var(--font)!importan
 
 /* numbers that matter: painted in goalpost yellow */
 html body .dash-stat-v,html body .dt-big,html body .nav-record,html body .dt-chips b{font-family:var(--hd)!important;font-weight:900!important;color:var(--post)!important;-webkit-text-fill-color:currentColor;background:none!important}
-html body .dt-chips span{background:var(--board)!important;color:#cfe0d4!important;border-radius:var(--rad)!important;padding:6px 10px!important;font-size:13px!important}
+html body .dt-chips span{background:var(--board)!important;color:#d4d4d8!important;border-radius:var(--rad)!important;padding:6px 10px!important;font-size:13px!important}
 html body .dt-chips b{font-size:24px!important;color:var(--post)!important;margin-left:2px}
-:root.light body .dt-chips span{background:#0f241a!important;color:#d5e3d8!important}:root.light body .dt-chips b{color:#f2c230!important}
+:root.light body .dt-chips span{background:#111113!important;color:#d4d4d8!important}:root.light body .dt-chips b{color:#ef2d38!important}
 
 /* top of the app */
 html body #tb,html body #nav-bar,html body #nav-prim{background:var(--s1)!important;border-color:var(--bd)!important;box-shadow:none!important;backdrop-filter:none!important}
@@ -834,8 +834,8 @@ html body .dt-crest{background:var(--bg)!important;box-shadow:none!important;bor
 html body .dt-tools button{background:transparent!important;border:1px solid var(--line2)!important;color:var(--tx)!important;border-radius:var(--rad)!important;font:600 13px/1 var(--font)!important}
 html body .dt-tools button:hover{background:var(--s2)!important}
 html body .dt-club .dt-go button,html body .dt-club .dt-go button.btn,html body .dt-club .dt-go button.btn.bgd,html body .dt-club .dt-go button.btn.bgn{
-  background:var(--post)!important;color:#1a1400!important;font:700 17px/1 var(--font)!important;border-radius:var(--rad)!important;border-bottom:4px solid rgba(0,0,0,.3)!important;padding:14px 22px!important;box-shadow:none!important;animation:none!important}
-html body .dt-strip{background:var(--board)!important;color:#dceade!important;border-radius:0 0 var(--rad) var(--rad)!important;margin:0 10px 16px!important}
+  background:var(--post)!important;color:#ffffff!important;font:700 17px/1 var(--font)!important;border-radius:var(--rad)!important;border-bottom:4px solid rgba(0,0,0,.3)!important;padding:14px 22px!important;box-shadow:none!important;animation:none!important}
+html body .dt-strip{background:var(--board)!important;color:#e4e4e7!important;border-radius:0 0 var(--rad) var(--rad)!important;margin:0 10px 16px!important}
 html body .dt-strip b{font:700 16px/1.2 var(--font)!important}
 html body .dt-pill{background:rgba(255,255,255,.08)!important;border-radius:var(--rad)!important;font-family:var(--hd)!important;font-size:18px!important;font-weight:800!important}
 :root.light body .dt-pill{background:rgba(255,255,255,.12)!important}
@@ -860,7 +860,7 @@ html body.cnav:not(.cnav-dash) #nav-bar .nb.on{background:none!important;color:v
 html body.cnav:not(.cnav-dash) #nav-bar .nb.nb-home{color:var(--tx)!important}
 
 /* dialogs and popups: a plate with the clipped corner and the team color along the top */
-html body #mo,html body #pu,html body #confirm-menu,html body #settings-modal{background:rgba(2,10,6,.74)!important}
+html body #mo,html body #pu,html body #confirm-menu,html body #settings-modal{background:rgba(0,0,0,.74)!important}
 html body #mb,html body #pui,html body #tut-box,html body .offer-popup-box,html body #settings-modal>div{background:var(--s1)!important;color:var(--tx);border:0!important;border-top:5px solid var(--ac)!important;
   border-radius:0!important;box-shadow:var(--pop)!important;clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
 html body #mo.open #mb,html body #pu.open #pui{animation:g27in .16s ease-out}
@@ -872,8 +872,8 @@ html body .tut-pane h3{font:800 28px/1 var(--hd)!important;color:var(--tx)!impor
 html body #nf{background:var(--s2)!important;color:var(--tx)!important;border:0!important;border-left:4px solid var(--post)!important;border-radius:var(--rad)!important;box-shadow:var(--pop)!important;font:600 14px/1.35 var(--font)!important}
 
 /* title screen: the field at night, painted yard numbers */
-html body #title{background:linear-gradient(180deg,rgba(11,31,22,0) 40%,var(--pitch) 92%),repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(241,245,239,.07) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
-:root.light body #title{background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(15,36,26,.08) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
+html body #title{background:linear-gradient(180deg,rgba(12,12,14,0) 40%,var(--pitch) 92%),repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(255,255,255,.07) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
+:root.light body #title{background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),rgba(17,17,19,.08) calc(10% - 2px) 10%),var(--mow),var(--pitch)!important}
 html body #title .tt-name{font:900 clamp(64px,15vw,136px)/.82 var(--hd)!important;color:var(--chalk)!important}
 html body #title .tt-name .a{color:var(--chalk)!important;-webkit-text-fill-color:var(--chalk)!important;background:none!important}
 /* "27" is painted like a field number: goalpost yellow with a dark offset under it */
@@ -883,7 +883,7 @@ html body #title .tt-ver{color:var(--mute)!important;opacity:.85;text-shadow:non
 html body #title .tt-btns{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;gap:8px!important}
 html body #title .tt-btn{background:var(--sod)!important;border:0!important;border-left:4px solid var(--yard)!important;border-radius:0!important;box-shadow:none!important;color:var(--chalk)!important;font:650 17px/1.15 var(--font)!important;text-align:left!important;padding:15px 18px!important;text-shadow:none!important}
 html body #title .tt-btn:hover{background:var(--sod2)!important;border-left-color:var(--post)!important}
-html body #title .tt-btn.pri{background:var(--post)!important;color:#1a1400!important;border-left-color:#1a1400!important}
+html body #title .tt-btn.pri{background:var(--post)!important;color:#ffffff!important;border-left-color:#ffffff!important}
 html body #title .tt-btn small{display:block;font:400 13px/1.3 var(--font)!important;color:inherit!important;opacity:.75}
 html body #title .tt-legal button{color:var(--mute)!important;text-shadow:none!important}
 html body .tt-panel,html body .tt-list>*{background:var(--sod)!important;border-color:var(--line)!important;border-radius:var(--rad)!important;box-shadow:none!important;color:var(--chalk)}
@@ -982,7 +982,7 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 .vs-b{flex-direction:row-reverse;text-align:right;padding:8px 8px 8px 18px;clip-path:polygon(12px 0,100% 0,100% 100%,0 100%)}
 .vs-h div{min-width:0}.vs-h b{display:block;font:800 19px/1 var(--hd);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vs-h small{display:block;font-size:11px;opacity:.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vs-x{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;font:900 13px/1 var(--hd);text-transform:uppercase;background:#081710;color:#f2c230;padding:4px 6px}
+.vs-x{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;font:900 13px/1 var(--hd);text-transform:uppercase;background:#050506;color:#ef2d38;padding:4px 6px}
 /* Free Practice and Online Play screens */
 html body #fp,html body #ol{background:var(--mow),var(--bg)}
 #fp .fp-head h2,#ol .fp-head h2{font:900 28px/1 var(--hd)}
@@ -1423,7 +1423,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'d3f9650061'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'4a4baabb81'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -1509,10 +1509,6 @@ function setTheme(mode){
     if(mode==='light'){sdb.className='bgh';sdb.style.background='';slb.className='btn';slb.style.background='var(--ac)';}
     else{sdb.className='btn';sdb.style.background='var(--ac)';slb.className='bgh';slb.style.background='';}
   }
-}
-function toggleTheme(){
-  const isLight=document.documentElement.classList.contains('light');
-  setTheme(isLight?'dark':'light');
 }
 
 // v2.15 controllers (standard gamepad mapping): d-pad or left stick moves between buttons, A presses, B goes back
@@ -3004,10 +3000,6 @@ function _lgf(c2,big){
    :`<filter id="${id}" x="-25%" y="-25%" width="150%" height="150%"><feMorphology in="SourceAlpha" operator="dilate" radius="3" result="d1"/><feFlood flood-color="${c2}"/><feComposite in2="d1" operator="in" result="r1"/><feMerge><feMergeNode in="r1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
   d.firstChild.insertAdjacentHTML('beforeend',f);_LGF[id]=1;return id;
 }
-function _lgG(c){
-  const id='lgg'+c.replace('#','');if(_LGF[id])return id;_lgf('#000000',false);
-  const d=document.getElementById('lg-defs');d.firstChild.insertAdjacentHTML('beforeend',`<linearGradient id="${id}" x1="0" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="${_mx(c,'#ffffff',.3)}"/><stop offset=".48" stop-color="${c}"/><stop offset="1" stop-color="${_mx(c,'#000000',.32)}"/></linearGradient>`);_LGF[id]=1;return id;
-}
 function _lgm(b){
   try{let m=document.getElementById('lg-m');
    if(!m){let d=document.getElementById('lg-defs');if(!d){_lgf('#000000',false);d=document.getElementById('lg-defs');}
@@ -3578,8 +3570,6 @@ function _vgInk(m,tf,sc,fill,band,bw,ow,sh){const k=2/sc,j='stroke-linejoin="rou
     +(ow?`<g fill="${_LGINK}" stroke="${_LGINK}" stroke-width="${o}" ${j}>${m}</g>`:'')
     +(bw?`<g fill="${band}" stroke="${band}" stroke-width="${(bw*k).toFixed(2)}" ${j}>${m}</g>`:'')+`<g fill="${fill}">${m}</g></g>`;}
 // a word centered on cx with its baseline at base, cap height h, never wider than maxW
-function _vgWord(T,t,cx,base,h,maxW,fill,band,bw,ow,sh){const r=_vgRun(T,t);let sc=h/100;if(r.w*sc>maxW)sc=maxW/r.w;
-  return _vgInk(r.o,`translate(${(cx-r.w*sc/2).toFixed(2)} ${base}) scale(${sc.toFixed(4)})`,sc,fill,band,bw,ow,sh);}
 // text on a circle around (cx,cy): top reads along the outside of the arc, bottom along the inside
 function _vgArc(T,t,cx,cy,R,h,maxDeg,top,fill,band,bw,ow){
   let sc=h/100;const adv=[...t].map(c=>((T[c]||T[' '])||[30])[0]+9),tot=adv.reduce((a,b)=>a+b,0)-9;
@@ -5047,40 +5037,6 @@ function regSched(){return G.sched.filter(g=>g.type==='regular'&&!g._empty);}
 function allRegDone(){return regSched().length>0&&regSched().every(g=>g.result);}
 
 // ═══════════ SIMULATION ═══════════
-function calcTeamScore(myOvr,oppOvr,offS,defS,iWin,prestige){
-  const offBonus={'Air Raid':8,'Spread':5,'Wing-T':-3,'Option':2,'I-Formation':1,'Pro Style':0}[offS]||0;
-  const ovrDiff=myOvr-oppOvr; // positive = I'm better, negative = I'm weaker
-
-  // Scoring base driven heavily by OVR gap.
-  // Each OVR point advantage = ~1.1 pts. At +20 gap dominant team scores ~22 pts more.
-  // At even OVR base is ~24 pts before variance.
-  const gapScore=ovrDiff*1.1;
-
-  // Variance shrinks as the gap grows (blowouts are more predictable)
-  const absGap=Math.abs(ovrDiff);
-  const varRange=clamp(16-absGap*0.30,3,16);
-  const variance=rngF(-varRange,varRange);
-
-  const base=clamp(24+gapScore+offBonus+variance,0,84);
-
-  // Convert to football scores
-  if(base<4)return 0;
-  if(base<7)return Math.random()<0.5?3:0;
-
-  const tds=Math.max(0,Math.round((base*0.82)/7));
-  const fgs=rng(0,clamp(Math.round((base-tds*7)/4),0,3));
-  let pts=tds*7+fgs*3;
-
-  // High-OVR shootout: both elite teams can go back and forth for big scores
-  const bothElite=(myOvr>72&&oppOvr>72);
-  if(bothElite&&Math.random()<0.30)pts+=rng(7,14);
-
-  // Blowout extension for dominant teams
-  if(pts>=56&&Math.random()<0.20)pts+=7;
-  if(pts>=63&&Math.random()<0.10)pts+=7;
-
-  return clamp(pts,0,84);
-}
 
 function teamEffEdge(sId){try{
   const pl=(sId===G.myId?myP():sPlayers(sId)).filter(p=>!(p.inj>0));if(!pl.length)return 0;
@@ -5609,7 +5565,6 @@ function ticketSet(k){if(!TICKET[k])return;G.ticket=k;nav(G._page||'staff',G._ar
 // Pick seven players for offense and seven for defense, pay the entry fee and play the best programs of your class.
 // Quarterfinal and semifinal are single games, the league title is a best-of-five series. Standouts get college looks.
 const S7_FEE=5000;
-function s7Avail(){return G&&G.phase==='postseason'&&!(G.s7&&G.s7.yr===G.yr&&G.s7.done);}
 function s7Str(sid,picks){const L=(picks?G.players.filter(p=>picks.includes(p.id)):(sid===G.myId?myP():sPlayers(sid))).filter(p=>!(p.inj>0));
   const top=(pos,n)=>L.filter(p=>p.pos===pos).sort((a,b)=>b.rat-a.rat).slice(0,n).map(p=>p.rat);
   const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:40,qb=top('QB',1),rec=[...top('WR',3),...top('TE',1),...top('RB',1)],def=[...top('LB',2),...top('CB',3),...top('S',2)];
@@ -5998,19 +5953,6 @@ function calcSSBase(p,st){
 
 // ═══════════ PLAYER AWARDS ═══════════
 // Award score = 70% normalised season stats + 20% rating + 10% dev trait
-function calcAwardScore(p){
-  const DEV_SCORE={'Elite Dev':100,'Star':75,'Impact':50,'Normal':25};
-  const devScore=(DEV_SCORE[p.dev]||25)/100; // 0-1
-  // Normalise rating 0-1
-  const ratScore=p.rat/99;
-  // Normalised stat score, reuse calcSS but cap at 120 then scale 0-1
-  const ss=clamp(calcSS(p),0,120)/120;
-  // OL and K are purely rating-based and less comparable to skill positions; exclude from award pool
-  if(p.pos==='OL'||p.pos==='K')return 0;
-  // Must have played at least 3 games to be eligible
-  if((p.seasStats?.gp||0)<3)return 0;
-  return ss*0.70 + ratScore*0.20 + devScore*0.10;
-}
 
 // ═══════════ STARS, COLLEGE OFFERS AND CAMPS (v1.88 rework) ═══════════
 // Stars come from overall rating + development trait (+ a projection bonus for underclassmen), with only a small
@@ -6189,8 +6131,6 @@ function colClsSize(c,r){const q=COL_CLS_RNG[c.lvl]||[18,26],pr=COL_PR_RNG[c.lvl
 // v2.11: only some of each class comes straight from high school. About 15-20% of seniors play college football;
 // the rest of a 30-85 man class is transfers, junior-college players and walk-ons from outside the game.
 const COL_HS_Q={FBS:[14,26],FCS:[2,6],D2:[2,7],D3:[2,7],NAIA:[2,7],JUCO:[5,12]},COL_PR_RNG={FBS:[56,99],FCS:[30,55],D2:[18,38],D3:[5,24],NAIA:[12,29],JUCO:[3,20]};
-function colHsQuota(c,cy){const q=COL_HS_Q[c.lvl]||[3,6],pr=COL_PR_RNG[c.lvl]||[0,100],r=_colRand((c._k||c.school+'|'+c.lvl)+'#hs'+cy)();
-  const pn=clamp((c.pr-pr[0])/Math.max(1,pr[1]-pr[0]),0,1);return Math.round(q[0]+(q[1]-q[0])*(0.55*r+0.45*pn));}
 function colHsLeft(o){let n=0;for(const k in o.com)n+=o.com[k]||0;return Math.max(0,(o.hs||0)-n);}
 function colOffTot(o){let n=0;for(const k in o.off)n+=o.off[k]||0;return n;}
 function colRoom(c,p,forOffer){if(!c||!p)return true;const o=colCls(c,colClassYr(p)),n=o.need[p.pos]||1,cm=o.com[p.pos]||0;if(colHsLeft(o)<=0)return false;return forOffer?(cm<n&&(o.off[p.pos]||0)<Math.min(n*3,o.hs*2)&&colOffTot(o)<o.hs*4):cm<n;}
@@ -6365,12 +6305,6 @@ function checkCommit(p){
 function campCap(){return Math.max(1,Math.round(G.prestige||1));}
 function campsUsed(p){return p.campYr===G.yr?(p.campN||0):0;}
 const CAMP_KIND=['Elite Camp','Prospect Camp','Showcase','Mega Camp','Skills Camp'];
-function campMake(target){
-  const CC=COLLEGES.filter(c=>c.lvl!=='JUCO');const host=CC.slice().sort((a,b)=>Math.abs(a.pr-target)-Math.abs(b.pr-target))[Math.floor(Math.random()*4)];
-  const near=CC.filter(c=>c!==host&&Math.abs(c.pr-host.pr)<=16).sort(()=>Math.random()-0.5).slice(0,3+Math.floor(Math.random()*4));
-  const kind=host.lvl==='FBS'&&host.pr>=85?(Math.random()<0.5?'Elite Camp':'Mega Camp'):CAMP_KIND[Math.floor(Math.random()*CAMP_KIND.length)];
-  return{host:host.school,lvl:host.lvl,pr:host.pr,name:`${host.school} ${kind}`,schools:[host,...near].map(c=>({school:c.school,lvl:c.lvl,pr:c.pr})).sort((a,b)=>b.pr-a.pr)};
-}
 // ── v1.95 camp circuit: about 50 camps a year across the college ladder, each inviting 10-30 prospects.
 // Invites go to players who produce per touch (yards per carry / catch, completion %, coverage, line play),
 // do it week after week, and have the frame for their position; stars and rating help, but film matters most.
@@ -8400,7 +8334,7 @@ function dtChips(r){return`<div class="dt-chips"><span>OFF: <b>${r[0]}</b></span
 function dtTile(title,go,body,cls){return`<div class="dt${cls?' '+cls:''}" role="button" tabindex="0" onclick="${go}"><div class="dt-h"><span>${title}</span><svg viewBox="0 0 24 24"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></div><div class="dt-b">${body}</div></div>`;}
 window.dtMenu=function(){openMo(`<h2>Menu</h2>${cnavHub(true)}<div style="text-align:right"><button class="bgh" onclick="clo()">Close</button></div>`);};
 // two teams side by side in their own colors, meeting at a slanted seam
-function vsStrip(a,b,subA,subB){const h=(s,sub,i)=>{const c=_hx(s.c1)?s.c1:'#33415c';return`<div class="vs-h${i?' vs-b':''}" style="background:${c};color:${_lm(c)>.55?'#0f241a':'#fff'}">${sLogo(s,44)}<div><b>${s.mascot}</b><small>${sub}</small></div></div>`;};
+function vsStrip(a,b,subA,subB){const h=(s,sub,i)=>{const c=_hx(s.c1)?s.c1:'#33415c';return`<div class="vs-h${i?' vs-b':''}" style="background:${c};color:${_lm(c)>.55?'#111113':'#fff'}">${sLogo(s,44)}<div><b>${s.mascot}</b><small>${sub}</small></div></div>`;};
   return`<div class="vs">${h(a,subA,0)}<span class="vs-x">vs</span>${h(b,subB,1)}</div>`;}
 function dashTiles(o){
   const{ms,pl,nextUnplayed,no,playoffSlot,playoffOpp,actionBtn,curYear,phaseLabel,newsItems}=o,T=cnavTodo(),dot=k=>T[k]?'<i class="dt-dot"></i>':'';
@@ -9351,15 +9285,6 @@ function pgSched(){
 
 // Cross-classification view state
 let _viewCls=null; // null = current game cls; set to '1A'-'5A' to view others
-function allSchoolsCls(cls){
-  if(!cls||cls===G.cls)return allSchools();
-  // Build a flat list of all schools across divisions for a given classification
-  return G.divisions.filter(div=>div.teams.some(t=>t.cls===cls||!t.cls)).flatMap(d=>d.teams);
-}
-function allDivisionsCls(cls){
-  if(!cls||cls===G.cls)return G.divisions;
-  return G.divisions;
-}
 // filter values: a class code, 'ALL' (all of Crestfield), 'ST:WK' / 'ST:TA' (a whole neighbor state), 'NAT' (all three states), 'INTL'
 function fltClasses(v){if(v==='NAT')return[...CLS_ORDER,...XCLS_ORDER];if(!v||v==='ALL')return CLS_ORDER.slice();if(v.startsWith('ST:'))return clsOfSt(v.slice(3));return[v];}
 function fltLabel(v){return v==='NAT'?`National · all ${ST_ORDER.length} states`:v==='ALL'?`All ${CF_NAME} classifications`:v.startsWith('ST:')?`All ${stName(v.slice(3))} classifications`:clsName(v);}
@@ -10301,7 +10226,6 @@ function aiMoney(m){return m>=100?'$'+Math.round(m)+' million':m>=10?'$'+m.toFix
 function aiTier(a){if(a.lvl==='NAIA')return'D3';if(a.lvl!=='FBS')return a.lvl;return AI_P4[a.school]?'P4':'G5';}
 function aiConfName(a){return AI_P4[a.school]&&AI_P4[a.school]!=='Independent'?AI_P4[a.school]:'conference';}
 function aiQ(ovr,b,s){return aiCl((ovr-b)/s,0,1);}
-function aiSide(pos){return AI_OFF.includes(pos)?'Offensive':'Defensive';}
 function aiList(name){try{const v={D1FBS:typeof D1FBS!=='undefined'?D1FBS:null,D1FCS:typeof D1FCS!=='undefined'?D1FCS:null,D2:typeof D2!=='undefined'?D2:null,D3:typeof D3!=='undefined'?D3:null,JUCO:typeof JUCO!=='undefined'?JUCO:null}[name];return v&&v.length?v:null;}catch(e){return null;}}
 function aiSchool(r,tier,avoid){
   let L;if(tier==='P4')L=Object.keys(AI_P4);else if(tier==='G5')L=(aiList('D1FBS')||['Llano State','Sonora State','Canyon State']).filter(s=>!AI_P4[s]);else if(tier==='FCS')L=aiList('D1FCS')||['Silsbee State'];else if(tier==='D2')L=aiList('D2')||['Osage State'];else if(tier==='D3')L=aiList('D3')||['Middletown College'];else L=aiList('JUCO')||['Jim Hogg County CC'];
@@ -10919,10 +10843,10 @@ function rkBadge(id){
   const flip=e=>{e.stopPropagation();e.preventDefault();const ms=b.dataset.ms.split('');rkMode(b,ms[(ms.indexOf(b.dataset.m)+1)%ms.length]);};
   b.addEventListener('click',flip);b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')flip(e);});
   return b;}
-function rkTag(id){const b=rkBadge(id);return b?b.outerHTML:'';}
 let _rkNames=null;
+// rebuilt once per task, so a team renamed anywhere (its page, Team Builder, Customize) keeps its rank badge
 function rkNames(){
-  if(_rkNames&&_rkNames.G===G)return _rkNames;const full={},nm={},dup={};
+  if(_rkNames&&_rkNames.G===G)return _rkNames;const full={},nm={},dup={};setTimeout(()=>{_rkNames=null;},0);
   for(const s of allSchoolsAll()){full[`${s.name} ${s.mascot}`]=s.id;if(nm[s.name]!==undefined)dup[s.name]=1;nm[s.name]=s.id;}
   for(const d in dup)delete nm[d];_rkNames={G,full,nm};return _rkNames;
 }
@@ -11244,12 +11168,6 @@ function lgScore(oa,ob,aWins,r){
   return aWins?[21,17,false]:[17,21,false];
 }
 function lgDivs(){const seen=new Set(),out=[];const add=d=>{if(d&&!seen.has(d)){seen.add(d);out.push(d);}};(G.divisions||[]).forEach(add);if(G.allLeagues)Object.values(G.allLeagues).forEach(l=>(l.divisions||[]).forEach(add));return out;}
-function lgPairs(teams,wk){
-  const arr=teams.slice().sort((x,y)=>x.id-y.id);if(arr.length<2)return[];if(arr.length%2)arr.push(null);
-  const n=arr.length,rr=((wk-1)%(n-1)+(n-1))%(n-1),rest=arr.slice(1),rot=rest.slice(rr).concat(rest.slice(0,rr)),full=[arr[0]].concat(rot),out=[];
-  for(let i=0;i<n/2;i++)out.push([full[i],full[n-1-i]]);return out;
-}
-function lgMyOppAt(wk){const g=(G.sched||[]).find(x=>x.wk===wk&&x.type==='regular');return g?g.oppId:null;}
 function lgLog(s,e){if(!s.gl||s.gl.yr!==G.yr)s.gl={yr:G.yr,g:[]};s.gl.g=s.gl.g.filter(x=>!(x.wk===e.wk&&!x.po&&!e.po));s.gl.g.push(e);}
 function lgPlay(s,score,win,oppId){
   let pl=sPlayers(s.id).filter(p=>p.inj===0);if(s.lite&&pl.length&&!(window._gdOppStats&&window._gdOppStats.sid===s.id))pl=pl.concat(litePH(s));
@@ -11303,7 +11221,6 @@ function lgTeamSchedHtml(s){
 // Ratings are mapped around the matchup's average so talent gaps show up clearly on the field
 // (a 10-point OVR gap is about 11 engine points on every attribute, including speed).
 let _gdAnchor=55;
-function _gdE(v){return Math.max(30,Math.min(99,Math.round(66+((+v||50)-_gdAnchor)*1.1)));}
 function _gdTop(s){if(s&&s.lite)return(s.str||55)+4;const ps=(s.fp?s.roster:(G&&s.id===G.myId?myP():sPlayers(s.id))).filter(p=>!(p.inj>0)).sort((a,b)=>b.rat-a.rat).slice(0,22);return ps.length?ps.reduce((a,p)=>a+p.rat,0)/ps.length:50;}
 function _gdLum(c){const h=String(c||'#777').replace('#','');const f=h.length===3?h.split('').map(x=>x+x).join(''):h;const n=parseInt(f,16);return((n>>16&255)*.299+(n>>8&255)*.587+(n&255)*.114)/255;}
 function _gdDark(c,t){const h=String(c||'#333').replace('#','');const f=h.length===3?h.split('').map(x=>x+x).join(''):h;const n=parseInt(f,16);const k=1-(t||.35);return'#'+[n>>16&255,n>>8&255,n&255].map(v=>Math.round(v*k).toString(16).padStart(2,'0')).join('');}
@@ -11457,7 +11374,7 @@ function gdLaunch(){
   // v2.16: a career game saves first, so a crash or reload during or right after the game never costs more than that game
   // the frame is only built once that save is written, so the save and the game never use memory at the same time
   let sv=null;try{if(_gdCtx&&!['prac','free','online'].includes(_gdCtx.kind)&&typeof G!=='undefined'&&G&&G.myId&&gdsMain().autosave!==false)sv=_svBusy&&_svP?_svP.then(()=>saveGame(true)):saveGame(true);}catch(e){}  // a running autosave is waited for, then this one is written
-  if(sv&&sv.then){const ld=document.getElementById('loading-screen');try{if(ld){document.getElementById('loading-label').textContent='Saving before kickoff…';ld.classList.add('active');}}catch(e){}
+  if(sv&&sv.then){let ld=null;try{ld=loadingHold('Saving before kickoff…',typeof G!=='undefined'&&G&&G.myId?myS():null);}catch(e){}
     let done=false;const go=()=>{if(done)return;done=true;try{if(ld)ld.classList.remove('active');}catch(e){}gdLaunchFrame();};sv.then(go,go);setTimeout(go,10000);return;}
   gdLaunchFrame();
 }
@@ -11506,7 +11423,6 @@ function gdFail(msg){
   openMo(`<div style="text-align:center;padding:8px"><div style="font-weight:900;font-size:18px;margin-bottom:8px">Game Day could not start</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">${String(msg).replace(/</g,'&lt;')}</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" onclick="clo();if(window._gdRetryCtx&&window.__GP){_gdCtx=window._gdRetryCtx;gdLaunchFrame();}">Try again</button><button class="btn bgn" onclick="clo();window._gdSim&&window._gdSim()">Simulate this game instead</button></div><div style="font-size:11px;color:var(--mu);margin-top:10px">Tip: close other tabs, or set Settings → Graphics to Fast on older laptops and Chromebooks.</div></div>`);
 }
 window.gdSaveFile=function(name,data){_fileSave(name,data);};
-function gdSimRest(){const f=document.getElementById('gd-if');try{f.contentWindow.gpSimRest();}catch(e){notify('Could not simulate: '+e.message,'e');}}
 function gdConv(st){const o={passYds:0,passTD:0,passInt:0,rushYds:0,rushTD:0,recYds:0,recTD:0,tackles:0,sacks:0,ints:0};const m={passAtt:'passAtt',passCmp:'passCmp',passYds:'passYds',passTD:'passTD',passInt:'passInt',rushAtt:'rushAtt',rushYds:'rushYds',rushTD:'rushTD',rec:'rec',recYds:'recYds',recTD:'recTD',tackles:'tackles',sacks:'sacks',ints:'ints',fga:'fga',fgm:'fgm',xpa:'xpa',xpm:'xpm',krRet:'krRet',krYds:'krYds',krTD:'krTD',drops:'drops',pbu:'pbu',tgtA:'tgtA',ydsA:'ydsA',pancakes:'pancakes',sacksA:'sacksA',tfl:'tfl',yac:'yac',safeties:'safeties',prRet:'prRet',prYds:'prYds',prTD:'prTD',cmpA:'cmpA'};for(const k in st)if(m[k])o[m[k]]=st[k];return o;}
 window.gdFinish=function(res){
   try{res=JSON.parse(JSON.stringify(res));}catch(e){}   // a copy that does not keep the game frame alive
@@ -11567,7 +11483,7 @@ function gdBoxHtml(res,me,opp){
     ${sec(t,'Kicking',x=>x.fga||x.xpa,x=>[x.fgm||0,`FG ${x.fgm||0}/${x.fga||0} · XP ${x.xpm||0}/${x.xpa||0}`])}</div>`;
   const xpL=(res.xp||[]).filter(r=>r.xp>0).sort((a,b)=>b.xp-a.xp).slice(0,8);
   const xpH=xpL.length?`<div class="bx-h">XP earned (10 XP = 1 skill point)</div><div class="bx-xp">${xpL.map(r=>`<span>${r.p.fn[0]}. ${r.p.ln} <b style="color:var(--te)">+${r.xp}</b>${r.sp?` <b style="color:var(--gn)">+${r.sp} SP</b>`:''}</span>`).join('')}</div>`:'';
-  const fin=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',w=res.score[i]>res.score[1-i];return`<div class="bx-f${i?' bx-f2':''}${w?' won':''}" style="background:${c};color:${_lm(c)>.55?'#0f241a':'#fff'}">${sLogo(s,40)}<span class="bx-fn">${s.mascot}</span><span class="bx-fs">${res.score[i]}</span></div>`;};
+  const fin=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',w=res.score[i]>res.score[1-i];return`<div class="bx-f${i?' bx-f2':''}${w?' won':''}" style="background:${c};color:${_lm(c)>.55?'#111113':'#fff'}">${sLogo(s,40)}<span class="bx-fn">${s.mascot}</span><span class="bx-fs">${res.score[i]}</span></div>`;};
   return`<div class="bx"><div class="bx-top"><span>Final</span>Box score</div><div class="bx-fin">${fin(me,0)}${fin(opp,1)}</div><div class="bx-note">These stats were added to every player's season and career totals.</div>
     <div class="bx-cols">${col(0,me)}${col(1,opp)}</div>${splitsHtml(res.splits&&res.splits[0],'This game: your play calls')}${xpH}<div style="text-align:right;margin-top:12px"><button class="btn" onclick="clo()">Done</button></div></div>`;
 }
@@ -11765,7 +11681,6 @@ function gameWx(home,dateIdx,awayId){
 }
 const WX_NAMES={clear:'Clear',cloudy:'Overcast',rain:'Rain',storm:'Thunderstorms',snow:'Snow',fog:'Fog'};
 function wxName(w){if(!w)return'';if(w.k==='rain'&&w.i>0.65)return'Heavy rain';if(w.k==='snow'&&w.i>0.65)return'Heavy snow';if(w.k==='clear'&&w.w>=18)return'Windy';if(w.k==='clear'&&w.t>=90)return'Hot and humid';if(w.k==='clear'&&w.t<=32)return'Bitter cold';return WX_NAMES[w.k]||'Clear';}
-function wxDirArrow(d){return['↓','↙','←','↖','↑','↗','→','↘'][Math.round(((d%360)+360)%360/45)%8];}
 function wxLine(w){if(!w)return'';return`${wxName(w)} · ${w.t}°F · wind ${w.w} mph`;}
 // what it changes on the field, in plain words
 function wxEffects(w){if(!w)return'';const o=[];
@@ -11788,7 +11703,6 @@ function wxIcon(w,sz){sz=sz||18;if(!w)return'';const k=w.k==='clear'&&w.w>=18?'w
     fog:'<g stroke="#b9c3cf" stroke-width="2" stroke-linecap="round"><path d="M4 9h16M3 13h18M5 17h14"/></g>',
     wind:'<g fill="none" stroke="#9cc7e8" stroke-width="2" stroke-linecap="round"><path d="M3 9h11a3 3 0 1 0-3-3M3 14h15a3 3 0 1 1-3 3M3 19h8"/></g>'}[k]||sun;
   return`<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" style="vertical-align:middle;flex-shrink:0" aria-hidden="true">${body}</svg>`;}
-function wxChip(w){if(!w)return'';return`<span class="wx-chip" title="${wxEffects(w)}">${wxIcon(w,16)}<span>${wxName(w)} · ${w.t}°F · ${w.w} mph</span></span>`;}
 // how much the weather pulls a simulated game around: fewer points, fewer passing yards, more upsets
 function wxSimF(w){
   if(!w)return{sc:1,pass:1,upset:1};
@@ -11944,12 +11858,12 @@ function gdPreviewHtml(me,opp,homeIdx){
   const logo=s=>{const L=sLogoStandalone(s,64);return L;};
   // broadcast matchup strip: each half in its team's color, meeting at a slanted seam
   const rkTxt=i=>rk[i].n&&rk[i].n<=25?` · #${rk[i].n} national`:rk[i].a&&rk[i].a<=25?` · #${rk[i].a} ${stName(stOf(T[i]))}`:rk[i].c&&rk[i].c<=25?` · #${rk[i].c} in class`:'';
-  const col=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',ink=_lm(c)>.55?'#0f241a':'#ffffff';
+  const col=(s,i)=>{const c=_hx(s.c1)?s.c1:'#33415c',ink=_lm(c)>.55?'#111113':'#ffffff';
     return`<div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;${i?'flex-direction:row-reverse;text-align:right;':''}padding:12px ${i?'14px 12px 22px':'22px 12px 14px'};background:${c};color:${ink};clip-path:${i?'polygon(16px 0,100% 0,100% 100%,0 100%)':'polygon(0 0,100% 0,calc(100% - 16px) 100%,0 100%)'}">${logo(s)}<div style="min-width:0"><div style="font:900 clamp(20px,4.6vw,28px)/.92 'Alumni Sans','Arial Narrow',sans-serif">${s.name.replace(/\s+High.*$/,'')} ${s.mascot}</div><div style="font-size:12px;opacity:.9;margin-top:3px">${rec(s)}${rkTxt(i)}</div></div></div>`;};
   const row=(l,a,b)=>`<tr><td style="text-align:right;padding:3px 8px;font-weight:800">${a}</td><td style="text-align:center;opacity:.7;font-size:11px;padding:3px 8px">${l}</td><td style="text-align:left;padding:3px 8px;font-weight:800">${b}</td></tr>`;
-  const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:4px;border-left:3px solid rgba(242,194,48,.7);background:rgba(255,255,255,.06);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
+  const star=(p,s)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:4px;border-left:3px solid rgba(225,29,42,.7);background:rgba(255,255,255,.06);margin-top:6px">${face(p.fs!=null?p.fs:p.id,46)}<div style="text-align:left;min-width:0"><div style="font-weight:800;font-size:13px">#${p.num} ${p.fn} ${p.ln}</div><div style="font-size:11px;opacity:.8">${p.pos} · ${s.mascot} · ${_gdStatLine(p)}</div></div></div>`;
   const stars=T.map(s=>_gdStars(s).map(p=>star(p,s)).join(''));
-  return`<div style="font-family:Archivo,'Segoe UI',system-ui,sans-serif;color:#f1f5ef">
+  return`<div style="font-family:Archivo,'Segoe UI',system-ui,sans-serif;color:#f4f4f5">
     <div style="display:flex;align-items:stretch;gap:0;margin:-2px -4px 12px">${col(me,0)}${col(opp,1)}</div>
     <table style="margin:0 auto 10px;border-collapse:collapse;font-size:13px">${row('Record',rec(me),rec(opp))}${row('Last 3',form(logs[0]),form(logs[1]))}${row('Points for / game',ppg(logs[0],'us'),ppg(logs[1],'us'))}${row('Points against / game',ppg(logs[0],'them'),ppg(logs[1],'them'))}${row('Team rating',ovr(me),ovr(opp))}</table>
     <div style="font:800 19px/1 'Alumni Sans','Arial Narrow',sans-serif;margin-bottom:4px">Keys to the game</div>
@@ -12204,7 +12118,6 @@ function myClsOrder(){return clsOfSt(clsSt(G.cls));}
 function makeDivsAny(c){return XCLS[c]?makeStateDivisions(c):makeDivisions(c);}
 function clsSz(c){return XCLS[c]?{r:XCLS[c].r,t:XCLS[c].t,d:XCLS[c].d}:CLS_SZ[c]||CLS_SZ['3A'];}
 function isUSSchool(s){const st=stOf(s);return st==='CF'||!!XST[st];}
-function schoolsOfSt(st){return allSchoolsAll().filter(s=>stOf(s)===st);}
 const XDIV_NAMES={
   WK:['Big River Conference','Corn Belt Conference','Tallgrass Conference','North Star Conference','Iron Range Conference','Prairie Lakes Conference',
       'Heartland Conference','Bluestem Conference','Twin Rivers Conference','Lakeshore Conference','Cedar Valley Conference',
@@ -12810,7 +12723,6 @@ function pbSVG(P,opt){
   s+=`<circle cx="${PBX(CX).toFixed(1)}" cy="${PBY(-qbD).toFixed(1)}" r="${ed?2.5:2.2}" fill="#fff" stroke="#0d2a43" stroke-width=".7"/>${ed?`<text x="${PBX(CX).toFixed(1)}" y="${(PBY(-qbD)+1.2).toFixed(1)}" font-size="2.6" font-weight="900" text-anchor="middle" fill="#0d2a43" font-family="Archivo,sans-serif">QB</text>`:''}</svg>`;
   return s;
 }
-function pbDiagram(f,r,w){return pbSVG({kind:'pass',f,r},{w});}
 function pbThumb(p,w){return pbSVG(p.kind==='run'?{kind:'run',f:p.f,pos:p.pos,path:p.path,carrier:p.carrier,keep:p.keep,lead:p.lead,toss:p.toss,mo:p.mo}:{kind:'pass',f:p.f,r:p.r,pos:p.pos,mo:p.mo},{w});}
 // ── designer state ──
 window._pbD=null;window._pbB=null;
@@ -15361,39 +15273,6 @@ function lsLoad(key){
   }catch(e){return null;}
 }
 
-function saveGameLegacy(){
-  // Step 1: always try to download the file, no size limit, most reliable
-  let downloadOk=false;
-  try{
-    const json=saveJson();
-    const blob=new Blob([json],{type:'application/json'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`gridiron_${2026+(G.yr-1)}_s${G.yr}.json`;
-    a.style.display='none';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    downloadOk=true;
-    // Step 2: also try browser save (chunked) as a quick-resume backup
-    try{
-      lsSave(LS_KEY,json);
-    }catch(lsErr){
-      // Browser save failed (private browsing or storage full), file download already worked, so just continue
-      console.warn('Browser save skipped:',lsErr);
-    }
-    notify('Game saved! Check your Downloads folder.');
-  }catch(e){
-    // File download failed (rare, e.g. some mobile browsers)
-    // Fall back to browser-only chunked save
-    try{
-      const json=saveJson();
-      lsSave(LS_KEY,json);
-      notify('Saved to browser (no file). Export a backup soon!','w');
-    }catch(e2){
-      notify('Save failed! Try a different browser.','e');
-      console.error('Save error:',e2);
-    }
-  }
-}
 
 /* saves can come from other players (shared saves, leagues, files), and their text ends up in the page. Every string is made
    safe: allowed formatting tags in the log stay, anything else that could become markup or break out of an attribute goes,
@@ -15501,11 +15380,6 @@ function loadGame(){
 
 
 // ═══════════ DIVISION EDITOR ═══════════
-function openDivEditor(){
-  const el=document.getElementById('div-editor');
-  el.style.display='flex';
-  renderDivEditorList();
-}
 function closeDivEditor(){
   // Flush any edited names back into _setupDivs
   const inputs=document.querySelectorAll('.div-name-input');
@@ -16197,28 +16071,6 @@ function tbApplyImport(pack){
 }
 
 // Global import entry point (called from setup screen button)
-function importTeamPack(){
-  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
-  inp.onchange=function(e){
-    const file=e.target.files[0];if(!file)return;
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      try{
-        const pack=JSON.parse(ev.target.result);
-        // If team builder is open use it, otherwise apply directly
-        if(document.getElementById('team-builder').style.display==='flex'){
-          tbApplyImport(pack);
-        }else{
-          tbApplyImport(pack);
-          // Brief confirmation notification to setup screen
-          const total=_setupDivs?_setupDivs.reduce((s,d)=>s+d.teams.length,0):0;
-          const note=document.getElementById('nf');
-          if(note){note.textContent=`Team pack imported! ${total} teams loaded.`;note.className='show';setTimeout(()=>note.classList.remove('show'),3200);}
-        }
-      }catch(err){alert('Invalid team pack file: '+err.message);}
-    };reader.readAsText(file);
-  };inp.click();
-}
 
 // ═══════════ COUNTY MAP SYSTEM ═══════════
 // 60 fictional counties in a grid-like arrangement across the state of Crestfield
@@ -16252,39 +16104,6 @@ function pointInPoly(px, py, poly) {
 }
 
 // Clip a polygon to the state boundary using Sutherland-Hodgman
-function clipPolyToState(subjectPoly, clipPoly) {
-  if (!subjectPoly.length) return [];
-  let output = [...subjectPoly];
-  for (let i = 0; i < clipPoly.length; i++) {
-    if (!output.length) return [];
-    const input = output;
-    output = [];
-    const edgeA = clipPoly[i];
-    const edgeB = clipPoly[(i + 1) % clipPoly.length];
-    const inside = (p) => {
-      return (edgeB[0] - edgeA[0]) * (p[1] - edgeA[1]) - (edgeB[1] - edgeA[1]) * (p[0] - edgeA[0]) >= 0;
-    };
-    const intersect = (a, b) => {
-      const dx1 = b[0] - a[0], dy1 = b[1] - a[1];
-      const dx2 = edgeB[0] - edgeA[0], dy2 = edgeB[1] - edgeA[1];
-      const denom = dx1 * dy2 - dy1 * dx2;
-      if (Math.abs(denom) < 1e-10) return a;
-      const t = ((edgeA[0] - a[0]) * dy2 - (edgeA[1] - a[1]) * dx2) / denom;
-      return [a[0] + t * dx1, a[1] + t * dy1];
-    };
-    for (let j = 0; j < input.length; j++) {
-      const cur = input[j];
-      const prev = input[(j + input.length - 1) % input.length];
-      if (inside(cur)) {
-        if (!inside(prev)) output.push(intersect(prev, cur));
-        output.push(cur);
-      } else if (inside(prev)) {
-        output.push(intersect(prev, cur));
-      }
-    }
-  }
-  return output;
-}
 
 const _STATE_POLY = parseStatePath(STATE_PATH);
 
@@ -16315,49 +16134,6 @@ function genSeedPoints(n, statePoly) {
 
 // Build Voronoi regions clipped to state using a simple rasterized approach
 // For each seed, compute its clipped polygon region
-function buildVoronoiCounties(seeds, statePoly, viewW, viewH) {
-  // For each seed, we'll define its Voronoi cell by building a bounding polygon
-  // from the perpendicular bisectors with all other seeds, then clip to state.
-  // Simplified: use a large bounding box polygon, intersect half-planes for each neighbor.
-  const BIG = 1200;
-  const regions = seeds.map((seed, i) => {
-    // Start with a big rectangle
-    let poly = [[-BIG, -BIG], [BIG, -BIG], [BIG, BIG], [-BIG, BIG]];
-    // Clip against half-plane for each other seed
-    for (let j = 0; j < seeds.length; j++) {
-      if (i === j || !poly.length) continue;
-      const ox = seeds[j][0], oy = seeds[j][1];
-      const mx = (seed[0] + ox) / 2, my = (seed[1] + oy) / 2;
-      const dx = ox - seed[0], dy = oy - seed[1];
-      // Keep points on seed's side: dot(p - mid, d) <= 0
-      const newPoly = [];
-      for (let k = 0; k < poly.length; k++) {
-        const cur = poly[k];
-        const prev = poly[(k + poly.length - 1) % poly.length];
-        const dCur = (cur[0] - mx) * dx + (cur[1] - my) * dy;
-        const dPrev = (prev[0] - mx) * dx + (prev[1] - my) * dy;
-        if (dCur <= 0) {
-          if (dPrev > 0) {
-            // intersection
-            const t = dPrev / (dPrev - dCur);
-            newPoly.push([prev[0] + t * (cur[0] - prev[0]), prev[1] + t * (cur[1] - prev[1])]);
-          }
-          newPoly.push(cur);
-        } else if (dPrev <= 0) {
-          const t = dPrev / (dPrev - dCur);
-          newPoly.push([prev[0] + t * (cur[0] - prev[0]), prev[1] + t * (cur[1] - prev[1])]);
-        }
-      }
-      poly = newPoly;
-    }
-    // Clip to state boundary
-    poly = clipPolyToState(poly, statePoly);
-    const cx = poly.length ? poly.reduce((s, p) => s + p[0], 0) / poly.length : seed[0];
-    const cy = poly.length ? poly.reduce((s, p) => s + p[1], 0) / poly.length : seed[1];
-    return { pts: poly, cx, cy };
-  });
-  return regions;
-}
 
 
 function _gridSeeds(n,poly){
@@ -16646,13 +16422,6 @@ function usaNorm(cfg){const X=usaWorld(cfg&&cfg.custom),all=Object.keys(X.st);le
   if(cfg&&cfg.v===1){o.v=1;if(Array.isArray(cfg.detail))o.detail=[h,...cfg.detail.filter(a=>a!==h&&s.includes(a))].slice(0,USA_DETAIL_MAX);return o;} // a career saved before light states: every chosen state keeps full detail at the scaled size
   o.v=2;o.detail=cfg&&Array.isArray(cfg.detail)?usaDetailFix(cfg.detail,h,s,X):usaAutoDetail(s,h,X);return o;}
 // class labels in each state's style, smallest class first
-function usaLbls(style,n){const R=['I','II','III','IV','V','VI','VII','VIII'];
-  if(style==='Div')return Array.from({length:n},(_,i)=>'Division '+R[n-1-i]);
-  if(style==='CBA'){const L=['Class D','Class C','Class B','Class A','Class AA','Class AAA'];return L.slice(Math.max(0,L.length-n-(n<=4?1:0)),Math.max(0,L.length-n-(n<=4?1:0))+n);}
-  if(style==='A')return Array.from({length:n},(_,i)=>'Class '+'A'.repeat(i+1));
-  if(style==='Cls')return Array.from({length:n},(_,i)=>'Class '+(i+1));
-  if(style==='Grp')return Array.from({length:n},(_,i)=>'Group '+(i+1));
-  return Array.from({length:n},(_,i)=>(i+1)+'A');}
 function usaTeams(ab,X,sc){const w=X||USA.X,m=w&&w.st[ab]?w.st[ab].meta:USST[ab];return m?Math.max(16,Math.round(m[0]*(sc||USA_SCALE))):16;}
 function usaTeamsReal(ab,sc){return Math.max(16,Math.round(USST[ab][0]*(sc||USA_SCALE)));}
 // a state's classification list (custom states use the one of the state most of their people came from)
@@ -17175,16 +16944,6 @@ const _MAPRIV={r1:"M120,90 L122.9,93.1 L126.8,94.7 L129.5,97.9 L132.0,101.1 L132
 const _MAPGULF="M522,262 L523.1,265.1 L520.9,267.6 L518.7,269.6 L515.8,270.4 L513.1,269.8 L510.4,269.4 L508.0,270.9 L505.6,272.2 L503.6,274.6 L500.6,273.8 L500.7,276.8 L498.2,278.6 L496.9,280.9 L496.6,283.5 L494.8,285.7 L492,286 L491.2,283.7 L488.8,283.8 L486.7,283.4 L485.1,284.9 L484.4,287.2 L482.4,288.4 L481.0,285.9 L478.4,286.8 L478.4,284.7 L476.7,283.5 L475.5,281.7 L476.3,279.7 L474.6,278.3 L474.2,276.1 L472.1,277.0 L470,276 L471.6,278.0 L473.5,279.9 L473.1,282.6 L471.4,284.7 L470.8,287.1 L470.1,289.4 L467.7,290.1 L465.9,291.6 L463.1,291.6 L462.4,294.3 L460.1,295.7 L460.4,298.3 L458.4,296.3 L455.7,296.7 L453.7,298.1 L452,300 L453.2,302.3 L455.8,301.8 L455.6,304.1 L457.1,305.8 L457.7,307.6 L458.6,309.4 L460.3,310.5 L461.6,312.0 L461.9,315.0 L459.1,316.2 L461.4,317.9 L461.2,320.6 L463.5,321.1 L465.4,322.4 L467.0,323.9 L468,326 L466.5,328.2 L467.0,330.9 L465.4,333.3 L462.5,333.2 L460.1,332.5 L457.8,331.6 L456.0,333.5 L453.5,334.2 L451.2,335.1 L448.9,334.2 L448.2,337.0 L445.3,337.1 L446.5,339.8 L444.7,342.2 L442.4,343.2 L440,344 L437.2,343.8 L434.5,344.7 L433.7,341.5 L430.5,341.0 L428.1,339.7 L425.5,339.7 L423.6,342.2 L420.5,341.4 L418.1,343.2 L415.1,343.5 L415.9,346.6 L413.9,349.2 L411.2,350.1 L408.5,349.1 L405.3,349.0 L404,352 L403.8,354.6 L404.1,357.2 L401.7,358.3 L400.0,360.4 L397.8,361.0 L395.5,361.4 L393.1,361.3 L390.8,361.7 L388.5,362.6 L388.0,364.9 L386.5,366.8 L384.1,366.7 L383.7,368.9 L382.2,370.5 L380.1,371.6 L380,374 L377.2,374.4 L376.2,377.1 L374.0,375.8 L371.4,376.4 L370.1,374.0 L367.5,373.4 L364.7,372.3 L362.7,374.5 L360.4,375.0 L358.2,375.8 L355.5,375.8 L354.0,373.7 L351.5,375.4 L349.2,373.5 L348.1,371.3 L346,370 L344.2,371.4 L342.9,373.3 L342.0,375.4 L340.1,376.7 L337.9,375.7 L335.4,375.5 L333.9,377.8 L331.2,377.8 L329.1,378.8 L326.7,378.4 L325.1,380.0 L323.8,381.8 L321.3,382.7 L321.3,385.3 L319.4,386.4 L318,388 L315.4,389.8 L314.2,392.7 L312.5,395.3 L309.8,396.9 L306.9,398.0 L304.2,399.5 L301.9,401.6 L300,404 L298.3,406.7 L299.2,409.8 L298.0,412.7 L294.9,413.7 L294.3,416.8 L291.5,418.4 L288.4,417.9 L286,420 L560,420 L560,244 L558.1,246.5 L554.9,247.0 L552.4,248.8 L551.3,251.7 L549.1,253.9 L545.9,254.0 L543.0,253.7 L540,254 L537.6,255.2 L535.0,254.7 L533.4,256.9 L530.9,257.8 L528.8,259.0 L526.4,259.8 L524.1,260.6Z";
 const _MAPLAKE="M318,0 L318.9,3.0 L320.7,5.5 L322.0,8.4 L324.2,10.6 L327.2,11.4 L329.9,13.0 L333.2,12.0 L336,14 L340.0,13.4 L343.5,11.2 L347.0,13.0 L350.8,14.2 L352.6,17.7 L355.9,19.7 L358.7,22.3 L362,24 L365.2,25.4 L368.5,26.4 L371.8,28.1 L372.8,31.8 L375.8,30.1 L379.2,29.5 L382.6,30.3 L386,30 L388.4,30.3 L390.0,32.2 L391.7,33.7 L393.4,35.3 L395.9,34.1 L398.7,33.6 L400.4,35.7 L402,38 L404.2,37.2 L406.5,37.7 L409.0,38.3 L411.0,36.8 L413.5,36.6 L415.9,35.5 L417.6,37.4 L419.7,39.0 L422.5,39.2 L424.5,37.4 L427.2,37.9 L429.0,39.8 L431.8,39.7 L433.2,42.1 L435.5,43.4 L436,46 L438.6,45.2 L441.3,45.8 L442.6,48.5 L445.6,48.9 L446.7,51.3 L448.8,53.0 L451.2,54.0 L453.7,54.9 L454.9,57.5 L457.4,59.0 L460.1,58.1 L462.9,58.9 L465.0,60.7 L467.7,61.2 L469.7,63.2 L470,66 L471.8,67.2 L473.9,67.6 L475.5,69.0 L476.7,70.7 L478.9,72.0 L478.8,74.5 L478.1,76.6 L478.3,78.8 L478.9,81.4 L481.3,82.2 L479.5,84.1 L480.1,86.6 L482.1,87.6 L482.7,89.7 L483.9,91.5 L486,92 L487.4,93.9 L489.2,95.5 L487.0,97.2 L487.4,99.9 L489.4,100.8 L490.6,102.8 L492.7,102.3 L494.8,103.0 L497.5,102.8 L498.6,105.2 L500.9,104.8 L502.4,103.0 L504.1,104.0 L505.8,104.7 L508.2,105.6 L508,108 L511.4,107.2 L514.9,107.0 L517.1,104.1 L520.5,102.8 L523.9,101.6 L527.3,102.9 L530.8,102.5 L534,104 L536.7,101.8 L540.2,101.0 L543.7,101.3 L546.8,99.5 L549.2,96.5 L553.0,96.1 L556.5,94.8 L560,96 L560,0Z";
 function _cpts(pts){return 'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L')+'Z';}
-function _mapBoundary(){
-  const cnt={},ed=[],S=v=>Math.round(v*20)/20;
-  COUNTIES.forEach(c=>{const q=c.pts.map(p=>[S(p[0]),S(p[1])]);for(let i=0;i<q.length;i++){const a=q[i],b=q[(i+1)%q.length],k=(a[0]<b[0]||(a[0]===b[0]&&a[1]<b[1]))?a+'|'+b:b+'|'+a;cnt[k]=(cnt[k]||0)+1;ed.push([a,b,k]);}});
-  return ed.filter(e=>cnt[e[2]]===1).map(e=>`M${e[0][0]},${e[0][1]}L${e[1][0]},${e[1][1]}`).join('');
-}
-function _landColor(c){
-  const t=Math.max(0,Math.min(1,(c.cx-150)/300)),n=Math.sin(c.cx*.071+c.cy*.053)*.5+.5;
-  const A=[201,182,138],B=[118,160,92],m=Math.max(0,Math.min(1,t*.85+n*.25-.05));
-  return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*m).toString(16).padStart(2,'0')).join('');
-}
 // (v2.07: renderCountyMap lives with the country map above)
 window.onCountyHover=function(e,id){
   const county=MAPC[id];if(!county)return;
@@ -17607,19 +17366,21 @@ function initCountyMap(){
 
 
 // ═══════════ LOADING SCREEN ═══════════
+// the team on the loading screen is always drawn from the team as it is now, so an edited name, logo or colors show
+function loadingIdentity(team,label){
+  const logoW=document.getElementById('loading-logo-wrap'),nameEl=document.getElementById('loading-team-name'),subEl=document.getElementById('loading-team-sub');
+  if(logoW)logoW.innerHTML=team?sLogo(team,110):'';
+  if(nameEl)nameEl.textContent=team?`${team.name} ${team.mascot}`:'';
+  if(subEl)subEl.textContent=team?[team.city,team.cls?clsL(team.cls):'',team.conf].filter(Boolean).join(' · '):'';
+  const lb=document.getElementById('loading-label');if(lb)lb.textContent=label||'Loading…';
+}
+// the loading screen without a progress bar run, for waits like a save before kickoff
+function loadingHold(label,team){const ld=document.getElementById('loading-screen');if(!ld)return null;loadingIdentity(team,label);ld.classList.add('active');return ld;}
 function showLoading(label,team,steps,cb){
   const scr=document.getElementById('loading-screen');
-  const logoW=document.getElementById('loading-logo-wrap');
-  const nameEl=document.getElementById('loading-team-name');
-  const subEl=document.getElementById('loading-team-sub');
-  const lblEl=document.getElementById('loading-label');
   const fill=document.getElementById('loading-bar-fill');
   const pctEl=document.getElementById('loading-pct');
-  // Set team identity
-  logoW.innerHTML=team?sLogo(team,110):'';
-  nameEl.textContent=team?`${team.name} ${team.mascot}`:'';
-  subEl.textContent=team?`${team.city||''} · ${team.cls?clsL(team.cls):''} · ${team.conf||''}`:'';
-  lblEl.textContent=label||'Loading…';
+  loadingIdentity(team,label);
   fill.style.width='0%';
   fill.style.transition='none';
   pctEl.textContent='0%';
@@ -18221,7 +17982,9 @@ function ccDealOpen(){const C=G.cc,offs=C.dealOffer||[];
    ${offs.map((o,i)=>`<button class="bgh" style="display:flex;justify-content:space-between;width:100%;text-align:left;margin-bottom:6px;padding:10px 12px" onclick="ccDeal(${i})"><span><b>${o.d[0]}</b><br><small style="color:var(--mu)">${o.d[1]}</small></span><span style="text-align:right"><b>${ccMoney(o.cash)}</b>${o.sp?`<br><small style="color:var(--gd)">+${o.sp} skill points</small>`:''}${o.xp?`<br><small style="color:var(--gd)">+${o.xp} XP</small>`:''}</span></button>`).join('')}`);}
 window.ccDeal=function(i){const C=G.cc,o=(C.dealOffer||[])[i];if(!o)return;C.nil.cash+=o.cash;C.nil.deals.push({y:ccYear(),n:o.d[0],cash:o.cash});if(o.sp)C.p.pcSP=(C.p.pcSP||0)+o.sp;if(o.xp)try{pcGainXP(C.p,o.xp);}catch(e){}
   C.dealOffer=null;C.os=3;clo();notify(`Signed with ${o.d[0]}`);ccSave();nav('dash');};
-function ccSummer(){const C=G.cc;const ld=document.getElementById('loading-screen');try{if(ld){document.getElementById('loading-label').textContent='The high school season plays out and the new recruits arrive…';ld.classList.add('active');}}catch(e){}
+// the player's current team for the loading screen: his college in college, his high school before that
+function ccLoadTeam(){const C=G.cc;return C&&C.k&&C.stage==='college'?colTeamObj(C.k):myS();}
+function ccSummer(){const C=G.cc;let ld=null;try{ld=loadingHold('The high school season plays out and the new recruits arrive…',ccLoadTeam());}catch(e){}
   setTimeout(()=>{try{ccHsYear();}catch(e){console.error('high school year',e);}try{if(ld)ld.classList.remove('active');}catch(e){}
     if(ccEligLeft()<=0){ccDraftRun();return;}ccBegin();ccSave();nav('dash');notify(`${ccYear()} season: the new signing classes are on campus`);},60);}
 // the high school world plays its year in the background so the colleges get their next signing classes
@@ -18254,7 +18017,7 @@ function ccProStart(res,hl){const C=G.cc,p=C.p;C.stage=res?'pro':'done';ccSave()
     Object.assign(a,{stage:'pro',lvl:C.lvl,school:ccName(C.k),dy:ccYear()+1,team:res.team,pick:res.pick,rd:res.rd,und:res.und,lg:res.lg,py:0,cYrs:res.pick?4:res.lg==='NGL'?3:2,aav:res.pick?aiRookieDeal(res.pick)/4:res.lg==='NGL'?.9:.08,optn:res.rd===1,ovr:clamp(Math.round(p.rat-4+gaussR()*2),35,99),last:G.yr});
     a.entries=[{y:ccYear()+1,age:18+(G.yr-a.gy),st:'pro',hl,tx:[hl+'.'],stl:'',aw:[],tg:['Draft'],nw:true,ovr:a.ovr,team:res.team}];g.alumni[C.pid]=a;}catch(e){console.error('pro start',e);}}
 function ccProNext(){const C=G.cc;if(C.stage==='done'){openMo(`<div style="text-align:center;padding:8px"><h2>Career complete</h2><div style="font-size:13px;color:var(--mu);margin-bottom:12px">${C.p.fn} ${C.p.ln}'s football story is written. You can keep the save and go back to the high school.</div><button class="btn" onclick="clo();ccBackToHs()">Back to the high school</button></div>`);return;}
-  const ld=document.getElementById('loading-screen');try{if(ld){document.getElementById('loading-label').textContent='A year goes by…';ld.classList.add('active');}}catch(e){}
+  let ld=null;try{ld=loadingHold('A year goes by…',ccLoadTeam());}catch(e){}
   setTimeout(()=>{try{ccHsYear();}catch(e){console.error(e);}try{const g=aiG(),a=g.alumni[C.pid],src=(G.hofArchive||[]).find(x=>x.id===C.pid)||C.p;if(a&&!a.done&&a.last<G.yr)aiAdvance(a,src,G.yr,true);const e=a&&a.entries[a.entries.length-1];if(a&&a.done)C.stage='done';
       if(e)openMo(`<div style="padding:6px"><h2>${e.y}</h2><div style="font-weight:800;margin-bottom:6px">${e.hl||''}</div>${(e.tx||[]).map(t=>`<div style="font-size:13px;margin-bottom:4px">${t}</div>`).join('')}<div style="text-align:right;margin-top:10px"><button class="btn" onclick="clo()">Continue</button></div></div>`);}catch(e){console.error(e);}
     try{if(ld)ld.classList.remove('active');}catch(e){}ccSave();nav('dash');},60);}
@@ -18598,6 +18361,8 @@ const TUT_PAGES=[
   `},
   {tab:'New this update',icon:'',title:'A new look, faster menus and lots of new football',body:`
     <ul>
+      <li><strong>Red and black</strong>: the whole game, menus and Game Day, now wears red and black.</li>
+      <li><strong>Team edits</strong>: a team's new name and logo show everywhere, loading screens included.</li>
       <li><strong>Catches</strong>: one-handed, diving and contested grabs now land about half the time, like real football. Routine catches stay sure.</li>
       <li><strong>Other teams' jerseys</strong>: open any school and tap Edit to change its uniforms.</li>
       <li><strong>New look</strong>: every screen, popup and Game Day panel was redrawn in turf greens, chalk text and goalpost gold. Matchups show both teams in their colors.</li>
@@ -19395,18 +19160,18 @@ html.g27l .mw-k{fill:#4a535d}
 html.g27l .mw-c{fill:rgba(255,255,255,.85);stroke:rgba(0,0,0,.1)}
 /* Painted field design (matches the main app): turf plates, chalk text, goalpost yellow for focus and numbers, the team color
    for the main action, clipped plate corners, sentence case */
-html.g27{--ink:#f1f5ef;--ink2:#a7bcae;--cs:rgba(11,31,22,.95);--cs2:#183c28;--cb:rgba(225,240,228,.14);--post:#f2c230;--cut:12px;
+html.g27{--ink:#f4f4f5;--ink2:#a1a1aa;--cs:rgba(12,12,14,.95);--cs2:#1c1c20;--cb:rgba(255,255,255,.14);--post:#ef2d38;--cut:12px;
   --hd:'Alumni Sans','Arial Narrow',sans-serif;--bf:'Archivo','Segoe UI',system-ui,sans-serif}
-html.g27.g27l{--ink:#0f241a;--ink2:#4f6658;--cs:rgba(255,255,255,.97);--cs2:#eaf0e8;--cb:rgba(15,36,26,.14);--post:#8a6400}
+html.g27.g27l{--ink:#111113;--ink2:#5b5b63;--cs:rgba(255,255,255,.97);--cs2:#ececef;--cb:rgba(17,17,19,.14);--post:#c8101e}
 html.g27 body,html.g27 .btn,html.g27 .tab,html.g27 .pcard,html.g27 .pseg button,html.g27 button[data-k],html.g27 button[data-x],html.g27 #hint,html.g27 #toast,html.g27 #flash{font-family:var(--bf)}
 html.g27 *:not(svg):not(svg *){text-transform:none!important;letter-spacing:normal!important}
-html.g27 .glass{background:var(--cs);border:1px solid var(--cb);box-shadow:0 10px 30px rgba(0,8,4,.45)}
+html.g27 .glass{background:var(--cs);border:1px solid var(--cb);box-shadow:0 10px 30px rgba(0,0,0,.45)}
 html.g27 .panel,html.g27 .pm{border-radius:0;border-top:5px solid var(--tA);clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
 html.g27 .ph h3,html.g27 .pm h2,html.g27 #simTitle,html.g27 .secth{font-family:var(--hd);font-weight:800;font-size:1.25em;line-height:1}
 html.g27 .btn{font:650 max(13px,calc(var(--s)*7.2px))/1.15 var(--bf);border-radius:4px;background:var(--cs2);color:var(--ink);border:1px solid var(--cb);border-bottom:3px solid rgba(0,0,0,.3);box-shadow:0 4px 12px rgba(0,0,0,.25)}
 html.g27 .btn.go{background:var(--tA);color:var(--tOn);border-color:transparent;border-bottom-color:rgba(0,0,0,.3)}
 html.g27 .btn.alt{background:var(--cs);color:var(--ink);border:1px solid var(--cb)}
-html.g27.g27l .btn,html.g27.g27l .btn.alt{background:#fff;color:var(--ink);border:1px solid var(--cb);border-bottom:3px solid rgba(15,36,26,.2);box-shadow:0 2px 8px rgba(15,36,26,.12)}
+html.g27.g27l .btn,html.g27.g27l .btn.alt{background:#fff;color:var(--ink);border:1px solid var(--cb);border-bottom:3px solid rgba(17,17,19,.2);box-shadow:0 2px 8px rgba(17,17,19,.12)}
 html.g27.g27l .btn.go{background:var(--tA);color:var(--tOn)}
 html.g27 .btn:focus-visible{outline:2px solid var(--post);outline-offset:2px;box-shadow:none}
 html.g27 .tab{border-radius:4px;font:600 13px/1 var(--bf);background:var(--cs2);color:var(--ink);border:1px solid var(--cb)}
@@ -19425,6 +19190,19 @@ html.g27 .mbar{border-radius:3px}
 html.g27 #bug .sc,html.g27 #bug #clock{font-family:var(--hd)!important;font-weight:900!important}
 html.g27 #flash{font-family:var(--hd)!important;font-weight:900!important}
 html.g27 #t2{background:var(--cs);color:var(--ink);border:0;border-left:3px solid var(--post);border-radius:4px;font-family:var(--bf)}
+/* catch, sack and penalty call-outs, the big touchdown line and the drive / quarter sim summary */
+html.g27 #flash{background:var(--cs)!important;color:var(--ink)!important;border:0!important;border-left:4px solid var(--post)!important;border-radius:0!important;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);box-shadow:0 8px 24px rgba(0,0,0,.45)!important;backdrop-filter:none!important;
+  font:900 max(17px,calc(var(--s)*10.5px))/1 var(--hd)!important;padding:.42em 1.1em .38em!important}
+html.g27 #t1{font-family:var(--hd);font-weight:900;letter-spacing:.01em;text-shadow:0 3px 0 var(--post),0 8px 24px rgba(0,0,0,.6)}
+html.g27 #simBox{background:var(--cs)!important;color:var(--ink);border:1px solid var(--cb)!important;border-top:3px solid var(--post)!important;border-radius:0!important;
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%);box-shadow:0 20px 60px rgba(0,0,0,.55)!important;backdrop-filter:none!important}
+html.g27 body:has(#simBox:not([hidden])) #c{filter:brightness(.32) saturate(.6)}
+html.g27 #simTitle,html.g27 #simSum,html.g27 #simList{color:var(--ink)}
+html.g27 #simList{font-family:var(--bf)}
+html.g27 .simRow{background:var(--cs2);border:0;border-left:3px solid var(--cb);border-radius:0;padding:5px 9px}
+html.g27 .simRow:last-child{border-left-color:var(--post)}
+html.g27 #simSum{font-family:var(--bf);font-weight:700;border-top:1px solid var(--cb);padding-top:8px}
 <\/style>
 <main id="stage">
   <div id="wrap">
@@ -20483,8 +20261,8 @@ function gpIntroSkip(){const el=document.getElementById('gpPrev');if(el)el.remov
 function gpShowPreview(){
   if(!GP.previewHtml){gpIntroSkip();return;}
   const ov=document.createElement('div');ov.id='gpPrev';
-  ov.style.cssText='position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;background:rgba(2,10,6,.6);padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch';
-  ov.innerHTML='<div style="margin:auto;width:min(620px,96vw);border-radius:0;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);padding:16px 18px 14px;background:rgba(11,31,22,.96);color:#f2f5f7;border:1px solid rgba(225,240,228,.14);border-top:4px solid var(--tA,#2f66c0);box-shadow:0 20px 50px rgba(0,8,4,.5)">'+GP.previewHtml+
+  ov.style.cssText='position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.6);padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  ov.innerHTML='<div style="margin:auto;width:min(620px,96vw);border-radius:0;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);padding:16px 18px 14px;background:rgba(12,12,14,.96);color:#f2f5f7;border:1px solid rgba(255,255,255,.14);border-top:4px solid var(--tA,#2f66c0);box-shadow:0 20px 50px rgba(0,0,0,.5)">'+GP.previewHtml+
     '<div style="text-align:center;margin-top:12px"><button id="gpPrevGo" style="min-height:46px;padding:0 30px;border-radius:8px;border:0;font:700 16px Barlow,system-ui,sans-serif;color:var(--tOn,#fff);cursor:pointer;background:var(--tA,#2f66c0)">Coin toss<\/button><\/div><\/div>';
   document.body.appendChild(ov);document.getElementById('gpPrevGo').onclick=gpIntroSkip;
 }
@@ -24386,8 +24164,8 @@ function simChunk(){
 }
 function logPlay(S,r){
   const p=G.pbp||{},dn=['','1st','2nd','3rd','4th'][p.d]||'';
-  const pre=p.conv?'Conversion':`${dn} & ${p.tg>=100-p.los?'Goal':p.tg}`;
-  const txt=`${G.teams[p.team!=null?p.team:G.offTeam].abbr} · ${pre} · ${p.call||''}: ${S.msg}${S.sub?''+S.sub:''}`;
+  const pre=p.conv?'Conversion':`${dn} & ${gpTgTxt(p.los,p.tg)}`;
+  const txt=`${G.teams[p.team!=null?p.team:G.offTeam].abbr} · ${pre} · ${p.call||''}: ${S.msg}${S.sub?'. '+S.sub:''}`;
   G.simLog.push(txt);const li=document.createElement('div');li.className='simRow';li.textContent=txt;$('simList').appendChild(li);$('simList').scrollTop=1e6;
 }
 function endSim(){
@@ -25001,10 +24779,10 @@ function drawTags(list){
     for(let g=0;g<6&&placed.some(r=>Math.abs(r[0]-p.sx)<(r[2]+w)/2&&Math.abs(r[1]-y)<(r[3]+hh)/2);g++)y-=hh;placed.push([p.sx,y,w,hh]);
     ctx.save();ctx.translate(p.sx,y);ctx.scale(k,k);
     // a dark plate with the team color down the left edge, like the app's plates
-    ctx.fillStyle='rgba(11,31,22,.9)';ctx.beginPath();ctx.roundRect(-w0/2,-5,w0,10,1.5);ctx.fill();
+    ctx.fillStyle='rgba(12,12,14,.9)';ctx.beginPath();ctx.roundRect(-w0/2,-5,w0,10,1.5);ctx.fill();
     ctx.fillStyle=S.team===0?'#3f6fc0':'#c0404f';ctx.fillRect(-w0/2,-5,1.6,10);
     if(sw)gpStarBadge(-w0/2+7.5,0,S.star,true);
-    ctx.font='700 6px Archivo, sans-serif';ctx.fillStyle='#f1f5ef';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(S.tag,sw/2,0.4);ctx.restore();}
+    ctx.font='700 6px Archivo, sans-serif';ctx.fillStyle='#f4f4f5';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(S.tag,sw/2,0.4);ctx.restore();}
 }
 function football2(rot,len,phase,lw){
   const L=6.6*len,Wd=3.9,m0=ctx.getTransform();ctx.rotate(rot);

@@ -149,13 +149,6 @@ function usaNorm(cfg){const X=usaWorld(cfg&&cfg.custom),all=Object.keys(X.st);le
   if(cfg&&cfg.v===1){o.v=1;if(Array.isArray(cfg.detail))o.detail=[h,...cfg.detail.filter(a=>a!==h&&s.includes(a))].slice(0,USA_DETAIL_MAX);return o;} // a career saved before light states: every chosen state keeps full detail at the scaled size
   o.v=2;o.detail=cfg&&Array.isArray(cfg.detail)?usaDetailFix(cfg.detail,h,s,X):usaAutoDetail(s,h,X);return o;}
 // class labels in each state's style, smallest class first
-function usaLbls(style,n){const R=['I','II','III','IV','V','VI','VII','VIII'];
-  if(style==='Div')return Array.from({length:n},(_,i)=>'Division '+R[n-1-i]);
-  if(style==='CBA'){const L=['Class D','Class C','Class B','Class A','Class AA','Class AAA'];return L.slice(Math.max(0,L.length-n-(n<=4?1:0)),Math.max(0,L.length-n-(n<=4?1:0))+n);}
-  if(style==='A')return Array.from({length:n},(_,i)=>'Class '+'A'.repeat(i+1));
-  if(style==='Cls')return Array.from({length:n},(_,i)=>'Class '+(i+1));
-  if(style==='Grp')return Array.from({length:n},(_,i)=>'Group '+(i+1));
-  return Array.from({length:n},(_,i)=>(i+1)+'A');}
 function usaTeams(ab,X,sc){const w=X||USA.X,m=w&&w.st[ab]?w.st[ab].meta:USST[ab];return m?Math.max(16,Math.round(m[0]*(sc||USA_SCALE))):16;}
 function usaTeamsReal(ab,sc){return Math.max(16,Math.round(USST[ab][0]*(sc||USA_SCALE)));}
 // a state's classification list (custom states use the one of the state most of their people came from)

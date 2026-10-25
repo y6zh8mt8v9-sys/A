@@ -1,38 +1,4 @@
 // ═══════════ SIMULATION ═══════════
-function calcTeamScore(myOvr,oppOvr,offS,defS,iWin,prestige){
-  const offBonus={'Air Raid':8,'Spread':5,'Wing-T':-3,'Option':2,'I-Formation':1,'Pro Style':0}[offS]||0;
-  const ovrDiff=myOvr-oppOvr; // positive = I'm better, negative = I'm weaker
-
-  // Scoring base driven heavily by OVR gap.
-  // Each OVR point advantage = ~1.1 pts. At +20 gap dominant team scores ~22 pts more.
-  // At even OVR base is ~24 pts before variance.
-  const gapScore=ovrDiff*1.1;
-
-  // Variance shrinks as the gap grows (blowouts are more predictable)
-  const absGap=Math.abs(ovrDiff);
-  const varRange=clamp(16-absGap*0.30,3,16);
-  const variance=rngF(-varRange,varRange);
-
-  const base=clamp(24+gapScore+offBonus+variance,0,84);
-
-  // Convert to football scores
-  if(base<4)return 0;
-  if(base<7)return Math.random()<0.5?3:0;
-
-  const tds=Math.max(0,Math.round((base*0.82)/7));
-  const fgs=rng(0,clamp(Math.round((base-tds*7)/4),0,3));
-  let pts=tds*7+fgs*3;
-
-  // High-OVR shootout: both elite teams can go back and forth for big scores
-  const bothElite=(myOvr>72&&oppOvr>72);
-  if(bothElite&&Math.random()<0.30)pts+=rng(7,14);
-
-  // Blowout extension for dominant teams
-  if(pts>=56&&Math.random()<0.20)pts+=7;
-  if(pts>=63&&Math.random()<0.10)pts+=7;
-
-  return clamp(pts,0,84);
-}
 
 function teamEffEdge(sId){try{
   const pl=(sId===G.myId?myP():sPlayers(sId)).filter(p=>!(p.inj>0));if(!pl.length)return 0;

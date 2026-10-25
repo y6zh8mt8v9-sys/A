@@ -142,7 +142,6 @@ function pbSVG(P,opt){
   s+=`<circle cx="${PBX(CX).toFixed(1)}" cy="${PBY(-qbD).toFixed(1)}" r="${ed?2.5:2.2}" fill="#fff" stroke="#0d2a43" stroke-width=".7"/>${ed?`<text x="${PBX(CX).toFixed(1)}" y="${(PBY(-qbD)+1.2).toFixed(1)}" font-size="2.6" font-weight="900" text-anchor="middle" fill="#0d2a43" font-family="Archivo,sans-serif">QB</text>`:''}</svg>`;
   return s;
 }
-function pbDiagram(f,r,w){return pbSVG({kind:'pass',f,r},{w});}
 function pbThumb(p,w){return pbSVG(p.kind==='run'?{kind:'run',f:p.f,pos:p.pos,path:p.path,carrier:p.carrier,keep:p.keep,lead:p.lead,toss:p.toss,mo:p.mo}:{kind:'pass',f:p.f,r:p.r,pos:p.pos,mo:p.mo},{w});}
 // ── designer state ──
 window._pbD=null;window._pbB=null;

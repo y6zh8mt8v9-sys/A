@@ -2,7 +2,6 @@
 // Pick seven players for offense and seven for defense, pay the entry fee and play the best programs of your class.
 // Quarterfinal and semifinal are single games, the league title is a best-of-five series. Standouts get college looks.
 const S7_FEE=5000;
-function s7Avail(){return G&&G.phase==='postseason'&&!(G.s7&&G.s7.yr===G.yr&&G.s7.done);}
 function s7Str(sid,picks){const L=(picks?G.players.filter(p=>picks.includes(p.id)):(sid===G.myId?myP():sPlayers(sid))).filter(p=>!(p.inj>0));
   const top=(pos,n)=>L.filter(p=>p.pos===pos).sort((a,b)=>b.rat-a.rat).slice(0,n).map(p=>p.rat);
   const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:40,qb=top('QB',1),rec=[...top('WR',3),...top('TE',1),...top('RB',1)],def=[...top('LB',2),...top('CB',3),...top('S',2)];

@@ -58,7 +58,6 @@ function aiMoney(m){return m>=100?'$'+Math.round(m)+' million':m>=10?'$'+m.toFix
 function aiTier(a){if(a.lvl==='NAIA')return'D3';if(a.lvl!=='FBS')return a.lvl;return AI_P4[a.school]?'P4':'G5';}
 function aiConfName(a){return AI_P4[a.school]&&AI_P4[a.school]!=='Independent'?AI_P4[a.school]:'conference';}
 function aiQ(ovr,b,s){return aiCl((ovr-b)/s,0,1);}
-function aiSide(pos){return AI_OFF.includes(pos)?'Offensive':'Defensive';}
 function aiList(name){try{const v={D1FBS:typeof D1FBS!=='undefined'?D1FBS:null,D1FCS:typeof D1FCS!=='undefined'?D1FCS:null,D2:typeof D2!=='undefined'?D2:null,D3:typeof D3!=='undefined'?D3:null,JUCO:typeof JUCO!=='undefined'?JUCO:null}[name];return v&&v.length?v:null;}catch(e){return null;}}
 function aiSchool(r,tier,avoid){
   let L;if(tier==='P4')L=Object.keys(AI_P4);else if(tier==='G5')L=(aiList('D1FBS')||['Llano State','Sonora State','Canyon State']).filter(s=>!AI_P4[s]);else if(tier==='FCS')L=aiList('D1FCS')||['Silsbee State'];else if(tier==='D2')L=aiList('D2')||['Osage State'];else if(tier==='D3')L=aiList('D3')||['Middletown College'];else L=aiList('JUCO')||['Jim Hogg County CC'];

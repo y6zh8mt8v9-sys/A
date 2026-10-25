@@ -233,10 +233,6 @@ function _lgf(c2,big){
    :`<filter id="${id}" x="-25%" y="-25%" width="150%" height="150%"><feMorphology in="SourceAlpha" operator="dilate" radius="3" result="d1"/><feFlood flood-color="${c2}"/><feComposite in2="d1" operator="in" result="r1"/><feMerge><feMergeNode in="r1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
   d.firstChild.insertAdjacentHTML('beforeend',f);_LGF[id]=1;return id;
 }
-function _lgG(c){
-  const id='lgg'+c.replace('#','');if(_LGF[id])return id;_lgf('#000000',false);
-  const d=document.getElementById('lg-defs');d.firstChild.insertAdjacentHTML('beforeend',`<linearGradient id="${id}" x1="0" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="${_mx(c,'#ffffff',.3)}"/><stop offset=".48" stop-color="${c}"/><stop offset="1" stop-color="${_mx(c,'#000000',.32)}"/></linearGradient>`);_LGF[id]=1;return id;
-}
 function _lgm(b){
   try{let m=document.getElementById('lg-m');
    if(!m){let d=document.getElementById('lg-defs');if(!d){_lgf('#000000',false);d=document.getElementById('lg-defs');}

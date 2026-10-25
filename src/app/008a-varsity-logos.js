@@ -13,8 +13,6 @@ function _vgInk(m,tf,sc,fill,band,bw,ow,sh){const k=2/sc,j='stroke-linejoin="rou
     +(ow?`<g fill="${_LGINK}" stroke="${_LGINK}" stroke-width="${o}" ${j}>${m}</g>`:'')
     +(bw?`<g fill="${band}" stroke="${band}" stroke-width="${(bw*k).toFixed(2)}" ${j}>${m}</g>`:'')+`<g fill="${fill}">${m}</g></g>`;}
 // a word centered on cx with its baseline at base, cap height h, never wider than maxW
-function _vgWord(T,t,cx,base,h,maxW,fill,band,bw,ow,sh){const r=_vgRun(T,t);let sc=h/100;if(r.w*sc>maxW)sc=maxW/r.w;
-  return _vgInk(r.o,`translate(${(cx-r.w*sc/2).toFixed(2)} ${base}) scale(${sc.toFixed(4)})`,sc,fill,band,bw,ow,sh);}
 // text on a circle around (cx,cy): top reads along the outside of the arc, bottom along the inside
 function _vgArc(T,t,cx,cy,R,h,maxDeg,top,fill,band,bw,ow){
   let sc=h/100;const adv=[...t].map(c=>((T[c]||T[' '])||[30])[0]+9),tot=adv.reduce((a,b)=>a+b,0)-9;

@@ -51,7 +51,6 @@ function rkBadge(id){
   const flip=e=>{e.stopPropagation();e.preventDefault();const ms=b.dataset.ms.split('');rkMode(b,ms[(ms.indexOf(b.dataset.m)+1)%ms.length]);};
   b.addEventListener('click',flip);b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')flip(e);});
   return b;}
-function rkTag(id){const b=rkBadge(id);return b?b.outerHTML:'';}
 let _rkNames=null;
 // rebuilt once per task, so a team renamed anywhere (its page, Team Builder, Customize) keeps its rank badge
 function rkNames(){

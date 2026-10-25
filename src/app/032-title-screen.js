@@ -159,12 +159,6 @@ function lgScore(oa,ob,aWins,r){
   return aWins?[21,17,false]:[17,21,false];
 }
 function lgDivs(){const seen=new Set(),out=[];const add=d=>{if(d&&!seen.has(d)){seen.add(d);out.push(d);}};(G.divisions||[]).forEach(add);if(G.allLeagues)Object.values(G.allLeagues).forEach(l=>(l.divisions||[]).forEach(add));return out;}
-function lgPairs(teams,wk){
-  const arr=teams.slice().sort((x,y)=>x.id-y.id);if(arr.length<2)return[];if(arr.length%2)arr.push(null);
-  const n=arr.length,rr=((wk-1)%(n-1)+(n-1))%(n-1),rest=arr.slice(1),rot=rest.slice(rr).concat(rest.slice(0,rr)),full=[arr[0]].concat(rot),out=[];
-  for(let i=0;i<n/2;i++)out.push([full[i],full[n-1-i]]);return out;
-}
-function lgMyOppAt(wk){const g=(G.sched||[]).find(x=>x.wk===wk&&x.type==='regular');return g?g.oppId:null;}
 function lgLog(s,e){if(!s.gl||s.gl.yr!==G.yr)s.gl={yr:G.yr,g:[]};s.gl.g=s.gl.g.filter(x=>!(x.wk===e.wk&&!x.po&&!e.po));s.gl.g.push(e);}
 function lgPlay(s,score,win,oppId){
   let pl=sPlayers(s.id).filter(p=>p.inj===0);if(s.lite&&pl.length&&!(window._gdOppStats&&window._gdOppStats.sid===s.id))pl=pl.concat(litePH(s));

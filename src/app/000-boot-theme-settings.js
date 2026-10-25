@@ -63,10 +63,6 @@ function setTheme(mode){
     else{sdb.className='btn';sdb.style.background='var(--ac)';slb.className='bgh';slb.style.background='';}
   }
 }
-function toggleTheme(){
-  const isLight=document.documentElement.classList.contains('light');
-  setTheme(isLight?'dark':'light');
-}
 
 // v2.15 controllers (standard gamepad mapping): d-pad or left stick moves between buttons, A presses, B goes back
 const PADN={prev:[],f:null,rep:0,dir:null,on:false,flick:0};
