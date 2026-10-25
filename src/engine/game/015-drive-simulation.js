@@ -91,7 +91,7 @@ function gpHotseat(t){if(!(GP&&GP.hotseat)||ON||G.simming||t==null)return;if(G.m
 function openCall(){
   G.phase='call';setTray('none');$('ctl').innerHTML='';gpHotseat(G.offTeam);
   const off=G.offTeam;
-  if(pcOn()&&!G.simming){const o=off===G.me&&G.pcWant&&GP.pc.pos==='RB'&&!G.conv&&G.down<4?{kind:'run',data:pick(RUNS.filter(r=>!r.qb))}:aiOffCall();
+  if(pcOn()&&!G.simming){const o=off===G.me&&G.pcWant&&pcPosNow()==='RB'&&!G.conv&&G.down<4?{kind:'run',data:pick(RUNS.filter(r=>!r.qb))}:aiOffCall();
     applyCall(o,['punt','fg','kneel','fakepunt','fakefg'].includes(o.kind)?DCALLS[3]:aiDefCall());return;}
   if(coachOn()&&!G.simming&&!G.simQtr&&!G.gpFast&&!G.test){
     if(off===G.me){showCall('off',(o)=>applyCall(o,aiDefCall()));return;}

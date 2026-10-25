@@ -1440,7 +1440,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'9127417198'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'ff25fd6999'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -4361,6 +4361,11 @@ function getStarters(sid){
   return st;
 }
 
+// two-way players: a second position on the other side of the ball makes him a candidate there too,
+// a little behind the specialists unless the depth chart puts him ahead
+function posPool(pl,pos){return pl.filter(p=>p.pos===pos||(p.pos2===pos&&typeof pcTwo==='function'&&pcTwo(p)));}
+function depthOrder(L,pos){const k=p=>p.depth&&p.depth[pos]!==undefined?p.depth[pos]:999,r=p=>p.rat-(p.pos===pos?0:4);return L.sort((a,b)=>k(a)-k(b)||r(b)-r(a));}
+
 function teamOvr(sid){{const s=getS(sid);if(s&&s.lite)return s.str||50;}const st=getStarters(sid);if(!st.length)return 50;return Math.round(st.reduce((a,p)=>a+p.rat,0)/st.length);}
 
 function updateRats(){
@@ -5285,8 +5290,8 @@ function genStats(players,teamScore,won,offScheme,defScheme,schId,oppId){
     const bo=b.depth&&b.depth[pos]!==undefined?b.depth[pos]:999;
     if(ao!==bo)return ao-bo;return b.rat-a.rat;
   });
-  // Player Career two-way player: he also lines up at his second position (a starter there when he starts, else by rating)
-  for(const p of players){if(!pcOwnPick(p)||!pcTwo(p))continue;const L=byPos[p.pos2]||(byPos[p.pos2]=[]);let i=L.findIndex(q=>q.rat<p.rat-4);try{if(pcRole(p).start)i=0;}catch(e){}L.splice(i<0?L.length:i,0,p);}
+  // two-way players also line up at their second position (where the depth chart puts them); your own Player Career player starts there when he starts
+  for(const p of players){if(!pcTwo(p))continue;const L=byPos[p.pos2]||(byPos[p.pos2]=[]);L.push(p);depthOrder(L,p.pos2);if(pcOwnPick(p))try{if(pcRole(p).start){L.splice(L.indexOf(p),1);L.unshift(p);}}catch(e){}}
   const starter=(pos,n=0)=>byPos[pos]&&byPos[pos][n]?byPos[pos][n]:null;
   function sc(p,base,spread){if(!p)return 0;const r=(p.rat-55)/50;const sb=p.traits&&p.traits.includes('showboat')&&Math.random()<.35?1.25:1;return Math.max(0,Math.round((base+r*spread+rng(-Math.round(spread*.22),Math.round(spread*.22)))*sb*STAT_NERF));}
 
@@ -8785,8 +8790,8 @@ function pgRoster(sid){
 function pgDepth(){
   const ms=myS();const pl=myP();const cnt=getStarterCnt(G.myId);
   if(!G.benched)G.benched={};
-  const byPos={};for(const pos of POS)byPos[pos]=pl.filter(p=>p.pos===pos);
-  for(const pos of POS)byPos[pos].sort((a,b)=>{const ao=a.depth&&a.depth[pos]!==undefined?a.depth[pos]:999,bo=b.depth&&b.depth[pos]!==undefined?b.depth[pos]:999;if(ao!==bo)return ao-bo;return b.rat-a.rat;});
+  const byPos={};for(const pos of POS)byPos[pos]=depthOrder(posPool(pl,pos),pos);
+  const tw=(p,pos)=>p.pos!==pos?` <span class="tag" title="Two-way player: his main position is ${p.pos}">2-way</span>`:'';
   return progPanel()+`<div class="pnl"><div class="ph">Depth Chart: ${ms.name} ${ms.mascot}
     <span style="font-size:11px;font-weight:400;color:var(--mu)">${ms.offS} / ${ms.defS}</span>
   </div><div class="pb">
@@ -8805,7 +8810,7 @@ function pgDepth(){
           ${!byPos[pos].length?'<span style="color:var(--mu);font-size:12px">No players</span>':
           [...activePlayers.map((p,i)=>`<div class="pbn ${i<starterSlots?'st':''}" style="min-width:165px">
             <div style="font-size:10px;color:var(--mu)">Depth ${i+1}${i<starterSlots?'<span style="color:var(--gd)">Starter</span>':''}</div>
-            <div style="display:flex;align-items:center;gap:7px;margin:3px 0">${face(p.fs,30)}<span style="font-weight:700;font-size:13px">${p.fn} ${p.ln}</span></div>
+            <div style="display:flex;align-items:center;gap:7px;margin:3px 0">${face(p.fs,30)}<span style="font-weight:700;font-size:13px">${p.fn} ${p.ln}</span>${tw(p,pos)}</div>
             <div style="display:flex;gap:5px;align-items:center;margin-top:3px">${yrL(p.yr)} ${rbDelta(p)} ${injBadgeDepth(p)}</div>
             <div style="display:flex;gap:4px;margin-top:4px">
               <button class="bxs bgh" onclick="setStarter('${pos}',${p.id})">★ Starter</button>
@@ -8832,7 +8837,7 @@ window.setStarter=function(pos,pid){
   if(!G.benched)G.benched={};
   // Remove from bench if they were benched
   if(G.benched[pos])G.benched[pos]=G.benched[pos].filter(id=>id!==pid);
-  const all=myP().filter(p=>p.pos===pos);for(const p of all){if(!p.depth)p.depth={};delete p.depth[pos];}
+  const all=depthOrder(posPool(myP(),pos),pos);for(const p of all){if(!p.depth)p.depth={};delete p.depth[pos];}
   const t=getP(pid);if(!t)return;if(!t.depth)t.depth={};t.depth[pos]=0;
   let rank=1;for(const p of all){if(p.id!==pid){if(!p.depth)p.depth={};p.depth[pos]=rank++;}}
   updateRats();nav('depth');notify(`${t.fn} ${t.ln} set as ${pos} starter!`);
@@ -8845,7 +8850,7 @@ window.benchPlayer=function(pos,pid){
   if(G.benched[pos].includes(pid)){notify(`${p.fn} ${p.ln} is already benched.`,'w');return;}
   // Check if benching would leave no starters at this position
   const cnt=getStarterCnt(G.myId);const slots=cnt[pos]||0;
-  const activeCnt=myP().filter(pl=>pl.pos===pos&&!(G.benched[pos]||[]).includes(pl.id)).length;
+  const activeCnt=posPool(myP(),pos).filter(pl=>!(G.benched[pos]||[]).includes(pl.id)).length;
   if(activeCnt<=slots){notify(`Can't bench, no eligible replacement for ${pos}!`,'w');return;}
   G.benched[pos].push(pid);
   updateRats();nav('depth');notify(`${p.fn} ${p.ln} benched, next player promoted!`);
@@ -11306,7 +11311,8 @@ function gdTeam(s,kind,kitOv,opt){
       const w=gdPlayer({id:null,pos,rat:Math.round(avg-8),fn:GD_WALKON[k%GD_WALKON.length],ln:'(walk-on)',num:n,fs:(s.id*31+k)},roster.length);w.mid=null;roster.push(w);cnt[pos]=(cnt[pos]||0)+1;k++;}
   }
   // your depth chart's starters start on Game Day too (your own career player follows his playing time instead)
-  if(isMe&&!scout)try{const n={};for(const p of getStarters(G.myId)){const i=n[p.pos]=(n[p.pos]||0)+1;if(p.id===_gdPc)continue;const q=roster.find(x=>x.mid===p.id&&x.pos===p.pos);if(q)q.dep=i-1;}}catch(e){}
+  if(isMe&&!scout)try{const cnt=getStarterCnt(G.myId),bn=G.benched||{},pl=myP().filter(p=>p.inj===0);
+    for(const pos in cnt)depthOrder(posPool(pl,pos).filter(p=>!(bn[pos]||[]).includes(p.id)),pos).slice(0,cnt[pos]).forEach((p,i)=>{if(p.id===_gdPc)return;const q=roster.find(x=>x.mid===p.id&&x.pos===p.pos);if(q){if(p.pos===pos)q.dep=i;else q.dep2=i;}});}catch(e){}
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
   for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}if(q.eb&&q.eb!=='none'){q.eq=q.eq||{};q.eq.eb=q.eb;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);
@@ -14862,8 +14868,8 @@ function editPlayer(pid){
     <div class="fg"><label>First Name</label><input class="ei" id="ef" value="${p.fn}"></div>
     <div class="fg"><label>Last Name</label><input class="ei" id="el" value="${p.ln}"></div>
     <div class="fg"><label>Jersey #</label><input class="ei" type="number" id="en" value="${p.num}" min="0" max="99"></div>
-    <div class="fg"><label>Position</label><select class="ei" id="ep">${POS.map(ps=>`<option value="${ps}" ${ps===p.pos?'selected':''}>${ps}</option>`).join('')}</select></div>
-    <div class="fg"><label>Two-way: also plays</label><select class="ei" id="ep2"><option value="">Nothing else</option>${POS.filter(ps=>ps!=='K').map(ps=>`<option value="${ps}" ${ps===p.pos2?'selected':''}>${ps}</option>`).join('')}</select></div>
+    <div class="fg"><label>Position</label><select class="ei" id="ep" onchange="epPosChg(this.value)">${POS.map(ps=>`<option value="${ps}" ${ps===p.pos?'selected':''}>${ps}</option>`).join('')}</select></div>
+    <div class="fg"><label>Two-way: also plays</label><select class="ei" id="ep2"><option value="">Nothing else</option>${twoWayOpts(p.pos).map(ps=>`<option value="${ps}" ${ps===p.pos2?'selected':''}>${ps}</option>`).join('')}</select></div>
     <div class="fg"><label>Overall (change it to scale every skill)</label><input class="ei" type="number" id="er" value="${p.rat}" min="1" max="99"></div>
     <div class="fg"><label>Potential</label><input class="ei" type="number" id="ept" value="${p.pot}" min="1" max="99"></div>
     <details style="grid-column:1/-1" open><summary style="cursor:pointer;font-weight:700;font-size:13px">Attributes · overall from these: <span id="at-ovr" style="color:var(--gn)">${(ovrSync(p),p.rat)}</span></summary>
@@ -15044,7 +15050,9 @@ function coachTakeOver(sid,quiet,anyLg){
   try{addNews('myteam',`New head coach at ${ns.name}`,`You left ${os.name} to take over the ${ns.mascot}.`);}catch(e){}
   try{updateTb();}catch(e){}clo();nav('dash');notify(quiet?`Welcome to ${ns.name}!`:`Welcome to ${ns.name}! Build your schedule to start the season.`);
 }
-function savePlayer(pid){const p=getP(pid);if(!p)return;p.fn=document.getElementById('ef').value||p.fn;p.ln=document.getElementById('el').value||p.ln;{const nv=parseInt(document.getElementById('en').value,10);p.num=Number.isFinite(nv)?clamp(nv,0,99):p.num;}{const p2=(document.getElementById('ep2')||{}).value||'';p.pos2=p2&&p2!==document.getElementById('ep').value?p2:null;}const newPos=document.getElementById('ep').value;if(newPos!==p.pos){p.pos=newPos;const sch=getS(p.sId);p.arch=pickArchetype(newPos,sch?sch.offS:'Pro Style',sch?sch.defS:'4-3');}if(!earnedOn()){const r0=p.rat,rIn=clamp(parseInt(document.getElementById('er').value)||p.rat,1,99);ovrSync(p,true);document.querySelectorAll('.at-in').forEach(i=>{const k=i.dataset.k,v=clamp(parseInt(i.value)||1,1,99);if(ATOP.has(k))p[k]=v;else p.at[k]=v;});if(rIn!==r0)attrShift(p,rIn);p.rat=ovrCalc(p);p._rc=p.rat;{const p0=p.pot,pIn=parseInt(document.getElementById('ept').value);p.pot=clamp(pIn||p.pot,p.rat,99);if(pIn&&pIn!==p0){p.potLo=p.pot;p.potHi=p.pot;}else{if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}}}p.gpa=clamp(parseFloat(document.getElementById('eg').value)||p.gpa,1.5,4.0);if(!earnedOn()){p.dev=document.getElementById('ed').value;p.traits=Array.from(document.getElementById('et').selectedOptions).map(o=>o.value);}const eintEl=document.getElementById('eint');if(eintEl)p.interests=Array.from(eintEl.selectedOptions).map(o=>o.value);{const eq=eqRead();if(eq)p.eq=eq;}
+// a new main position: the two-way list follows it (the other side of the ball)
+window.epPosChg=function(pos){const e=document.getElementById('ep2');if(!e)return;const v=e.value,O=twoWayOpts(pos);e.innerHTML='<option value="">Nothing else</option>'+O.map(ps=>`<option value="${ps}"${ps===v?' selected':''}>${ps}</option>`).join('');};
+function savePlayer(pid){const p=getP(pid);if(!p)return;p.fn=document.getElementById('ef').value||p.fn;p.ln=document.getElementById('el').value||p.ln;{const nv=parseInt(document.getElementById('en').value,10);p.num=Number.isFinite(nv)?clamp(nv,0,99):p.num;}{const p2=(document.getElementById('ep2')||{}).value||'';p.pos2=p2&&twoWayOpts(document.getElementById('ep').value).includes(p2)?p2:null;if(p2&&!p.pos2)notify(`${p2} is on the same side of the ball as his new position, so he plays only one way now`,'w');}const newPos=document.getElementById('ep').value;if(newPos!==p.pos){p.pos=newPos;const sch=getS(p.sId);p.arch=pickArchetype(newPos,sch?sch.offS:'Pro Style',sch?sch.defS:'4-3');}if(!earnedOn()){const r0=p.rat,rIn=clamp(parseInt(document.getElementById('er').value)||p.rat,1,99);ovrSync(p,true);document.querySelectorAll('.at-in').forEach(i=>{const k=i.dataset.k,v=clamp(parseInt(i.value)||1,1,99);if(ATOP.has(k))p[k]=v;else p.at[k]=v;});if(rIn!==r0)attrShift(p,rIn);p.rat=ovrCalc(p);p._rc=p.rat;{const p0=p.pot,pIn=parseInt(document.getElementById('ept').value);p.pot=clamp(pIn||p.pot,p.rat,99);if(pIn&&pIn!==p0){p.potLo=p.pot;p.potHi=p.pot;}else{if(p.potHi!=null&&p.potHi<p.pot)p.potHi=p.pot;if(p.potLo!=null&&p.potLo>p.potHi)p.potLo=p.potHi;}}}p.gpa=clamp(parseFloat(document.getElementById('eg').value)||p.gpa,1.5,4.0);if(!earnedOn()){p.dev=document.getElementById('ed').value;p.traits=Array.from(document.getElementById('et').selectedOptions).map(o=>o.value);}const eintEl=document.getElementById('eint');if(eintEl)p.interests=Array.from(eintEl.selectedOptions).map(o=>o.value);{const eq=eqRead();if(eq)p.eq=eq;}
   {const ft=parseInt(document.getElementById('eht-ft').value,10),inch=parseInt(document.getElementById('eht-in').value,10),w=parseInt(document.getElementById('ewt').value,10);
    if(Number.isFinite(ft)&&Number.isFinite(inch))p.ht=clamp(ft*12+clamp(inch,0,11),54,90);if(Number.isFinite(w))p.wt=clamp(w,90,420);
    const ye=document.getElementById('eyr');if(ye){const y=parseInt(ye.value,10);if(y>=9&&y<=12)p.yr=y;}
@@ -17652,7 +17660,9 @@ window.pcNoCollege=function(){const p=pcActive();if(p)p.pcNoCol=G.yr;clo();const
 function pcUnitOf(pos){return['QB','RB','WR','TE','OL'].includes(pos)?'o':['DL','LB','CB','S'].includes(pos)?'d':'k';}
 function pcTwo(p){return!!(p&&p.pos2&&p.pos2!==p.pos&&pcUnitOf(p.pos)!=='k'&&pcUnitOf(p.pos2)!=='k'&&pcUnitOf(p.pos2)!==pcUnitOf(p.pos));}
 window.pcSetPos2=function(v){const p=myPlayer();if(!p)return;p.pos2=v&&v!==p.pos&&pcUnitOf(v)!==pcUnitOf(p.pos)?v:null;notify(p.pos2?`${p.fn} ${p.ln} also plays ${p.pos2}`:`${p.fn} ${p.ln} plays only ${p.pos}`);nav(G._page||'mine',G._arg);};
-function pcTwoPanel(p){if(pcUnitOf(p.pos)==='k')return'';const O=(pcUnitOf(p.pos)==='o'?['DL','LB','CB','S']:['QB','RB','WR','TE']);
+// the second positions a player can add: the other side of the ball (none for kickers)
+function twoWayOpts(pos){const u=pcUnitOf(pos);return u==='o'?['DL','LB','CB','S']:u==='d'?['QB','RB','WR','TE']:[];}
+function pcTwoPanel(p){if(pcUnitOf(p.pos)==='k')return'';const O=twoWayOpts(p.pos);
   return`<div class="pnl"><div class="ph">Two-way player</div><div class="pb" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:13px">Also plays</span><select style="width:auto;min-height:0" onchange="pcSetPos2(this.value)"><option value="">Nothing else</option>${O.map(x=>`<option value="${x}"${p.pos2===x?' selected':''}>${x}</option>`).join('')}</select><span style="font-size:11px;color:var(--mu)">A two-way player is on the field for offense and defense, on Game Day and in simulated games.</span></div></div>`;}
 // on every page change: nothing the coach would handle is left waiting
 function pcAutoTick(){if(!pcAuto()||ccOn()||!G.myId||!myS()||!Array.isArray(G.players))return;
@@ -20247,7 +20257,7 @@ function gpTeam(id,c){
   if(c.kit)KITS[id]=kitOf(c.kit);
   if(c.pack)PACK_TEAMS[id]=c.pack;
   const roster=c.players.map(q=>{const ht=q.ht||74,wt=q.wt||210,bmi=wt*703/(ht*ht);
-    const p={id:PID++,mid:q.mid,fs:q.fs,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
+    const p={id:PID++,mid:q.mid,fs:q.fs,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,dep2:q.dep2!=null?q.dep2:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
       ...Object.fromEntries('dac,tup,car,elu,btk,cit,rte,jmp,pbk,rbk,pmv,fmv,bsh,hpw,mcv,zcv,prs,end'.split(',').filter(k=>q[k]!=null).map(k=>[k,q[k]])),
       stamina:100,inj:null,body:{hs:1+(ht-74)*0.012,ws:clamp(1+(bmi-26)*0.04,0.88,1.5),belly:clamp((bmi-31)*0.09,0,0.65)},
       look:{pk:q.pk,skin:tone(q.skin||'#c68a5e'),sleeve:q.pos==='OL'||q.pos==='DL'?null:(q.sl===1?tone('#111820'):q.sl===2?tone('#ffffff'):null),visor:!!q.visor,longSock:!!q.ls,band:!!q.band,eq:q.eq||null,hair:q.hair||null,hst:q.hst||null},ovr:q.ovr,stars:q.stars>=2?Math.min(5,q.stars|0):0};
@@ -20257,7 +20267,7 @@ function gpTeam(id,c){
   T.byPos=pos=>roster.filter(p=>p.pos===pos||p.pos2===pos).sort((a,b)=>(b.ovr-(b.pos===pos?0:4))-(a.ovr-(a.pos===pos?0:4)));
   T.get=pid=>roster.find(p=>p.id===pid);
   // the depth chart's starters (dep, from the app) take the first spots, then the best by rating
-  const dk=(p,pos)=>p.dep!=null&&p.pos===pos?p.dep:99,first=pos=>T.byPos(pos).sort((a,b)=>dk(a,pos)-dk(b,pos));
+  const dk=(p,pos)=>p.dep!=null&&p.pos===pos?p.dep:p.dep2!=null&&p.pos2===pos?p.dep2:99,first=pos=>T.byPos(pos).sort((a,b)=>dk(a,pos)-dk(b,pos));
   for(const set of[OSLOTS,DSLOTS]){const used=new Set();for(const[s,pos]of set){const pl=first(pos).find(p=>!used.has(p.id))||roster.find(p=>!used.has(p.id))||roster[0];used.add(pl.id);T.lineup[s]=pl.id;}}
   return T;
 }
@@ -22234,6 +22244,9 @@ function pcMe(e){return!!(e&&e.pl&&GP&&GP.pc&&e.pl.mid!=null&&e.pl.mid===GP.pc.m
 function pcAI(e){return pcOn()&&!!e&&e.team===G.me&&!pcMe(e);}
 function pcAIQB(){return pcOn()&&G.offTeam===G.me&&!pcMe(G.qb);}
 function pcUnit(){const p=GP.pc.pos;return['QB','RB','WR','TE','OL'].includes(p)?'o':['DL','LB','CB','S'].includes(p)?'d':'k';}
+// the position your player has on this snap (a two-way player's second one when his other side is on the field)
+function pcPosNow(){if(!GP.pc.two)return GP.pc.pos;const T=G.teams[G.me],rp=T&&T.roster.find(p=>p.mid===GP.pc.mid),U=p=>['QB','RB','WR','TE','OL'].includes(p)?'o':'d';
+  return rp&&rp.pos2&&U(rp.pos2)===(G.poss===G.me?'o':'d')?rp.pos2:GP.pc.pos;}
 function pcDrive(){const u=pcUnit(),mine=G.poss===G.me,on=GP.pc.two?true:u==='d'?!mine:mine;
   G.pcRot=false;if(!on||u==='k'||GP.pc.start){G.pcIn=on;return G.pcIn;}
   G.pcSer=(G.pcSer||0)+1;const n=G.pcSer,sh=clamp(GP.pc.share||0.3,0.1,1);G.pcIn=n===1||Math.floor(n*sh)>Math.floor((n-1)*sh);
@@ -24295,7 +24308,7 @@ function gpHotseat(t){if(!(GP&&GP.hotseat)||ON||G.simming||t==null)return;if(G.m
 function openCall(){
   G.phase='call';setTray('none');$('ctl').innerHTML='';gpHotseat(G.offTeam);
   const off=G.offTeam;
-  if(pcOn()&&!G.simming){const o=off===G.me&&G.pcWant&&GP.pc.pos==='RB'&&!G.conv&&G.down<4?{kind:'run',data:pick(RUNS.filter(r=>!r.qb))}:aiOffCall();
+  if(pcOn()&&!G.simming){const o=off===G.me&&G.pcWant&&pcPosNow()==='RB'&&!G.conv&&G.down<4?{kind:'run',data:pick(RUNS.filter(r=>!r.qb))}:aiOffCall();
     applyCall(o,['punt','fg','kneel','fakepunt','fakefg'].includes(o.kind)?DCALLS[3]:aiDefCall());return;}
   if(coachOn()&&!G.simming&&!G.simQtr&&!G.gpFast&&!G.test){
     if(off===G.me){showCall('off',(o)=>applyCall(o,aiDefCall()));return;}
@@ -24438,7 +24451,7 @@ function setCtl(){
   if(G.test||G.phase!=='live'&&G.phase!=='presnap')return;
   const c=G.carrier,P=G.play;
   if(pcOn()&&G.phase==='live'&&!pcMe(c)&&!passingUser()&&!(G.ballState==='air'&&(G.cm&&G.cm.target&&pcMe(G.cm.target)||G.im&&G.im.def&&pcMe(G.im.def)))){
-    if(G.offTeam===G.me&&G.ballState==='qb'&&!pcMe(G.qb)&&GP.pc.pos!=='OL'){btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');padLegend(box,[[3,'Call for ball']]);G.hint='Run your route: drag, use the stick or the arrow keys to move him, or let go and he runs the play as drawn. Call for the ball when you are open.';}
+    if(G.offTeam===G.me&&G.ballState==='qb'&&!pcMe(G.qb)&&pcPosNow()!=='OL'){btn(box,G.pcWant?'Ball called':'Call for ball','go',pcCallBall,'b');padLegend(box,[[3,'Call for ball']]);G.hint='Run your route: drag, use the stick or the arrow keys to move him, or let go and he runs the play as drawn. Call for the ball when you are open.';}
     else if(G.uctl&&G.uctl.team===G.me&&!G.uctl.down&&gpDefending(G.me)){gpDefCtl(box,false);G.hint=DEF_HINT;}
     return;}
   if(G.phase==='live'&&c&&!isAI(c.team)&&c.team===G.me){

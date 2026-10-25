@@ -65,7 +65,8 @@ function gdTeam(s,kind,kitOv,opt){
       const w=gdPlayer({id:null,pos,rat:Math.round(avg-8),fn:GD_WALKON[k%GD_WALKON.length],ln:'(walk-on)',num:n,fs:(s.id*31+k)},roster.length);w.mid=null;roster.push(w);cnt[pos]=(cnt[pos]||0)+1;k++;}
   }
   // your depth chart's starters start on Game Day too (your own career player follows his playing time instead)
-  if(isMe&&!scout)try{const n={};for(const p of getStarters(G.myId)){const i=n[p.pos]=(n[p.pos]||0)+1;if(p.id===_gdPc)continue;const q=roster.find(x=>x.mid===p.id&&x.pos===p.pos);if(q)q.dep=i-1;}}catch(e){}
+  if(isMe&&!scout)try{const cnt=getStarterCnt(G.myId),bn=G.benched||{},pl=myP().filter(p=>p.inj===0);
+    for(const pos in cnt)depthOrder(posPool(pl,pos).filter(p=>!(bn[pos]||[]).includes(p.id)),pos).slice(0,cnt[pos]).forEach((p,i)=>{if(p.id===_gdPc)return;const q=roster.find(x=>x.mid===p.id&&x.pos===p.pos);if(q){if(p.pos===pos)q.dep=i;else q.dep2=i;}});}catch(e){}
   const kk=roster.filter(q=>q.pos==='K').sort((a,b)=>b.ovr-a.ovr)[0];if(kk)roster.push(Object.assign({},kk,{pos:'P'}));
   for(const q of roster){try{q.eq=eqResolve(q.eq,s);}catch(e){q.eq=null;}if(q.pos==='QB'){q.eq=q.eq||{};q.eq.noGlove=true;q.eq.glove=null;}if(q.eb&&q.eb!=='none'){q.eq=q.eq||{};q.eq.eb=q.eb;}}
   const u=kitOv||uniOf(s,kind),kit=Object.assign({glove:u.trim,sleeve:u.jersey},u);

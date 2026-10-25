@@ -141,8 +141,8 @@ function pgRoster(sid){
 function pgDepth(){
   const ms=myS();const pl=myP();const cnt=getStarterCnt(G.myId);
   if(!G.benched)G.benched={};
-  const byPos={};for(const pos of POS)byPos[pos]=pl.filter(p=>p.pos===pos);
-  for(const pos of POS)byPos[pos].sort((a,b)=>{const ao=a.depth&&a.depth[pos]!==undefined?a.depth[pos]:999,bo=b.depth&&b.depth[pos]!==undefined?b.depth[pos]:999;if(ao!==bo)return ao-bo;return b.rat-a.rat;});
+  const byPos={};for(const pos of POS)byPos[pos]=depthOrder(posPool(pl,pos),pos);
+  const tw=(p,pos)=>p.pos!==pos?` <span class="tag" title="Two-way player: his main position is ${p.pos}">2-way</span>`:'';
   return progPanel()+`<div class="pnl"><div class="ph">Depth Chart: ${ms.name} ${ms.mascot}
     <span style="font-size:11px;font-weight:400;color:var(--mu)">${ms.offS} / ${ms.defS}</span>
   </div><div class="pb">
@@ -161,7 +161,7 @@ function pgDepth(){
           ${!byPos[pos].length?'<span style="color:var(--mu);font-size:12px">No players</span>':
           [...activePlayers.map((p,i)=>`<div class="pbn ${i<starterSlots?'st':''}" style="min-width:165px">
             <div style="font-size:10px;color:var(--mu)">Depth ${i+1}${i<starterSlots?'<span style="color:var(--gd)">Starter</span>':''}</div>
-            <div style="display:flex;align-items:center;gap:7px;margin:3px 0">${face(p.fs,30)}<span style="font-weight:700;font-size:13px">${p.fn} ${p.ln}</span></div>
+            <div style="display:flex;align-items:center;gap:7px;margin:3px 0">${face(p.fs,30)}<span style="font-weight:700;font-size:13px">${p.fn} ${p.ln}</span>${tw(p,pos)}</div>
             <div style="display:flex;gap:5px;align-items:center;margin-top:3px">${yrL(p.yr)} ${rbDelta(p)} ${injBadgeDepth(p)}</div>
             <div style="display:flex;gap:4px;margin-top:4px">
               <button class="bxs bgh" onclick="setStarter('${pos}',${p.id})">★ Starter</button>
@@ -188,7 +188,7 @@ window.setStarter=function(pos,pid){
   if(!G.benched)G.benched={};
   // Remove from bench if they were benched
   if(G.benched[pos])G.benched[pos]=G.benched[pos].filter(id=>id!==pid);
-  const all=myP().filter(p=>p.pos===pos);for(const p of all){if(!p.depth)p.depth={};delete p.depth[pos];}
+  const all=depthOrder(posPool(myP(),pos),pos);for(const p of all){if(!p.depth)p.depth={};delete p.depth[pos];}
   const t=getP(pid);if(!t)return;if(!t.depth)t.depth={};t.depth[pos]=0;
   let rank=1;for(const p of all){if(p.id!==pid){if(!p.depth)p.depth={};p.depth[pos]=rank++;}}
   updateRats();nav('depth');notify(`${t.fn} ${t.ln} set as ${pos} starter!`);
@@ -201,7 +201,7 @@ window.benchPlayer=function(pos,pid){
   if(G.benched[pos].includes(pid)){notify(`${p.fn} ${p.ln} is already benched.`,'w');return;}
   // Check if benching would leave no starters at this position
   const cnt=getStarterCnt(G.myId);const slots=cnt[pos]||0;
-  const activeCnt=myP().filter(pl=>pl.pos===pos&&!(G.benched[pos]||[]).includes(pl.id)).length;
+  const activeCnt=posPool(myP(),pos).filter(pl=>!(G.benched[pos]||[]).includes(pl.id)).length;
   if(activeCnt<=slots){notify(`Can't bench, no eligible replacement for ${pos}!`,'w');return;}
   G.benched[pos].push(pid);
   updateRats();nav('depth');notify(`${p.fn} ${p.ln} benched, next player promoted!`);

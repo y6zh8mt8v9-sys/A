@@ -150,6 +150,11 @@ function getStarters(sid){
   return st;
 }
 
+// two-way players: a second position on the other side of the ball makes him a candidate there too,
+// a little behind the specialists unless the depth chart puts him ahead
+function posPool(pl,pos){return pl.filter(p=>p.pos===pos||(p.pos2===pos&&typeof pcTwo==='function'&&pcTwo(p)));}
+function depthOrder(L,pos){const k=p=>p.depth&&p.depth[pos]!==undefined?p.depth[pos]:999,r=p=>p.rat-(p.pos===pos?0:4);return L.sort((a,b)=>k(a)-k(b)||r(b)-r(a));}
+
 function teamOvr(sid){{const s=getS(sid);if(s&&s.lite)return s.str||50;}const st=getStarters(sid);if(!st.length)return 50;return Math.round(st.reduce((a,p)=>a+p.rat,0)/st.length);}
 
 function updateRats(){

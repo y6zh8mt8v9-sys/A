@@ -111,7 +111,7 @@ function gpTeam(id,c){
   if(c.kit)KITS[id]=kitOf(c.kit);
   if(c.pack)PACK_TEAMS[id]=c.pack;
   const roster=c.players.map(q=>{const ht=q.ht||74,wt=q.wt||210,bmi=wt*703/(ht*ht);
-    const p={id:PID++,mid:q.mid,fs:q.fs,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
+    const p={id:PID++,mid:q.mid,fs:q.fs,arch:q.arch||null,traits:q.traits||[],awr:Math.min(99,(q.awr||70)+(q.cap?3:0)),chem:q.chem!=null?q.chem:null,cap:!!q.cap,team:id,pos:q.pos,pos2:q.pos2||null,dep:q.dep!=null?q.dep:null,dep2:q.dep2!=null?q.dep2:null,first:q.first,last:q.last,num:q.num,ht,wt,spd:q.spd,str:q.str,hands:q.hands,tkl:q.tkl,cov:q.cov,acc:q.acc,pow:q.pow,kpow:q.kpow,kacc:q.kacc,agi:q.agi,
       ...Object.fromEntries('dac,tup,car,elu,btk,cit,rte,jmp,pbk,rbk,pmv,fmv,bsh,hpw,mcv,zcv,prs,end'.split(',').filter(k=>q[k]!=null).map(k=>[k,q[k]])),
       stamina:100,inj:null,body:{hs:1+(ht-74)*0.012,ws:clamp(1+(bmi-26)*0.04,0.88,1.5),belly:clamp((bmi-31)*0.09,0,0.65)},
       look:{pk:q.pk,skin:tone(q.skin||'#c68a5e'),sleeve:q.pos==='OL'||q.pos==='DL'?null:(q.sl===1?tone('#111820'):q.sl===2?tone('#ffffff'):null),visor:!!q.visor,longSock:!!q.ls,band:!!q.band,eq:q.eq||null,hair:q.hair||null,hst:q.hst||null},ovr:q.ovr,stars:q.stars>=2?Math.min(5,q.stars|0):0};
@@ -121,7 +121,7 @@ function gpTeam(id,c){
   T.byPos=pos=>roster.filter(p=>p.pos===pos||p.pos2===pos).sort((a,b)=>(b.ovr-(b.pos===pos?0:4))-(a.ovr-(a.pos===pos?0:4)));
   T.get=pid=>roster.find(p=>p.id===pid);
   // the depth chart's starters (dep, from the app) take the first spots, then the best by rating
-  const dk=(p,pos)=>p.dep!=null&&p.pos===pos?p.dep:99,first=pos=>T.byPos(pos).sort((a,b)=>dk(a,pos)-dk(b,pos));
+  const dk=(p,pos)=>p.dep!=null&&p.pos===pos?p.dep:p.dep2!=null&&p.pos2===pos?p.dep2:99,first=pos=>T.byPos(pos).sort((a,b)=>dk(a,pos)-dk(b,pos));
   for(const set of[OSLOTS,DSLOTS]){const used=new Set();for(const[s,pos]of set){const pl=first(pos).find(p=>!used.has(p.id))||roster.find(p=>!used.has(p.id))||roster[0];used.add(pl.id);T.lineup[s]=pl.id;}}
   return T;
 }

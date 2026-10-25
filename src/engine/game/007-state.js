@@ -16,6 +16,9 @@ function pcMe(e){return!!(e&&e.pl&&GP&&GP.pc&&e.pl.mid!=null&&e.pl.mid===GP.pc.m
 function pcAI(e){return pcOn()&&!!e&&e.team===G.me&&!pcMe(e);}
 function pcAIQB(){return pcOn()&&G.offTeam===G.me&&!pcMe(G.qb);}
 function pcUnit(){const p=GP.pc.pos;return['QB','RB','WR','TE','OL'].includes(p)?'o':['DL','LB','CB','S'].includes(p)?'d':'k';}
+// the position your player has on this snap (a two-way player's second one when his other side is on the field)
+function pcPosNow(){if(!GP.pc.two)return GP.pc.pos;const T=G.teams[G.me],rp=T&&T.roster.find(p=>p.mid===GP.pc.mid),U=p=>['QB','RB','WR','TE','OL'].includes(p)?'o':'d';
+  return rp&&rp.pos2&&U(rp.pos2)===(G.poss===G.me?'o':'d')?rp.pos2:GP.pc.pos;}
 function pcDrive(){const u=pcUnit(),mine=G.poss===G.me,on=GP.pc.two?true:u==='d'?!mine:mine;
   G.pcRot=false;if(!on||u==='k'||GP.pc.start){G.pcIn=on;return G.pcIn;}
   G.pcSer=(G.pcSer||0)+1;const n=G.pcSer,sh=clamp(GP.pc.share||0.3,0.1,1);G.pcIn=n===1||Math.floor(n*sh)>Math.floor((n-1)*sh);

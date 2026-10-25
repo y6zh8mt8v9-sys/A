@@ -78,7 +78,9 @@ window.pcNoCollege=function(){const p=pcActive();if(p)p.pcNoCol=G.yr;clo();const
 function pcUnitOf(pos){return['QB','RB','WR','TE','OL'].includes(pos)?'o':['DL','LB','CB','S'].includes(pos)?'d':'k';}
 function pcTwo(p){return!!(p&&p.pos2&&p.pos2!==p.pos&&pcUnitOf(p.pos)!=='k'&&pcUnitOf(p.pos2)!=='k'&&pcUnitOf(p.pos2)!==pcUnitOf(p.pos));}
 window.pcSetPos2=function(v){const p=myPlayer();if(!p)return;p.pos2=v&&v!==p.pos&&pcUnitOf(v)!==pcUnitOf(p.pos)?v:null;notify(p.pos2?`${p.fn} ${p.ln} also plays ${p.pos2}`:`${p.fn} ${p.ln} plays only ${p.pos}`);nav(G._page||'mine',G._arg);};
-function pcTwoPanel(p){if(pcUnitOf(p.pos)==='k')return'';const O=(pcUnitOf(p.pos)==='o'?['DL','LB','CB','S']:['QB','RB','WR','TE']);
+// the second positions a player can add: the other side of the ball (none for kickers)
+function twoWayOpts(pos){const u=pcUnitOf(pos);return u==='o'?['DL','LB','CB','S']:u==='d'?['QB','RB','WR','TE']:[];}
+function pcTwoPanel(p){if(pcUnitOf(p.pos)==='k')return'';const O=twoWayOpts(p.pos);
   return`<div class="pnl"><div class="ph">Two-way player</div><div class="pb" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:13px">Also plays</span><select style="width:auto;min-height:0" onchange="pcSetPos2(this.value)"><option value="">Nothing else</option>${O.map(x=>`<option value="${x}"${p.pos2===x?' selected':''}>${x}</option>`).join('')}</select><span style="font-size:11px;color:var(--mu)">A two-way player is on the field for offense and defense, on Game Day and in simulated games.</span></div></div>`;}
 // on every page change: nothing the coach would handle is left waiting
 function pcAutoTick(){if(!pcAuto()||ccOn()||!G.myId||!myS()||!Array.isArray(G.players))return;
