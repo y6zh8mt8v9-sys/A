@@ -113,11 +113,14 @@ const TUT_PAGES=[
   `},
   {tab:'New this update',icon:'',title:'A new look, faster menus and lots of new football',body:`
     <ul>
-      <li><strong>Red and black</strong>: the whole game, menus and Game Day, now wears red and black.</li>
+      <li><strong>Potential</strong>: a quiet season never lowers a player's potential any more. In Player Career it only goes up, and it comes with you to college.</li>
+      <li><strong>Two-way players</strong>: set them as starters at their second position on the depth chart; sims and Game Day use it.</li>
+      <li><strong>Online</strong>: online play isn't working right now. Everything else works as usual.</li>
+      <li><strong>Red and black</strong>: the whole game, menus, Game Day and the player and coach creators, now wears red and black.</li>
       <li><strong>Team edits</strong>: a team's new name and logo show everywhere, loading screens included.</li>
       <li><strong>Catches</strong>: one-handed, diving and contested grabs now land about half the time, like real football. Routine catches stay sure.</li>
       <li><strong>Other teams' jerseys</strong>: open any school and tap Edit to change its uniforms.</li>
-      <li><strong>New look</strong>: every screen, popup and Game Day panel was redrawn in turf greens, chalk text and goalpost gold. Matchups show both teams in their colors.</li>
+      <li><strong>New look</strong>: every screen, popup and Game Day panel was redrawn. Matchups show both teams in their colors.</li>
       <li><strong>Faster on PC</strong>: pages with many players open 2 to 4 times faster.</li>
       <li><strong>Defense</strong>: lunge tackles, hit stick, ankle bite, a defensive move wheel and sprint.</li>
       <li><strong>Offense</strong>: faster slants, lead passes and a real option read.</li>

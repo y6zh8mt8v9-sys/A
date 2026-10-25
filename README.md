@@ -40,6 +40,16 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 ## What's new
 
 ### Latest update
+- **Potential no longer drops:** a quiet season (a backup who barely played) never lowers a player's ceiling any more; good seasons can still raise it. In Player Career your player's potential only goes up, and going to college keeps the ceiling he earned in high school.
+- **Two-way players:** the depth chart lists them at their second position with a 2-way tag, and you can make them the starter there. Simulated games and Game Day use that order. Edit Player only offers a second position on the other side of the ball, and the list follows a change of main position. Call for the ball follows the position your player has on that snap.
+- **Player and coach creation:** both screens use the red and black look.
+- **Online notice:** the Online button and screen say online play isn't working right now. Career, Free Practice and 2-player games on one device work as usual.
+- **Season flow fixes:** a quick second tap on Play week or a playoff round can't re-sim a played game or leave the dashboard without a next button. Closing an offseason window and pressing Begin offseason picks up where you left off instead of replaying the playoffs.
+- **College screens:** in a college Player Career, high school pages (roster, schedule, standings and the rest) open your college's version, and Transfers lists the transfer portal.
+- **Look and equipment** for your own player from My Player and his player card, at any point in his career, plus a Potential +1 skill point option.
+- **Every button checked:** an automated pass clicked every button on every page in coach mode and in high school and college Player Career, with no errors.
+
+### Previous update
 - **Red and black look:** black surfaces, white text and red for the numbers and buttons that matter, in the menus and in Game Day. Your team's own colors still mark your team. Light mode got the same change.
 - **Team edits show everywhere:** loading screens (including "Saving before kickoff" and the Player Career waits) always show a team's current name and logo, and renamed teams keep their rank badges.
 - **Game Day call-outs:** catch, sack and penalty call-outs, the touchdown line and the drive / quarter sim summary use the new plates and fonts; the field dims behind the sim summary. Drive log lines read properly again ("Gain of 3. Inches short of the first down") and show downs like the play call screen.
@@ -48,7 +58,7 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 - **Midfield logo:** solid instead of see-through, and painted onto the turf in perspective, so it stays put on the field like the yard lines while the camera moves.
 - **New Kanra Digital logo** on the start screen and next to the copyright line.
 
-### Previous update
+### Earlier update
 - **Kanra Digital:** the game now opens with a Kanra Digital loading screen (logo, progress bar; tap or press a key to skip), and every copyright line reads "© 2026 Kanra Digital. All rights reserved."
 - **Catches closer to real rates:** routine catches stay sure things; over-the-shoulder and low balls are caught most of the time; one-handed, diving and contested grabs land about half the time, less the farther off target the ball is. Toe-taps, mossing a defender and one-handed diving grabs are harder than the plain catch, and good hands matter most on the hard ones.
 - **Watermarks:** the copyright and a build fingerprint are in the code, the page, the console and Terms; saved replay videos carry "Gridiron 27 · © Kanra Digital" in the corner.
