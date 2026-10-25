@@ -288,7 +288,8 @@ function ccCreate(p,on){const c=p.committed;let k=c?c.school+'|'+c.lvl:null,walk
     const lv=p.rat>=74?'FCS':p.rat>=64?'D2':'JUCO',L=COLLEGES.filter(x=>x.lvl===lv).sort((a,b)=>(b.st===st)-(a.st===st)||a.pr-b.pr);const c0=L[0]||COLLEGES[COLLEGES.length-1];k=c0.school+'|'+c0.lvl;}
   const q=JSON.parse(JSON.stringify(p)),perf=ccHsPerf(p),drop=ccEntryDrop(p.rat,perf,0);
   try{ovrSync(q,true);}catch(e){}if(!q.at)q.at={};try{attrShift(q,p.rat-drop);}catch(e){}q.rat=ovrCalc(q);q._rc=q.rat;
-  q.pot=ccPotC(q.rat,q.dev,(p.pot||p.rat)-p.rat);q.potLo=q.pot;q.potHi=q.pot;q.grad=false;q.inj=0;q.seasStats=emS();q.offers=[];q.yr=12;
+  q.pot=Math.min(99,Math.max(ccPotC(q.rat,q.dev,(p.pot||p.rat)-p.rat),p.potHi||0,p.pot||0));q.potLo=q.pot;q.potHi=q.pot; // the ceiling he earned in high school comes with him: potential never drops on the way to college
+  q.grad=false;q.inj=0;q.seasStats=emS();q.offers=[];q.yr=12;
   G.cc={v:1,on:on!==false,pid:p.id,p:q,k,lvl:ccLvlOf(k),y0:G.yr+1,hsRat:p.rat,drop,walk,trust:clamp(44+(p.stars||0)*3+(walk?-4:0),38,62),used:0,rsUsed:false,rsWant:false,gp:0,
     R:{},conf:null,phase:'start',os:0,wk:0,S:null,P:null,pw:0,st:{},log:[],car:[],aw:[],nil:{cash:0,val:0,deals:[]},rv:0,stage:'college',hs:(myS()||{}).name||''};
   return G.cc;}

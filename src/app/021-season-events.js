@@ -235,6 +235,7 @@ function advPlayoffWeek(){
   gdChoose('po',{slot,opp,label:roundName+': vs '+opp.name+' '+opp.mascot},()=>showLoading(`${roundName}: vs ${opp.name}`,myTeam,12,()=>_doAdvPlayoffWeek(slot,opp)));
 }
 function _doAdvPlayoffWeek(slot,opp,forced=null){
+  if(slot.result){nav('dash');return;} // a double tap: this round was already played
 
   const myOvr=(G.offR+G.defR)/2+progEdge(),oppOvr=teamOvr(opp.id);
   const bigGameBonus=myP().filter(p=>p.traits.includes('big-game')).length*.03;

@@ -102,6 +102,7 @@ function advWk(){
   const myTeam=myS();
   const label=oppTeam?`Week ${game.wk}: vs ${oppTeam.name} ${oppTeam.mascot}`:`Week ${game.wk}`;
   gdChoose('reg',{idx,label,opp:oppTeam},()=>showLoading(label,myTeam,10,()=>{
+    if(game.result||G.sched[idx]!==game){nav('dash');return;} // a double tap: this week was already played, the season has moved on
     G.phase='regular';
     simGame(idx);
     nav('dash');
@@ -120,6 +121,8 @@ function doOffseason(){
   _doOffseason();
 }
 function _doOffseason(){
+  // the season is already wrapped up (an offseason window was closed): pick the offseason up where it was left, never replay the playoffs
+  if(G.phase==='offseason'&&G.playoff&&!G.sched.some(g=>g.type==='regular'&&!g.result&&!g._empty)){runOffseason();return;}
   // Show loading screen before simulating remaining games and transitioning to offseason
   const myTeam=myS();
   showLoading('Wrapping Up the Season…',myTeam,14,()=>{

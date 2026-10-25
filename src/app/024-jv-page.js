@@ -203,7 +203,7 @@ function pgRecls(){
             <div class="dr"><span class="a">State Champ at ${clsL(G.cls)}</span><span style="color:${champAtCurrent?'var(--gn)':'var(--rd)'};font-weight:700">${champAtCurrent?'✓ Earned':' Not yet'}</span></div>
             <div class="dr"><span class="a">Budget needed</span><span style="color:${canAffordUp?'var(--gn)':'var(--rd)'};font-weight:700">$${(moveUpCost/1000).toFixed(0)}k (have $${(G.budget/1000).toFixed(0)}k)</span></div>
           </div>
-          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%">Move Up to ${nextUp}</button>`}`
+          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':'disabled'} onclick="confirmMoveUp()" style="width:100%${champAtCurrent&&canAffordUp?'':';opacity:.45'}">Move Up to ${nextUp}</button>`}`
           :`<div style="font-size:12px;color:var(--mu)">Already in the highest classification (${myClsOrder().slice(-1)[0]}).</div>`}
         </div>
       </div>
@@ -366,33 +366,17 @@ function seasonDevCheck(p){
   const devUp=devChanged&&DEV.indexOf(p.dev)>DEV.indexOf(prevDev);
 
   // --- POTENTIAL RANGE SHIFT ---
-  // potLo and potHi shift based on performance each season.
-  // Freshmen (yr=9) and Sophomores (yr=10) are 70% protected from downward shifts.
-  // Training level affects whether the hi end is reachable (via effPot).
+  // a good season can raise a player's ceiling (2-8% a season, more likely the better he played); a quiet one never lowers it,
+  // so a backup who barely played keeps his potential. Training level decides how much of the range he reaches (effPot).
   const prevPotLo=p.potLo||p.pot;
   const prevPotHi=p.potHi||p.pot;
-  const isFrSo=(p.yr===9||p.yr===10);
-  const potShiftRoll=Math.random();
-  // 2-8% chance per season
-  const ownPc=typeof pcOwnPick==='function'&&pcOwnPick(p),potShiftChanceVal=ownPc?0:0.02+perfFactor*0.06;
-  // your own Player Career player: a solid season (a starter's numbers) raises his ceiling, a big one raises it more; it never drops
+  const ownPc=typeof pcOwnPick==='function'&&pcOwnPick(p);
+  // your own Player Career player: a solid season (a starter's numbers) raises his ceiling, a big one raises it more
   if(ownPc&&perfScore>=25){const up=clamp(Math.round((perfScore-25)/12)+1,1,4);p.potHi=Math.min(99,(p.potHi||p.pot)+up);p.potLo=Math.min(p.potHi,(p.potLo||p.pot)+Math.max(1,up-1));}
-  if(potShiftRoll<potShiftChanceVal){
-    const extremity=Math.abs(perfFactor-0.5)*2;
-    const mag=Math.max(1,Math.round(extremity*5));
-    if(perfFactor>=0.5){
-      // Good performance: raise hi end (and sometimes lo end)
-      p.potHi=clamp((p.potHi||p.pot)+mag,p.potHi||p.pot,99);
-      if(perfFactor>0.8)p.potLo=clamp((p.potLo||p.pot)+Math.max(1,mag-2),p.potLo||p.pot,p.potHi);
-    } else {
-      // Poor performance: lower potential range
-      // Freshmen/sophs have 70% damage reduction
-      const dmgMult=isFrSo?0.3:1.0;
-      const effMag=Math.max(1,Math.round(mag*dmgMult));
-      p.potHi=clamp((p.potHi||p.pot)-effMag,p.rat,(p.potHi||p.pot));
-      if(perfFactor<0.2)p.potLo=clamp((p.potLo||p.rat)-Math.max(1,Math.round(effMag*0.5)),p.rat,p.potHi);
-    }
-    // Ensure lo <= hi and neither below current rat
+  if(!ownPc&&perfFactor>=0.5&&Math.random()<0.02+perfFactor*0.06){
+    const mag=Math.max(1,Math.round((perfFactor-0.5)*10));
+    p.potHi=clamp((p.potHi||p.pot)+mag,p.potHi||p.pot,99);
+    if(perfFactor>0.8)p.potLo=clamp((p.potLo||p.pot)+Math.max(1,mag-2),p.potLo||p.pot,p.potHi);
     p.potLo=clamp(p.potLo||p.rat,p.rat,99);
     p.potHi=clamp(p.potHi||p.potLo,p.potLo,99);
   }

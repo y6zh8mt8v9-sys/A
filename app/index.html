@@ -1440,7 +1440,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'ff25fd6999'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'e7b3c6f3a9'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -6856,6 +6856,7 @@ function advPlayoffWeek(){
   gdChoose('po',{slot,opp,label:roundName+': vs '+opp.name+' '+opp.mascot},()=>showLoading(`${roundName}: vs ${opp.name}`,myTeam,12,()=>_doAdvPlayoffWeek(slot,opp)));
 }
 function _doAdvPlayoffWeek(slot,opp,forced=null){
+  if(slot.result){nav('dash');return;} // a double tap: this round was already played
 
   const myOvr=(G.offR+G.defR)/2+progEdge(),oppOvr=teamOvr(opp.id);
   const bigGameBonus=myP().filter(p=>p.traits.includes('big-game')).length*.03;
@@ -8022,7 +8023,7 @@ function pgRecls(){
             <div class="dr"><span class="a">State Champ at ${clsL(G.cls)}</span><span style="color:${champAtCurrent?'var(--gn)':'var(--rd)'};font-weight:700">${champAtCurrent?'✓ Earned':' Not yet'}</span></div>
             <div class="dr"><span class="a">Budget needed</span><span style="color:${canAffordUp?'var(--gn)':'var(--rd)'};font-weight:700">$${(moveUpCost/1000).toFixed(0)}k (have $${(G.budget/1000).toFixed(0)}k)</span></div>
           </div>
-          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':`disabled style="opacity:.45"`} onclick="confirmMoveUp()" style="width:100%">Move Up to ${nextUp}</button>`}`
+          ${pcAuto()?`<div style="font-size:12px;color:var(--mu)">The school moves up on its own once it qualifies.</div>`:`<button class="btn bgn" ${champAtCurrent&&canAffordUp?'':'disabled'} onclick="confirmMoveUp()" style="width:100%${champAtCurrent&&canAffordUp?'':';opacity:.45'}">Move Up to ${nextUp}</button>`}`
           :`<div style="font-size:12px;color:var(--mu)">Already in the highest classification (${myClsOrder().slice(-1)[0]}).</div>`}
         </div>
       </div>
@@ -8185,33 +8186,17 @@ function seasonDevCheck(p){
   const devUp=devChanged&&DEV.indexOf(p.dev)>DEV.indexOf(prevDev);
 
   // --- POTENTIAL RANGE SHIFT ---
-  // potLo and potHi shift based on performance each season.
-  // Freshmen (yr=9) and Sophomores (yr=10) are 70% protected from downward shifts.
-  // Training level affects whether the hi end is reachable (via effPot).
+  // a good season can raise a player's ceiling (2-8% a season, more likely the better he played); a quiet one never lowers it,
+  // so a backup who barely played keeps his potential. Training level decides how much of the range he reaches (effPot).
   const prevPotLo=p.potLo||p.pot;
   const prevPotHi=p.potHi||p.pot;
-  const isFrSo=(p.yr===9||p.yr===10);
-  const potShiftRoll=Math.random();
-  // 2-8% chance per season
-  const ownPc=typeof pcOwnPick==='function'&&pcOwnPick(p),potShiftChanceVal=ownPc?0:0.02+perfFactor*0.06;
-  // your own Player Career player: a solid season (a starter's numbers) raises his ceiling, a big one raises it more; it never drops
+  const ownPc=typeof pcOwnPick==='function'&&pcOwnPick(p);
+  // your own Player Career player: a solid season (a starter's numbers) raises his ceiling, a big one raises it more
   if(ownPc&&perfScore>=25){const up=clamp(Math.round((perfScore-25)/12)+1,1,4);p.potHi=Math.min(99,(p.potHi||p.pot)+up);p.potLo=Math.min(p.potHi,(p.potLo||p.pot)+Math.max(1,up-1));}
-  if(potShiftRoll<potShiftChanceVal){
-    const extremity=Math.abs(perfFactor-0.5)*2;
-    const mag=Math.max(1,Math.round(extremity*5));
-    if(perfFactor>=0.5){
-      // Good performance: raise hi end (and sometimes lo end)
-      p.potHi=clamp((p.potHi||p.pot)+mag,p.potHi||p.pot,99);
-      if(perfFactor>0.8)p.potLo=clamp((p.potLo||p.pot)+Math.max(1,mag-2),p.potLo||p.pot,p.potHi);
-    } else {
-      // Poor performance: lower potential range
-      // Freshmen/sophs have 70% damage reduction
-      const dmgMult=isFrSo?0.3:1.0;
-      const effMag=Math.max(1,Math.round(mag*dmgMult));
-      p.potHi=clamp((p.potHi||p.pot)-effMag,p.rat,(p.potHi||p.pot));
-      if(perfFactor<0.2)p.potLo=clamp((p.potLo||p.rat)-Math.max(1,Math.round(effMag*0.5)),p.rat,p.potHi);
-    }
-    // Ensure lo <= hi and neither below current rat
+  if(!ownPc&&perfFactor>=0.5&&Math.random()<0.02+perfFactor*0.06){
+    const mag=Math.max(1,Math.round((perfFactor-0.5)*10));
+    p.potHi=clamp((p.potHi||p.pot)+mag,p.potHi||p.pot,99);
+    if(perfFactor>0.8)p.potLo=clamp((p.potLo||p.pot)+Math.max(1,mag-2),p.potLo||p.pot,p.potHi);
     p.potLo=clamp(p.potLo||p.rat,p.rat,99);
     p.potHi=clamp(p.potHi||p.potLo,p.potLo,99);
   }
@@ -15164,6 +15149,7 @@ function advWk(){
   const myTeam=myS();
   const label=oppTeam?`Week ${game.wk}: vs ${oppTeam.name} ${oppTeam.mascot}`:`Week ${game.wk}`;
   gdChoose('reg',{idx,label,opp:oppTeam},()=>showLoading(label,myTeam,10,()=>{
+    if(game.result||G.sched[idx]!==game){nav('dash');return;} // a double tap: this week was already played, the season has moved on
     G.phase='regular';
     simGame(idx);
     nav('dash');
@@ -15182,6 +15168,8 @@ function doOffseason(){
   _doOffseason();
 }
 function _doOffseason(){
+  // the season is already wrapped up (an offseason window was closed): pick the offseason up where it was left, never replay the playoffs
+  if(G.phase==='offseason'&&G.playoff&&!G.sched.some(g=>g.type==='regular'&&!g.result&&!g._empty)){runOffseason();return;}
   // Show loading screen before simulating remaining games and transitioning to offseason
   const myTeam=myS();
   showLoading('Wrapping Up the Season…',myTeam,14,()=>{
@@ -17870,7 +17858,8 @@ function ccCreate(p,on){const c=p.committed;let k=c?c.school+'|'+c.lvl:null,walk
     const lv=p.rat>=74?'FCS':p.rat>=64?'D2':'JUCO',L=COLLEGES.filter(x=>x.lvl===lv).sort((a,b)=>(b.st===st)-(a.st===st)||a.pr-b.pr);const c0=L[0]||COLLEGES[COLLEGES.length-1];k=c0.school+'|'+c0.lvl;}
   const q=JSON.parse(JSON.stringify(p)),perf=ccHsPerf(p),drop=ccEntryDrop(p.rat,perf,0);
   try{ovrSync(q,true);}catch(e){}if(!q.at)q.at={};try{attrShift(q,p.rat-drop);}catch(e){}q.rat=ovrCalc(q);q._rc=q.rat;
-  q.pot=ccPotC(q.rat,q.dev,(p.pot||p.rat)-p.rat);q.potLo=q.pot;q.potHi=q.pot;q.grad=false;q.inj=0;q.seasStats=emS();q.offers=[];q.yr=12;
+  q.pot=Math.min(99,Math.max(ccPotC(q.rat,q.dev,(p.pot||p.rat)-p.rat),p.potHi||0,p.pot||0));q.potLo=q.pot;q.potHi=q.pot; // the ceiling he earned in high school comes with him: potential never drops on the way to college
+  q.grad=false;q.inj=0;q.seasStats=emS();q.offers=[];q.yr=12;
   G.cc={v:1,on:on!==false,pid:p.id,p:q,k,lvl:ccLvlOf(k),y0:G.yr+1,hsRat:p.rat,drop,walk,trust:clamp(44+(p.stars||0)*3+(walk?-4:0),38,62),used:0,rsUsed:false,rsWant:false,gp:0,
     R:{},conf:null,phase:'start',os:0,wk:0,S:null,P:null,pw:0,st:{},log:[],car:[],aw:[],nil:{cash:0,val:0,deals:[]},rv:0,stage:'college',hs:(myS()||{}).name||''};
   return G.cc;}
