@@ -7,7 +7,7 @@
   --pitch:#0a0a0b;--sod:#141416;--sod2:#1c1c20;--yard:#2a2a30;--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.22);
   --chalk:#f4f4f5;--mute:#a1a1aa;--post:#ef2d38;--go:#46d17f;--flag:#ff7a5c;--board:#050506;
   --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#26262b;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:var(--go);--gd:var(--post);--rd:var(--flag);--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);--te:var(--tT,#9fc0f2);
+  --gn:var(--go);--gd:var(--post);--rd:var(--flag);--ac:var(--tA,#ef2d38);--b2:var(--tB,#a51c24);--te:var(--tT,#ff9aa0);
   --hd:'Alumni Sans','Arial Narrow',sans-serif;--head:var(--hd);
   --font:'Archivo','Segoe UI',system-ui,sans-serif;--rad:4px;--cut:14px;--shadow:none;--glass:none;
   --pop:0 28px 80px rgba(0,0,0,.6);
@@ -20,7 +20,7 @@
   --pitch:#f4f4f5;--sod:#ffffff;--sod2:#ececef;--yard:#d4d4d8;--line:rgba(17,17,19,.12);--line2:rgba(17,17,19,.24);
   --chalk:#111113;--mute:#5b5b63;--post:#c8101e;--go:#167a45;--flag:#b8341b;--board:#111113;
   --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#e4e4e7;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:#167a45;--gd:#c8101e;--rd:#b8341b;--te:var(--tT,#1f56b0);--pop:0 24px 60px rgba(17,17,19,.2);--pot:#c8101e;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
+  --gn:#167a45;--gd:#c8101e;--rd:#b8341b;--te:var(--tT,#b3121f);--pop:0 24px 60px rgba(17,17,19,.2);--pot:#c8101e;--y8:#1f63b0;--ac:var(--tA,#ef2d38);--b2:var(--tB,#a51c24);
   --mow:repeating-linear-gradient(90deg,rgba(17,17,19,.022) 0 120px,transparent 120px 240px);
 }
 :root.light .yf{color:#167a45}:root.light .ys{color:#1f63b0}
@@ -253,3 +253,18 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 /* Free Practice and Online Play screens */
 html body #fp,html body #ol{background:var(--mow),var(--bg)}
 #fp .fp-head h2,#ol .fp-head h2{font:900 28px/1 var(--hd)}
+
+/* online play is down: a plain notice at the top of the Online Play screen */
+#ol .ol-down{margin:0 0 14px;padding:10px 14px;background:var(--s1);border-left:4px solid var(--post);font-size:13px;line-height:1.45}
+#ol .ol-down b{display:block;font:800 17px/1.1 var(--hd);margin-bottom:2px}
+
+/* player and coach creators */
+html body #coachc{background:var(--mow),var(--bg)!important}
+#coachc .cc-wrap{border-radius:0;background:var(--s1);border:0;border-top:3px solid var(--post);box-shadow:var(--pop);backdrop-filter:none;-webkit-backdrop-filter:none}
+#coachc .cc-head h2{font:900 30px/1 var(--hd)!important}
+#coachc .cc-face{border-radius:0!important;background:linear-gradient(180deg,#2a2a30,#141416)!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%)}
+:root.light #coachc .cc-face{background:linear-gradient(180deg,#e4e4e7,#cfcfd4)!important}
+#coachc .cc-seg{border-radius:0;background:var(--s2);border-color:var(--bd)}
+#coachc .cc-seg.on{background:var(--post)!important;border-color:var(--post);color:#fff;box-shadow:none}
+#coachc .cc-sw.on{outline-color:var(--post)}
+#coachc input[type=range],#coachc input[type=checkbox]{accent-color:var(--post)}

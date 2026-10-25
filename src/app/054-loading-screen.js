@@ -84,7 +84,7 @@ const PCC_PTS=140,PCC_OVR=[40,55],PCC_INT=3,PCC_TR=2,PCC_POS=['QB','RB','WR','TE
 let _pcd=null;
 function pccOn(){const on=document.getElementById('pc-on');return!!(on&&on.checked);}
 function pccMode(pl){const w=_ttEl('coachc');if(!w)return;const h=w.querySelector('.cc-head h2'),l=w.querySelector('.cc-prev-l'),f=w.querySelector('.cc-foot');
-  if(h)h.textContent=pl?'Create Your Player':'Create Your Coach';if(l)l.textContent=pl?'Freshman':'Head Coach';
+  if(h)h.textContent=pl?'Create your player':'Create your coach';if(l)l.textContent=pl?'Freshman':'Head coach';
   if(f)f.innerHTML=pl?`<button class="bgh" onclick="pccBack()">Back to offers</button><button class="btn bgn cc-go" onclick="pccStart()">${(document.getElementById('pc-lock')||{}).checked?'Start Career':'Next: your coach'}</button>`
     :`<button class="bgh" onclick="ccBack()">Back to offers</button><button class="btn bgn cc-go" onclick="ccStart()">Start Career</button>`;
   const t=_selectedOfferTeam,tm=_ttEl('cc-team');if(tm&&t)tm.textContent=`${t.name} ${t.mascot}`;}

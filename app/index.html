@@ -741,7 +741,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
   --pitch:#0a0a0b;--sod:#141416;--sod2:#1c1c20;--yard:#2a2a30;--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.22);
   --chalk:#f4f4f5;--mute:#a1a1aa;--post:#ef2d38;--go:#46d17f;--flag:#ff7a5c;--board:#050506;
   --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#26262b;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:var(--go);--gd:var(--post);--rd:var(--flag);--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);--te:var(--tT,#9fc0f2);
+  --gn:var(--go);--gd:var(--post);--rd:var(--flag);--ac:var(--tA,#ef2d38);--b2:var(--tB,#a51c24);--te:var(--tT,#ff9aa0);
   --hd:'Alumni Sans','Arial Narrow',sans-serif;--head:var(--hd);
   --font:'Archivo','Segoe UI',system-ui,sans-serif;--rad:4px;--cut:14px;--shadow:none;--glass:none;
   --pop:0 28px 80px rgba(0,0,0,.6);
@@ -754,7 +754,7 @@ html.lowend *{transition-duration:0s!important;animation-duration:0s!important}
   --pitch:#f4f4f5;--sod:#ffffff;--sod2:#ececef;--yard:#d4d4d8;--line:rgba(17,17,19,.12);--line2:rgba(17,17,19,.24);
   --chalk:#111113;--mute:#5b5b63;--post:#c8101e;--go:#167a45;--flag:#b8341b;--board:#111113;
   --bg:var(--pitch);--s1:var(--sod);--s2:var(--sod2);--s3:#e4e4e7;--bd:var(--line);--tx:var(--chalk);--mu:var(--mute);
-  --gn:#167a45;--gd:#c8101e;--rd:#b8341b;--te:var(--tT,#1f56b0);--pop:0 24px 60px rgba(17,17,19,.2);--pot:#c8101e;--y8:#1f63b0;--ac:var(--tA,#2f66c0);--b2:var(--tB,#24477f);
+  --gn:#167a45;--gd:#c8101e;--rd:#b8341b;--te:var(--tT,#b3121f);--pop:0 24px 60px rgba(17,17,19,.2);--pot:#c8101e;--y8:#1f63b0;--ac:var(--tA,#ef2d38);--b2:var(--tB,#a51c24);
   --mow:repeating-linear-gradient(90deg,rgba(17,17,19,.022) 0 120px,transparent 120px 240px);
 }
 :root.light .yf{color:#167a45}:root.light .ys{color:#1f63b0}
@@ -987,6 +987,21 @@ html body .soc-m{background:var(--s3)!important;color:var(--tx)!important}
 /* Free Practice and Online Play screens */
 html body #fp,html body #ol{background:var(--mow),var(--bg)}
 #fp .fp-head h2,#ol .fp-head h2{font:900 28px/1 var(--hd)}
+
+/* online play is down: a plain notice at the top of the Online Play screen */
+#ol .ol-down{margin:0 0 14px;padding:10px 14px;background:var(--s1);border-left:4px solid var(--post);font-size:13px;line-height:1.45}
+#ol .ol-down b{display:block;font:800 17px/1.1 var(--hd);margin-bottom:2px}
+
+/* player and coach creators */
+html body #coachc{background:var(--mow),var(--bg)!important}
+#coachc .cc-wrap{border-radius:0;background:var(--s1);border:0;border-top:3px solid var(--post);box-shadow:var(--pop);backdrop-filter:none;-webkit-backdrop-filter:none}
+#coachc .cc-head h2{font:900 30px/1 var(--hd)!important}
+#coachc .cc-face{border-radius:0!important;background:linear-gradient(180deg,#2a2a30,#141416)!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%)}
+:root.light #coachc .cc-face{background:linear-gradient(180deg,#e4e4e7,#cfcfd4)!important}
+#coachc .cc-seg{border-radius:0;background:var(--s2);border-color:var(--bd)}
+#coachc .cc-seg.on{background:var(--post)!important;border-color:var(--post);color:#fff;box-shadow:none}
+#coachc .cc-sw.on{outline-color:var(--post)}
+#coachc input[type=range],#coachc input[type=checkbox]{accent-color:var(--post)}
 /* ════════ Career story scenes: a cutscene card inside the modal (tokens from 06-design.css) ════════ */
 .st-scene{display:flex;flex-direction:column;gap:12px;max-width:620px;margin:0 auto}
 .st-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px;padding-right:36px;background:var(--yardline);background-position:bottom;padding-top:0}
@@ -1061,7 +1076,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
       <button class="tt-btn" onclick="ttPlayer()">Player Career<small>Be one player: the coach calls the plays</small></button>
       <button class="tt-btn" onclick="ttLoad()">Load Game</button>
       <button class="tt-btn" onclick="fpOpen()">Free Practice</button>
-      <button class="tt-btn" onclick="olOpen()">Online Play<small>Play a friend with a code</small></button>
+      <button class="tt-btn" onclick="olOpen()">Online Play<small>Not working right now</small></button>
       <button class="tt-btn" onclick="ccOpen()">Community Creations<small>Worlds and teams from other players</small></button>
     </div>
     <div class="tt-legal"><button type="button" onclick="privacyOpen()">Privacy policy</button><button type="button" onclick="termsOpen()">Terms of use</button></div>
@@ -1076,9 +1091,9 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 </div>
 <div id="coachc" class="hid" role="dialog" aria-label="Create your coach">
   <div class="cc-wrap">
-    <div class="cc-head"><h2>Create Your Coach</h2><div id="cc-team" class="cc-team"></div></div>
+    <div class="cc-head"><h2>Create your coach</h2><div id="cc-team" class="cc-team"></div></div>
     <div class="cc-body">
-      <div class="cc-prev"><div id="cc-face" class="cc-face"></div><div class="cc-prev-l">Head Coach</div></div>
+      <div class="cc-prev"><div id="cc-face" class="cc-face"></div><div class="cc-prev-l">Head coach</div></div>
       <div id="cc-form" class="cc-form"></div>
     </div>
     <div class="cc-foot"><button class="bgh" onclick="ccBack()">Back to offers</button><button class="btn bgn cc-go" onclick="ccStart()">Start Career</button></div>
@@ -1425,7 +1440,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'51a5c13ece'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'9127417198'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -1969,7 +1984,8 @@ function effPot(p){
   }
   // a player who grew past his ceiling keeps his rating: the ceiling rises to meet him, it never pulls him down
   const r=Math.min(99,p.rat||0);if(r>p.potHi)p.potHi=r;
-  const tf=trainFactor();
+  // your own Player Career player reaches the top of his range: his ceiling is his to earn, not the team's facilities
+  const tf=typeof pcOwnPick==='function'&&pcOwnPick(p)?1:trainFactor();
   return Math.max(r,clamp(Math.round(p.potLo+(p.potHi-p.potLo)*tf),p.potLo,p.potHi));
 }
 // Sync p.pot to effective value (called after training upgrades or season updates)
@@ -8171,7 +8187,10 @@ function seasonDevCheck(p){
   const prevPotHi=p.potHi||p.pot;
   const isFrSo=(p.yr===9||p.yr===10);
   const potShiftRoll=Math.random();
-  const potShiftChanceVal=0.02+perfFactor*0.06; // 2-8% chance per season
+  // 2-8% chance per season
+  const ownPc=typeof pcOwnPick==='function'&&pcOwnPick(p),potShiftChanceVal=ownPc?0:0.02+perfFactor*0.06;
+  // your own Player Career player: a solid season (a starter's numbers) raises his ceiling, a big one raises it more; it never drops
+  if(ownPc&&perfScore>=25){const up=clamp(Math.round((perfScore-25)/12)+1,1,4);p.potHi=Math.min(99,(p.potHi||p.pot)+up);p.potLo=Math.min(p.potHi,(p.potLo||p.pot)+Math.max(1,up-1));}
   if(potShiftRoll<potShiftChanceVal){
     const extremity=Math.abs(perfFactor-0.5)*2;
     const mag=Math.max(1,Math.round(extremity*5));
@@ -8399,6 +8418,7 @@ function cnavHub(force){if(!force&&gdsMain().cnav===false)return'';const T=cnavT
     return`<div class="cnav-card"><div class="cnav-h"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg>${l}${n?`<small>${n} to do</small>`:''}</div><div class="cnav-sub">${ps.map(pg=>`<button class="${T[pg]?'todo':''}" onclick="nav('${pg}')">${cnavLbl(pg)}${T[pg]?`<span>${T[pg]}</span>`:''}</button>`).join('')}</div></div>`;}).join('');
   return`<div class="cnav-hub">${cards}</div>`;}
 function nav(page,arg){try{ovrSyncAll();}catch(e){}try{applyTeamTheme();}catch(e){}
+  if(ccOn()&&G.cc.stage==='college'&&CC_TAB[page]){arg=CC_TAB[page];page='college';} // college: high school league links open the college tab
   if(pcHidePg(page)){page='dash';arg=undefined;} // Player Career: coach pages (old saves, deep links) go to the dashboard
   try{pcAutoTick();}catch(e){console.error('player career auto',e);}
   const _prevPg=G._page;
@@ -13426,6 +13446,7 @@ function olRender(soft){
   const y=el.scrollTop;
   el.innerHTML=`<div class="fp-wrap"><div class="fp-head"><button class="bgh bsm" onclick="olClose()">Main menu</button><h2>Online Play</h2>
     <span class="fp-sub">${cfg?(cfg.mode==='local'?'Test mode: this device only':OLS.backend?'Connected to your online server':'Connecting to your online server…'):'Not set up yet'}${u?` · signed in as <b>${olEsc(olName())}</b>`:''}</span></div>
+    <div class="ol-down" role="status"><b>Online play isn't working right now.</b> We're working on it. Career, Free Practice and 2-player games on one device all work as usual.</div>
     ${cfg&&!OLS.cfgOpen?`<div class="tabs fp-tabs">${tabs}</div>`:''}${OLS.msg?`<div class="ol-note ol-err">${olEsc(OLS.msg)}</div>`:''}${body}</div>`;
   el.scrollTop=y;
 }
@@ -14479,6 +14500,7 @@ function showPlayer(id){
     </div>
     <button class="bgh bsm" onclick="autoSP(${p.id})">Auto-upgrade all SP</button>
   </div>`:''}
+  ${own&&pcAuto()?`<div style="margin-top:14px"><button class="bgh bsm" onclick="clo();myGearOpen()">Look and equipment</button></div>`:''}
   ${ctl?`<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="bgh bsm" onclick="clo();editPlayer(${p.id})">Edit Player &amp; Equipment</button><button class="bgh bsm" onclick="capToggle(${p.id});clo();showPlayer(${p.id})">${captains().includes(p.id)?'Remove captain':'Name captain'}</button>${colFlipTarget(p)?`<button class="bgh bsm" onclick="pushFlip(${p.id})">Push him to flip to ${colFlipTarget(p).school}</button>`:''}${p.onJV&&canBeOnJV(p)?`<button class="btn bsm" onclick="talkOpen(${p.id})">Talk about moving up</button>`:''}<span style="font-size:11px;color:var(--mu);align-self:center">Gear: ${eqDesc(eqOf(p))}</span>
   </div>`:''}
@@ -14798,7 +14820,8 @@ function eqRead(){const g=id=>document.getElementById(id);if(!g('eq-tw'))return 
     sleeve:g('eq-sl').value,sleeveC:eqColRead('eq-slc')||'#16181d',band:g('eq-bd').value,bandC:eqColRead('eq-bdc')||'#ffffff',under:g('eq-un').value,underC:eqColRead('eq-unc')||'#8d939b',pants:g('eq-pa')?g('eq-pa').value:'knee',socks:g('eq-so')?g('eq-so').value:'high',legS:g('eq-ls')?g('eq-ls').value:'none',legSC:eqColRead('eq-lsc')||'#16181d',visor:g('eq-vi')?g('eq-vi').value:'',crop:g('eq-cr')?g('eq-cr').value==='1':false,hShell:g('eq-hs')?g('eq-hs').value:'gloss',hStripe:g('eq-ht')?g('eq-ht').value:'team',hMask:eqColRead('eq-hm')||'',mouth2:g('eq-mo2')?eqColRead('eq-mo2'):'',ski:g('eq-sk')?eqColRead('eq-sk'):'',gcap:g('eq-gc')?eqColRead('eq-gc'):'',spats:g('eq-sp')?eqColRead('eq-sp'):''};}
 function eqSetForm(e){const g=id=>document.getElementById(id),sc=(id,v)=>{const s=g(id);if(!s)return;if([...s.options].some(o=>o.value===v))s.value=v;else{s.value='custom';g(id+'-x').value=v;}};
   g('eq-tw').value=e.towel?'1':'0';sc('eq-twc',e.towelC);sc('eq-gl',e.glove);sc('eq-cl',e.cleat);sc('eq-mo',e.mouth);g('eq-sl').value=e.sleeve;sc('eq-slc',e.sleeveC);g('eq-bd').value=e.band;sc('eq-bdc',e.bandC);g('eq-un').value=e.under;sc('eq-unc',e.underC);if(g('eq-pa'))g('eq-pa').value=e.pants||'knee';if(g('eq-so'))g('eq-so').value=e.socks||'high';if(g('eq-ls'))g('eq-ls').value=e.legS||'none';sc('eq-lsc',e.legSC||'#16181d');if(g('eq-vi'))g('eq-vi').value=e.visor||'';if(g('eq-cr'))g('eq-cr').value=e.crop?'1':'0';if(g('eq-hs'))g('eq-hs').value=e.hShell||'gloss';if(g('eq-ht'))g('eq-ht').value=e.hStripe||'team';sc('eq-hm',e.hMask||'');sc('eq-mo2',e.mouth2||'');sc('eq-sk',e.ski||'');sc('eq-gc',e.gcap||'');sc('eq-sp',e.spats||'');eqPrev();}
-function eqRandom(pid){const p=window._eqPid==='pcd'&&_pcd?pccP():getP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
+function _eqP(pid){return window._eqPid==='mine'?myPlayer():window._eqPid==='pcd'&&_pcd?pccP():getP(pid);}
+function eqRandom(pid){const p=_eqP(pid);if(!p)return;const q=Object.assign({},p,{id:(p.id||1)*7+Math.floor(Math.random()*9999),eq:null});eqSetForm(eqDefault(q));}
 function eqClear(){eqSetForm({towel:false,towelC:'#ffffff',glove:'',cleat:'',mouth:'',sleeve:'none',sleeveC:'#16181d',band:'none',bandC:'#ffffff',under:'none',underC:'#8d939b',pants:'knee',socks:'high',visor:'',legS:'none',legSC:'#16181d',crop:false,hShell:'gloss',hStripe:'team',hMask:'',mouth2:'',ski:'',gcap:'',spats:''});}
 // the same pixel sprites as Game Day, loaded once from the embedded game for the preview
 let _eqLibP=null;
@@ -14816,7 +14839,7 @@ function gdPackOf(s,kind){const u=uniOf(s,kind||'home'),kit=Object.assign({glove
   return{helmet:kit.helmet,helmetStripe:kit.hstripe,helmetLogo:kit.hstripe,facemask:kit.mask,jersey:kit.jersey,jerseyTrim:kit.trim,pants:kit.pants,pantsStripe:kit.pstripe,belt:'#1d1d22',socks:kit.sock,sockStripe:kit.trim,cleats:kit.cleat,cleatAccent:kit.trim,gloves:kit.glove,number:kit.num,numberTrim:_gdLum(kit.jersey)>.6?null:'#f4f4f4',armSleeve:'skin'};}
 function eqPrev(){
   if(window._eqPid==='pcd'){pccPrev();return;}
-  const cv=document.getElementById('eq-cv');if(!cv)return;const p=getP(window._eqPid);if(!p)return;const e=eqRead()||eqOf(p),s=getS(p.sId)||myS();
+  const cv=document.getElementById('eq-cv');if(!cv)return;const p=_eqP(window._eqPid);if(!p)return;const e=eqRead()||eqOf(p),s=getS(p.sId)||myS();
   eqLib().then(lib=>{if(!document.body.contains(cv))return;const x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);x.imageSmoothingEnabled=false;
     const build=(p.pos==='OL'||(p.pos==='DL'&&(p.wt||0)>=275))?'line':(['TE','LB','DL'].includes(p.pos)?'big':'skill'),sh='player_'+build;
     const sk=Math.round(Math.max(0,FACE_SKIN.indexOf(faceSkinHex(p.fs!=null?p.fs:p.id)))*5/7),sp=lib.lite(sh,gdPackOf(s,'home'),sk),eq=eqResolve(e,s);{const u=uniOf(s,'home');eq.helm={shell:u.hShell||'gloss',stripe:u.hStripe||'team',mask:''};}if(p.pos==='QB'){eq.noGlove=true;eq.glove=null;}
@@ -14824,6 +14847,14 @@ function eqPrev(){
     shows.forEach(([an,f,fl],i)=>{if(!sp.has(an))return;sp.draw(x,an,f,46+i*80,200,3,3,fl,p.num,eq);});
   }).catch(()=>{const x=cv.getContext('2d');x.fillStyle='#fff';x.font='12px sans-serif';x.fillText('Preview unavailable',90,95);});
 }
+// Player Career: your own player's look and equipment, any time in his career (high school, college or the pros);
+// ratings stay out of it, they are earned
+function myGearOpen(){const p=myPlayer();if(!p)return;window._eqPid='mine';
+  openMo(`<h2>Look and equipment</h2><div style="font-size:13px;color:var(--mu);margin-bottom:8px">${p.fn} ${p.ln} · ${p.pos}</div>
+  ${lookEditorHtml(p)}${eqEditorHtml(p)}
+  <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" onclick="myGearSave()">Save</button><button class="bgh" onclick="clo()">Cancel</button></div>`);setTimeout(eqPrev,0);}
+function myGearSave(){const p=myPlayer();if(!p)return;const eq=eqRead();if(eq)p.eq=eq;lookRead(p);try{gdFixNums(p);}catch(e){}
+  clo();nav(G._page||'mine',G._arg);notify('Look and equipment saved');}
 function editPlayer(pid){
   const p=getP(pid);if(!p)return;window._eqPid=pid;setTimeout(earnedLock,0);
   openMo(`<h2>Edit: ${p.fn} ${p.ln}</h2>
@@ -17459,7 +17490,7 @@ const PCC_PTS=140,PCC_OVR=[40,55],PCC_INT=3,PCC_TR=2,PCC_POS=['QB','RB','WR','TE
 let _pcd=null;
 function pccOn(){const on=document.getElementById('pc-on');return!!(on&&on.checked);}
 function pccMode(pl){const w=_ttEl('coachc');if(!w)return;const h=w.querySelector('.cc-head h2'),l=w.querySelector('.cc-prev-l'),f=w.querySelector('.cc-foot');
-  if(h)h.textContent=pl?'Create Your Player':'Create Your Coach';if(l)l.textContent=pl?'Freshman':'Head Coach';
+  if(h)h.textContent=pl?'Create your player':'Create your coach';if(l)l.textContent=pl?'Freshman':'Head coach';
   if(f)f.innerHTML=pl?`<button class="bgh" onclick="pccBack()">Back to offers</button><button class="btn bgn cc-go" onclick="pccStart()">${(document.getElementById('pc-lock')||{}).checked?'Start Career':'Next: your coach'}</button>`
     :`<button class="bgh" onclick="ccBack()">Back to offers</button><button class="btn bgn cc-go" onclick="ccStart()">Start Career</button>`;
   const t=_selectedOfferTeam,tm=_ttEl('cc-team');if(tm&&t)tm.textContent=`${t.name} ${t.mascot}`;}
@@ -17578,7 +17609,10 @@ function pcActive(){const p=myPlayer();return!!(G&&G.pcLock&&p&&G.players.includ
 // ── Player Career mode runs the team for you: the head coach handles schedule, depth chart, training, staff and recruiting ──
 function pcAuto(){return!!(typeof G!=='undefined'&&G&&G.pcLock);}
 // coach pages are hidden; in college the high school team's pages go too
-function pcHidePg(pg){return pcAuto()&&(['depth','jv','recr','scout','training','staff','cust','advisor'].includes(pg)||(ccOn()&&['roster','sched','recls'].includes(pg)));}
+// in college the high school league's pages go too: his college page has its own schedule, standings, rankings and roster
+const CC_HS_PG=['roster','sched','recls','stand','rank','playoff','teams','leads','media','watch','hof','trophy','hist'];
+const CC_TAB={sched:'sched',stand:'stand',rank:'rank',playoff:'post',roster:'roster',teams:'cols',leads:'stats'};
+function pcHidePg(pg){return pcAuto()&&(['depth','jv','recr','scout','training','staff','cust','advisor'].includes(pg)||(ccOn()&&CC_HS_PG.includes(pg)));}
 // run a coach action without its toasts and page changes
 function pcQuiet(fn){const n=nav,nt=notify;nav=function(){};notify=function(){};try{return fn();}finally{nav=n;notify=nt;}}
 // the schedule: the rival in week 5 (an ongoing rival from the division, or the usual one), the open dates filled with fair
@@ -18095,13 +18129,13 @@ function pgCollege(tab){const C=G.cc;if(!C||!C.S){return`<div class="pnl"><div c
   else if(tab==='cols'){body=lvSel+`<div class="pnl"><div class="ph">${CC_LVN[lvl]} colleges</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;padding:10px">${C.S[lvl].T.slice().sort((a,b)=>(COL_BY[b]||{}).pr-(COL_BY[a]||{}).pr).map(k=>`<button class="bgh" style="display:flex;gap:8px;align-items:center;text-align:left;padding:6px 8px" onclick="colShow('${k.replace(/'/g,"\\'")}')">${colLogo(k,30)}<span style="font-size:12px;line-height:1.2"><b>${ccName(k)}</b><br><small style="color:var(--mu)">${colInfo(k).mascot} · ${ccRecStr(k,lvl)}</small></span></button>`).join('')}</div></div>`;}
   return`<div class="pnl" style="margin-bottom:10px"><div class="pb" style="display:flex;align-items:center;gap:12px">${colLogo(C.k,48)}<div style="flex:1"><div style="font:900 22px/1.1 var(--hd)">${colInfo(C.k).name} ${colInfo(C.k).mascot}</div><div style="font-size:12px;color:var(--mu)">${CC_LVN[C.lvl]} · ${ccConfName(C.k)} · ${ccRecStr(C.k)}</div></div><button class="btn bgn" onclick="ccNext()">${ccLabel()} ›</button></div></div>${bar}${body}`;}
 // My Player in college (and after)
-function ccMine(){const C=G.cc,p=C.p,I=colInfo(C.k);let skill='';try{if(C.stage==='college')skill=pcSkillPanel(p);}catch(e){}
+function ccMine(){const C=G.cc,p=C.p,I=colInfo(C.k);let skill='';try{if(C.stage==='college'||C.stage==='pro')skill=pcSkillPanel(p);}catch(e){}
   const head=`<div class="pnl"><div class="pb" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div>${face(p.fs,84)}</div>
     <div style="flex:1;min-width:220px"><div style="font-size:12px;color:var(--mu);font-weight:800;letter-spacing:.06em;">My Player · ${C.stage==='college'?ccClassLbl():C.stage==='pro'?'Pro':'Career over'}</div>
       <div style="font-family:var(--hd);font-size:30px;font-weight:900;line-height:1.05">#${p.num} ${p.fn} ${p.ln}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px"><span class="pb2">${p.pos}</span>${rb(p.rat)} ${stars(p.stars||0)} ${devB(p.dev)} ${p.arch?`<span style="font-size:11px;color:var(--mu)">${p.arch}</span>`:''}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:6px">${I.name} ${I.mascot} · potential ${p.pot} · Level ${p.pcLv||1} · high school: ${C.hs} (${C.hsRat} OVR)</div></div>
-    <div>${colLogo(C.k,64)}</div></div></div>`;
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">${colLogo(C.k,64)}${C.stage!=='done'?'<button class="bgh bsm" onclick="myGearOpen()">Look and equipment</button>':''}</div></div></div>`;
   let pro='';if(C.stage!=='college'){try{const a=aiG().alumni[C.pid];if(a)pro=`<div class="pnl"><div class="ph">Pro career</div><div class="pb">${aiCareerCard(a,p)}</div></div>`;else if(C.stage==='done')pro=`<div class="pnl"><div class="ph">After college</div><div class="pb">No pro team signed ${p.fn} after the draft. His football career is over.</div></div>`;}catch(e){}}
   return head+skill+pro+pgCollege('stats').replace(/^[\s\S]*?<div class="tabs"[\s\S]*?<\/div>/,'');}
 function ccProDash(){const C=G.cc,p=C.p,D=C.draft||{},a=(()=>{try{return aiG().alumni[C.pid];}catch(e){return null;}})();
@@ -18177,13 +18211,19 @@ window.pcSpend=function(k){const p=myPlayer();if(!p||!(G.players.includes(p)||(c
   const v=atv(p,k),c=pcCost(v);if(v>=99||(p.pcSP||0)<c)return;
   if(ATOP.has(k))p[k]=v+1;else p.at[k]=v+1;p.pcSP-=c;p.rat=ovrCalc(p);p._rc=p.rat;if(p.pot<p.rat)p.pot=p.rat;if(p.potHi!=null&&p.potHi<p.rat)p.potHi=p.rat;
   try{updateRats();}catch(e){}nav('mine');};
+// skill points can also raise his ceiling: one point on both ends of the potential range
+function pcPotCost(p){const h=p.potHi||p.pot||60;return h<80?4:h<90?6:8;}
+window.pcPotUp=function(){const p=myPlayer();if(!p||!(G.players.includes(p)||(ccOn()&&p===G.cc.p)))return;syncPot(p);
+  const c=pcPotCost(p),hi=p.potHi||p.pot;if(hi>=99||(p.pcSP||0)<c)return;
+  p.potHi=Math.min(99,hi+1);p.potLo=Math.min(p.potHi,(p.potLo||p.pot)+1);p.pcSP-=c;syncPot(p);nav(G._page||'mine');};
 function pcSkillPanel(p){const lv=p.pcLv||1,xp=p.pcXP||0,need=pcNeed(lv),sp=p.pcSP||0,W=OVR_W[p.pos]||OVR_W.WR;
   const ks=Object.keys(W).sort((a,b)=>W[b]-W[a]);for(const k of['spd','str','sta'])if(!ks.includes(k))ks.push(k);
   return`<div class="pnl"><div class="ph">Level ${lv} · Skill points</div><div class="pb">
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--mu)"><span>${xp} / ${need} XP to level ${lv+1}</span><span><b style="color:${sp?'var(--gd)':'var(--tx)'}">${sp}</b> skill point${sp===1?'':'s'} to spend</span></div>
     <div style="height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden;margin:4px 0 10px"><div style="height:100%;width:${Math.round(xp/need*100)}%;background:var(--ac)"></div></div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;padding:6px 8px;background:var(--s2)"><span style="flex:1"><b>Potential</b> ${p.potLo||p.pot}–${p.potHi||p.pot} <span style="color:var(--mu);font-size:11px">raise the ceiling he can grow to</span></span><button class="bgh bxs" style="min-width:52px" onclick="pcPotUp()" ${sp<pcPotCost(p)||(p.potHi||p.pot)>=99?'disabled':''}>+1 · ${pcPotCost(p)}</button></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 14px">${ks.map(k=>{const v=atv(p,k),c=pcCost(v);return`<div style="display:flex;align-items:center;gap:6px;font-size:13px"><span style="flex:1">${AN[k]||k}${W[k]?' <span style="color:var(--te);font-size:10px">●</span>':''}</span><b style="width:26px;text-align:center;color:${attrColor(v)}">${v}</b><button class="bgh bxs" style="min-width:52px" onclick="pcSpend('${k}')" ${sp<c||v>=99?'disabled':''}>+1 · ${c}</button></div>`;}).join('')}</div>
-    <div style="font-size:11px;color:var(--mu);margin-top:8px">Every game earns XP: more for big games, wins and the playoffs. Each level gives ${PC_SP_LV} skill points. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 points above 90.</div></div></div>`;}
+    <div style="font-size:11px;color:var(--mu);margin-top:8px">Every game earns XP: more for big games, wins and the playoffs. Each level gives ${PC_SP_LV} skill points. Ratings under 60 cost 1 point, then 2, 3, 4 and 5 points above 90. Raising the potential costs 4 to 8 points. Good seasons raise it too.</div></div></div>`;}
 function pcPanel(){
   const p=pcActive();if(!p)return'';const r=pcRole(p),rel=p.rel==null?50:p.rel,first=!G.sched.some(g=>g.type==='regular'&&g.result);
   const bar=`<div style="height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden;margin:4px 0 2px"><div style="height:100%;width:${rel}%;background:${rel>=70?'var(--gn)':rel>=40?'var(--gd)':'var(--rd,#d33)'}"></div></div>`;
@@ -18223,7 +18263,7 @@ function pgMine(){
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px"><span class="pb2">${p.pos}</span>${rb(p.rat)} ${stars(p.stars||0)} ${devB(p.dev)} ${p.arch?`<span style="font-size:11px;color:var(--mu)">${p.arch}</span>`:''}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:6px">${sch?sch.name+' '+sch.mascot:''} · potential ${p.potLo||p.pot}–${p.potHi||p.pot} · Level ${p.pcLv||1}</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px"><button class="btn" onclick="showPlayer(${p.id})">Player card</button></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><button class="btn" onclick="showPlayer(${p.id})">Player card</button>${active?'<button class="bgh" onclick="myGearOpen()">Look and equipment</button>':''}</div>
   </div></div>`;
   const season=active?`<div class="pnl"><div class="ph">This season</div><div class="pb"><div style="font-size:13px;margin-bottom:8px">${s.gp?statLine(p,s):'<span style="color:var(--mu)">No games yet this season.</span>'}</div>${gameLogHtml(p)}</div></div>`:'';
   const recruit=active?`<div class="pnl"><div class="ph">Recruiting</div><div class="pb">${p.committed?`<div style="font-weight:800;color:var(--gn)">Committed to ${p.committed.school} (${p.committed.lvl})</div>`:''}${G.pcLock&&!p.committed&&pcOffers(p).length?`<div style="font-size:12px;color:var(--mu);margin-bottom:6px">Your choice: nobody commits for you. Pick a school when you are ready (by signing day at the latest).</div>${pcOfferRows(p)}`:(p.offers||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${p.offers.map(o=>ofB(o)).join('')}</div>`:`<div style="color:var(--mu);font-size:13px">No offers yet. Big games, camps and stars bring the colleges.</div>`}${p.dreamSchool?`<div style="font-size:12px;margin-top:8px">Dream school: <b>${p.dreamSchool.school}</b> (${p.dreamSchool.lvl})</div>`:''}</div></div>`:'';

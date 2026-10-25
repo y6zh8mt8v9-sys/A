@@ -350,6 +350,7 @@ function olRender(soft){
   const y=el.scrollTop;
   el.innerHTML=`<div class="fp-wrap"><div class="fp-head"><button class="bgh bsm" onclick="olClose()">Main menu</button><h2>Online Play</h2>
     <span class="fp-sub">${cfg?(cfg.mode==='local'?'Test mode: this device only':OLS.backend?'Connected to your online server':'Connecting to your online server…'):'Not set up yet'}${u?` · signed in as <b>${olEsc(olName())}</b>`:''}</span></div>
+    <div class="ol-down" role="status"><b>Online play isn't working right now.</b> We're working on it. Career, Free Practice and 2-player games on one device all work as usual.</div>
     ${cfg&&!OLS.cfgOpen?`<div class="tabs fp-tabs">${tabs}</div>`:''}${OLS.msg?`<div class="ol-note ol-err">${olEsc(OLS.msg)}</div>`:''}${body}</div>`;
   el.scrollTop=y;
 }
