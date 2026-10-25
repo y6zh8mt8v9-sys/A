@@ -1,4 +1,8 @@
 // ═══════════ MODAL ═══════════
+// windows that open by themselves (story scenes, interviews) wait until you have not touched anything for a moment,
+// so a tap on a tile or tab never lands on a window that appeared under your finger
+let _uiT=0;addEventListener('pointerdown',()=>{_uiT=performance.now();},{capture:true,passive:true});addEventListener('keydown',()=>{_uiT=performance.now();},true);
+function uiQuiet(ms){return performance.now()-_uiT>(ms||1500);}
 // viewer cards (player, school, college) remember how to reopen themselves, so Back steps through the chain you clicked;
 // a viewer opened right after closing another (a link that closes first) still counts as the next step. Any other window starts fresh.
 let _moStack=[],_moCur=null,_moNext=null,_moShut=false;

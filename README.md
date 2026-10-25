@@ -40,6 +40,9 @@ The build joins the files in the order listed in `src/manifest.txt`. `src/README
 ## What's new
 
 ### Latest update
+- **Dashboard tiles do what they say:** Next game opens your next game (the play window with Full game, Coach mode, Offense only and Defense only), or the schedule builder, or the playoffs, whatever comes next. It never starts the offseason. Scouting the opponent is the Scout button inside the tile. Schedule opens the schedule builder while the schedule still has open slots.
+- **No windows under your finger:** story scenes and post-game interviews wait until you have not touched the screen for a moment, and interviews only open on the dashboard, so a tap never lands on a window that just appeared.
+
 - **Next game tile in college:** on a bye week or in the postseason without a game of your own, the tile used to quietly sim a week, which looked like the tap did nothing. It now opens your schedule or the bracket; the Continue button moves the season on.
 
 - **Award watch lists, every week:** in high school, the state and national Player of the Year races and the state Freshman of the Year race are re-ranked after every regular season week, with arrows for who moved up or down and a tag for new names. They are on the Media page and a dashboard tile. They use the same scoring as the end-of-season awards. A new No. 1 makes the news, and in Player Career you get a post when your player climbs a list.

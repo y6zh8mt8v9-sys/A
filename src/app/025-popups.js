@@ -112,10 +112,14 @@ function dashTiles(o){
   let nb;if(opp){const r=dtOD(opp.id),lbl=no?(ng.isRivalry?'Rivalry week':'Week '+ng.wk)+(ng.date?' · '+ng.date:''):(poRoundName(ng.playoffRound)||ng.label||'Playoffs');
     nb=`<div class="dt-sub">${lbl}</div>${vsStrip(ms,opp,`${G.wins}-${G.losses}`,`${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}`)}<div class="dt-big">${opp.name} ${opp.mascot}</div>${no&&ng.isRivalry?rivalryWeekHtml(opp):''}${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div>`;}
   else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)&&!pcAuto()?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
-  const tNext=dtTile('Next game',opp?`viewSchool(${opp.id})`:`nav('sched')`,nb,'dt-tall');
+  // the tile does what the big button does for the next game (play window, playoffs, schedule builder); it never starts the offseason.
+  // Scouting the opponent is the Scout link inside it
+  const act=((actionBtn||'').match(/onclick="([a-zA-Z]+)\(\)"/)||[])[1],ngGo=['advWk','advPlayoffWeek','startPlayoffs','natPlay','openScheduleBuilder'].includes(act)?act+'()':`nav('sched')`;
+  if(opp)nb+=`<button class="bgh bsm dt-scout" onclick="event.stopPropagation();viewSchool(${opp.id})">Scout ${opp.name}</button>`;
+  const tNext=dtTile('Next game',ngGo,nb,'dt-tall');
   // schedule
   const up=G.sched.filter(g=>!g.result&&g.type!=='bye').slice(0,5);
-  const tSched=dtTile('Schedule'+dot('sched'),`nav('sched')`,up.length?`<div class="dt-list">${up.map(g=>{const t=g.oppId!=null?getS(g.oppId):null;return`<div><b>W${g.wk}</b>${t?sLogo(t,26):'<span class="dt-nl"></span>'}<span class="dt-ln">${t?t.name:(g._empty?'Open slot':g.label||'TBD')}</span><span class="dt-mu">${g.type==='playoff'?'Playoff':g.isRivalry?'Rival':g.custom?'Non-league':'League'}</span></div>`;}).join('')}</div>`:`<div class="dt-mu">No games left on the schedule.</div>`);
+  const tSched=dtTile('Schedule'+dot('sched'),G.sched.some(g=>g.custom&&g._empty)&&!pcAuto()?`openScheduleBuilder()`:`nav('sched')`,up.length?`<div class="dt-list">${up.map(g=>{const t=g.oppId!=null?getS(g.oppId):null;return`<div><b>W${g.wk}</b>${t?sLogo(t,26):'<span class="dt-nl"></span>'}<span class="dt-ln">${t?t.name:(g._empty?'Open slot':g.label||'TBD')}</span><span class="dt-mu">${g.type==='playoff'?'Playoff':g.isRivalry?'Rival':g.custom?'Non-league':'League'}</span></div>`;}).join('')}</div>`:`<div class="dt-mu">No games left on the schedule.</div>`);
   // team management (Player Career: the team, read-only)
   const mo=moraleOf(),mine=dtOD(G.myId),pa=pcAuto();
   const tTeam=dtTile(pa?'Team':'Team management',pa?`nav('roster')`:`nav('depth')`,`<div class="dt-bar"><i style="width:${clamp(mo,0,100)}%;background:${mo>=60?'var(--gn)':mo>=40?'var(--gd)':'#e5534b'}"></i></div><div class="dt-sub">${G.offS} / ${G.defS} · Morale: ${mo} (${moraleLbl(mo)})</div>${dtChips(mine)}<div class="dt-stars">${stars(Math.round(G.prestige||1))}</div><div class="dt-sub" style="margin-top:6px">${pl.length} players · QB chemistry ${Math.round(chemAvg())}</div>`,'dt-tall');

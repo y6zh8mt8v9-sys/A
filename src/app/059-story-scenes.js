@@ -57,7 +57,7 @@ function storyNav(page){if(!G||!G.myId)return;try{if(page==='mine')stVisitCard()
   if(!['dash','mine','college'].includes(page))return;clearTimeout(_stT);_stTry=0;_stT=setTimeout(storyShow,700);}
 function storyShow(){_stT=null;const S=stS();if(!S||gdsMain().scenes===false)return;try{stScan();}catch(e){console.error('story scan',e);}if(!S.q.length)return;
   if(!['dash','mine','college'].includes(G._page))return;
-  if(stBusy()){if(_stTry++<12)_stT=setTimeout(storyShow,1500);return;}
+  if(stBusy()||!uiQuiet()){if(_stTry++<12)_stT=setTimeout(storyShow,1500);return;}
   const sc=S.q.shift();stRun(sc);}
 // a scene: steps of lines and choices; the reply to a choice opens the next step, the last one shows what changed
 function stRun(sc,live){window._stCur={sc,step:0,fx:[],reply:'',live:live||null};stDraw();}

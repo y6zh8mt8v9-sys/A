@@ -1034,6 +1034,7 @@ html body .tab.on{background-size:100% 3px!important;border-bottom-color:transpa
 .aw-n small{display:block;font-size:11px;font-weight:500;color:var(--mute,var(--mu));overflow:hidden;text-overflow:ellipsis}
 .aw-mv{font:700 11px/1 var(--font);color:var(--mute,var(--mu));text-align:center}
 .aw-mv.up{color:#4ade80}.aw-mv.dn{color:var(--post)}.aw-mv.new{color:#fbbf24;text-transform:uppercase;font-size:9px;letter-spacing:.06em}
+.dt-scout{margin-top:10px;min-height:36px}
 /* ════════ Career story scenes: a cutscene card inside the modal (tokens from 06-design.css) ════════ */
 .st-scene{display:flex;flex-direction:column;gap:12px;max-width:620px;margin:0 auto}
 .st-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px;padding-right:36px;background:var(--yardline);background-position:bottom;padding-top:0}
@@ -1473,7 +1474,7 @@ html body .st-vrow{display:flex!important;align-items:center;gap:12px;width:100%
 // Gridiron 27 (beta, web version). Copyright (c) 2026 Kanra Digital. All rights reserved.
 // The game, its code, art, data and names belong to Kanra Digital and may not be copied, re-hosted, modified for
 // redistribution or sold without written permission.
-const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'3a793dd80e'});
+const G27_COPY=Object.freeze({owner:'Kanra Digital',year:2026,get line(){return`© ${this.year} ${this.owner}. All rights reserved.`},mark:'g27-7f3a91c4',build:'e6951fe41e'});
 // Official sites. Empty: the game runs anywhere. With hosts listed, a copy on any other site (or framed by one)
 // shows an "unofficial copy" screen instead of the game. Subdomains count; local testing always works.
 const G27_HOSTS=['gridiron27.neocities.org'];
@@ -5866,7 +5867,7 @@ function weeklyAwards(wk,pops){const P=_wkPos;_wkPos={};const C=[];
 // interviews after big games and awards: what you say moves morale and (in Player Career) the coach's trust
 const IV_Q={win:['Big win tonight. What was working out there?','Your team looked sharp. What changed this week?'],loss:['Tough night. What went wrong?','How does the team bounce back from this one?'],
   rival:['That rivalry game was intense. What does it mean to you?','Anything to say to the other side after tonight?'],playoff:['Playoff football. How does it feel?','One step closer to a title. What is the message?'],potw:['Player of the Week! How does it feel?','Everybody is talking about your game. Your reaction?']};
-function interviewOpen(kind,o){if(document.getElementById('mo')&&document.getElementById('mo').classList.contains('open')){if((o._n=(o._n||0)+1)<8)setTimeout(()=>interviewOpen(kind,o),2500);return;}
+function interviewOpen(kind,o){if(document.getElementById('mo')&&document.getElementById('mo').classList.contains('open')||G._page!=='dash'||!uiQuiet()||document.getElementById('gd-ov')){if((o._n=(o._n||0)+1)<8)setTimeout(()=>interviewOpen(kind,o),2500);return;}
   const q=pick(IV_Q[kind]||IV_Q.win),pc=!!pcActive(),who=pc?myPlayer():null,outlet=pick([MEDIA.fni,MEDIA.rival,'Channel 8 Sports']);
   window._ivK=kind;openMo(`<div style="font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.06em">${outlet} · interview</div>
    <h2 style="margin:4px 0 10px">"${q}"</h2><div style="display:flex;flex-direction:column;gap:8px">
@@ -8410,10 +8411,14 @@ function dashTiles(o){
   let nb;if(opp){const r=dtOD(opp.id),lbl=no?(ng.isRivalry?'Rivalry week':'Week '+ng.wk)+(ng.date?' · '+ng.date:''):(poRoundName(ng.playoffRound)||ng.label||'Playoffs');
     nb=`<div class="dt-sub">${lbl}</div>${vsStrip(ms,opp,`${G.wins}-${G.losses}`,`${opp.wins||0}-${opp.losses||0} · ${clsL(opp.cls)}`)}<div class="dt-big">${opp.name} ${opp.mascot}</div>${no&&ng.isRivalry?rivalryWeekHtml(opp):''}${dtChips(r)}<div class="dt-stars">${stars(Math.round(opp.prestige||1))}</div>`;}
   else nb=`<div class="dt-sub">${phaseLabel}</div><div class="dt-big">No game scheduled</div><div class="dt-sub">${G.sched.some(g=>g._empty)&&!pcAuto()?'Build your schedule to start the season.':'Use Continue to move on.'}</div>`;
-  const tNext=dtTile('Next game',opp?`viewSchool(${opp.id})`:`nav('sched')`,nb,'dt-tall');
+  // the tile does what the big button does for the next game (play window, playoffs, schedule builder); it never starts the offseason.
+  // Scouting the opponent is the Scout link inside it
+  const act=((actionBtn||'').match(/onclick="([a-zA-Z]+)\(\)"/)||[])[1],ngGo=['advWk','advPlayoffWeek','startPlayoffs','natPlay','openScheduleBuilder'].includes(act)?act+'()':`nav('sched')`;
+  if(opp)nb+=`<button class="bgh bsm dt-scout" onclick="event.stopPropagation();viewSchool(${opp.id})">Scout ${opp.name}</button>`;
+  const tNext=dtTile('Next game',ngGo,nb,'dt-tall');
   // schedule
   const up=G.sched.filter(g=>!g.result&&g.type!=='bye').slice(0,5);
-  const tSched=dtTile('Schedule'+dot('sched'),`nav('sched')`,up.length?`<div class="dt-list">${up.map(g=>{const t=g.oppId!=null?getS(g.oppId):null;return`<div><b>W${g.wk}</b>${t?sLogo(t,26):'<span class="dt-nl"></span>'}<span class="dt-ln">${t?t.name:(g._empty?'Open slot':g.label||'TBD')}</span><span class="dt-mu">${g.type==='playoff'?'Playoff':g.isRivalry?'Rival':g.custom?'Non-league':'League'}</span></div>`;}).join('')}</div>`:`<div class="dt-mu">No games left on the schedule.</div>`);
+  const tSched=dtTile('Schedule'+dot('sched'),G.sched.some(g=>g.custom&&g._empty)&&!pcAuto()?`openScheduleBuilder()`:`nav('sched')`,up.length?`<div class="dt-list">${up.map(g=>{const t=g.oppId!=null?getS(g.oppId):null;return`<div><b>W${g.wk}</b>${t?sLogo(t,26):'<span class="dt-nl"></span>'}<span class="dt-ln">${t?t.name:(g._empty?'Open slot':g.label||'TBD')}</span><span class="dt-mu">${g.type==='playoff'?'Playoff':g.isRivalry?'Rival':g.custom?'Non-league':'League'}</span></div>`;}).join('')}</div>`:`<div class="dt-mu">No games left on the schedule.</div>`);
   // team management (Player Career: the team, read-only)
   const mo=moraleOf(),mine=dtOD(G.myId),pa=pcAuto();
   const tTeam=dtTile(pa?'Team':'Team management',pa?`nav('roster')`:`nav('depth')`,`<div class="dt-bar"><i style="width:${clamp(mo,0,100)}%;background:${mo>=60?'var(--gn)':mo>=40?'var(--gd)':'#e5534b'}"></i></div><div class="dt-sub">${G.offS} / ${G.defS} · Morale: ${mo} (${moraleLbl(mo)})</div>${dtChips(mine)}<div class="dt-stars">${stars(Math.round(G.prestige||1))}</div><div class="dt-sub" style="margin-top:6px">${pl.length} players · QB chemistry ${Math.round(chemAvg())}</div>`,'dt-tall');
@@ -15347,6 +15352,10 @@ function startPlayoffs(){
 }
 
 // ═══════════ MODAL ═══════════
+// windows that open by themselves (story scenes, interviews) wait until you have not touched anything for a moment,
+// so a tap on a tile or tab never lands on a window that appeared under your finger
+let _uiT=0;addEventListener('pointerdown',()=>{_uiT=performance.now();},{capture:true,passive:true});addEventListener('keydown',()=>{_uiT=performance.now();},true);
+function uiQuiet(ms){return performance.now()-_uiT>(ms||1500);}
 // viewer cards (player, school, college) remember how to reopen themselves, so Back steps through the chain you clicked;
 // a viewer opened right after closing another (a link that closes first) still counts as the next step. Any other window starts fresh.
 let _moStack=[],_moCur=null,_moNext=null,_moShut=false;
@@ -18928,7 +18937,7 @@ function storyNav(page){if(!G||!G.myId)return;try{if(page==='mine')stVisitCard()
   if(!['dash','mine','college'].includes(page))return;clearTimeout(_stT);_stTry=0;_stT=setTimeout(storyShow,700);}
 function storyShow(){_stT=null;const S=stS();if(!S||gdsMain().scenes===false)return;try{stScan();}catch(e){console.error('story scan',e);}if(!S.q.length)return;
   if(!['dash','mine','college'].includes(G._page))return;
-  if(stBusy()){if(_stTry++<12)_stT=setTimeout(storyShow,1500);return;}
+  if(stBusy()||!uiQuiet()){if(_stTry++<12)_stT=setTimeout(storyShow,1500);return;}
   const sc=S.q.shift();stRun(sc);}
 // a scene: steps of lines and choices; the reply to a choice opens the next step, the last one shows what changed
 function stRun(sc,live){window._stCur={sc,step:0,fx:[],reply:'',live:live||null};stDraw();}
